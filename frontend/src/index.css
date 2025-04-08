@@ -1,1 +1,14 @@
 @import "tailwindcss";
+
+.btn-glow {
+    @apply flex items-center justify-center  border border-white/20 rounded cursor-pointer
+    transition-all duration-500 ease-in-out;
+}
+
+.btn-glow-on {
+    @apply shadow-[0_0_140px_22px_rgba(255,255,255,0.3)];
+}
+
+.btn-glow-off {
+    @apply shadow-[0_0_140px_22px_rgba(255,255,255,0)];
+}

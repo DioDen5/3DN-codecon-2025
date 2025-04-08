@@ -1,86 +1,83 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { FaFilter } from 'react-icons/fa';
-import { articleList } from '../api/article_comment';
-import PostCard from '../components/PostCard';
-import Pagination from '../components/Pagination';
-import SearchInput from '../components/SearchInput';
-import axios from 'axios';
+import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { articleList } from '../api/article_comment'
+import PostCard from '../components/PostCard'
+import Pagination from '../components/Pagination'
+import SearchInput from '../components/SearchInput'
+import { useSort } from '../hooks/./useSort.jsx'
+import axios from 'axios'
 
-const itemsPerPage = 3;
+const itemsPerPage = 3
 
 const ForumPage = () => {
-    const [posts, setPosts] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [itemOffset, setItemOffset] = useState(0);
-    const navigate = useNavigate();
+    const [posts, setPosts] = useState([])
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
+    const [itemOffset, setItemOffset] = useState(0)
+    const navigate = useNavigate()
+    
+    const { sortedData, SortDropdown } = useSort(posts)
 
-    const endOffset = itemOffset + itemsPerPage;
-    const currentItems = posts.slice(itemOffset, endOffset);
-    const pageCount = Math.ceil(posts.length / itemsPerPage);
+    const currentItems = sortedData.slice(itemOffset, itemOffset + itemsPerPage)
+    const pageCount = Math.ceil(sortedData.length / itemsPerPage)
 
     useEffect(() => {
         const fetchPosts = async () => {
             try {
-                const data = await articleList();
+                const data = await articleList()
                 const postsWithVotes = data.map(post => ({
                     ...post,
-                    voted: null, // 'like' | 'dislike' | null
-                }));
-                setPosts(postsWithVotes);
+                    voted: null,
+                }))
+                setPosts(postsWithVotes)
             } catch (err) {
-                setError(err.message);
+                setError(err.message)
             } finally {
-                setLoading(false);
+                setLoading(false)
             }
-        };
+        }
 
-        fetchPosts();
-    }, []);
+        fetchPosts()
+    }, [])
 
     const handleVote = async (postId, type) => {
         setPosts(prev =>
             prev.map(post => {
-                if (post.id !== postId) return post;
+                if (post.id !== postId) return post
 
-                let updated = { ...post };
+                let updated = { ...post }
 
                 if (type === 'like' && post.voted !== 'like') {
-                    axios.post(`http://127.0.0.1:8000/api/article/${postId}/vote/upvote/`);
-                    updated.rating_positive += 1;
-                    if (post.voted === 'dislike') updated.rating_negative -= 1;
-                    updated.voted = 'like';
+                    axios.post(`http://127.0.0.1:8000/api/article/${postId}/vote/upvote/`)
+                    updated.rating_positive += 1
+                    if (post.voted === 'dislike') updated.rating_negative -= 1
+                    updated.voted = 'like'
                 } else if (type === 'dislike' && post.voted !== 'dislike') {
-                    axios.post(`http://127.0.0.1:8000/api/article/${postId}/vote/downvote/`);
-                    updated.rating_negative += 1;
-                    if (post.voted === 'like') updated.rating_positive -= 1;
-                    updated.voted = 'dislike';
+                    axios.post(`http://127.0.0.1:8000/api/article/${postId}/vote/downvote/`)
+                    updated.rating_negative += 1
+                    if (post.voted === 'like') updated.rating_positive -= 1
+                    updated.voted = 'dislike'
                 }
 
-                return updated;
+                return updated
             })
-        );
-    };
+        )
+    }
 
     return (
         <div className="min-h-[calc(100vh-68px)] bg-gradient-to-b from-black to-gray-900 px-6 py-10 text-white">
             <div className="max-w-4xl mx-auto relative z-10">
-                <h1 className="text-center text-3xl font-semibold mb-8">ОБГОВОРЕННЯ</h1>
+                <h1 className="text-center text-3xl font-semibold mb-8 ">ОБГОВОРЕННЯ</h1>
 
                 <div className="max-w-xl mx-auto mb-4">
                     <SearchInput />
                 </div>
 
                 <div className="flex justify-between items-center mb-6">
-                    <button
-                        className="flex items-center justify-center w-10 h-10 bg-white/10 text-white border border-white/20 rounded hover:bg-white hover:text-black transition cursor-pointer"
-                    >
-                        <FaFilter className="w-4 h-4" />
-                    </button>
+                    <SortDropdown />
                     <button
                         onClick={() => navigate("/forum/create")}
-                        className="px-4 py-2 bg-white/10 text-white border border-white/20 rounded hover:bg-white hover:text-black transition cursor-pointer"
+                        className="px-4 py-2 bg-white/10 text-white hover:bg-white hover:text-black btn-glow "
                     >
                         + Створити
                     </button>
@@ -111,15 +108,18 @@ const ForumPage = () => {
                             ))}
                         </div>
 
-                        <Pagination pageCount={pageCount} handlePageClick={(e) => {
-                            const newOffset = (e.selected * itemsPerPage) % posts.length;
-                            setItemOffset(newOffset);
-                        }} />
+                        <Pagination
+                            pageCount={pageCount}
+                            handlePageClick={(e) => {
+                                const newOffset = (e.selected * itemsPerPage) % sortedData.length
+                                setItemOffset(newOffset)
+                            }}
+                        />
                     </div>
                 )}
             </div>
         </div>
-    );
-};
+    )
+}
 
-export default ForumPage;
+export default ForumPage
