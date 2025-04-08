@@ -15,7 +15,7 @@ const ForumPage = () => {
     const [error, setError] = useState(null)
     const [itemOffset, setItemOffset] = useState(0)
     const navigate = useNavigate()
-    
+
     const { sortedData, SortDropdown } = useSort(posts)
 
     const currentItems = sortedData.slice(itemOffset, itemOffset + itemsPerPage)
