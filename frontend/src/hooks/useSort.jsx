@@ -35,41 +35,37 @@ export const useSort = (data = [], options = null) => {
         return active?.sort ? sorted.sort(active.sort) : sorted
     }, [data, sortOption, activeOptions])
 
-    const SortDropdown = useCallback(({ className = '' }) => {
+    const SortDropdown = useCallback(({ className = '', slideFrom = 'right', menuPosition = 'left-12' }) => {
         const [open, setOpen] = useState(false)
         const [hovered, setHovered] = useState(false)
 
         const showGlow = open || hovered
 
-        const toggleDropdown = () => {
-            setOpen(prev => !prev)
-        }
+        const toggleDropdown = () => setOpen(prev => !prev)
 
         const handleSelect = (value) => {
             if (value === sortOption) {
-                // 🔁 Same method selected — close with smooth animation
                 setOpen(false)
-                setTimeout(() => {
-                    setHovered(false)
-                }, 300) // match duration-300 for smooth glow fade
+                setTimeout(() => setHovered(false), 300)
             } else {
-                // ✅ New method selected — keep menu open
                 setSortOption(value)
-
-                // Make sure dropdown stays open on change
-                setTimeout(() => {
-                    setOpen(true)
-                }, 0)
+                setOpen(true)
             }
         }
 
+        const closedTransform = slideFrom === 'left'
+            ? 'translate-x-12'
+            : '-translate-x-10'
+
         return (
             <div className={`relative ${className}`}>
+                {/* меню опцій */}
                 <div
-                    className={`absolute -top-0 left-12 z-10 flex gap-2 bg-black/80 border border-white/20 rounded-xl px-3 py-1 transition-all duration-300 ease-in-out transform ${
+                    className={`absolute top-0 ${menuPosition} z-10 flex gap-2 bg-black/80 border border-white/20 
+          rounded-xl px-3 py-1 transition-all duration-300 ease-in-out transform ${
                         open
                             ? 'opacity-100 translate-x-0'
-                            : 'opacity-0 -translate-x-10 pointer-events-none'
+                            : `opacity-0 ${closedTransform} pointer-events-none`
                     }`}
                 >
                     {activeOptions.map(({ label, value }) => (
@@ -87,28 +83,27 @@ export const useSort = (data = [], options = null) => {
                     ))}
                 </div>
 
+                {/* кнопка фільтру */}
                 <button
                     onClick={toggleDropdown}
                     onMouseEnter={() => setHovered(true)}
                     onMouseLeave={() => setHovered(false)}
-                    className={`flex items-center justify-center h-10 w-10 btn-glow
-                        ${
-                        showGlow
-                            ? 'btn-glow-on'
-                            : 'btn-glow-off'
-                    }
-                        ${
-                        open
-                            ? 'bg-white text-black'
-                            : 'bg-white/10 text-white hover:bg-white hover:text-black'
-                    }
-                    `}
+                    className={`flex items-center justify-center w-10 h-10 border border-white/20 rounded cursor-pointer 
+          transition-all duration-500 ease-in-out
+          ${showGlow
+                        ? 'shadow-[0_0_140px_22px_rgba(255,255,255,0.3)]'
+                        : 'shadow-[0_0_140px_22px_rgba(255,255,255,0)]'}
+          ${open
+                        ? 'bg-white text-black'
+                        : 'bg-white/10 text-white hover:bg-white hover:text-black'}
+        `}
                 >
                     <FaFilter className="w-4 h-4" />
                 </button>
             </div>
         )
     }, [sortOption, activeOptions])
+
 
     return {
         sortedData,

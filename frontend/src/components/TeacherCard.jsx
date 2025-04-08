@@ -8,9 +8,9 @@ const TeacherCard = ({ id, image, name, university, rating, likes, dislikes, com
     return (
         <div
             onClick={() => navigate(`/teachers/${id}`)}
-            className="bg-white text-black rounded-xl overflow-hidden shadow-md w-full max-w-xs cursor-pointer hover:scale-[1.02] transition"
+            className="bg-white text-black rounded-xl overflow-hidden  shadow-md w-full max-w-xs cursor-pointer hover:scale-[1.02] transition"
         >
-            <img src={image} alt={name} className="w-full h-64 object-cover" />
+            <img src={image} alt={name} className="w-full h-64 object-cover object-[center_20%]	 " />
             <div className="p-4">
                 <h3 className="text-sm font-medium leading-tight mb-1">{name}</h3>
                 <p className="text-sm text-gray-600 mb-2">{university}</p>
