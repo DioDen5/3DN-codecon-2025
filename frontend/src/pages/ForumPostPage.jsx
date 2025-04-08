@@ -6,12 +6,12 @@ import CommentInput from '../components/CommentInput';
 import RepliesList from '../components/RepliesList';
 
 const ForumPostPage = () => {
-    const { id } = useParams();  // Отримуємо id з URL
+    const { id } = useParams();
     const navigate = useNavigate();
-    const [post, setPost] = useState(null);  // Стан для поста
-    const [replies, setReplies] = useState([]);  // Стан для відповідей
-    const [loading, setLoading] = useState(true);  // Стан для завантаження
-    const [error, setError] = useState(null);  // Стан для помилок
+    const [post, setPost] = useState(null);
+    const [replies, setReplies] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         const fetchPostAndReplies = async () => {
@@ -42,17 +42,17 @@ const ForumPostPage = () => {
         <div className="min-h-[calc(100vh-68px)] px-6 py-10 bg-gradient-to-b from-black to-gray-900 text-white">
             <div className="max-w-4xl mx-auto space-y-6">
                 <button
-                    onClick={() => navigate(-1)}  // Повертаємось назад
+                    onClick={() => navigate(-1)}
                     className="text-sm underline text-white hover:text-purple-300 transition cursor-pointer"
                 >
                     ← Назад
                 </button>
 
-                <PostExpanded postId={post.id} />  {/* Відображаємо пост, передаючи ID */}
+                <PostExpanded postId={post.id} />
 
-                <CommentInput />  {/* Ввід для коментарів */}
+                <CommentInput />
 
-                <RepliesList replies={replies} />  {/* Відображаємо відповіді */}
+                <RepliesList replies={replies} />
             </div>
         </div>
     );
