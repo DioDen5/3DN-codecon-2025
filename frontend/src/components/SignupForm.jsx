@@ -90,7 +90,7 @@ const SignupForm = ({ switchToLogin }) => {
                     placeholder="Confirm Password"
                 />
             </div>
-            <button type="submit" className="btn-primary w-full bg-blue-700 p-2 outline-none rounded-lg cursor-pointer">
+            <button type="submit" className="w-full bg-blue-700 p-2 outline-none rounded-lg cursor-pointer">
                 Confirm
             </button>
         </form>
