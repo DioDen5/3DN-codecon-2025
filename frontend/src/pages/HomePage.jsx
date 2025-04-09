@@ -27,7 +27,7 @@ const HomePage = () => {
 
                 <Link
                     to="/forum"
-                    className="w-fit px-6 py-3 border border-purple-400 text-white rounded-full hover:bg-purple-600 hover:border-transparent transition-all text-sm md:text-base"
+                    className="btn-primary "
                 >
                     Почати обговорення
                 </Link>
