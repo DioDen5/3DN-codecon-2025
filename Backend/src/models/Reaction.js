@@ -1,14 +1,40 @@
 import mongoose from 'mongoose';
 
-const reactionSchema = new mongoose.Schema({
-    targetType: { type: String, enum: ['announcement','comment','review'], required: true },
-    targetId:   { type: mongoose.Schema.Types.ObjectId, required: true, index: true },
-    userId:     { type: mongoose.Schema.Types.ObjectId, ref: 'users', required: true, index: true },
-    value:      { type: Number, enum: [1, -1], required: true },
-    createdAt:  { type: Date, default: () => new Date() }
-}, { versionKey: false });
+const { Schema, Types } = mongoose;
 
-// один користувач — одна реакція на конкретну ціль
+const reactionSchema = new Schema(
+    {
+        targetType: {
+            type: String,
+            enum: ['announcement', 'comment', 'review'],
+            required: true,
+            index: true,
+        },
+        targetId: {
+            type: Types.ObjectId,
+            required: true,
+            index: true,
+        },
+        userId: {
+            type: Types.ObjectId,
+            ref: 'users',
+            required: true,
+            index: true,
+        },
+        value: {
+            type: Number,
+            enum: [1, -1],
+            required: true,
+        },
+    },
+    {
+        versionKey: false,
+        timestamps: true,
+    }
+);
+
 reactionSchema.index({ targetType: 1, targetId: 1, userId: 1 }, { unique: true });
+
+reactionSchema.index({ targetType: 1, targetId: 1, value: 1 });
 
 export const Reaction = mongoose.model('reactions', reactionSchema);
