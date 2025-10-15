@@ -1,49 +1,85 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { login } from '../api/auth';
+import { useState } from "react"
+import { login } from "../api/auth"
+import { useNavigate } from "react-router-dom"
 
-export default function LoginForm() {
-    const nav = useNavigate();
-    const [email, setEmail] = useState('student@lnu.edu.ua'); // demo
-    const [password, setPassword] = useState('password123');
-    const [loading, setLoading] = useState(false);
-    const [err, setErr] = useState('');
+const LoginForm = ({ switchToReset }) => {
+    const [email, setEmail] = useState("")
+    const [password, setPassword] = useState("")
+    const [error, setError] = useState(null)
+    const [loading, setLoading] = useState(false)
+    const navigate = useNavigate()
 
-    async function onSubmit(e) {
-        e.preventDefault();
-        setErr('');
-        setLoading(true);
+    const handleSubmit = async (e) => {
+        e.preventDefault()
+        setError(null)
+        setLoading(true)
         try {
-            const user = await login(email.trim(), password);
-            if (!user) throw new Error('Invalid credentials');
-            nav('/forum');
-        } catch (e) {
-            setErr(e?.response?.data?.error || e.message || 'Login failed');
+            await login(email, password)               // ← наш бекенд
+            navigate("/forum")                         // ← як було
+        } catch {
+            setError("Невірна пошта або пароль")       // ← текст як у тебе
         } finally {
-            setLoading(false);
+            setLoading(false)
         }
     }
 
     return (
-        <form onSubmit={onSubmit} className="max-w-sm mx-auto space-y-4">
-            <h1 className="text-xl font-semibold">Увійти</h1>
-            {err && <div className="text-red-600 text-sm">{err}</div>}
+        <form onSubmit={handleSubmit} className="space-y-6 p-10 w-full text-white">
             <div>
-                <label className="block text-sm mb-1">Email</label>
-                <input className="w-full border rounded px-3 py-2"
-                       value={email} onChange={e=>setEmail(e.target.value)}
-                       type="email" autoComplete="email" required />
+                <label className="block text-sm text-white-700">Email</label>
+                <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 placeholder-white/50 focus:outline-none text-gray-800"
+                    placeholder="example@lnu.edu.ua"
+                    autoComplete="email"
+                    required
+                />
             </div>
+
             <div>
-                <label className="block text-sm mb-1">Пароль</label>
-                <input className="w-full border rounded px-3 py-2"
-                       value={password} onChange={e=>setPassword(e.target.value)}
-                       type="password" autoComplete="current-password" required />
+                <label className="block text-sm text-white-700">Password</label>
+                <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 placeholder-white/50 focus:outline-none text-gray-800"
+                    placeholder="Your Password"
+                    autoComplete="current-password"
+                    required
+                />
             </div>
-            <button disabled={loading}
-                    className="w-full bg-blue-600 text-white rounded py-2 disabled:opacity-50">
-                {loading ? 'Входимо…' : 'Увійти'}
+
+            <div className="flex items-center justify-between text-sm">
+                <label className="flex items-center space-x-2">
+                    <input
+                        type="checkbox"
+                        className="form-checkbox h-4 w-4 rounded-sm bg-transparent border-white checked:bg-white"
+                    />
+                    <span className="text-md">Запам'ятати мене</span>
+                </label>
+
+                <button
+                    type="button"
+                    onClick={switchToReset}
+                    className="font-medium text-md text-indigo-300 hover:underline"
+                >
+                    Забули пароль?
+                </button>
+            </div>
+
+            {error && <p className="text-red-400">{error}</p>}
+
+            <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-blue-700 p-2 rounded-lg mt-8 text-white hover:bg-blue-800 transition disabled:opacity-60"
+            >
+                {loading ? "Вхід..." : "Авторизуватися"}
             </button>
         </form>
-    );
+    )
 }
+
+export default LoginForm
