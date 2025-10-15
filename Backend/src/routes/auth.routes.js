@@ -16,7 +16,6 @@ const registerSchema = z.object({
 function isAllowedEduEmail(email) {
     const domain = email.trim().toLowerCase().split('@')[1] ?? '';
     return allowed.some(d => domain === d || domain.endsWith(`.${d}`));
-    // приклад: sub.kpi.ua теж пройде
 }
 
 router.post('/register', async (req,res) => {
@@ -35,7 +34,7 @@ router.post('/register', async (req,res) => {
     const user = await User.create({
         email, passwordHash, displayName,
         role: 'student',
-        status: 'pending' // далі адмін/AI верифікує
+        status: 'pending'
     });
 
     const token = signJwt({ id: user._id, role: user.role, status: user.status });
