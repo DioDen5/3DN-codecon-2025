@@ -1,37 +1,54 @@
-// src/api/article_comment.js
-// Адаптер під старий фронт API, працює поверх нових модулів і бекенду.
-
 import * as Ann from './announcements';
 import * as Com from './comments';
 import * as Rx from './reactions';
 
-// ----- helpers -----
-function mapPost(a, counts) {
+// Безпечне форматування дати
+function asDateString(d) {
+    try {
+        if (!d) return '';
+        const s = typeof d === 'string' ? d : d?.toString?.();
+        const dt = new Date(s);
+        return isNaN(dt.getTime()) ? '' : dt.toISOString();
+    } catch {
+        return '';
+    }
+}
+
+function mapPost(a = {}, counts = {}) {
+    const likes = Number(counts?.likes ?? 0) || 0;
+    const dislikes = Number(counts?.dislikes ?? 0) || 0;
+
     return {
-        id: a._id,
-        title: a.title,
-        content: a.body,
+        id: a._id || a.id || '',
+        title: a.title || '',
+        content: a.body || a.content || '',
         image_url: a.image_url || null,
-        rating_positive: counts?.likes ?? 0,
-        rating_negative: counts?.dislikes ?? 0,
-        comment_count: a.metrics?.comments ?? 0,
+        rating_positive: likes < 0 ? 0 : likes,
+        rating_negative: dislikes < 0 ? 0 : dislikes,
+        comment_count: Number(a?.metrics?.comments ?? 0) || 0,
         user: {
-            first_name: a.authorFirstName || 'User',
-            last_name:  a.authorLastName  || '',
+            first_name: a.authorFirstName || a.user?.first_name || 'User',
+            last_name:  a.authorLastName  || a.user?.last_name  || '',
         },
-        created_at: a.createdAt || a.publishedAt,
+        created_at: asDateString(a.createdAt || a.publishedAt || a.created_at || Date.now()),
         voted: null,
     };
 }
 
-function mapReply(c, counts) {
+function mapReply(c = {}, counts = {}) {
+    const likes = Number(counts?.likes ?? 0) || 0;
+    const dislikes = Number(counts?.dislikes ?? 0) || 0;
+
     return {
-        id: c._id,
-        user: { first_name: c.authorFirstName || 'User', last_name: c.authorLastName || '' },
-        message: c.body,
-        rating_positive: counts?.likes ?? 0,
-        rating_negative: counts?.dislikes ?? 0,
-        created_at: c.createdAt,
+        id: c._id || c.id || '',
+        user: {
+            first_name: c.authorFirstName || c.user?.first_name || 'User',
+            last_name:  c.authorLastName  || c.user?.last_name  || '',
+        },
+        message: c.body || c.message || '',
+        rating_positive: likes < 0 ? 0 : likes,
+        rating_negative: dislikes < 0 ? 0 : dislikes,
+        created_at: asDateString(c.createdAt || c.created_at || Date.now()),
     };
 }
 
@@ -39,12 +56,8 @@ function mapReply(c, counts) {
 export async function articleList() {
     const items = await Ann.listPublished();
     const mapped = await Promise.all(items.map(async a => {
-        try {
-            const cnt = await Rx.countsAnnouncement(a._id);
-            return mapPost(a, cnt);
-        } catch {
-            return mapPost(a, { likes: 0, dislikes: 0, score: 0 });
-        }
+        const cnt = await Rx.countsAnnouncement(a._id).catch(()=>null);
+        return mapPost(a, cnt);
     }));
     return mapped;
 }
@@ -56,7 +69,7 @@ export async function articleDetail(id) {
     return mapPost(a, cnt);
 }
 
-export async function voteArticle(id, type /* 'like'|'dislike' */) {
+export async function voteArticle(id, type) {
     const value = type === 'like' ? 1 : -1;
     const res = await Rx.toggleAnnouncement(id, value);
     return res;
@@ -78,7 +91,7 @@ export async function createComment(postId, message) {
     return mapReply(c, cnt);
 }
 
-export async function voteComment(commentId, action /* 'upvote'|'downvote' */) {
+export async function voteComment(commentId, action) {
     const value = action === 'upvote' ? 1 : -1;
     const res = await Rx.toggleComment(commentId, value);
     return res;
@@ -86,9 +99,6 @@ export async function voteComment(commentId, action /* 'upvote'|'downvote' */) {
 
 // ----- create (draft) -----
 export async function articleCreate(title, content, imageFile) {
-    // TODO: image upload буде в M3/M4 (окремий ендпоїнт/форм-дані).
-    // Зараз — створюємо чернетку з текстом.
     const doc = await Ann.createDraft({ title, body: content, tags: [] });
-    // Повернемо мінімум, щоб форма показала success
     return { id: doc._id };
 }
