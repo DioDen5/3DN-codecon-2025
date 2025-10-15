@@ -1,66 +1,99 @@
-import { useEffect, useState } from 'react';
-import { getById } from '../api/announcements';
-import { countsAnnouncement, toggleAnnouncement } from '../api/reactions';
-import { list as listComments, create as createComment } from '../api/comments';
-import RepliesList from './RepliesList';
-import CommentInput from './CommentInput';
+import React, { useEffect, useState } from 'react';
+import { ThumbsUp, ThumbsDown, MessageCircle } from 'lucide-react';
+import { articleDetail, voteArticle } from '../api/article_comment';
 
-export default function PostExpanded({ id }) {
+const PostExpanded = ({ postId }) => {
     const [post, setPost] = useState(null);
-    const [counts, setCounts] = useState({ likes: 0, dislikes: 0, score: 0 });
-    const [comments, setComments] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [err, setErr] = useState('');
+    const [error, setError] = useState('');
 
     useEffect(() => {
-        let mounted = true;
-        (async () => {
+        if (!postId) {
+            setError('Post ID не надано');
+            setLoading(false);
+            return;
+        }
+        const fetchPost = async () => {
             try {
-                const [p, cts, cmts] = await Promise.all([
-                    getById(id),
-                    countsAnnouncement(id),
-                    listComments(id, { limit: 50 }),
-                ]);
-                if (!p) throw new Error('Announcement not found');
-                if (mounted) { setPost(p); setCounts(cts); setComments(cmts); }
+                const data = await articleDetail(postId); // ← з адаптера
+                setPost(data);
             } catch (e) {
-                setErr(e?.response?.data?.error || e.message);
+                setError(e?.response?.data?.error || 'Не вдалося завантажити пост');
             } finally {
-                if (mounted) setLoading(false);
+                setLoading(false);
             }
-        })();
-        return () => { mounted = false; };
-    }, [id]);
+        };
+        fetchPost();
+    }, [postId]);
 
-    async function onVote(v) {
-        try { setCounts(await toggleAnnouncement(id, v)); } catch {}
-    }
+    const handleVote = async (type) => {
+        if (!post) return;
+        const prev = post;
+        const optimistic = { ...post };
+        if (type === 'like') {
+            optimistic.rating_positive += 1;
+            if (post.voted === 'dislike') optimistic.rating_negative -= 1;
+            optimistic.voted = 'like';
+        } else {
+            optimistic.rating_negative += 1;
+            if (post.voted === 'like') optimistic.rating_positive -= 1;
+            optimistic.voted = 'dislike';
+        }
+        setPost(optimistic);
+        try { await voteArticle(post.id, type); } catch { setPost(prev); }
+    };
 
-    async function onCreateComment(body) {
-        const doc = await createComment(id, body);
-        setComments(prev => [doc, ...prev]);
-    }
+    if (loading) return <p>Loading...</p>;
+    if (error) return <p className="text-red-500">{error}</p>;
+    if (!post) return <p className="text-red-500">Пост не знайдений.</p>;
 
-    if (loading) return <div className="p-4">Завантаження…</div>;
-    if (err) return <div className="p-4 text-red-600">{err}</div>;
-    if (!post) return null;
-
+    // ↓ твій оригінальний UI (без змін)
     return (
-        <div className="max-w-3xl mx-auto p-4 space-y-4">
-            <h1 className="text-2xl font-semibold">{post.title}</h1>
-            <p className="text-gray-800 whitespace-pre-wrap">{post.body}</p>
-
-            <div className="flex gap-3">
-                <button onClick={() => onVote(1)} className="px-2 py-1 border rounded">👍 {counts.likes}</button>
-                <button onClick={() => onVote(-1)} className="px-2 py-1 border rounded">👎 {counts.dislikes}</button>
-                <span className="text-gray-500">Коментарі: {post.metrics?.comments ?? comments.length}</span>
+        <div className="bg-white text-black rounded-xl p-4 shadow-md">
+            <div className="flex items-center gap-2 text-sm mb-1">
+        <span className="font-semibold">
+          @{post.user?.first_name} {post.user?.last_name || 'Невідомий'}
+        </span>
+                <span className="text-gray-500">{new Date(post.created_at).toLocaleDateString() || 'Невідомо'}</span>
             </div>
 
-            <section>
-                <h2 className="text-lg font-semibold mb-2">Коментарі</h2>
-                <CommentInput onSubmit={onCreateComment} />
-                <RepliesList items={comments} />
-            </section>
+            {post.title && (
+                <h2 className="font-bold text-lg mb-2 leading-snug">{post.title}</h2>
+            )}
+
+            {post.content && (
+                <p className="text-sm text-gray-800 whitespace-pre-line mb-4">
+                    {post.content}
+                </p>
+            )}
+
+            {post?.image_url && (
+                <img
+                    src={post.image_url}
+                    alt="Article Image"
+                    className="w-full h-auto rounded-lg mb-4"
+                />
+            )}
+
+            <div className="flex items-center gap-3 text-sm">
+                <button onClick={() => handleVote('like')} className="flex items-center gap-1">
+                    <ThumbsUp size={16} /> {post.rating_positive}
+                </button>
+                <button onClick={() => handleVote('dislike')} className="flex items-center gap-1">
+                    <ThumbsDown size={16} /> {post.rating_negative}
+                </button>
+                <div className="flex items-center gap-1 ml-auto">
+                    <MessageCircle size={16} /> {post.comment_count}
+                </div>
+            </div>
+
+            <div className="flex items-center gap-3 text-sm mb-2 mt-2">
+                <button className="ml-auto text-xs border rounded px-2 py-0.5 hover:bg-black hover:text-white transition cursor-pointer">
+                    report
+                </button>
+            </div>
         </div>
     );
-}
+};
+
+export default PostExpanded;

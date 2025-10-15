@@ -1,41 +1,70 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { countsAnnouncement, toggleAnnouncement } from '../api/reactions';
+import React from 'react';
+import { MessageCircle, ThumbsDown, ThumbsUp } from 'lucide-react';
 
-export default function PostCard({ post }) {
-    const { _id, title, body, metrics } = post;
-    const [counts, setCounts] = useState({ likes: 0, dislikes: 0, score: 0 });
-    const [busy, setBusy] = useState(false);
+const PostCard = ({
+                      id,
+                      username,
+                      date,
+                      title,
+                      content,
+                      likes,
+                      dislikes,
+                      comments,
+                      image_url,
+                      onClick,
+                      voted,
+                      onVote
+                  }) => {
+    const shortContent = content.length > 180 ? content.slice(0, 180) + '...' : content;
 
-    useEffect(() => {
-        let mounted = true;
-        (async () => {
-            try { const c = await countsAnnouncement(_id); if (mounted) setCounts(c); } catch {}
-        })();
-        return () => { mounted = false; };
-    }, [_id]);
+    const handleLike = (e) => {
+        e.stopPropagation();
+        if (voted !== 'like') onVote(id, 'like');
+    };
 
-    async function vote(v) {
-        if (busy) return;
-        setBusy(true);
-        const prev = counts;
-        const optimistic = v === 1
-            ? { ...counts, likes: counts.likes + 1, score: counts.score + 1 }
-            : { ...counts, dislikes: counts.dislikes + 1, score: counts.score - 1 };
-        setCounts(optimistic);
-        try { setCounts(await toggleAnnouncement(_id, v)); } catch { setCounts(prev); }
-        finally { setBusy(false); }
-    }
+    const handleDislike = (e) => {
+        e.stopPropagation();
+        if (voted !== 'dislike') onVote(id, 'dislike');
+    };
 
     return (
-        <article className="border rounded p-4">
-            <Link to={`/forum/${_id}`} className="text-lg font-semibold hover:underline">{title}</Link>
-            <p className="text-sm text-gray-700 mt-2 line-clamp-3">{body}</p>
-            <div className="mt-3 flex items-center gap-3 text-sm">
-                <button disabled={busy} onClick={()=>vote(1)} className="px-2 py-1 border rounded">👍 {counts.likes}</button>
-                <button disabled={busy} onClick={()=>vote(-1)} className="px-2 py-1 border rounded">👎 {counts.dislikes}</button>
-                <span className="text-gray-500">Коментарі: {metrics?.comments ?? 0}</span>
+        <div
+            onClick={onClick}
+            className="bg-white text-black rounded-xl p-4 shadow-sm cursor-pointer hover:bg-gray-200 transition space-y-3"
+        >
+            <div className="flex items-center gap-2 text-sm">
+                <span className="font-semibold">@{username}</span>
+                <span className="text-gray-500">{date}</span>
             </div>
-        </article>
+
+            <h2 className="font-bold text-md leading-snug">{title}</h2>
+            <p className="text-sm text-gray-700">{shortContent}</p>
+
+            {image_url && (
+                <img
+                    src={image_url}
+                    alt={title}
+                    className="w-full h-48 object-cover rounded-md"
+                />
+            )}
+
+            <div className="flex items-center gap-3 text-sm pt-2">
+                <button
+                    onClick={handleLike}
+                    className={`flex items-center gap-1 transition ${voted === 'like' ? "text-green-600" : "hover:text-green-600"}`}
+                >
+                    <ThumbsUp size={16} /> {likes}
+                </button>
+                <button
+                    onClick={handleDislike}
+                    className={`flex items-center gap-1 transition ${voted === 'dislike' ? "text-red-600" : "hover:text-red-600"}`}
+                >
+                    <ThumbsDown size={16} /> {dislikes}
+                </button>
+                <div className="flex items-center gap-1"><MessageCircle size={16} /> {comments}</div>
+            </div>
+        </div>
     );
-}
+};
+
+export default PostCard;

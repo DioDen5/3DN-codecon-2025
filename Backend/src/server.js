@@ -10,8 +10,19 @@ import commentsRoutes from './routes/comments.routes.js';
 import reactionsRoutes from './routes/reactions.routes.js';
 
 const app = express();
-app.use(cors());
+
+const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'http://localhost:5173';
+
+app.use(cors({
+    origin: FRONTEND_ORIGIN,
+    credentials: true,
+    methods: ['GET','HEAD','POST','PATCH','PUT','DELETE','OPTIONS'],
+    allowedHeaders: ['Content-Type','Authorization'],
+    optionsSuccessStatus: 204,
+}));
+
 app.use(express.json());
+
 
 app.use('/api/auth', authRoutes);
 app.use('/api/announcements', announcementRoutes);
