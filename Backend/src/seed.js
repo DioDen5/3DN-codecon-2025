@@ -20,13 +20,13 @@ async function main() {
 
     const pass = await bcrypt.hash('password123', 10);
 
-    const admin = await User.create({
+    const [admin] = await User.create([{
         email: 'admin@lpnu.ua',
-        passwordHash: pass,
+        passwordHash: await bcrypt.hash('password123', 10),
         displayName: 'Admin',
-        roles: ['admin'],
-        status: 'verified'
-    });
+        role: 'admin',
+        status: 'verified',
+    }]);
 
     const student = await User.create({
         email: 'student@lnu.edu.ua',
