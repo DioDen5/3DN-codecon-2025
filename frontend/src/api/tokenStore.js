@@ -7,5 +7,7 @@ export const tokenStore = {
     set(t) {
         try { t ? localStorage.setItem(KEY, t) : localStorage.removeItem(KEY); } catch {}
     },
-    clear() { try { localStorage.removeItem(KEY); } catch {} },
+    clear() {
+        try { localStorage.removeItem(KEY); } catch {}
+    },
 };

@@ -1,76 +1,66 @@
-import React, { useEffect, useState } from 'react';
-import { ThumbsUp, ThumbsDown, MessageCircle } from 'lucide-react';
-import axios from 'axios';
+import { useEffect, useState } from 'react';
+import { getById } from '../api/announcements';
+import { countsAnnouncement, toggleAnnouncement } from '../api/reactions';
+import { list as listComments, create as createComment } from '../api/comments';
+import RepliesList from './RepliesList';
+import CommentInput from './CommentInput';
 
-const PostExpanded = ({ postId }) => {
+export default function PostExpanded({ id }) {
     const [post, setPost] = useState(null);
+    const [counts, setCounts] = useState({ likes: 0, dislikes: 0, score: 0 });
+    const [comments, setComments] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+    const [err, setErr] = useState('');
 
     useEffect(() => {
-        if (!postId) {
-            setError('Post ID не надано');
-            setLoading(false);
-            return;
-        }
-
-        const fetchPost = async () => {
+        let mounted = true;
+        (async () => {
             try {
-                const response = await axios.get(`http://127.0.0.1:8000/api/article/${postId}/`);
-                setPost(response.data);
-            } catch {
-                setError('Не вдалося завантажити пост');
+                const [p, cts, cmts] = await Promise.all([
+                    getById(id),
+                    countsAnnouncement(id),
+                    listComments(id, { limit: 50 }),
+                ]);
+                if (!p) throw new Error('Announcement not found');
+                if (mounted) { setPost(p); setCounts(cts); setComments(cmts); }
+            } catch (e) {
+                setErr(e?.response?.data?.error || e.message);
             } finally {
-                setLoading(false);
+                if (mounted) setLoading(false);
             }
-        };
+        })();
+        return () => { mounted = false; };
+    }, [id]);
 
-        fetchPost();
-    }, [postId]);
+    async function onVote(v) {
+        try { setCounts(await toggleAnnouncement(id, v)); } catch {}
+    }
 
-    if (loading) return <p>Loading...</p>;
-    if (error) return <p className="text-red-500">{error}</p>;
+    async function onCreateComment(body) {
+        const doc = await createComment(id, body);
+        setComments(prev => [doc, ...prev]);
+    }
 
-    // Якщо дані відсутні, потрібно додати перевірку
-    if (!post) return <p className="text-red-500">Пост не знайдений.</p>;
+    if (loading) return <div className="p-4">Завантаження…</div>;
+    if (err) return <div className="p-4 text-red-600">{err}</div>;
+    if (!post) return null;
 
     return (
-        <div className="bg-white text-black rounded-xl p-4 shadow-md">
-            <div className="flex items-center gap-2 text-sm mb-1">
-                {/* Відображення імені та прізвища користувача */}
-                <span className="font-semibold">
-                    @{post.user?.first_name} {post.user?.last_name || 'Невідомий'}
-                </span>
-                <span className="text-gray-500">{new Date(post.created_at).toLocaleDateString() || 'Невідомо'}</span>
+        <div className="max-w-3xl mx-auto p-4 space-y-4">
+            <h1 className="text-2xl font-semibold">{post.title}</h1>
+            <p className="text-gray-800 whitespace-pre-wrap">{post.body}</p>
+
+            <div className="flex gap-3">
+                <button onClick={() => onVote(1)} className="px-2 py-1 border rounded">👍 {counts.likes}</button>
+                <button onClick={() => onVote(-1)} className="px-2 py-1 border rounded">👎 {counts.dislikes}</button>
+                <span className="text-gray-500">Коментарі: {post.metrics?.comments ?? comments.length}</span>
             </div>
 
-            {/* Відображення зображення статті */}
-            {post.title && (
-                <h2 className="font-bold text-lg mb-2 leading-snug">{post.title}</h2>
-            )}
-
-            {post.content && (
-                <p className="text-sm text-gray-800 whitespace-pre-line mb-4">
-                    {post.content}
-                </p>
-            )}
-
-            {post?.image_url && (
-                <img
-                    src={post.image_url}
-                    alt="Article Image"
-                    className="w-full h-auto rounded-lg mb-4"  // Збільшений розмір для статті
-                />
-            )}
-
-
-            <div className="flex items-center gap-3 text-sm mb-2">
-                <button className="ml-auto text-xs border rounded px-2 py-0.5 hover:bg-black hover:text-white transition cursor-pointer">
-                    report
-                </button>
-            </div>
+            <section>
+                <h2 className="text-lg font-semibold mb-2">Коментарі</h2>
+                <CommentInput onSubmit={onCreateComment} />
+                <RepliesList items={comments} />
+            </section>
         </div>
     );
-};
-
-export default PostExpanded;
+}

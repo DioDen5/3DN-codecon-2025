@@ -4,7 +4,7 @@ export async function toggleAnnouncement(announcementId, value) {
     const { data } = await http.post('/reactions/toggle', {
         targetType: 'announcement',
         targetId: announcementId,
-        value, 
+        value, // 1 | -1
     });
     return data?.counts || { likes: 0, dislikes: 0, score: 0 };
 }

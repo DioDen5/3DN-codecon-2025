@@ -18,9 +18,9 @@ http.interceptors.request.use((config) => {
 http.interceptors.response.use(
     (r) => r,
     async (err) => {
-        const status = err?.response?.status;
-        if (status === 401) {
+        if (err?.response?.status === 401) {
             tokenStore.clear();
+            // TODO(M4): тут підключити /auth/refresh та повторити запит
         }
         return Promise.reject(err);
     }

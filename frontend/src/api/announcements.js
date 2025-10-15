@@ -18,3 +18,9 @@ export async function getById(id) {
         return getByIdFallback(id);
     }
 }
+
+export async function createDraft({ title, body, tags = [] }) {
+    const payload = { title, body, status: 'draft', tags };
+    const { data } = await http.post('/announcements', payload);
+    return data;
+}
