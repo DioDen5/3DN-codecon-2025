@@ -38,12 +38,10 @@ router.post('/announcements/:id/comments', auth, requireVerified, async (req, re
         const doc = await Comment.create({ announcementId, authorId: uid, body: body.trim() });
         await Announcement.updateOne({ _id: announcementId }, { $inc: { 'metrics.comments': 1 } });
 
-        // Отримуємо інформацію про користувача
         console.log('Looking for user with ID:', uid);
         const user = await User.findById(uid).select('email displayName');
         console.log('Found user:', user);
         
-        // Створюємо об'єкт коментаря з інформацією про автора
         const commentWithAuthor = {
             ...doc.toObject(),
             authorId: {
@@ -67,7 +65,6 @@ router.get('/announcements/:id/comments', auth, requireVerified, async (req, res
         const announcementId = req.params.id;
         if (!mongoose.isValidObjectId(announcementId)) return res.status(400).json({ error: 'Invalid announcement id' });
 
-        // Перевіряємо що оголошення існує та має правильний статус
         const ann = await Announcement.findById(announcementId).lean();
         if (!ann) return res.status(404).json({ error: 'Announcement not found' });
         if (ann.status !== 'published' || ann.visibility !== 'students') {

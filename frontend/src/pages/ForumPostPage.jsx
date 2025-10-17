@@ -24,7 +24,6 @@ const ForumPostPage = () => {
                     commentsList(id),
                 ]);
                 
-                // Отримуємо лічильники для головного поста
                 try {
                     const postCounts = await countsAnnouncement(id);
                     setPost({ ...p, counts: postCounts, userReaction: postCounts.userReaction || 0 });
@@ -65,18 +64,13 @@ const ForumPostPage = () => {
         try {
         const doc = await createComment(id, message);
         console.log('Created comment:', doc);
-        console.log('AuthorId structure:', doc.authorId);
-        console.log('AuthorId type:', typeof doc.authorId);
-        console.log('AuthorId is object:', typeof doc.authorId === 'object');
             
-            // Додаємо лічильники до нового коментаря
             const counts = await countsComment(doc._id).catch(() => ({ likes: 0, dislikes: 0, score: 0 }));
             const commentWithCounts = { 
                 ...doc, 
                 counts,
                 userReaction: counts.userReaction || 0
             };
-            console.log('Comment with counts:', commentWithCounts);
             setReplies(prev => [commentWithCounts, ...prev]);
             
             setPost(prev => ({
@@ -93,14 +87,12 @@ const ForumPostPage = () => {
         
         const value = type === 'like' ? 1 : -1;
         
-        // Оптимістичне оновлення з урахуванням поточної реакції користувача
         const currentCounts = post.counts || { likes: 0, dislikes: 0, score: 0, userReaction: 0 };
         const currentReaction = currentCounts.userReaction || 0;
         let newCounts = { ...currentCounts };
 
         if (type === 'like') {
             if (currentReaction === 1) {
-                // зняти лайк
                 newCounts.likes = Math.max(0, newCounts.likes - 1);
                 newCounts.score -= 1;
                 newCounts.userReaction = 0;
@@ -115,12 +107,10 @@ const ForumPostPage = () => {
             }
         } else {
             if (currentReaction === -1) {
-                // зняти дизлайк
                 newCounts.dislikes = Math.max(0, newCounts.dislikes - 1);
                 newCounts.score += 1;
                 newCounts.userReaction = 0;
             } else {
-                // переключення з лайка або додавання дизлайка
                 if (currentReaction === 1) {
                     newCounts.likes = Math.max(0, newCounts.likes - 1);
                     newCounts.score -= 1; // знімаємо попередній +1
@@ -138,13 +128,11 @@ const ForumPostPage = () => {
         
         try {
             const result = await toggleAnnouncement(id, value);
-            // Оновлюємо з реальними даними з сервера (повертає userReaction)
             setPost(prev => ({
                 ...prev,
                 counts: result
             }));
         } catch (error) {
-            // Відкатуємо оптимістичне оновлення при помилці
             setPost(prev => ({
                 ...prev,
                 counts: currentCounts

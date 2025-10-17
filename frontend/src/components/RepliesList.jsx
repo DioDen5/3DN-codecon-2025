@@ -23,7 +23,6 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
             const value = type === 'like' ? 1 : -1;
             const result = await toggleComment(commentId, value);
             
-            // Оновлюємо список коментарів з новими лічильниками та реакцією користувача
             if (onRepliesUpdate) {
                 onRepliesUpdate(prevReplies => 
                     prevReplies.map(reply => 
@@ -41,7 +40,6 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
             console.error('Vote error:', err);
             if (err?.response?.status === 401) {
                 setError('Сесія закінчилася. Будь ласка, увійдіть знову.');
-                // Перенаправляємо на логін
                 setTimeout(() => {
                     window.location.href = '/login';
                 }, 2000);
@@ -68,7 +66,6 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
         const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
         const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
         
-        // Якщо менше 24 годин - показуємо час як в TikTok
         if (diffDays < 1) {
             if (diffHours < 1) {
                 const diffMinutes = Math.floor(diffMs / (1000 * 60));
@@ -77,29 +74,23 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
             return `${diffHours}г`;
         }
         
-        // Якщо більше 24 годин - показуємо дату
         return date.toLocaleDateString('uk-UA');
     };
 
     const getUserName = (comment) => {
         console.log('Getting user name for comment:', comment);
-        
-        // Перевіряємо нову структуру з authorId
         if (comment?.authorId) {
             console.log('AuthorId found:', comment.authorId);
-            // Якщо є displayName, використовуємо його
             if (comment.authorId.displayName) {
                 console.log('Using displayName:', comment.authorId.displayName);
                 return comment.authorId.displayName;
             }
-            // Якщо є email, витягуємо частину до @
             if (comment.authorId.email) {
                 console.log('Using email:', comment.authorId.email);
                 return comment.authorId.email.split('@')[0];
             }
         }
         
-        // Fallback на стару структуру
         if (comment?.user?.email) {
             return comment.user.email.split('@')[0];
         }
@@ -111,7 +102,6 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
         return 'Невідомий';
     };
 
-    // ⬇️ нижче — твоя оригінальнарозмітка без змін
     return (
         <div className="pt-8">
             <div className="flex items-center gap-2 mb-4">
