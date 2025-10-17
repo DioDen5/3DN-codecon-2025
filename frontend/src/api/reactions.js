@@ -1,29 +1,51 @@
 import { http } from './httpClient';
 
+export async function toggleReaction(targetType, targetId, value) {
+    try {
+        const { data } = await http.post('/reactions/toggle', {
+            targetType,
+            targetId,
+            value, // 1 | -1
+        });
+        return data?.counts || { likes: 0, dislikes: 0, score: 0 };
+    } catch (err) {
+        console.error('toggleReaction error:', err);
+        return { likes: 0, dislikes: 0, score: 0 };
+    }
+}
+
+export async function getAnnouncementCounts(announcementId) {
+    try {
+        const { data } = await http.get(`/reactions/announcement/${announcementId}/counts`);
+        return data || { likes: 0, dislikes: 0, score: 0 };
+    } catch (err) {
+        console.error('getAnnouncementCounts error:', err);
+        return { likes: 0, dislikes: 0, score: 0 };
+    }
+}
+
+export async function getCommentCounts(commentId) {
+    try {
+        const { data } = await http.get(`/reactions/comment/${commentId}/counts`);
+        return data || { likes: 0, dislikes: 0, score: 0 };
+    } catch (err) {
+        console.error('getCommentCounts error:', err);
+        return { likes: 0, dislikes: 0, score: 0 };
+    }
+}
+
 export async function toggleAnnouncement(announcementId, value) {
-    const { data } = await http.post('/reactions/toggle', {
-        targetType: 'announcement',
-        targetId: announcementId,
-        value, // 1 | -1
-    });
-    return data?.counts || { likes: 0, dislikes: 0, score: 0 };
+    return toggleReaction('announcement', announcementId, value);
 }
 
 export async function countsAnnouncement(announcementId) {
-    const { data } = await http.get(`/reactions/announcement/${announcementId}/counts`);
-    return data;
+    return getAnnouncementCounts(announcementId);
 }
 
 export async function toggleComment(commentId, value) {
-    const { data } = await http.post('/reactions/toggle', {
-        targetType: 'comment',
-        targetId: commentId,
-        value,
-    });
-    return data?.counts || { likes: 0, dislikes: 0, score: 0 };
+    return toggleReaction('comment', commentId, value);
 }
 
 export async function countsComment(commentId) {
-    const { data } = await http.get(`/reactions/comment/${commentId}/counts`);
-    return data;
+    return getCommentCounts(commentId);
 }
