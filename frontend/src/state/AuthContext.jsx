@@ -1,41 +1,47 @@
-import { createContext, useContext, useEffect, useState } from 'react'
-import { tokenStore } from '../api/tokenStore'
+import React, { createContext, useContext, useMemo, useState, useEffect } from 'react';
+import { tokenStore } from '../api/tokenStore';
 
-const KEY_USER = 'studlink_user'
-
-const AuthCtx = createContext(null)
+const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-    const [token, setToken] = useState(tokenStore.get())
     const [user, setUser] = useState(() => {
-        try { return JSON.parse(localStorage.getItem(KEY_USER) || 'null') } catch { return null }
-    })
+        try {
+            return JSON.parse(localStorage.getItem('auth_user') || 'null');
+        } catch {
+            return null;
+        }
+    });
+
+    const [isAuth, setIsAuth] = useState(() => !!tokenStore.get());
 
     useEffect(() => {
-        if (token) tokenStore.set(token)
-        else tokenStore.clear()
-    }, [token])
+        setIsAuth(!!tokenStore.get());
+    }, []);
 
     const loginSuccess = ({ token, user }) => {
-        if (token) setToken(token)
-        if (user) {
-            setUser(user)
-            localStorage.setItem(KEY_USER, JSON.stringify(user))
-        }
-    }
+        tokenStore.set(token);
+        setUser(user);
+        localStorage.setItem('auth_user', JSON.stringify(user));
+        setIsAuth(true);
+    };
 
     const logoutLocal = () => {
-        setToken(null)
-        setUser(null)
-        localStorage.removeItem(KEY_USER)
-        tokenStore.clear()
-    }
+        tokenStore.clear();
+        setUser(null);
+        localStorage.removeItem('auth_user');
+        setIsAuth(false);
+    };
 
-    return (
-        <AuthCtx.Provider value={{ token, user, isAuth: !!token, loginSuccess, logoutLocal }}>
-            {children}
-        </AuthCtx.Provider>
-    )
+    const value = useMemo(
+        () => ({ isAuth, user, loginSuccess, logoutLocal }),
+        [isAuth, user]
+    );
+
+    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-export const useAuth = () => useContext(AuthCtx)
+export function useAuth() {
+    const ctx = useContext(AuthContext);
+    if (!ctx) throw new Error('useAuth must be used within AuthProvider');
+    return ctx;
+}
