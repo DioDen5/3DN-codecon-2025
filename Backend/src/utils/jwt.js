@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
-const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || 'dev_access';
+
+const ACCESS_SECRET  = process.env.JWT_ACCESS_SECRET  || 'dev_access';
 const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'dev_refresh';
 
 export function signAccess(payload, expiresIn = '1h') {
