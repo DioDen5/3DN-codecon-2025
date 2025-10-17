@@ -13,7 +13,8 @@ const PostCard = ({
                       image_url,
                       onClick,
                       onVote,
-                      pending = false
+                      pending = false,
+                      voted = null
                   }) => {
     const shortContent = content?.length > 180 ? content.slice(0, 180) + '...' : content || '';
 
@@ -49,6 +50,8 @@ const PostCard = ({
                     onClick={handleLike}
                     disabled={pending}
                     className={`flex items-center gap-2 border border-black rounded px-3 py-2 transition hover:bg-black hover:text-white ${
+                        voted === 'like' ? 'bg-black text-white' : ''
+                    } ${
                         pending ? 'opacity-60 cursor-not-allowed' : ''
                     }`}
                     aria-label="like"
@@ -61,6 +64,8 @@ const PostCard = ({
                     onClick={handleDislike}
                     disabled={pending}
                     className={`flex items-center gap-2 border border-black rounded px-3 py-2 transition hover:bg-black hover:text-white ${
+                        voted === 'dislike' ? 'bg-black text-white' : ''
+                    } ${
                         pending ? 'opacity-60 cursor-not-allowed' : ''
                     }`}
                     aria-label="dislike"

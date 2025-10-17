@@ -20,8 +20,8 @@ router.post('/announcements/:id/comments', auth, requireVerified, async (req, re
         const uid = getUid(req.user);
         if (!uid) return res.status(401).json({ error: 'No user id in auth context' });
 
-        if (ann.status !== 'published' && !isAdmin(req.user) && String(ann.authorId) !== uid) {
-            return res.status(403).json({ error: 'Comments allowed only for published announcements' });
+        if (ann.status !== 'published' || ann.visibility !== 'students') {
+            return res.status(403).json({ error: 'Comments allowed only for published announcements with students visibility' });
         }
 
         const { body } = req.body;
@@ -34,10 +34,17 @@ router.post('/announcements/:id/comments', auth, requireVerified, async (req, re
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-router.get('/announcements/:id/comments', auth, async (req, res) => {
+router.get('/announcements/:id/comments', auth, requireVerified, async (req, res) => {
     try {
         const announcementId = req.params.id;
         if (!mongoose.isValidObjectId(announcementId)) return res.status(400).json({ error: 'Invalid announcement id' });
+
+        // Перевіряємо що оголошення існує та має правильний статус
+        const ann = await Announcement.findById(announcementId).lean();
+        if (!ann) return res.status(404).json({ error: 'Announcement not found' });
+        if (ann.status !== 'published' || ann.visibility !== 'students') {
+            return res.status(403).json({ error: 'Comments allowed only for published announcements with students visibility' });
+        }
 
         const limit = Math.min(parseInt(req.query.limit || '20', 10), 100);
         const showAll = req.query.all === '1' && isAdmin(req.user);
@@ -50,7 +57,11 @@ router.get('/announcements/:id/comments', auth, async (req, res) => {
             if (!isNaN(before)) query.createdAt = { $lt: before };
         }
 
-        const items = await Comment.find(query).sort({ createdAt: -1, _id: -1 }).limit(limit).lean();
+        const items = await Comment.find(query)
+            .populate('authorId', 'email firstName lastName')
+            .sort({ createdAt: -1, _id: -1 })
+            .limit(limit)
+            .lean();
         res.json({ items, count: items.length });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });

@@ -43,9 +43,9 @@ const ForumPage = () => {
                     arr.map(async (a) => {
                         try {
                             const counts = await countsAnnouncement(a._id);
-                            return { ...a, counts };
+                            return { ...a, counts, _my: counts.userReaction || 0 };
                         } catch {
-                            return { ...a, counts: { likes: 0, dislikes: 0, score: 0 } };
+                            return { ...a, counts: { likes: 0, dislikes: 0, score: 0 }, _my: 0 };
                         }
                     })
                 );
@@ -85,7 +85,7 @@ const ForumPage = () => {
         );
         try {
             const counts = await toggleAnnouncement(id, value);
-            setRaw((prev) => prev.map((p) => (p._id === id ? { ...p, counts } : p)));
+            setRaw((prev) => prev.map((p) => (p._id === id ? { ...p, counts, _my: counts.userReaction || 0 } : p)));
         } catch {
             listPublished({ q }).then(setRaw).catch(() => {});
         }
@@ -130,9 +130,7 @@ const ForumPage = () => {
                                     date={new Date(
                                         post.publishedAt || post.createdAt
                                     ).toLocaleDateString()}
-                                    voted={
-                                        post._my === 1 ? "like" : post._my === -1 ? "dislike" : null
-                                    }
+                                    voted={post._my === 1 ? 'like' : post._my === -1 ? 'dislike' : (post.counts?.userReaction === 1 ? 'like' : post.counts?.userReaction === -1 ? 'dislike' : null)}
                                     onVote={(id, t) => handleVote(id, t)}
                                     onClick={() => nav(`/forum/${post._id}`)}
                                 />
