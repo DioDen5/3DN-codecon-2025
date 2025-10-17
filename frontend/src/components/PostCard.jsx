@@ -13,18 +13,19 @@ const PostCard = ({
                       image_url,
                       onClick,
                       voted,
-                      onVote
+                      onVote,
+                      pending = false // блокувати кнопки на час запиту
                   }) => {
-    const shortContent = content.length > 180 ? content.slice(0, 180) + '...' : content;
+    const shortContent = content?.length > 180 ? content.slice(0, 180) + '...' : content || '';
 
     const handleLike = (e) => {
         e.stopPropagation();
-        if (voted !== 'like') onVote(id, 'like');
+        if (!pending) onVote?.(id, 'like');
     };
 
     const handleDislike = (e) => {
         e.stopPropagation();
-        if (voted !== 'dislike') onVote(id, 'dislike');
+        if (!pending) onVote?.(id, 'dislike');
     };
 
     return (
@@ -41,27 +42,35 @@ const PostCard = ({
             <p className="text-sm text-gray-700">{shortContent}</p>
 
             {image_url && (
-                <img
-                    src={image_url}
-                    alt={title}
-                    className="w-full h-48 object-cover rounded-md"
-                />
+                <img src={image_url} alt={title} className="w-full h-48 object-cover rounded-md" />
             )}
 
             <div className="flex items-center gap-3 text-sm pt-2">
                 <button
                     onClick={handleLike}
-                    className={`flex items-center gap-1 transition ${voted === 'like' ? "text-green-600" : "hover:text-green-600"}`}
+                    disabled={pending}
+                    className={`flex items-center gap-2 border rounded px-3 py-2 transition hover:bg-black hover:text-white
+            ${pending ? 'opacity-60 cursor-not-allowed' : ''}`}
+                    aria-label="like"
                 >
-                    <ThumbsUp size={16} /> {likes}
+                    <ThumbsUp size={16} className="text-green-600" />
+                    {likes}
                 </button>
+
                 <button
                     onClick={handleDislike}
-                    className={`flex items-center gap-1 transition ${voted === 'dislike' ? "text-red-600" : "hover:text-red-600"}`}
+                    disabled={pending}
+                    className={`flex items-center gap-2 border rounded px-3 py-2 transition hover:bg-black hover:text-white
+            ${pending ? 'opacity-60 cursor-not-allowed' : ''}`}
+                    aria-label="dislike"
                 >
-                    <ThumbsDown size={16} /> {dislikes}
+                    <ThumbsDown size={16} className="text-red-600" />
+                    {dislikes}
                 </button>
-                <div className="flex items-center gap-1"><MessageCircle size={16} /> {comments}</div>
+
+                <div className="flex items-center gap-2 ml-auto text-gray-700">
+                    <MessageCircle size={16} /> {comments}
+                </div>
             </div>
         </div>
     );

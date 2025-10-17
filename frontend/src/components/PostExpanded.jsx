@@ -9,7 +9,6 @@ const PostExpanded = ({ postId }) => {
     const [pending, setPending] = useState(false);
     const [error, setError] = useState('');
 
-    // завантажуємо сам пост
     useEffect(() => {
         let alive = true;
         const load = async () => {
@@ -26,7 +25,6 @@ const PostExpanded = ({ postId }) => {
         return () => { alive = false; };
     }, [postId]);
 
-    // завантажуємо лічильники реакцій
     useEffect(() => {
         let alive = true;
         const loadCounts = async () => {
@@ -34,9 +32,7 @@ const PostExpanded = ({ postId }) => {
                 const data = await getAnnouncementCounts(postId);
                 if (!alive) return;
                 setCounts(data);
-            } catch {
-                if (!alive) return;
-            }
+            } catch {}
         };
         if (postId) loadCounts();
         return () => { alive = false; };
@@ -47,7 +43,7 @@ const PostExpanded = ({ postId }) => {
         setPending(true);
         try {
             const data = await toggleReaction('announcement', postId, val);
-            setCounts(data); // беремо точні цифри з бекенду
+            setCounts(data);
         } finally {
             setPending(false);
         }
@@ -64,38 +60,35 @@ const PostExpanded = ({ postId }) => {
         </span>
             </div>
 
-            {post.title && (
-                <h2 className="font-bold text-lg mb-2 leading-snug">{post.title}</h2>
-            )}
-
-            {post.body && (
-                <p className="text-sm text-gray-800 whitespace-pre-line mb-4">
-                    {post.body}
-                </p>
-            )}
+            {post.title && <h2 className="font-bold text-lg mb-2 leading-snug">{post.title}</h2>}
+            {post.body && <p className="text-sm text-gray-800 whitespace-pre-line mb-4">{post.body}</p>}
 
             <div className="flex items-center gap-4 text-sm">
                 <button
                     disabled={pending}
                     onClick={() => onVote(1)}
-                    className={`flex items-center gap-1 border rounded px-2 py-1 hover:bg-black hover:text-white transition
-            ${pending ? 'opacity-60 cursor-not-allowed' : ''}`}
+                    className={`flex items-center gap-2 border border-black rounded px-3 py-2 transition hover:bg-black hover:text-white ${
+                        pending ? 'opacity-60 cursor-not-allowed' : ''
+                    }`}
                     aria-label="like"
                 >
-                    <ThumbsUp size={16} /> {counts.likes}
+                    <ThumbsUp size={16} />
+                    {counts.likes}
                 </button>
 
                 <button
                     disabled={pending}
                     onClick={() => onVote(-1)}
-                    className={`flex items-center gap-1 border rounded px-2 py-1 hover:bg-black hover:text-white transition
-            ${pending ? 'opacity-60 cursor-not-allowed' : ''}`}
+                    className={`flex items-center gap-2 border border-black rounded px-3 py-2 transition hover:bg-black hover:text-white ${
+                        pending ? 'opacity-60 cursor-not-allowed' : ''
+                    }`}
                     aria-label="dislike"
                 >
-                    <ThumbsDown size={16} /> {counts.dislikes}
+                    <ThumbsDown size={16} />
+                    {counts.dislikes}
                 </button>
 
-                <div className="flex items-center gap-1 ml-auto text-gray-700">
+                <div className="flex items-center gap-2 ml-auto text-gray-700">
                     <MessageCircle size={16} /> коментарі
                 </div>
             </div>
