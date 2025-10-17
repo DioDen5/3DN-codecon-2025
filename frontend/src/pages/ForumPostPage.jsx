@@ -3,7 +3,9 @@ import { useEffect, useState } from 'react';
 import PostExpanded from '../components/PostExpanded';
 import CommentInput from '../components/CommentInput';
 import RepliesList from '../components/RepliesList';
-import { articleDetail, commentsList, createComment } from '../api/article_comment';
+import { getById } from '../api/announcements';
+import { list as commentsList, create as createComment } from '../api/comments';
+import { toggleAnnouncement } from '../api/reactions';
 
 const ForumPostPage = () => {
     const { id } = useParams();
@@ -18,7 +20,7 @@ const ForumPostPage = () => {
             try {
                 setLoading(true);
                 const [p, r] = await Promise.all([
-                    articleDetail(id),
+                    getById(id),
                     commentsList(id),
                 ]);
                 setPost(p);
@@ -41,6 +43,45 @@ const ForumPostPage = () => {
         }
     };
 
+    const handleReaction = async (type) => {
+        if (!post) return;
+        
+        const value = type === 'like' ? 1 : -1;
+        
+        // Оптимістичне оновлення
+        const currentCounts = post.counts || { likes: 0, dislikes: 0, score: 0 };
+        let newCounts = { ...currentCounts };
+        
+        if (type === 'like') {
+            newCounts.likes += 1;
+            newCounts.score += 1;
+        } else {
+            newCounts.dislikes += 1;
+            newCounts.score -= 1;
+        }
+        
+        setPost(prev => ({
+            ...prev,
+            counts: newCounts
+        }));
+        
+        try {
+            const result = await toggleAnnouncement(id, value);
+            // Оновлюємо з реальними даними з сервера
+            setPost(prev => ({
+                ...prev,
+                counts: result
+            }));
+        } catch (error) {
+            // Відкатуємо оптимістичне оновлення при помилці
+            setPost(prev => ({
+                ...prev,
+                counts: currentCounts
+            }));
+            console.error('Reaction error:', error);
+        }
+    };
+
     if (loading) return <div className="text-white p-10">Завантаження...</div>;
     if (error) return <div className="text-white p-10">Помилка: {error}</div>;
     if (!post) return <div className="text-white p-10">Пост не знайдено</div>;
@@ -55,7 +96,10 @@ const ForumPostPage = () => {
                     ← Назад
                 </button>
 
-                <PostExpanded postId={post.id} />
+                <PostExpanded 
+                    post={post} 
+                    onReaction={handleReaction}
+                />
 
                 <CommentInput onSubmit={handleCreate} />
 
