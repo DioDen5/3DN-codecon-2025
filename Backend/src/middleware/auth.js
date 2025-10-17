@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 
 const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || 'dev_access';
 
-export function requireAuth(req, res, next) {
+export function authRequired(req, res, next) {
     const header = req.headers.authorization;
     if (!header) return res.status(401).json({ error: 'Unauthorized' });
 
