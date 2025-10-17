@@ -17,10 +17,17 @@ router.post('/announcements/:id/comments', auth, requireVerified, async (req, re
         const ann = await Announcement.findById(announcementId).lean();
         if (!ann) return res.status(404).json({ error: 'Announcement not found' });
 
+        console.log('Checking announcement for comments:', { 
+            id: ann._id, 
+            status: ann.status, 
+            visibility: ann.visibility 
+        });
+
         const uid = getUid(req.user);
         if (!uid) return res.status(401).json({ error: 'No user id in auth context' });
 
         if (ann.status !== 'published' || ann.visibility !== 'students') {
+            console.log('Comment rejected:', { status: ann.status, visibility: ann.visibility });
             return res.status(403).json({ error: 'Comments allowed only for published announcements with students visibility' });
         }
 
@@ -58,7 +65,7 @@ router.get('/announcements/:id/comments', auth, requireVerified, async (req, res
         }
 
         const items = await Comment.find(query)
-            .populate('authorId', 'email firstName lastName')
+            .populate('authorId', 'email displayName')
             .sort({ createdAt: -1, _id: -1 })
             .limit(limit)
             .lean();

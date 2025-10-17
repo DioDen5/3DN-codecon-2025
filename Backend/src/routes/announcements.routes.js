@@ -37,6 +37,16 @@ router.get('/:id', authRequired, requireVerified, async (req, res) => {
             visibility: 'students' 
         });
         
+        console.log('Looking for announcement:', { id, found: !!doc });
+        if (doc) {
+            console.log('Found announcement:', { 
+                id: doc._id, 
+                status: doc.status, 
+                visibility: doc.visibility,
+                title: doc.title 
+            });
+        }
+        
         if (!doc) {
             return res.status(404).json({ error: 'Announcement not found' });
         }
@@ -77,14 +87,22 @@ router.get('/:id', authRequired, requireVerified, async (req, res) => {
 });
 
 router.post('/', authRequired, requireVerified, async (req, res) => {
-    const { title, body, tags } = req.body ?? {};
+    const { title, body, tags, status = 'draft', visibility = 'students' } = req.body ?? {};
+    
+    console.log('Creating announcement:', { title, status, visibility });
+    
     const doc = await Announcement.create({
         title,
         body,
         tags,
         authorId: req.user.id,
-        status: 'draft',
+        status,
+        visibility,
+        publishedAt: status === 'published' ? new Date() : undefined,
     });
+    
+    console.log('Created announcement:', { id: doc._id, status: doc.status, visibility: doc.visibility });
+    
     res.status(201).json(doc);
 });
 

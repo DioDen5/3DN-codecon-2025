@@ -32,7 +32,7 @@ async function main() {
         email: 'student@lnu.edu.ua',
         passwordHash: pass,
         displayName: 'Student',
-        roles: ['student'],
+        role: 'student',
         status: 'verified'
     });
 

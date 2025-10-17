@@ -88,9 +88,13 @@ router.post('/refresh', async (req, res) => {
     const payload = verifyJwt(token, 'refresh');
     if (!payload?.id) return res.status(401).json({ error: 'Invalid refresh' });
 
-    const access = signJwt({ id: payload.id }, 'access');
+    // Отримуємо актуальну інформацію про користувача
+    const user = await User.findById(payload.id);
+    if (!user) return res.status(401).json({ error: 'User not found' });
 
-    const newRefresh = signJwt({ id: payload.id }, 'refresh');
+    const access = signJwt({ id: user._id, role: user.role, status: user.status }, 'access');
+
+    const newRefresh = signJwt({ id: user._id }, 'refresh');
     setRefreshCookie(res, newRefresh);
 
     return res.json({ token: access });

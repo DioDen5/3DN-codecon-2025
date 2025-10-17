@@ -32,6 +32,7 @@ export function authRequired(req, res, next) {
     const payload = verifyJwt(token, 'access');
     if (!payload?.id) return res.status(401).json({ error: 'Unauthorized' });
 
+    console.log('Auth payload:', payload);
     req.user = payload; // { id, role?, status? }
     next();
 }
