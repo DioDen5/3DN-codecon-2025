@@ -1,7 +1,9 @@
 import express from 'express';
+import mongoose from 'mongoose';
 import { authRequired } from '../middleware/auth.js';
 import { requireVerified } from '../middleware/requireVerified.js';
 import { Announcement } from '../models/Announcement.js';
+import { Reaction } from '../models/Reaction.js';
 
 const router = express.Router();
 
@@ -19,14 +21,59 @@ router.get('/', authRequired, requireVerified, async (req, res) => {
 });
 
 
-router.get('/:id', authRequired, async (req, res) => {
-    const { id } = req.params;
-    const doc = await Announcement.findById(id);
-    if (!doc) return res.status(404).json({ error: 'Not found' });
-    if (doc.status !== 'published') {
-        return res.status(403).json({ error: 'Forbidden' });
+router.get('/:id', authRequired, requireVerified, async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        // Валідація ID
+        if (!mongoose.isValidObjectId(id)) {
+            return res.status(400).json({ error: 'Invalid announcement id' });
+        }
+
+        // Знаходимо оголошення з правильними умовами
+        const doc = await Announcement.findOne({ 
+            _id: id, 
+            status: 'published', 
+            visibility: 'students' 
+        });
+        
+        if (!doc) {
+            return res.status(404).json({ error: 'Announcement not found' });
+        }
+
+        // Збільшуємо лічильник переглядів
+        await Announcement.updateOne(
+            { _id: id }, 
+            { $inc: { 'metrics.views': 1 } }
+        );
+
+        // Агрегуємо реакції
+        const reactions = await Reaction.aggregate([
+            { $match: { targetType: 'announcement', targetId: new mongoose.Types.ObjectId(id) } },
+            { $group: { 
+                _id: '$value', 
+                count: { $sum: 1 } 
+            }}
+        ]);
+
+        // Підраховуємо likes, dislikes та score
+        let likes = 0, dislikes = 0;
+        reactions.forEach(reaction => {
+            if (reaction._id === 1) likes = reaction.count;
+            if (reaction._id === -1) dislikes = reaction.count;
+        });
+        const score = likes - dislikes;
+
+        // Повертаємо документ з лічильниками
+        const result = {
+            ...doc.toObject(),
+            counts: { likes, dislikes, score }
+        };
+
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
-    return res.json(doc);
 });
 
 router.post('/', authRequired, requireVerified, async (req, res) => {

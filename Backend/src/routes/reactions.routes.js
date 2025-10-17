@@ -46,8 +46,38 @@ const countsFor = async (targetType, targetId) => {
     return { likes, dislikes, score: likes - dislikes };
 };
 
+const countsForWithUser = async (targetType, targetId, userId) => {
+    const [agg] = await Reaction.aggregate([
+        { $match: { targetType, targetId: new mongoose.Types.ObjectId(targetId) } },
+        {
+            $group: {
+                _id: null,
+                likes:    { $sum: { $cond: [{ $eq: ['$value', 1] }, 1, 0] } },
+                dislikes: { $sum: { $cond: [{ $eq: ['$value',-1] }, 1, 0] } },
+            },
+        },
+    ]);
+    const likes = agg?.likes || 0;
+    const dislikes = agg?.dislikes || 0;
+    
+    // Отримуємо реакцію поточного користувача
+    const userReaction = await Reaction.findOne({ 
+        targetType, 
+        targetId: new mongoose.Types.ObjectId(targetId), 
+        userId 
+    });
+    
+    return { 
+        likes, 
+        dislikes, 
+        score: likes - dislikes,
+        userReaction: userReaction?.value || 0
+    };
+};
+
 router.post('/reactions/toggle', auth, requireVerified, async (req, res) => {
     try {
+        res.set('Cache-Control', 'no-store');
         const { targetType, targetId, value } = req.body;
 
         if (!['announcement','comment','review'].includes(targetType)) {
@@ -76,15 +106,16 @@ router.post('/reactions/toggle', auth, requireVerified, async (req, res) => {
             await existing.save();
         }
 
-        const counts = await countsFor(targetType, targetId);
+        const counts = await countsForWithUser(targetType, targetId, uid);
         res.json({ ok: true, counts });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
 });
 
-router.get('/reactions/:targetType/:targetId/counts', async (req, res) => {
+router.get('/reactions/:targetType/:targetId/counts', auth, async (req, res) => {
     try {
+        res.set('Cache-Control', 'no-store');
         const { targetType, targetId } = req.params;
 
         if (!['announcement','comment','review'].includes(targetType)) {
@@ -94,7 +125,10 @@ router.get('/reactions/:targetType/:targetId/counts', async (req, res) => {
             return res.status(400).json({ error: 'Invalid id' });
         }
 
-        const counts = await countsFor(targetType, targetId);
+        const uid = getUid(req.user);
+        if (!uid) return res.status(401).json({ error: 'No user id in auth context' });
+
+        const counts = await countsForWithUser(targetType, targetId, uid);
         res.json(counts);
     } catch (e) {
         res.status(500).json({ error: e.message });

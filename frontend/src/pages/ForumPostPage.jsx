@@ -5,7 +5,7 @@ import CommentInput from '../components/CommentInput';
 import RepliesList from '../components/RepliesList';
 import { getById } from '../api/announcements';
 import { list as commentsList, create as createComment } from '../api/comments';
-import { toggleAnnouncement } from '../api/reactions';
+import { toggleAnnouncement, countsComment, countsAnnouncement } from '../api/reactions';
 
 const ForumPostPage = () => {
     const { id } = useParams();
@@ -23,8 +23,36 @@ const ForumPostPage = () => {
                     getById(id),
                     commentsList(id),
                 ]);
-                setPost(p);
-                setReplies(r);
+                
+                // Отримуємо лічильники для головного поста
+                try {
+                    const postCounts = await countsAnnouncement(id);
+                    setPost({ ...p, counts: postCounts });
+                } catch {
+                    setPost(p);
+                }
+                
+                // Додаємо лічильники реакцій до кожного коментаря
+                const repliesWithCounts = await Promise.all(
+                    r.map(async (comment) => {
+                        try {
+                            const counts = await countsComment(comment._id);
+                            return { 
+                                ...comment, 
+                                counts,
+                                userReaction: counts.userReaction || 0
+                            };
+                        } catch {
+                            return { 
+                                ...comment, 
+                                counts: { likes: 0, dislikes: 0, score: 0 },
+                                userReaction: 0
+                            };
+                        }
+                    })
+                );
+                
+                setReplies(repliesWithCounts);
             } catch (err) {
                 setError(err?.response?.data?.error || err.message);
             } finally {
@@ -37,7 +65,14 @@ const ForumPostPage = () => {
     const handleCreate = async (message) => {
         try {
             const doc = await createComment(id, message);
-            setReplies(prev => [doc, ...prev]);
+            // Додаємо лічильники до нового коментаря
+            const counts = await countsComment(doc._id).catch(() => ({ likes: 0, dislikes: 0, score: 0 }));
+            const commentWithCounts = { 
+                ...doc, 
+                counts,
+                userReaction: counts.userReaction || 0
+            };
+            setReplies(prev => [commentWithCounts, ...prev]);
         } catch (e) {
             console.error(e);
         }
@@ -48,16 +83,43 @@ const ForumPostPage = () => {
         
         const value = type === 'like' ? 1 : -1;
         
-        // Оптимістичне оновлення
-        const currentCounts = post.counts || { likes: 0, dislikes: 0, score: 0 };
+        // Оптимістичне оновлення з урахуванням поточної реакції користувача
+        const currentCounts = post.counts || { likes: 0, dislikes: 0, score: 0, userReaction: 0 };
+        const currentReaction = currentCounts.userReaction || 0;
         let newCounts = { ...currentCounts };
-        
+
         if (type === 'like') {
-            newCounts.likes += 1;
-            newCounts.score += 1;
+            if (currentReaction === 1) {
+                // зняти лайк
+                newCounts.likes = Math.max(0, newCounts.likes - 1);
+                newCounts.score -= 1;
+                newCounts.userReaction = 0;
+            } else {
+                // переключення з дизлайка або додавання лайка
+                if (currentReaction === -1) {
+                    newCounts.dislikes = Math.max(0, newCounts.dislikes - 1);
+                    newCounts.score += 1; // знімаємо попередній -1
+                }
+                newCounts.likes += 1;
+                newCounts.score += 1;
+                newCounts.userReaction = 1;
+            }
         } else {
-            newCounts.dislikes += 1;
-            newCounts.score -= 1;
+            if (currentReaction === -1) {
+                // зняти дизлайк
+                newCounts.dislikes = Math.max(0, newCounts.dislikes - 1);
+                newCounts.score += 1;
+                newCounts.userReaction = 0;
+            } else {
+                // переключення з лайка або додавання дизлайка
+                if (currentReaction === 1) {
+                    newCounts.likes = Math.max(0, newCounts.likes - 1);
+                    newCounts.score -= 1; // знімаємо попередній +1
+                }
+                newCounts.dislikes += 1;
+                newCounts.score -= 1;
+                newCounts.userReaction = -1;
+            }
         }
         
         setPost(prev => ({
@@ -67,7 +129,7 @@ const ForumPostPage = () => {
         
         try {
             const result = await toggleAnnouncement(id, value);
-            // Оновлюємо з реальними даними з сервера
+            // Оновлюємо з реальними даними з сервера (повертає userReaction)
             setPost(prev => ({
                 ...prev,
                 counts: result
@@ -103,7 +165,10 @@ const ForumPostPage = () => {
 
                 <CommentInput onSubmit={handleCreate} />
 
-                <RepliesList replies={replies} />
+                <RepliesList 
+                    replies={replies} 
+                    onRepliesUpdate={setReplies}
+                />
             </div>
         </div>
     );
