@@ -5,6 +5,7 @@ import PostCard from "../components/PostCard";
 import Pagination from "../components/Pagination";
 import SearchInput from "../components/SearchInput";
 import { useSort } from "../hooks/useSort.jsx";
+import { useForumRefresh } from "../hooks/useForumRefresh";
 import {
     toggleAnnouncement,
     countsAnnouncement,
@@ -16,6 +17,7 @@ const ITEMS_PER_PAGE = 3;
 const ForumPage = () => {
     const nav = useNavigate();
     const { isAuthed } = useAuthState();
+    const { subscribe } = useForumRefresh();
 
     const [raw, setRaw] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -31,36 +33,42 @@ const ForumPage = () => {
     );
     const pageCount = Math.ceil(sortedData.length / ITEMS_PER_PAGE) || 1;
 
-    useEffect(() => {
-        let ignore = false;
+    const loadData = async () => {
         setLoading(true);
         setError("");
 
-        listPublished({ q })
-            .then(async (arr) => {
-                if (ignore) return;
-                const withCounts = await Promise.all(
-                    arr.map(async (a) => {
-                        try {
-                            const counts = await countsAnnouncement(a._id);
-                            return { ...a, counts, _my: counts.userReaction || 0 };
-                        } catch {
-                            return { ...a, counts: { likes: 0, dislikes: 0, score: 0 }, _my: 0 };
-                        }
-                    })
-                );
-                setRaw(withCounts);
-                setItemOffset(0);
-            })
-            .catch((e) =>
-                setError(e?.response?.data?.error || e.message || "Error loading data")
-            )
-            .finally(() => !ignore && setLoading(false));
+        try {
+            const arr = await listPublished({ q: q.trim() });
+            const withCounts = await Promise.all(
+                arr.map(async (a) => {
+                    try {
+                        const counts = await countsAnnouncement(a._id);
+                        return { ...a, counts, _my: counts.userReaction || 0 };
+                    } catch {
+                        return { ...a, counts: { likes: 0, dislikes: 0, score: 0 }, _my: 0 };
+                    }
+                })
+            );
+            setRaw(withCounts);
+        } catch (err) {
+            setError("Помилка завантаження обговорень");
+            console.error("Load error:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-        return () => {
-            ignore = true;
-        };
+    useEffect(() => {
+        loadData();
     }, [q, isAuthed]);
+
+    // Підписка на оновлення форуму
+    useEffect(() => {
+        const unsubscribe = subscribe(() => {
+            loadData();
+        });
+        return unsubscribe;
+    }, [subscribe]);
 
     const handleVote = async (id, type) => {
         const value = type === "like" ? 1 : -1;

@@ -1,7 +1,7 @@
 import { http } from './httpClient';
 
-export async function listPublished() {
-    const { data } = await http.get('/announcements', { params: { status: 'published' } });
+export async function listPublished(params = {}) {
+    const { data } = await http.get('/announcements', { params: { status: 'published', ...params } });
     return Array.isArray(data) ? data : (data.items || []);
 }
 
@@ -21,6 +21,12 @@ export async function getById(id) {
 
 export async function createDraft({ title, body, tags = [] }) {
     const payload = { title, body, status: 'draft', tags };
+    const { data } = await http.post('/announcements', payload);
+    return data;
+}
+
+export async function createPublished({ title, body, tags = [] }) {
+    const payload = { title, body, status: 'published', visibility: 'students', tags };
     const { data } = await http.post('/announcements', payload);
     return data;
 }

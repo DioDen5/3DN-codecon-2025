@@ -33,7 +33,7 @@ const PostExpanded = ({ post, onReaction }) => {
                     disabled={pending}
                     onClick={() => onVote(1)}
                     className={`flex items-center gap-2 border border-black rounded px-3 py-2 transition hover:bg-black hover:text-white ${
-                        post.counts?.userReaction === 1 ? 'bg-black text-white' : ''
+                        (post.counts?.userReaction === 1 || post.userReaction === 1) ? 'bg-black text-white' : ''
                     } ${
                         pending ? 'opacity-60 cursor-not-allowed' : ''
                     }`}
@@ -47,7 +47,7 @@ const PostExpanded = ({ post, onReaction }) => {
                     disabled={pending}
                     onClick={() => onVote(-1)}
                     className={`flex items-center gap-2 border border-black rounded px-3 py-2 transition hover:bg-black hover:text-white ${
-                        post.counts?.userReaction === -1 ? 'bg-black text-white' : ''
+                        (post.counts?.userReaction === -1 || post.userReaction === -1) ? 'bg-black text-white' : ''
                     } ${
                         pending ? 'opacity-60 cursor-not-allowed' : ''
                     }`}
@@ -58,7 +58,8 @@ const PostExpanded = ({ post, onReaction }) => {
                 </button>
 
                 <div className="flex items-center gap-2 ml-auto text-gray-700">
-                    <MessageCircle size={16} /> коментарі
+                    <MessageCircle size={16} /> 
+                    {post.commentsCount || 0} коментарів
                 </div>
             </div>
         </div>

@@ -97,8 +97,8 @@ export async function voteComment(commentId, action) {
     return res;
 }
 
-// ----- create (draft) -----
+// ----- create (published) -----
 export async function articleCreate(title, content, imageFile) {
-    const doc = await Ann.createDraft({ title, body: content, tags: [] });
+    const doc = await Ann.createPublished({ title, body: content, tags: [] });
     return { id: doc._id };
 }

@@ -1,13 +1,20 @@
 import React, { useState } from 'react';
 import { ThumbsUp, ThumbsDown } from 'lucide-react';
 import { toggleComment } from '../api/reactions';
+import { useAuthState } from '../api/useAuthState';
 
 const RepliesList = ({ replies, onRepliesUpdate }) => {
+    const { isAuthed } = useAuthState();
     const [error, setError] = useState(null);
     const [pendingVotes, setPendingVotes] = useState(new Set());
 
     const handleVote = async (commentId, type) => {
         if (pendingVotes.has(commentId)) return;
+        
+        if (!isAuthed) {
+            setError('Потрібно увійти в систему для голосування');
+            return;
+        }
         
         setPendingVotes(prev => new Set(prev).add(commentId));
         setError(null);
@@ -31,7 +38,16 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
                 );
             }
         } catch (err) {
-            setError(err?.response?.data?.error || 'Щось пішло не так');
+            console.error('Vote error:', err);
+            if (err?.response?.status === 401) {
+                setError('Сесія закінчилася. Будь ласка, увійдіть знову.');
+                // Перенаправляємо на логін
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 2000);
+            } else {
+                setError(err?.response?.data?.error || 'Щось пішло не так');
+            }
         } finally {
             setPendingVotes(prev => {
                 const newSet = new Set(prev);
@@ -66,18 +82,19 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
     };
 
     const getUserName = (comment) => {
+        console.log('Getting user name for comment:', comment);
+        
         // Перевіряємо нову структуру з authorId
         if (comment?.authorId) {
-            // Якщо є firstName та lastName, об'єднуємо їх
-            if (comment.authorId.firstName && comment.authorId.lastName) {
-                return `${comment.authorId.firstName} ${comment.authorId.lastName}`;
-            }
-            // Якщо є тільки firstName
-            if (comment.authorId.firstName) {
-                return comment.authorId.firstName;
+            console.log('AuthorId found:', comment.authorId);
+            // Якщо є displayName, використовуємо його
+            if (comment.authorId.displayName) {
+                console.log('Using displayName:', comment.authorId.displayName);
+                return comment.authorId.displayName;
             }
             // Якщо є email, витягуємо частину до @
             if (comment.authorId.email) {
+                console.log('Using email:', comment.authorId.email);
                 return comment.authorId.email.split('@')[0];
             }
         }
@@ -89,7 +106,8 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
         if (comment?.user?.first_name) {
             return comment.user.first_name;
         }
-        
+
+        console.log('No user info found, returning Невідомий');
         return 'Невідомий';
     };
 

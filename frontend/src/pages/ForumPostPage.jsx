@@ -27,12 +27,11 @@ const ForumPostPage = () => {
                 // Отримуємо лічильники для головного поста
                 try {
                     const postCounts = await countsAnnouncement(id);
-                    setPost({ ...p, counts: postCounts });
+                    setPost({ ...p, counts: postCounts, userReaction: postCounts.userReaction || 0 });
                 } catch {
                     setPost(p);
                 }
                 
-                // Додаємо лічильники реакцій до кожного коментаря
                 const repliesWithCounts = await Promise.all(
                     r.map(async (comment) => {
                         try {
@@ -64,7 +63,12 @@ const ForumPostPage = () => {
 
     const handleCreate = async (message) => {
         try {
-            const doc = await createComment(id, message);
+        const doc = await createComment(id, message);
+        console.log('Created comment:', doc);
+        console.log('AuthorId structure:', doc.authorId);
+        console.log('AuthorId type:', typeof doc.authorId);
+        console.log('AuthorId is object:', typeof doc.authorId === 'object');
+            
             // Додаємо лічильники до нового коментаря
             const counts = await countsComment(doc._id).catch(() => ({ likes: 0, dislikes: 0, score: 0 }));
             const commentWithCounts = { 
@@ -72,7 +76,13 @@ const ForumPostPage = () => {
                 counts,
                 userReaction: counts.userReaction || 0
             };
+            console.log('Comment with counts:', commentWithCounts);
             setReplies(prev => [commentWithCounts, ...prev]);
+            
+            setPost(prev => ({
+                ...prev,
+                commentsCount: (prev.commentsCount || 0) + 1
+            }));
         } catch (e) {
             console.error(e);
         }
@@ -95,7 +105,6 @@ const ForumPostPage = () => {
                 newCounts.score -= 1;
                 newCounts.userReaction = 0;
             } else {
-                // переключення з дизлайка або додавання лайка
                 if (currentReaction === -1) {
                     newCounts.dislikes = Math.max(0, newCounts.dislikes - 1);
                     newCounts.score += 1; // знімаємо попередній -1

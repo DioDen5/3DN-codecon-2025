@@ -92,6 +92,8 @@ router.post('/refresh', async (req, res) => {
     const user = await User.findById(payload.id);
     if (!user) return res.status(401).json({ error: 'User not found' });
 
+    console.log('Token refresh for user:', { id: user._id, role: user.role, status: user.status });
+
     const access = signJwt({ id: user._id, role: user.role, status: user.status }, 'access');
 
     const newRefresh = signJwt({ id: user._id }, 'refresh');
