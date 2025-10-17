@@ -1,35 +1,40 @@
 import { http } from './httpClient';
 import { tokenStore } from './tokenStore';
 
+const USER_KEY = 'me';
+
+export function getMe() {
+    try { return JSON.parse(localStorage.getItem(USER_KEY) || 'null'); }
+    catch { return null; }
+}
+
+function setMe(user) {
+    try { localStorage.setItem(USER_KEY, JSON.stringify(user || null)); } catch {}
+    window.dispatchEvent(new Event('studlink:auth-changed'));
+}
+
 export async function login(email, password) {
     const { data } = await http.post('/auth/login', { email, password });
     if (data?.token) tokenStore.set(data.token);
-    return data?.user || null;
+    if (data?.user)  setMe(data.user);
+    return data;
 }
 
-export async function register(a, b, c, d, e) {
-    let payload;
-    if (typeof a === 'object') {
-        const { firstName, lastName, email, password, passwordConfirm } = a || {};
-        payload = { firstName, lastName, email, password, passwordConfirm, displayName: `${firstName || ''} ${lastName || ''}`.trim() };
-    } else {
-        const firstName = a, lastName = b, email = c, password = d, passwordConfirm = e;
-        payload = { firstName, lastName, email, password, passwordConfirm, displayName: `${firstName || ''} ${lastName || ''}`.trim() };
-    }
-    const { data } = await http.post('/auth/register', payload);
+export async function register({ email, password, displayName }) {
+    const { data } = await http.post('/auth/register', { email, password, displayName });
     if (data?.token) tokenStore.set(data.token);
-    return data?.user || null;
+    if (data?.user)  setMe(data.user);
+    return data;
 }
 
-export async function me() {
-    const { data } = await http.get('/auth/me');
-    return data || null;
+export async function refresh() {
+    const { data } = await http.post('/auth/refresh');
+    if (data?.token) tokenStore.set(data.token);
+    return data;
 }
 
-export function getToken() {
-    return tokenStore.get();
-}
-
-export function logout() {
+export async function logout() {
+    await http.post('/auth/logout', null, { _skipAuthHandler: true }).catch(()=>{});
     tokenStore.clear();
+    setMe(null);
 }
