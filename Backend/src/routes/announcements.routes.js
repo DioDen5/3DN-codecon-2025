@@ -5,10 +5,12 @@ import { Announcement } from '../models/Announcement.js';
 
 const router = express.Router();
 
-router.get('/', authRequired, requireVerified, async (req,res) => {
+router.get('/', authRequired, requireVerified, async (req, res) => {
     const q = req.query.q?.trim();
     const filter = { status: 'published', visibility: 'students' };
-    const cursor = q ? Announcement.find(filter, { score: { $meta: 'textScore' }})
+
+    const cursor = q
+        ? Announcement.find(filter, { score: { $meta: 'textScore' } })
             .sort({ score: { $meta: 'textScore' }, pinned: -1, publishedAt: -1 })
         : Announcement.find(filter).sort({ pinned: -1, publishedAt: -1 });
 
@@ -16,21 +18,38 @@ router.get('/', authRequired, requireVerified, async (req,res) => {
     res.json(docs);
 });
 
-router.post('/', authRequired, requireVerified, async (req,res) => {
+
+router.get('/:id', authRequired, async (req, res) => {
+    const { id } = req.params;
+    const doc = await Announcement.findById(id);
+    if (!doc) return res.status(404).json({ error: 'Not found' });
+    if (doc.status !== 'published') {
+        return res.status(403).json({ error: 'Forbidden' });
+    }
+    return res.json(doc);
+});
+
+router.post('/', authRequired, requireVerified, async (req, res) => {
     const { title, body, tags } = req.body ?? {};
     const doc = await Announcement.create({
-        title, body, tags, authorId: req.user.id, status: 'draft'
+        title,
+        body,
+        tags,
+        authorId: req.user.id,
+        status: 'draft',
     });
     res.status(201).json(doc);
 });
 
-router.post('/:id/submit', authRequired, requireVerified, async (req,res) => {
+router.post('/:id/submit', authRequired, requireVerified, async (req, res) => {
     const { id } = req.params;
     const doc = await Announcement.findOne({ _id: id, authorId: req.user.id });
-    if (!doc) return res.status(404).json({error:'Not found'});
+    if (!doc) return res.status(404).json({ error: 'Not found' });
+
     doc.status = 'pending';
     doc.moderation = { lastAction: 'submit', by: req.user.id, at: new Date() };
     await doc.save();
+
     res.json(doc);
 });
 
