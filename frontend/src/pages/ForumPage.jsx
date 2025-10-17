@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { articleList } from '../api/article_comment'
+import { articleList, voteArticle } from '../api/article_comment'
 import PostCard from '../components/PostCard'
 import Pagination from '../components/Pagination'
 import SearchInput from '../components/SearchInput'
 import { useSort } from '../hooks/./useSort.jsx'
-import axios from 'axios'
 
 const itemsPerPage = 3
 
@@ -25,43 +24,36 @@ const ForumPage = () => {
         const fetchPosts = async () => {
             try {
                 const data = await articleList()
-                const postsWithVotes = data.map(post => ({
-                    ...post,
-                    voted: null,
-                }))
+                const postsWithVotes = data.map(post => ({ ...post, voted: null }))
                 setPosts(postsWithVotes)
             } catch (err) {
-                setError(err.message)
+                setError(err?.response?.data?.error || err.message || 'Failed to load')
             } finally {
                 setLoading(false)
             }
         }
-
         fetchPosts()
     }, [])
 
     const handleVote = async (postId, type) => {
+        // оптимістичне оновлення — верстку не чіпаємо
         setPosts(prev =>
             prev.map(post => {
                 if (post.id !== postId) return post
-
                 let updated = { ...post }
-
                 if (type === 'like' && post.voted !== 'like') {
-                    axios.post(`http://127.0.0.1:8000/api/article/${postId}/vote/upvote/`)
                     updated.rating_positive += 1
                     if (post.voted === 'dislike') updated.rating_negative -= 1
                     updated.voted = 'like'
                 } else if (type === 'dislike' && post.voted !== 'dislike') {
-                    axios.post(`http://127.0.0.1:8000/api/article/${postId}/vote/downvote/`)
                     updated.rating_negative += 1
                     if (post.voted === 'like') updated.rating_positive -= 1
                     updated.voted = 'dislike'
                 }
-
                 return updated
             })
         )
+        try { await voteArticle(postId, type) } catch {}
     }
 
     return (

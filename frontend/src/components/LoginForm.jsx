@@ -1,21 +1,25 @@
 import { useState } from "react"
 import { login } from "../api/auth"
-import {useNavigate} from "react-router-dom";
-
+import { useNavigate } from "react-router-dom"
 
 const LoginForm = ({ switchToReset }) => {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [error, setError] = useState(null)
-    const navigate = useNavigate();
+    const [loading, setLoading] = useState(false)
+    const navigate = useNavigate()
 
     const handleSubmit = async (e) => {
         e.preventDefault()
+        setError(null)
+        setLoading(true)
         try {
-            await login(email, password)
-            navigate('/forum')
+            await login(email, password)               // ← наш бекенд
+            navigate("/forum")                         // ← як було
         } catch {
-            setError("Невірна пошта або пароль")
+            setError("Невірна пошта або пароль")       // ← текст як у тебе
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -29,6 +33,8 @@ const LoginForm = ({ switchToReset }) => {
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 placeholder-white/50 focus:outline-none text-gray-800"
                     placeholder="example@lnu.edu.ua"
+                    autoComplete="email"
+                    required
                 />
             </div>
 
@@ -40,6 +46,8 @@ const LoginForm = ({ switchToReset }) => {
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 placeholder-white/50 focus:outline-none text-gray-800"
                     placeholder="Your Password"
+                    autoComplete="current-password"
+                    required
                 />
             </div>
 
@@ -65,9 +73,10 @@ const LoginForm = ({ switchToReset }) => {
 
             <button
                 type="submit"
-                className="w-full bg-blue-700 p-2 rounded-lg mt-8 text-white hover:bg-blue-800 transition"
+                disabled={loading}
+                className="w-full bg-blue-700 p-2 rounded-lg mt-8 text-white hover:bg-blue-800 transition disabled:opacity-60"
             >
-                Авторизуватися
+                {loading ? "Вхід..." : "Авторизуватися"}
             </button>
         </form>
     )

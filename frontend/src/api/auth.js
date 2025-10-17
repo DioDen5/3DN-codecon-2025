@@ -1,38 +1,35 @@
-import axios from 'axios';
-import {saveToken} from "./token.js";
-const BASE_URL = "http://127.0.0.1:8000/api"
+import { http } from './httpClient';
+import { tokenStore } from './tokenStore';
 
-export const logout = () => {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
-    localStorage.removeItem("access_token_lifetime");
-    localStorage.removeItem("refresh_token_lifetime");
-};
+export async function login(email, password) {
+    const { data } = await http.post('/auth/login', { email, password });
+    if (data?.token) tokenStore.set(data.token);
+    return data?.user || null;
+}
 
-export const login = async (email, password) => {
-    try {
-        const response = await axios.post(`${BASE_URL}/login/`, {email, password});
-
-        saveToken(response.data.access, response.data.refresh);
-
-        return response.data;
-    } catch {
-        throw new Error;
+export async function register(a, b, c, d, e) {
+    let payload;
+    if (typeof a === 'object') {
+        const { firstName, lastName, email, password, passwordConfirm } = a || {};
+        payload = { firstName, lastName, email, password, passwordConfirm, displayName: `${firstName || ''} ${lastName || ''}`.trim() };
+    } else {
+        const firstName = a, lastName = b, email = c, password = d, passwordConfirm = e;
+        payload = { firstName, lastName, email, password, passwordConfirm, displayName: `${firstName || ''} ${lastName || ''}`.trim() };
     }
-};
+    const { data } = await http.post('/auth/register', payload);
+    if (data?.token) tokenStore.set(data.token);
+    return data?.user || null;
+}
 
-export const register = async (firstName, lastName, email, password, passwordConfirm) => {
-    try {
-        const response = await axios.post(`${BASE_URL}/register/`, {
-            first_name: firstName,
-            last_name: lastName,
-            email: email,
-            password: password,
-            password_confirm: passwordConfirm
-        });
+export async function me() {
+    const { data } = await http.get('/auth/me');
+    return data || null;
+}
 
-        return response.data;
-        } catch {
-            throw new Error;
-        }
-};
+export function getToken() {
+    return tokenStore.get();
+}
+
+export function logout() {
+    tokenStore.clear();
+}

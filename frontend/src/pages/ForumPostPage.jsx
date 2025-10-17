@@ -1,9 +1,9 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import axios from 'axios';
 import PostExpanded from '../components/PostExpanded';
 import CommentInput from '../components/CommentInput';
 import RepliesList from '../components/RepliesList';
+import { articleDetail, commentsList, createComment } from '../api/article_comment';
 
 const ForumPostPage = () => {
     const { id } = useParams();
@@ -17,22 +17,29 @@ const ForumPostPage = () => {
         const fetchPostAndReplies = async () => {
             try {
                 setLoading(true);
-                // Завантаження поста за id
-                const postResponse = await axios.get(`http://127.0.0.1:8000/api/article/${id}/`);
-                setPost(postResponse.data);
-
-                // Завантаження відповідей на пост
-                const repliesResponse = await axios.get(`http://127.0.0.1:8000/api/article/${id}/comments/`);
-                setReplies(repliesResponse.data);
+                const [p, r] = await Promise.all([
+                    articleDetail(id),
+                    commentsList(id),
+                ]);
+                setPost(p);
+                setReplies(r);
             } catch (err) {
-                setError(err.message);
+                setError(err?.response?.data?.error || err.message);
             } finally {
                 setLoading(false);
             }
         };
-
         fetchPostAndReplies();
     }, [id]);
+
+    const handleCreate = async (message) => {
+        try {
+            const doc = await createComment(id, message);
+            setReplies(prev => [doc, ...prev]);
+        } catch (e) {
+            console.error(e);
+        }
+    };
 
     if (loading) return <div className="text-white p-10">Завантаження...</div>;
     if (error) return <div className="text-white p-10">Помилка: {error}</div>;
@@ -50,7 +57,7 @@ const ForumPostPage = () => {
 
                 <PostExpanded postId={post.id} />
 
-                <CommentInput />
+                <CommentInput onSubmit={handleCreate} />
 
                 <RepliesList replies={replies} />
             </div>

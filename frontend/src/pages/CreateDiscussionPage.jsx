@@ -18,10 +18,12 @@ const CreateDiscussionPage = () => {
         try {
             await articleCreate(title, content, image);
             setSuccess('Статтю успішно створено!');
+            setError('');
             setTitle('');
             setContent('');
             setImage(null);
         } catch {
+            setSuccess('');
             setError('Не вдалося створити статтю. Спробуйте ще раз.');
         }
     };
