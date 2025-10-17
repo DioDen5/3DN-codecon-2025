@@ -12,9 +12,8 @@ const PostCard = ({
                       comments,
                       image_url,
                       onClick,
-                      voted,
                       onVote,
-                      pending = false // блокувати кнопки на час запиту
+                      pending = false
                   }) => {
     const shortContent = content?.length > 180 ? content.slice(0, 180) + '...' : content || '';
 
@@ -49,22 +48,24 @@ const PostCard = ({
                 <button
                     onClick={handleLike}
                     disabled={pending}
-                    className={`flex items-center gap-2 border rounded px-3 py-2 transition hover:bg-black hover:text-white
-            ${pending ? 'opacity-60 cursor-not-allowed' : ''}`}
+                    className={`flex items-center gap-2 border border-black rounded px-3 py-2 transition hover:bg-black hover:text-white ${
+                        pending ? 'opacity-60 cursor-not-allowed' : ''
+                    }`}
                     aria-label="like"
                 >
-                    <ThumbsUp size={16} className="text-green-600" />
+                    <ThumbsUp size={16} />
                     {likes}
                 </button>
 
                 <button
                     onClick={handleDislike}
                     disabled={pending}
-                    className={`flex items-center gap-2 border rounded px-3 py-2 transition hover:bg-black hover:text-white
-            ${pending ? 'opacity-60 cursor-not-allowed' : ''}`}
+                    className={`flex items-center gap-2 border border-black rounded px-3 py-2 transition hover:bg-black hover:text-white ${
+                        pending ? 'opacity-60 cursor-not-allowed' : ''
+                    }`}
                     aria-label="dislike"
                 >
-                    <ThumbsDown size={16} className="text-red-600" />
+                    <ThumbsDown size={16} />
                     {dislikes}
                 </button>
 
