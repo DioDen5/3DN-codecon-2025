@@ -62,7 +62,7 @@ function App() {
                 {modalType === 'login' && (
                     <LoginForm
                         switchToReset={() => setModalType('reset')}
-                        onSuccess={() => setModalType(null)}  {/* ✅ закриває модалку після успішного логіну */}
+                        onSuccess={() => setModalType(null)}
                     />
                 )}
 
