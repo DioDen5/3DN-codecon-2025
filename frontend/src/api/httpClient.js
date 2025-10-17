@@ -1,11 +1,17 @@
 import axios from 'axios';
 import { tokenStore } from './tokenStore';
 
-const baseURL = `${import.meta.env.VITE_API_URL}/api`;
+const baseURL = '/api';
 
 export const http = axios.create({
     baseURL,
-    withCredentials: true,  
+    withCredentials: true,
+    timeout: 10000,
+});
+
+const refreshHttp = axios.create({
+    baseURL,
+    withCredentials: true,
     timeout: 10000,
 });
 
@@ -15,34 +21,46 @@ http.interceptors.request.use((config) => {
     return config;
 });
 
-let refreshing = null;
+let isRefreshing = false;
+let queue = [];
 
 http.interceptors.response.use(
     (r) => r,
     async (err) => {
-        const original = err.config;
+        const { config, response } = err || {};
+        if (!response) throw err;
 
-        if (err.response?.status === 401 && !original.__retry) {
-            original.__retry = true;
-            try {
-                if (!refreshing) {
-                    refreshing = axios.post(`${baseURL}/auth/refresh`, {}, { withCredentials: true })
-                        .then(res => {
-                            const newAccess = res.data?.token;
-                            if (newAccess) tokenStore.set(newAccess);
-                            return newAccess;
-                        })
-                        .finally(() => { refreshing = null; });
-                }
-                const token = await refreshing;
-                if (token) {
-                    original.headers.Authorization = `Bearer ${token}`;
-                    return http(original);
-                }
-            } catch (_) {
-            }
+        const url = new URL(config.url, window.location.origin);
+        const isAuthPath = url.pathname.startsWith('/api/auth/');
+        if (isAuthPath || response.status !== 401 || config._retry || config._skipAuthHandler) {
+            throw err;
         }
 
-        return Promise.reject(err);
+        if (isRefreshing) {
+            await new Promise((res) => queue.push(res));
+        } else {
+            isRefreshing = true;
+            try {
+                const { data } = await refreshHttp.post('/auth/refresh');
+                if (data?.token) tokenStore.set(data.token);
+                else throw new Error('No access token from /auth/refresh');
+            } catch {
+                tokenStore.clear();
+                window.dispatchEvent(new CustomEvent('open-login'));
+                isRefreshing = false;
+                queue.forEach((r) => r());
+                queue = [];
+                throw err;
+            }
+            isRefreshing = false;
+            queue.forEach((r) => r());
+            queue = [];
+        }
+
+        config._retry = true;
+        const fresh = tokenStore.get();
+        config.headers = config.headers || {};
+        if (fresh) config.headers.Authorization = `Bearer ${fresh}`;
+        return http(config);
     }
 );

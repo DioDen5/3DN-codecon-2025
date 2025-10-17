@@ -27,6 +27,14 @@ function App() {
         return () => window.removeEventListener("open-login", openLogin);
     }, []);
 
+    useEffect(() => {
+        const onAuthChanged = (e) => {
+            if (e.detail?.isAuth) setModalType(null);
+        };
+        window.addEventListener("auth-changed", onAuthChanged);
+        return () => window.removeEventListener("auth-changed", onAuthChanged);
+    }, []);
+
     return (
         <Router>
             <Header

@@ -1,76 +1,93 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import PostCard from '../components/PostCard';
-import Pagination from '../components/Pagination';
-import SearchInput from '../components/SearchInput';
-import { http } from '../api/httpClient';
-import { toggleReaction, getAnnouncementCounts } from '../api/reactions';
+import React, { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { listPublished } from "../api/announcements";
+import PostCard from "../components/PostCard";
+import Pagination from "../components/Pagination";
+import SearchInput from "../components/SearchInput";
+import { useSort } from "../hooks/useSort.jsx";
+import {
+    toggleAnnouncement,
+    countsAnnouncement,
+} from "../api/reactions"; // ✅ правильний імпорт
+import { useAuthState } from "../api/useAuthState";
 
 const ITEMS_PER_PAGE = 3;
 
 const ForumPage = () => {
     const nav = useNavigate();
+    const { isAuthed } = useAuthState();
 
-    const [posts, setPosts] = useState([]);
+    const [raw, setRaw] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [err, setErr] = useState('');
-    const [q, setQ] = useState('');
-    const [offset, setOffset] = useState(0);
+    const [error, setError] = useState("");
+    const [q, setQ] = useState("");
+    const [itemOffset, setItemOffset] = useState(0);
 
-    const [pendingId, setPendingId] = useState(null);
+    const { sortedData, SortDropdown } = useSort(raw);
+
+    const currentItems = useMemo(
+        () => sortedData.slice(itemOffset, itemOffset + ITEMS_PER_PAGE),
+        [sortedData, itemOffset]
+    );
+    const pageCount = Math.ceil(sortedData.length / ITEMS_PER_PAGE) || 1;
 
     useEffect(() => {
-        let alive = true;
-        const load = async () => {
-            setLoading(true);
-            setErr('');
-            try {
-                const { data } = await http.get('/announcements', {
-                    params: { status: 'published', q: q || undefined }
-                });
-                if (!alive) return;
+        let ignore = false;
+        setLoading(true);
+        setError("");
 
+        listPublished({ q })
+            .then(async (arr) => {
+                if (ignore) return;
                 const withCounts = await Promise.all(
-                    (data || []).map(async (a) => {
+                    arr.map(async (a) => {
                         try {
-                            const counts = await getAnnouncementCounts(a._id);
+                            const counts = await countsAnnouncement(a._id);
                             return { ...a, counts };
                         } catch {
                             return { ...a, counts: { likes: 0, dislikes: 0, score: 0 } };
                         }
                     })
                 );
+                setRaw(withCounts);
+                setItemOffset(0);
+            })
+            .catch((e) =>
+                setError(e?.response?.data?.error || e.message || "Error loading data")
+            )
+            .finally(() => !ignore && setLoading(false));
 
-                setPosts(withCounts);
-            } catch (e) {
-                if (!alive) return;
-                setErr(e?.response?.data?.error || 'Не вдалося завантажити оголошення');
-            } finally {
-                if (alive) setLoading(false);
-            }
+        return () => {
+            ignore = true;
         };
-        load();
-        return () => { alive = false; };
-    }, [q]);
+    }, [q, isAuthed]);
 
-    const current = useMemo(() => {
-        const start = offset;
-        return posts.slice(start, start + ITEMS_PER_PAGE);
-    }, [posts, offset]);
-
-    const pageCount = Math.max(1, Math.ceil(posts.length / ITEMS_PER_PAGE));
-
-    const handleVote = async (id, kind) => {
-        const value = kind === 'like' ? 1 : -1;
-        if (pendingId) return;
-        setPendingId(id);
+    const handleVote = async (id, type) => {
+        const value = type === "like" ? 1 : -1;
+        setRaw((prev) =>
+            prev.map((p) => {
+                if (p._id !== id) return p;
+                const next = { ...p };
+                if (!next._my) next._my = 0;
+                const newVal = next._my === value ? 0 : value;
+                const likes =
+                    (next.counts?.likes || 0) +
+                    (newVal === 1 ? 1 : 0) -
+                    (next._my === 1 ? 1 : 0);
+                const dislikes =
+                    (next.counts?.dislikes || 0) +
+                    (newVal === -1 ? 1 : 0) -
+                    (next._my === -1 ? 1 : 0);
+                next._my = newVal;
+                next.counts = { likes, dislikes, score: likes - dislikes };
+                return next;
+            })
+        );
         try {
-            const counts = await toggleReaction('announcement', id, value);
-            setPosts((prev) =>
-                prev.map((p) => (p._id === id ? { ...p, counts } : p))
-            );
-        } finally {
-            setPendingId(null);
+            const counts = await toggleAnnouncement(id, value);
+            setRaw((prev) => prev.map((p) => (p._id === id ? { ...p, counts } : p)));
+        } catch {
+            listPublished({ q }).then(setRaw).catch(() => {});
         }
     };
 
@@ -83,52 +100,51 @@ const ForumPage = () => {
                     <SearchInput value={q} onChange={setQ} />
                 </div>
 
-                <div className="flex justify-end items-center mb-6">
+                <div className="flex justify-between items-center mb-6">
+                    <SortDropdown />
                     <button
-                        onClick={() => nav('/forum/create')}
+                        onClick={() => nav("/forum/create")}
                         className="px-4 py-2 bg-white/10 text-white hover:bg-white hover:text-black btn-glow"
                     >
                         + Створити
                     </button>
                 </div>
 
-                {loading && <p className="text-center text-white/80">Завантаження…</p>}
-                {!!err && !loading && (
-                    <p className="text-center text-red-400">{err}</p>
-                )}
+                {loading && <p className="text-center">Завантаження...</p>}
+                {error && <p className="text-center text-red-500">{error}</p>}
 
-                {!loading && !err && (
+                {!loading && !error && (
                     <div>
-                        {current.length === 0 ? (
-                            <p className="text-center text-white/70">Немає оголошень</p>
-                        ) : (
-                            <div className="space-y-4">
-                                {current.map((a) => (
-                                    <PostCard
-                                        key={a._id}
-                                        id={a._id}
-                                        username="author" // за потреби підставимо displayName автора, коли бек віддаватиме
-                                        date={a.publishedAt ? new Date(a.publishedAt).toLocaleDateString() : ''}
-                                        title={a.title}
-                                        content={a.body}
-                                        image_url={null}
-                                        likes={a.counts?.likes ?? 0}
-                                        dislikes={a.counts?.dislikes ?? 0}
-                                        comments={a.metrics?.comments ?? 0}
-                                        onVote={(id, kind) => handleVote(id, kind)}
-                                        pending={pendingId === a._id}
-                                        onClick={() => nav(`/forum/${a._id}`)}
-                                    />
-                                ))}
-                            </div>
-                        )}
+                        <div className="space-y-4">
+                            {currentItems.map((post) => (
+                                <PostCard
+                                    key={post._id}
+                                    id={post._id}
+                                    title={post.title}
+                                    content={post.body}
+                                    image_url={null}
+                                    likes={post.counts?.likes ?? 0}
+                                    dislikes={post.counts?.dislikes ?? 0}
+                                    comments={post.metrics?.comments ?? 0}
+                                    username={"@anon"}
+                                    date={new Date(
+                                        post.publishedAt || post.createdAt
+                                    ).toLocaleDateString()}
+                                    voted={
+                                        post._my === 1 ? "like" : post._my === -1 ? "dislike" : null
+                                    }
+                                    onVote={(id, t) => handleVote(id, t)}
+                                    onClick={() => nav(`/forum/${post._id}`)}
+                                />
+                            ))}
+                        </div>
 
                         <Pagination
                             pageCount={pageCount}
                             handlePageClick={(e) => {
-                                const newOffset = (e.selected * ITEMS_PER_PAGE) % posts.length;
-                                setOffset(newOffset);
-                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                                const newOffset =
+                                    (e.selected * ITEMS_PER_PAGE) % sortedData.length;
+                                setItemOffset(newOffset);
                             }}
                         />
                     </div>

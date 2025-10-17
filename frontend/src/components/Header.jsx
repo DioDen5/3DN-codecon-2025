@@ -1,19 +1,18 @@
-import React from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import logo from '../assets/logo.png'
-import { useAuth } from '../state/AuthContext'
-import { logout } from '../api/auth'
-import { User as UserIcon } from 'lucide-react'
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
+import logo from "../assets/logo.png";
+import { UserRound } from "lucide-react";
+import { useAuthState } from "../api/useAuthState";
+import { logout } from "../api/auth";
 
 const Header = ({ onLoginOpen, onSignupOpen }) => {
-    const { isAuth, user, logoutLocal } = useAuth()
-    const navigate = useNavigate()
+    const nav = useNavigate();
+    const { isAuthed, user } = useAuthState();
 
     const handleLogout = async () => {
-        try { await logout() } catch {}
-        logoutLocal()
-        navigate('/')
-    }
+        await logout();
+        nav("/");
+    };
 
     return (
         <header className="w-full bg-black px-8 py-4 flex items-center justify-between">
@@ -21,6 +20,7 @@ const Header = ({ onLoginOpen, onSignupOpen }) => {
                 <Link to="/" className="flex items-center gap-2">
                     <img src={logo} alt="StudLink Logo" className="h-8 w-auto object-contain" />
                 </Link>
+
                 <nav className="flex items-center gap-6 text-xs mx-8">
                     <Link to="/" className="text-white hover:text-pink-400 transition">Головна</Link>
                     <Link to="/teachers" className="text-white hover:text-pink-400 transition">Рейтинг викладачів</Link>
@@ -28,7 +28,7 @@ const Header = ({ onLoginOpen, onSignupOpen }) => {
                 </nav>
             </div>
 
-            {!isAuth ? (
+            {!isAuthed ? (
                 <div className="flex items-center gap-3">
                     <button
                         onClick={onLoginOpen}
@@ -44,10 +44,14 @@ const Header = ({ onLoginOpen, onSignupOpen }) => {
                     </button>
                 </div>
             ) : (
-                <div className="flex items-center gap-4">
-                    <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/10">
-            <UserIcon size={18} className="text-white" />
-          </span>
+                <div className="flex items-center gap-3">
+                    {/* акуратна іконка користувача замість тексту */}
+                    <div
+                        title={user?.displayName || "Користувач"}
+                        className="h-8 w-8 rounded-full bg-white/10 border border-white/20 grid place-items-center text-white"
+                    >
+                        <UserRound size={16} />
+                    </div>
                     <button
                         onClick={handleLogout}
                         className="px-4 py-1.5 min-w-[80px] rounded-md bg-red-600 text-white font-medium hover:bg-red-700 transition"
@@ -57,7 +61,7 @@ const Header = ({ onLoginOpen, onSignupOpen }) => {
                 </div>
             )}
         </header>
-    )
-}
+    );
+};
 
-export default Header
+export default Header;

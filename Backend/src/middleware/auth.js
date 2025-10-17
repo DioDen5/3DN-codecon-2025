@@ -1,21 +1,37 @@
 import jwt from 'jsonwebtoken';
+import { ENV } from '../config/env.js';
 
-const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || 'dev_access';
+export function signJwt(payload, type = 'access') {
+    const secret = ENV.JWT_SECRET;
+    if (!secret) throw new Error('JWT_SECRET is not set');
 
-export function authRequired(req, res, next) {
-    const header = req.headers.authorization;
-    if (!header) return res.status(401).json({ error: 'Unauthorized' });
+    const expiresIn = type === 'refresh'
+        ? '30d'
+        : '1h';
 
-    const token = header.split(' ')[1];
+    return jwt.sign(payload, secret, { expiresIn });
+}
+
+
+export function verifyJwt(token, _type = 'access') {
     try {
-        const decoded = jwt.verify(token, ACCESS_SECRET);
-        req.user = decoded;
-        next();
+        const secret = ENV.JWT_SECRET;
+        if (!secret) throw new Error('JWT_SECRET is not set');
+        return jwt.verify(token, secret);
     } catch {
-        return res.status(401).json({ error: 'Unauthorized' });
+        return null;
     }
 }
 
-export function signJwt(payload, expiresIn = '1h') {
-    return jwt.sign(payload, ACCESS_SECRET, { expiresIn });
+
+export function authRequired(req, res, next) {
+    const h = req.headers?.authorization || '';
+    const [, token] = h.split(' ');
+    if (!token) return res.status(401).json({ error: 'Unauthorized' });
+
+    const payload = verifyJwt(token, 'access');
+    if (!payload?.id) return res.status(401).json({ error: 'Unauthorized' });
+
+    req.user = payload; // { id, role?, status? }
+    next();
 }
