@@ -4,6 +4,7 @@ import { authRequired } from '../middleware/auth.js';
 import { requireVerified } from '../middleware/requireVerified.js';
 import { Announcement } from '../models/Announcement.js';
 import { Reaction } from '../models/Reaction.js';
+import { Comment } from '../models/Comment.js';
 
 const router = express.Router();
 
@@ -74,10 +75,17 @@ router.get('/:id', authRequired, requireVerified, async (req, res) => {
         });
         const score = likes - dislikes;
 
+        // Підраховуємо кількість коментарів
+        const commentsCount = await Comment.countDocuments({ 
+            announcementId: new mongoose.Types.ObjectId(id),
+            status: 'visible'
+        });
+
         // Повертаємо документ з лічильниками
         const result = {
             ...doc.toObject(),
-            counts: { likes, dislikes, score }
+            counts: { likes, dislikes, score },
+            commentsCount
         };
 
         res.json(result);
