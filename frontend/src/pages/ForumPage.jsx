@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { articleList, voteArticle } from '../api/article_comment'   // ← адаптер на наш бекенд
+import { articleList, voteArticle } from '../api/article_comment'
 import PostCard from '../components/PostCard'
 import Pagination from '../components/Pagination'
 import SearchInput from '../components/SearchInput'
@@ -23,7 +23,7 @@ const ForumPage = () => {
     useEffect(() => {
         const fetchPosts = async () => {
             try {
-                const data = await articleList() // отримує у старому форматі: id/title/content/…
+                const data = await articleList()
                 const postsWithVotes = data.map(post => ({ ...post, voted: null }))
                 setPosts(postsWithVotes)
             } catch (err) {
@@ -53,7 +53,6 @@ const ForumPage = () => {
                 return updated
             })
         )
-        // бекенд-виклик через адаптер (більше ніяких axios на 127.0.0.1:8000)
         try { await voteArticle(postId, type) } catch {}
     }
 

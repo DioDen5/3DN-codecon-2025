@@ -37,7 +37,6 @@ const ForumPostPage = () => {
             const doc = await createComment(id, message);
             setReplies(prev => [doc, ...prev]);
         } catch (e) {
-            // залишимо без UI-змін — дизайн той самий
             console.error(e);
         }
     };
@@ -58,7 +57,6 @@ const ForumPostPage = () => {
 
                 <PostExpanded postId={post.id} />
 
-                {/* лишаємо той самий компонент; просто передамо onSubmit — на вигляд не впливає */}
                 <CommentInput onSubmit={handleCreate} />
 
                 <RepliesList replies={replies} />

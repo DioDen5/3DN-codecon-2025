@@ -11,14 +11,13 @@ const Modal = ({ isOpen, onClose, children }) => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{
-                    duration: 0.3,  // Коротша тривалість для плавнішої анімації
+                    duration: 0.3,
                     ease: "easeOut",
                 }}
                 className="bg-white/40 backdrop-blur-md rounded-4xl shadow-2xl w-full max-w-xl p-1 relative"
             >
                 <button
                     onClick={onClose}
-                    // className="absolute top-4 right-4 text-gray-300 hover:text-white text-2xl"
                 >
                     <div
                         className="group absolute  right-4 flex items-center justify-center
