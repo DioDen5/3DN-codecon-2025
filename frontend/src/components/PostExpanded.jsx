@@ -4,6 +4,18 @@ import { ThumbsUp, ThumbsDown, MessageCircle } from 'lucide-react';
 const PostExpanded = ({ post, onReaction }) => {
     const [pending, setPending] = useState(false);
 
+    const getAuthorName = (post) => {
+        if (post?.authorId) {
+            if (post.authorId.displayName) {
+                return post.authorId.displayName;
+            }
+            if (post.authorId.email) {
+                return post.authorId.email.split('@')[0];
+            }
+        }
+        return 'Невідомий';
+    };
+
     const onVote = async (val) => {
         if (pending || !onReaction) return;
         setPending(true);
@@ -20,9 +32,10 @@ const PostExpanded = ({ post, onReaction }) => {
     return (
         <div className="bg-white text-black rounded-xl p-4 shadow-md">
             <div className="flex items-center gap-2 text-sm mb-1">
-        <span className="text-gray-500">
-          {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString() : ''}
-        </span>
+                <span className="font-semibold">@{getAuthorName(post)}</span>
+                <span className="text-gray-500">
+                    {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString() : ''}
+                </span>
             </div>
 
             {post.title && <h2 className="font-bold text-lg mb-2 leading-snug">{post.title}</h2>}

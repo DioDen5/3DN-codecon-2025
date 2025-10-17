@@ -11,13 +11,30 @@ const router = express.Router();
 router.get('/', authRequired, requireVerified, async (req, res) => {
     const q = req.query.q?.trim();
     const filter = { status: 'published', visibility: 'students' };
-
-    const cursor = q
-        ? Announcement.find(filter, { score: { $meta: 'textScore' } })
-            .sort({ score: { $meta: 'textScore' }, pinned: -1, publishedAt: -1 })
-        : Announcement.find(filter).sort({ pinned: -1, publishedAt: -1 });
-
-    const docs = await cursor.limit(20);
+    
+    let docs;
+    if (q) {
+        docs = await Announcement.aggregate([
+            { $match: { ...filter, $text: { $search: q } } },
+            { $addFields: { score: { $meta: 'textScore' } } },
+            { $lookup: {
+                from: 'users',
+                localField: 'authorId',
+                foreignField: '_id',
+                as: 'authorId',
+                pipeline: [{ $project: { email: 1, displayName: 1 } }]
+            }},
+            { $unwind: '$authorId' },
+            { $sort: { score: -1, pinned: -1, publishedAt: -1 } },
+            { $limit: 20 }
+        ]);
+    } else {
+        const cursor = Announcement.find(filter)
+            .populate('authorId', 'email displayName')
+            .sort({ pinned: -1, publishedAt: -1 })
+            .limit(20);
+        docs = await cursor;
+    }
     res.json(docs);
 });
 
@@ -26,17 +43,15 @@ router.get('/:id', authRequired, requireVerified, async (req, res) => {
     try {
         const { id } = req.params;
         
-        // Валідація ID
         if (!mongoose.isValidObjectId(id)) {
             return res.status(400).json({ error: 'Invalid announcement id' });
         }
 
-        // Знаходимо оголошення з правильними умовами
         const doc = await Announcement.findOne({ 
             _id: id, 
             status: 'published', 
             visibility: 'students' 
-        });
+        }).populate('authorId', 'email displayName');
         
         console.log('Looking for announcement:', { id, found: !!doc });
         if (doc) {
@@ -52,13 +67,11 @@ router.get('/:id', authRequired, requireVerified, async (req, res) => {
             return res.status(404).json({ error: 'Announcement not found' });
         }
 
-        // Збільшуємо лічильник переглядів
         await Announcement.updateOne(
             { _id: id }, 
             { $inc: { 'metrics.views': 1 } }
         );
 
-        // Агрегуємо реакції
         const reactions = await Reaction.aggregate([
             { $match: { targetType: 'announcement', targetId: new mongoose.Types.ObjectId(id) } },
             { $group: { 
@@ -67,7 +80,6 @@ router.get('/:id', authRequired, requireVerified, async (req, res) => {
             }}
         ]);
 
-        // Підраховуємо likes, dislikes та score
         let likes = 0, dislikes = 0;
         reactions.forEach(reaction => {
             if (reaction._id === 1) likes = reaction.count;
@@ -75,13 +87,11 @@ router.get('/:id', authRequired, requireVerified, async (req, res) => {
         });
         const score = likes - dislikes;
 
-        // Підраховуємо кількість коментарів
         const commentsCount = await Comment.countDocuments({ 
             announcementId: new mongoose.Types.ObjectId(id),
             status: 'visible'
         });
 
-        // Повертаємо документ з лічильниками
         const result = {
             ...doc.toObject(),
             counts: { likes, dislikes, score },

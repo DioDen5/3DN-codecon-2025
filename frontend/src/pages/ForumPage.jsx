@@ -33,6 +33,18 @@ const ForumPage = () => {
     );
     const pageCount = Math.ceil(sortedData.length / ITEMS_PER_PAGE) || 1;
 
+    const getAuthorName = (announcement) => {
+        if (announcement?.authorId) {
+            if (announcement.authorId.displayName) {
+                return announcement.authorId.displayName;
+            }
+            if (announcement.authorId.email) {
+                return announcement.authorId.email.split('@')[0];
+            }
+        }
+        return 'Невідомий';
+    };
+
     const loadData = async () => {
         setLoading(true);
         setError("");
@@ -134,7 +146,7 @@ const ForumPage = () => {
                                     likes={post.counts?.likes ?? 0}
                                     dislikes={post.counts?.dislikes ?? 0}
                                     comments={post.metrics?.comments ?? 0}
-                                    username={"@anon"}
+                                    username={`@${getAuthorName(post)}`}
                                     date={new Date(
                                         post.publishedAt || post.createdAt
                                     ).toLocaleDateString()}
