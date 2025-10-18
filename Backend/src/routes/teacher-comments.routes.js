@@ -58,9 +58,8 @@ router.post('/:teacherId', authRequired, async (req, res) => {
             return res.status(400).json({ error: 'Invalid teacher ID' });
         }
 
-        if (!body || body.trim().length === 0) {
-            return res.status(400).json({ error: 'Comment body is required' });
-        }
+        // body може бути порожнім, але rating обов'язковий
+        const commentBody = body ? body.trim() : '';
 
         if (!rating || ![1, 2, 3, 4, 5].includes(rating)) {
             return res.status(400).json({ error: 'Rating is required and must be between 1 and 5' });
@@ -80,7 +79,7 @@ router.post('/:teacherId', authRequired, async (req, res) => {
         const comment = new TeacherComment({
             teacherId,
             authorId: userId,
-            body: body.trim(),
+            body: commentBody,
             rating
         });
 

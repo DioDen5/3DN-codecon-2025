@@ -21,7 +21,7 @@ export default function ReviewInput({ onSubmit, userRating, onRatingChange, isVo
         }
 
         // Перевіряємо чи поставлена оцінка
-        if (!userRating || userRating < 1 || userRating > 5) {
+        if (userRating < 1 || userRating > 5) {
             setErr('Спочатку поставте оцінку від 1 до 5 зірок');
             return;
         }
@@ -72,10 +72,10 @@ export default function ReviewInput({ onSubmit, userRating, onRatingChange, isVo
                 />
                 <div className="flex justify-between items-center">
                     <p className="text-xs text-gray-500">
-                        {!userRating ? 'Спочатку поставте оцінку' : 'Оцінка поставлена ✓'}
+                        {userRating < 1 || userRating > 5 ? 'Спочатку поставте оцінку' : 'Оцінка поставлена ✓'}
                     </p>
                     <button 
-                        disabled={busy || !userRating} 
+                        disabled={busy || userRating < 1 || userRating > 5} 
                         className="bg-blue-600 text-white rounded-lg px-6 py-2 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700 transition"
                     >
                         {busy ? 'Відправляємо...' : 'Надіслати відгук'}

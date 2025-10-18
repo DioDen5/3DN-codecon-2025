@@ -18,8 +18,9 @@ const teacherCommentSchema = new Schema(
         },
         body: {
             type: String,
-            required: true,
+            required: false,
             trim: true,
+            default: '',
         },
     rating: {
         type: Number,

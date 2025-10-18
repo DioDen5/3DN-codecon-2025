@@ -187,7 +187,7 @@ const TeacherProfilePage = () => {
                                                     animation: 'ratingSlideIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
                                                 }}
                                             >
-                                                {currentRating.toFixed(1)}
+                                                {Math.round(currentRating)}
                                             </div>
                                         </div>
                                         <span className="ml-1">/10</span>
