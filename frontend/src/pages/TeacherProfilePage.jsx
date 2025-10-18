@@ -6,6 +6,7 @@ import { getTeacherComments, createTeacherComment, getTeacherCommentCounts } fro
 import { useAuthState } from '../api/useAuthState'
 import CommentInput from '../components/CommentInput'
 import TeacherRepliesList from '../components/TeacherRepliesList'
+import StarRating from '../components/StarRating'
 
 const TeacherProfilePage = () => {
     const { id } = useParams()
@@ -72,10 +73,12 @@ const TeacherProfilePage = () => {
             console.log('Sending vote request...')
             const data = await voteTeacher(id, type)
             console.log('Vote response:', data)
+            console.log('New teacher rating:', data.teacher.rating)
             setTeacher(data.teacher)
             setUserReaction(data.userReaction)
             
-            animateRatingChange(data.teacher.rating)
+            // Оновлюємо currentRating для анімації
+            setCurrentRating(data.teacher.rating)
         } catch (err) {
             console.error('Error voting:', err)
             console.error('Error details:', err.response?.data)
@@ -84,24 +87,6 @@ const TeacherProfilePage = () => {
         }
     }
 
-    const animateRatingChange = (newRating) => {
-        const startRating = currentRating
-        const difference = newRating - startRating
-        const steps = 20
-        const stepSize = difference / steps
-        let currentStep = 0
-
-        const interval = setInterval(() => {
-            currentStep++
-            const newValue = startRating + (stepSize * currentStep)
-            setCurrentRating(Math.round(newValue * 10) / 10)
-            
-            if (currentStep >= steps) {
-                setCurrentRating(newRating)
-                clearInterval(interval)
-            }
-        }, 50)
-    }
 
     const handleCommentSubmit = async (commentText) => {
         console.log('Comment submitted:', commentText)
@@ -176,19 +161,49 @@ const TeacherProfilePage = () => {
                                 </div>
                                 
                                 <div className="text-right">
-                                    <div className="text-4xl font-bold text-blue-600 mb-1">
-                                        {currentRating}/10
+                                    <div className="text-4xl font-bold text-blue-500 mb-2 flex items-center">
+                                        <div className="relative overflow-hidden inline-block">
+                                            <div 
+                                                key={currentRating}
+                                                className="transition-all duration-500 ease-out"
+                                                style={{
+                                                    animation: 'ratingSlideIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+                                                }}
+                                            >
+                                                {currentRating.toFixed(1)}
+                                            </div>
+                                        </div>
+                                        <span className="ml-1">/10</span>
                                     </div>
-                                    <div className="flex items-center gap-1 text-yellow-500">
-                                        {[...Array(5)].map((_, i) => (
-                                            <Star 
-                                                key={i} 
-                                                size={20} 
-                                                className={i < Math.floor(currentRating / 2) ? 'fill-current' : 'text-gray-300'} 
-                                            />
-                                        ))}
+                                    <div key={currentRating} className="mb-2">
+                                        <StarRating 
+                                            rating={currentRating} 
+                                            maxRating={10} 
+                                            size="lg" 
+                                            showNumber={false}
+                                            animated={true}
+                                        />
                                     </div>
-                                    <p className="text-sm text-gray-500 mt-1">Загальна оцінка</p>
+                                    <p className="text-sm text-gray-500">Загальна оцінка</p>
+                                    <style jsx>{`
+                                        @keyframes ratingSlideIn {
+                                            0% {
+                                                transform: translateY(30px);
+                                                opacity: 0;
+                                                filter: blur(2px);
+                                            }
+                                            50% {
+                                                transform: translateY(-5px);
+                                                opacity: 0.8;
+                                                filter: blur(0px);
+                                            }
+                                            100% {
+                                                transform: translateY(0);
+                                                opacity: 1;
+                                                filter: blur(0px);
+                                            }
+                                        }
+                                    `}</style>
                                 </div>
                             </div>
 
