@@ -44,10 +44,7 @@ router.get('/', authRequired, requireVerified, async (req, res) => {
         ];
     }
     
-    console.log('Search query:', q);
-    console.log('Using pipeline:', JSON.stringify(pipeline, null, 2));
     const docs = await Announcement.aggregate(pipeline);
-    console.log('Found documents:', docs.length);
     res.json(docs);
 });
 

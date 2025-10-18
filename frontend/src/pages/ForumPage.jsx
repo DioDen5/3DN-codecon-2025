@@ -49,10 +49,6 @@ const ForumPage = () => {
     ];
 
     const { sortedData, SortDropdown, sortOption } = useSort(raw, sortOptions);
-    
-    console.log("Raw data:", raw.length, "items");
-    console.log("Sorted data:", sortedData.length, "items");
-    console.log("Current sort option:", sortOption);
 
     const currentItems = useMemo(
         () => sortedData.slice(itemOffset, itemOffset + ITEMS_PER_PAGE),
@@ -100,9 +96,8 @@ const ForumPage = () => {
         setError("");
 
         try {
-            console.log("Searching with query:", q.trim());
-            const arr = await listPublished({ q: q.trim() });
-            console.log("API returned:", arr.length, "items");
+            const searchQuery = typeof q === 'string' ? q.trim() : '';
+            const arr = await listPublished({ q: searchQuery });
             const withCounts = await Promise.all(
                 arr.map(async (a) => {
                     try {
@@ -113,7 +108,6 @@ const ForumPage = () => {
                     }
                 })
             );
-            console.log("Final data:", withCounts.length, "items");
             setRaw(withCounts);
         } catch (err) {
             setError("Помилка завантаження обговорень");
@@ -170,7 +164,7 @@ const ForumPage = () => {
                 <h1 className="text-center text-3xl font-semibold mb-8">ОБГОВОРЕННЯ</h1>
 
                 <div className="max-w-xl mx-auto mb-4">
-                    <SearchInput value={q} onChange={setQ} />
+                    <SearchInput value={q} onChange={(e) => setQ(e.target.value)} />
                 </div>
 
                 <div className="flex justify-between items-center mb-6">
