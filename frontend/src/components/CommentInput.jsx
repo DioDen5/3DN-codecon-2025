@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { useAuthState } from '../api/useAuthState';
 
 export default function CommentInput({ onSubmit }) {
+    const { isAuthed } = useAuthState();
     const [value, setValue] = useState('');
     const [busy, setBusy] = useState(false);
     const [err, setErr] = useState('');
@@ -8,13 +10,27 @@ export default function CommentInput({ onSubmit }) {
     async function handleSend(e) {
         e.preventDefault();
         if (!value.trim()) return;
+        
+        if (!isAuthed) {
+            setErr('Потрібно увійти в систему для коментування');
+            return;
+        }
+        
         setErr('');
         setBusy(true);
         try {
             await onSubmit(value.trim());
             setValue('');
         } catch (e) {
-            setErr(e?.response?.data?.error || e.message || 'Помилка');
+            console.error('Comment error:', e);
+            if (e?.response?.status === 401) {
+                setErr('Сесія закінчилася. Будь ласка, увійдіть знову.');
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 2000);
+            } else {
+                setErr(e?.response?.data?.error || e.message || 'Помилка');
+            }
         } finally {
             setBusy(false);
         }

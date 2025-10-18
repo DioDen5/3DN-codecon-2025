@@ -2,6 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import { Announcement } from '../models/Announcement.js';
 import { Comment } from '../models/Comment.js';
+import { User } from '../models/User.js';
 import { authRequired as auth } from '../middleware/auth.js';
 import { requireVerified } from '../middleware/requireVerified.js';
 
@@ -17,10 +18,17 @@ router.post('/announcements/:id/comments', auth, requireVerified, async (req, re
         const ann = await Announcement.findById(announcementId).lean();
         if (!ann) return res.status(404).json({ error: 'Announcement not found' });
 
+        console.log('Checking announcement for comments:', { 
+            id: ann._id, 
+            status: ann.status, 
+            visibility: ann.visibility 
+        });
+
         const uid = getUid(req.user);
         if (!uid) return res.status(401).json({ error: 'No user id in auth context' });
 
         if (ann.status !== 'published' || ann.visibility !== 'students') {
+            console.log('Comment rejected:', { status: ann.status, visibility: ann.visibility });
             return res.status(403).json({ error: 'Comments allowed only for published announcements with students visibility' });
         }
 
@@ -30,7 +38,25 @@ router.post('/announcements/:id/comments', auth, requireVerified, async (req, re
         const doc = await Comment.create({ announcementId, authorId: uid, body: body.trim() });
         await Announcement.updateOne({ _id: announcementId }, { $inc: { 'metrics.comments': 1 } });
 
-        res.status(201).json(doc);
+        console.log('Looking for user with ID:', uid);
+        const user = await User.findById(uid).select('email displayName');
+        console.log('Found user:', user);
+        
+        const commentWithAuthor = {
+            ...doc.toObject(),
+            authorId: {
+                _id: user._id,
+                email: user.email,
+                displayName: user.displayName
+            }
+        };
+
+        console.log('Created comment with populated author:', {
+            id: commentWithAuthor._id,
+            authorId: commentWithAuthor.authorId,
+            body: commentWithAuthor.body?.substring(0, 20) + '...'
+        });
+        res.status(201).json(commentWithAuthor);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -39,7 +65,6 @@ router.get('/announcements/:id/comments', auth, requireVerified, async (req, res
         const announcementId = req.params.id;
         if (!mongoose.isValidObjectId(announcementId)) return res.status(400).json({ error: 'Invalid announcement id' });
 
-        // Перевіряємо що оголошення існує та має правильний статус
         const ann = await Announcement.findById(announcementId).lean();
         if (!ann) return res.status(404).json({ error: 'Announcement not found' });
         if (ann.status !== 'published' || ann.visibility !== 'students') {
@@ -58,10 +83,17 @@ router.get('/announcements/:id/comments', auth, requireVerified, async (req, res
         }
 
         const items = await Comment.find(query)
-            .populate('authorId', 'email firstName lastName')
+            .populate('authorId', 'email displayName')
             .sort({ createdAt: -1, _id: -1 })
             .limit(limit)
             .lean();
+        
+        console.log('Fetched comments:', items.map(item => ({
+            id: item._id,
+            authorId: item.authorId,
+            body: item.body?.substring(0, 20) + '...'
+        })));
+        
         res.json({ items, count: items.length });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });

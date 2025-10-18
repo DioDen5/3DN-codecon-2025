@@ -5,6 +5,7 @@ import PostCard from "../components/PostCard";
 import Pagination from "../components/Pagination";
 import SearchInput from "../components/SearchInput";
 import { useSort } from "../hooks/useSort.jsx";
+import { useForumRefresh } from "../hooks/useForumRefresh";
 import {
     toggleAnnouncement,
     countsAnnouncement,
@@ -16,6 +17,7 @@ const ITEMS_PER_PAGE = 3;
 const ForumPage = () => {
     const nav = useNavigate();
     const { isAuthed } = useAuthState();
+    const { subscribe } = useForumRefresh();
 
     const [raw, setRaw] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -30,37 +32,78 @@ const ForumPage = () => {
         [sortedData, itemOffset]
     );
     const pageCount = Math.ceil(sortedData.length / ITEMS_PER_PAGE) || 1;
+    const currentPage = Math.floor(itemOffset / ITEMS_PER_PAGE);
 
-    useEffect(() => {
-        let ignore = false;
+    const formatDate = (dateString) => {
+        if (!dateString) return 'Невідомо';
+        
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return 'Невідомо';
+        
+        const now = new Date();
+        const diffMs = now - date;
+        const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        
+        if (diffDays < 1) {
+            if (diffHours < 1) {
+                const diffMinutes = Math.floor(diffMs / (1000 * 60));
+                return diffMinutes < 1 ? 'щойно' : `${diffMinutes}хв`;
+            }
+            return `${diffHours}г`;
+        }
+        
+        return date.toLocaleDateString('uk-UA');
+    };
+
+    const getAuthorName = (announcement) => {
+        if (announcement?.authorId) {
+            if (announcement.authorId.displayName) {
+                return announcement.authorId.displayName;
+            }
+            if (announcement.authorId.email) {
+                return announcement.authorId.email.split('@')[0];
+            }
+        }
+        return 'Невідомий';
+    };
+
+    const loadData = async () => {
         setLoading(true);
         setError("");
 
-        listPublished({ q })
-            .then(async (arr) => {
-                if (ignore) return;
-                const withCounts = await Promise.all(
-                    arr.map(async (a) => {
-                        try {
-                            const counts = await countsAnnouncement(a._id);
-                            return { ...a, counts, _my: counts.userReaction || 0 };
-                        } catch {
-                            return { ...a, counts: { likes: 0, dislikes: 0, score: 0 }, _my: 0 };
-                        }
-                    })
-                );
-                setRaw(withCounts);
-                setItemOffset(0);
-            })
-            .catch((e) =>
-                setError(e?.response?.data?.error || e.message || "Error loading data")
-            )
-            .finally(() => !ignore && setLoading(false));
+        try {
+            const arr = await listPublished({ q: q.trim() });
+            const withCounts = await Promise.all(
+                arr.map(async (a) => {
+                    try {
+                        const counts = await countsAnnouncement(a._id);
+                        return { ...a, counts, _my: counts.userReaction || 0 };
+                    } catch {
+                        return { ...a, counts: { likes: 0, dislikes: 0, score: 0 }, _my: 0 };
+                    }
+                })
+            );
+            setRaw(withCounts);
+        } catch (err) {
+            setError("Помилка завантаження обговорень");
+            console.error("Load error:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-        return () => {
-            ignore = true;
-        };
+    useEffect(() => {
+        loadData();
     }, [q, isAuthed]);
+
+    // Підписка на оновлення форуму
+    useEffect(() => {
+        const unsubscribe = subscribe(() => {
+            loadData();
+        });
+        return unsubscribe;
+    }, [subscribe]);
 
     const handleVote = async (id, type) => {
         const value = type === "like" ? 1 : -1;
@@ -126,10 +169,8 @@ const ForumPage = () => {
                                     likes={post.counts?.likes ?? 0}
                                     dislikes={post.counts?.dislikes ?? 0}
                                     comments={post.metrics?.comments ?? 0}
-                                    username={"@anon"}
-                                    date={new Date(
-                                        post.publishedAt || post.createdAt
-                                    ).toLocaleDateString()}
+                                    username={getAuthorName(post)}
+                                    date={formatDate(post.publishedAt || post.createdAt)}
                                     voted={post._my === 1 ? 'like' : post._my === -1 ? 'dislike' : (post.counts?.userReaction === 1 ? 'like' : post.counts?.userReaction === -1 ? 'dislike' : null)}
                                     onVote={(id, t) => handleVote(id, t)}
                                     onClick={() => nav(`/forum/${post._id}`)}
@@ -139,6 +180,7 @@ const ForumPage = () => {
 
                         <Pagination
                             pageCount={pageCount}
+                            currentPage={currentPage}
                             handlePageClick={(e) => {
                                 const newOffset =
                                     (e.selected * ITEMS_PER_PAGE) % sortedData.length;

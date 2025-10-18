@@ -9,7 +9,7 @@ export const http = axios.create({
     timeout: 10000,
 });
 
-const refreshHttp = axios.create({
+export const refreshHttp = axios.create({
     baseURL,
     withCredentials: true,
     timeout: 10000,
@@ -44,9 +44,14 @@ http.interceptors.response.use(
                 const { data } = await refreshHttp.post('/auth/refresh');
                 if (data?.token) tokenStore.set(data.token);
                 else throw new Error('No access token from /auth/refresh');
-            } catch {
+            } catch (refreshError) {
+                console.log('Token refresh failed, redirecting to login');
                 tokenStore.clear();
-                window.dispatchEvent(new CustomEvent('open-login'));
+                // Очищаємо localStorage/sessionStorage
+                localStorage.removeItem('studlink-token');
+                sessionStorage.removeItem('studlink-token');
+                // Перенаправляємо на логін
+                window.location.href = '/login';
                 isRefreshing = false;
                 queue.forEach((r) => r());
                 queue = [];

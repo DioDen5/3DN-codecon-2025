@@ -24,15 +24,13 @@ const ForumPostPage = () => {
                     commentsList(id),
                 ]);
                 
-                // Отримуємо лічильники для головного поста
                 try {
                     const postCounts = await countsAnnouncement(id);
-                    setPost({ ...p, counts: postCounts });
+                    setPost({ ...p, counts: postCounts, userReaction: postCounts.userReaction || 0 });
                 } catch {
                     setPost(p);
                 }
                 
-                // Додаємо лічильники реакцій до кожного коментаря
                 const repliesWithCounts = await Promise.all(
                     r.map(async (comment) => {
                         try {
@@ -64,8 +62,9 @@ const ForumPostPage = () => {
 
     const handleCreate = async (message) => {
         try {
-            const doc = await createComment(id, message);
-            // Додаємо лічильники до нового коментаря
+        const doc = await createComment(id, message);
+        console.log('Created comment:', doc);
+            
             const counts = await countsComment(doc._id).catch(() => ({ likes: 0, dislikes: 0, score: 0 }));
             const commentWithCounts = { 
                 ...doc, 
@@ -73,6 +72,11 @@ const ForumPostPage = () => {
                 userReaction: counts.userReaction || 0
             };
             setReplies(prev => [commentWithCounts, ...prev]);
+            
+            setPost(prev => ({
+                ...prev,
+                commentsCount: (prev.commentsCount || 0) + 1
+            }));
         } catch (e) {
             console.error(e);
         }
@@ -83,19 +87,16 @@ const ForumPostPage = () => {
         
         const value = type === 'like' ? 1 : -1;
         
-        // Оптимістичне оновлення з урахуванням поточної реакції користувача
         const currentCounts = post.counts || { likes: 0, dislikes: 0, score: 0, userReaction: 0 };
         const currentReaction = currentCounts.userReaction || 0;
         let newCounts = { ...currentCounts };
 
         if (type === 'like') {
             if (currentReaction === 1) {
-                // зняти лайк
                 newCounts.likes = Math.max(0, newCounts.likes - 1);
                 newCounts.score -= 1;
                 newCounts.userReaction = 0;
             } else {
-                // переключення з дизлайка або додавання лайка
                 if (currentReaction === -1) {
                     newCounts.dislikes = Math.max(0, newCounts.dislikes - 1);
                     newCounts.score += 1; // знімаємо попередній -1
@@ -106,12 +107,10 @@ const ForumPostPage = () => {
             }
         } else {
             if (currentReaction === -1) {
-                // зняти дизлайк
                 newCounts.dislikes = Math.max(0, newCounts.dislikes - 1);
                 newCounts.score += 1;
                 newCounts.userReaction = 0;
             } else {
-                // переключення з лайка або додавання дизлайка
                 if (currentReaction === 1) {
                     newCounts.likes = Math.max(0, newCounts.likes - 1);
                     newCounts.score -= 1; // знімаємо попередній +1
@@ -129,13 +128,11 @@ const ForumPostPage = () => {
         
         try {
             const result = await toggleAnnouncement(id, value);
-            // Оновлюємо з реальними даними з сервера (повертає userReaction)
             setPost(prev => ({
                 ...prev,
                 counts: result
             }));
         } catch (error) {
-            // Відкатуємо оптимістичне оновлення при помилці
             setPost(prev => ({
                 ...prev,
                 counts: currentCounts
@@ -152,7 +149,7 @@ const ForumPostPage = () => {
         <div className="min-h-[calc(100vh-68px)] px-6 py-10 bg-gradient-to-b from-black to-gray-900 text-white">
             <div className="max-w-4xl mx-auto space-y-6">
                 <button
-                    onClick={() => navigate(-1)}
+                    onClick={() => navigate('/forum')}
                     className="text-sm underline text-white hover:text-purple-300 transition cursor-pointer"
                 >
                     ← Назад

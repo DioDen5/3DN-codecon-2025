@@ -12,7 +12,7 @@ import reactionsRoutes from './routes/reactions.routes.js'
 
 const app = express()
 
-const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'http://localhost:5173'
+const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'http://localhost:5174'
 
 app.use(
     helmet({
