@@ -19,10 +19,7 @@ router.get('/', authRequired, requireVerified, async (req, res) => {
             { 
                 $match: { 
                     ...filter, 
-                    $or: [
-                        { title: { $regex: searchRegex } },
-                        { body: { $regex: searchRegex } }
-                    ]
+                    title: { $regex: searchRegex }
                 } 
             },
             { $lookup: {

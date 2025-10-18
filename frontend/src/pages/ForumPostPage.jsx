@@ -158,6 +158,7 @@ const ForumPostPage = () => {
                 <PostExpanded 
                     post={post} 
                     onReaction={handleReaction}
+                    searchQuery=""
                 />
 
                 <CommentInput onSubmit={handleCreate} />

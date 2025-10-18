@@ -93,6 +93,24 @@ const ForumPage = () => {
         return 'Невідомий';
     };
 
+    const highlightText = (text, query) => {
+        if (!query || !text) return text;
+        
+        const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+        const parts = text.split(regex);
+        
+        return parts.map((part, index) => 
+            regex.test(part) ? (
+                <mark 
+                    key={index} 
+                    className="bg-yellow-300 text-black px-1 rounded font-semibold animate-pulse"
+                >
+                    {part}
+                </mark>
+            ) : part
+        );
+    };
+
     const loadData = async () => {
         setLoading(true);
         setSearching(searchQuery.length > 0);
@@ -211,6 +229,7 @@ const ForumPage = () => {
                                     voted={post._my === 1 ? 'like' : post._my === -1 ? 'dislike' : (post.counts?.userReaction === 1 ? 'like' : post.counts?.userReaction === -1 ? 'dislike' : null)}
                                     onVote={(id, t) => handleVote(id, t)}
                                     onClick={() => nav(`/forum/${post._id}`)}
+                                    searchQuery={searchQuery}
                                 />
                             ))}
                         </div>
