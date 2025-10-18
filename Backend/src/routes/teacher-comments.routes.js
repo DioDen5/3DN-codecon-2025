@@ -47,7 +47,7 @@ router.get('/:teacherId', async (req, res) => {
 });
 
 // Create a new comment
-router.post('/:teacherId', authRequired, requireVerified, async (req, res) => {
+router.post('/:teacherId', authRequired, async (req, res) => {
     try {
         const { teacherId } = req.params;
         const { body, rating } = req.body;
@@ -85,6 +85,48 @@ router.post('/:teacherId', authRequired, requireVerified, async (req, res) => {
 
         await comment.save();
         await comment.populate('authorId', 'displayName email');
+
+        // Оновлюємо лічильники викладача
+        const { Teacher } = await import('../models/Teacher.js');
+        const teacher = await Teacher.findById(teacherId);
+        
+        if (teacher) {
+            console.log('Before update - Teacher stats:', {
+                comments: teacher.comments,
+                likes: teacher.likes,
+                dislikes: teacher.dislikes,
+                totalVotes: teacher.totalVotes,
+                rating: teacher.rating
+            });
+            
+            // Додаємо коментар до загальної кількості
+            teacher.comments += 1;
+            
+            // Визначаємо чи це позитивна чи негативна оцінка
+            if (rating >= 3) {
+                teacher.likes += 1;
+                console.log('Added positive rating:', rating);
+            } else {
+                teacher.dislikes += 1;
+                console.log('Added negative rating:', rating);
+            }
+            
+            // Оновлюємо загальну кількість голосів
+            teacher.totalVotes += 1;
+            
+            // Перераховуємо рейтинг
+            teacher.rating = teacher.calculateRating();
+            
+            await teacher.save();
+            
+            console.log('After update - Teacher stats:', {
+                comments: teacher.comments,
+                likes: teacher.likes,
+                dislikes: teacher.dislikes,
+                totalVotes: teacher.totalVotes,
+                rating: teacher.rating
+            });
+        }
 
         res.status(201).json(comment);
     } catch (error) {
@@ -137,6 +179,60 @@ router.get('/:commentId/counts', authRequired, async (req, res) => {
     } catch (error) {
         console.error('Error fetching comment counts:', error);
         res.status(500).json({ error: 'Failed to fetch comment counts' });
+    }
+});
+
+// Delete a comment
+router.delete('/:commentId', authRequired, async (req, res) => {
+    try {
+        const { commentId } = req.params;
+        const userId = req.user.id;
+
+        if (!mongoose.isValidObjectId(commentId)) {
+            return res.status(400).json({ error: 'Invalid comment ID' });
+        }
+
+        const comment = await TeacherComment.findOne({
+            _id: commentId,
+            authorId: userId,
+            status: 'visible'
+        });
+
+        if (!comment) {
+            return res.status(404).json({ error: 'Comment not found' });
+        }
+
+        // Оновлюємо лічильники викладача
+        const { Teacher } = await import('../models/Teacher.js');
+        const teacher = await Teacher.findById(comment.teacherId);
+        
+        if (teacher) {
+            // Віднімаємо коментар від загальної кількості
+            teacher.comments -= 1;
+            
+            // Визначаємо чи це позитивна чи негативна оцінка
+            if (comment.rating >= 3) {
+                teacher.likes -= 1;
+            } else {
+                teacher.dislikes -= 1;
+            }
+            
+            // Оновлюємо загальну кількість голосів
+            teacher.totalVotes -= 1;
+            
+            // Перераховуємо рейтинг
+            teacher.rating = teacher.calculateRating();
+            
+            await teacher.save();
+        }
+
+        // Видаляємо коментар
+        await TeacherComment.findByIdAndDelete(commentId);
+
+        res.json({ message: 'Comment deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting comment:', error);
+        res.status(500).json({ error: 'Failed to delete comment' });
     }
 });
 

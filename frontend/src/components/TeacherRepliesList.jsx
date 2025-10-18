@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { ThumbsUp, ThumbsDown } from 'lucide-react';
-import { toggleTeacherComment } from '../api/teacher-comments';
+import { ThumbsUp, ThumbsDown, Trash2 } from 'lucide-react';
+import { toggleTeacherComment, deleteTeacherComment } from '../api/teacher-comments';
 import { useAuthState } from '../api/useAuthState';
 
 const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
-    const { isAuthed } = useAuthState();
+    const { isAuthed, user } = useAuthState();
     const [error, setError] = useState(null);
     const [pendingVotes, setPendingVotes] = useState(new Set());
 
@@ -55,6 +55,32 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
         }
     };
 
+    const handleDelete = async (commentId) => {
+        if (!isAuthed) {
+            setError('Потрібно увійти в систему для видалення відгуку');
+            return;
+        }
+
+        if (!window.confirm('Ви впевнені, що хочете видалити цей відгук?')) {
+            return;
+        }
+
+        setError(null);
+        
+        try {
+            await deleteTeacherComment(commentId);
+            
+            if (onRepliesUpdate) {
+                onRepliesUpdate(prevReplies => 
+                    prevReplies.filter(reply => reply._id !== commentId)
+                );
+            }
+        } catch (err) {
+            console.error('Error deleting comment:', err);
+            setError('Помилка при видаленні відгуку');
+        }
+    };
+
     const formatDate = (dateString) => {
         if (!dateString) return 'Невідомо';
         
@@ -95,6 +121,22 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
         }
 
         return 'Невідомий';
+    };
+
+    const isOwnComment = (comment) => {
+        if (!user) return false;
+        const userId = user._id || user.id;
+        
+        if (comment?.authorId) {
+            if (typeof comment.authorId === 'string') {
+                return comment.authorId === userId;
+            }
+            if (comment.authorId._id) {
+                return comment.authorId._id === userId;
+            }
+        }
+        
+        return false;
     };
 
     return (
@@ -161,6 +203,17 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
                                     {reply.counts?.dislikes || 0}
                                 </button>
 
+                                {isOwnComment(reply) && (
+                                    <button
+                                        onClick={() => handleDelete(reply._id)}
+                                        className="flex items-center gap-1 text-xs text-red-600 hover:text-red-800 hover:bg-red-50 rounded px-2 py-0.5 transition"
+                                        title="Видалити відгук"
+                                    >
+                                        <Trash2 size={12} />
+                                        Видалити
+                                    </button>
+                                )}
+                                
                                 <button className="ml-auto text-xs border rounded px-2 py-0.5 hover:bg-black hover:text-white transition cursor-pointer">
                                     report
                                 </button>

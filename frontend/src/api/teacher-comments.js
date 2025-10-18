@@ -39,3 +39,13 @@ export async function toggleTeacherComment(commentId, value) {
         throw err;
     }
 }
+
+export async function deleteTeacherComment(commentId) {
+    try {
+        const { data } = await http.delete(`/teacher-comments/${commentId}`);
+        return data;
+    } catch (err) {
+        console.error('Error deleting teacher comment:', err);
+        throw err;
+    }
+}
