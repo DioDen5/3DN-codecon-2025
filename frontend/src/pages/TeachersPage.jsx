@@ -127,8 +127,8 @@ const TeachersPage = () => {
                             <div className="flex justify-center mt-10">
                                 <Pagination
                                     pageCount={totalPages}
-                                    currentPage={currentPage}
-                                    onPageChange={handlePageChange}
+                                    currentPage={currentPage - 1}
+                                    handlePageClick={({ selected }) => handlePageChange(selected + 1)}
                                 />
                             </div>
                         )}

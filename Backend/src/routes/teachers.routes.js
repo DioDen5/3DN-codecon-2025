@@ -75,7 +75,13 @@ router.get('/:id', async (req, res) => {
         if (!teacher) {
             return res.status(404).json({ error: 'Teacher not found' });
         }
-        res.json(teacher);
+        
+        const teacherWithRating = {
+            ...teacher.toObject(),
+            rating: teacher.calculateRating()
+        };
+        
+        res.json(teacherWithRating);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch teacher' });
     }
@@ -112,7 +118,7 @@ router.post('/:id/vote', authRequired, async (req, res) => {
         const existingReaction = await Reaction.findOne({
             targetType: 'teacher',
             targetId: id,
-            userId
+            authorId: userId
         });
         
         const teacher = await Teacher.findById(id);
@@ -141,7 +147,7 @@ router.post('/:id/vote', authRequired, async (req, res) => {
             await Reaction.create({
                 targetType: 'teacher',
                 targetId: id,
-                userId,
+                authorId: userId,
                 value: newValue
             });
             teacher.likes += type === 'like' ? 1 : 0;
@@ -179,7 +185,7 @@ router.get('/:id/reactions', authRequired, async (req, res) => {
         const userReaction = await Reaction.findOne({
             targetType: 'teacher',
             targetId: id,
-            userId
+            authorId: userId
         });
         
         const counts = {
