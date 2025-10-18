@@ -1,6 +1,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import { TeacherComment } from '../models/TeacherComment.js';
+import { Teacher } from '../models/Teacher.js';
 import { authRequired } from '../middleware/auth.js';
 import { requireVerified } from '../middleware/requireVerified.js';
 
@@ -87,7 +88,6 @@ router.post('/:teacherId', authRequired, async (req, res) => {
         await comment.populate('authorId', 'displayName email');
 
         // Оновлюємо лічильники викладача
-        const { Teacher } = await import('../models/Teacher.js');
         const teacher = await Teacher.findById(teacherId);
         
         if (teacher) {
@@ -114,8 +114,16 @@ router.post('/:teacherId', authRequired, async (req, res) => {
             // Оновлюємо загальну кількість голосів
             teacher.totalVotes += 1;
             
-            // Перераховуємо рейтинг
-            teacher.rating = teacher.calculateRating();
+            // Перераховуємо рейтинг на основі зірок (1-5 -> 0-10)
+            const allComments = await TeacherComment.find({ teacherId, status: 'visible' });
+            if (allComments.length > 0) {
+                const totalStars = allComments.reduce((sum, comment) => sum + (comment.rating || 0), 0);
+                const averageStars = totalStars / allComments.length;
+                // Конвертуємо з 1-5 зірок в 0-10 рейтинг
+                teacher.rating = Math.round((averageStars / 5) * 10);
+            } else {
+                teacher.rating = 0;
+            }
             
             await teacher.save();
             
@@ -203,7 +211,6 @@ router.delete('/:commentId', authRequired, async (req, res) => {
         }
 
         // Оновлюємо лічильники викладача
-        const { Teacher } = await import('../models/Teacher.js');
         const teacher = await Teacher.findById(comment.teacherId);
         
         if (teacher) {
@@ -220,8 +227,16 @@ router.delete('/:commentId', authRequired, async (req, res) => {
             // Оновлюємо загальну кількість голосів
             teacher.totalVotes -= 1;
             
-            // Перераховуємо рейтинг
-            teacher.rating = teacher.calculateRating();
+            // Перераховуємо рейтинг на основі зірок (1-5 -> 0-10)
+            const allComments = await TeacherComment.find({ teacherId: comment.teacherId, status: 'visible' });
+            if (allComments.length > 0) {
+                const totalStars = allComments.reduce((sum, comment) => sum + (comment.rating || 0), 0);
+                const averageStars = totalStars / allComments.length;
+                // Конвертуємо з 1-5 зірок в 0-10 рейтинг
+                teacher.rating = Math.round((averageStars / 5) * 10);
+            } else {
+                teacher.rating = 0;
+            }
             
             await teacher.save();
         }
