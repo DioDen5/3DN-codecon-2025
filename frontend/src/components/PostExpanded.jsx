@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ThumbsUp, ThumbsDown, MessageCircle } from 'lucide-react';
 
-const PostExpanded = ({ post, onReaction }) => {
+const PostExpanded = ({ post, onReaction, searchQuery = '' }) => {
     const [pending, setPending] = useState(false);
 
     const formatDate = (dateString) => {
@@ -38,6 +38,24 @@ const PostExpanded = ({ post, onReaction }) => {
         return '@Невідомий';
     };
 
+    const highlightText = (text, query) => {
+        if (!query || !text) return text;
+        
+        const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+        const parts = text.split(regex);
+        
+        return parts.map((part, index) => 
+            regex.test(part) ? (
+                <mark 
+                    key={index} 
+                    className="bg-yellow-300 text-black px-1 rounded font-semibold animate-pulse"
+                >
+                    {part}
+                </mark>
+            ) : part
+        );
+    };
+
     const onVote = async (val) => {
         if (pending || !onReaction) return;
         setPending(true);
@@ -60,7 +78,7 @@ const PostExpanded = ({ post, onReaction }) => {
                 </span>
             </div>
 
-            {post.title && <h2 className="font-bold text-lg mb-2 leading-snug">{post.title}</h2>}
+            {post.title && <h2 className="font-bold text-lg mb-2 leading-snug">{highlightText(post.title, searchQuery)}</h2>}
             {post.body && <p className="text-sm text-gray-800 whitespace-pre-line mb-4">{post.body}</p>}
 
             <div className="flex items-center gap-4 text-sm">

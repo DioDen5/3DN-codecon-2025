@@ -14,9 +14,28 @@ const PostCard = ({
                       onClick,
                       onVote,
                       pending = false,
-                      voted = null
+                      voted = null,
+                      searchQuery = ''
                   }) => {
     const shortContent = content?.length > 180 ? content.slice(0, 180) + '...' : content || '';
+
+    const highlightText = (text, query) => {
+        if (!query || !text) return text;
+        
+        const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+        const parts = text.split(regex);
+        
+        return parts.map((part, index) => 
+            regex.test(part) ? (
+                <mark 
+                    key={index} 
+                    className="bg-yellow-300 text-black px-1 rounded font-semibold animate-pulse"
+                >
+                    {part}
+                </mark>
+            ) : part
+        );
+    };
 
     const handleLike = (e) => {
         e.stopPropagation();
@@ -38,7 +57,7 @@ const PostCard = ({
                 <span className="text-gray-500">{date}</span>
             </div>
 
-            <h2 className="font-bold text-md leading-snug">{title}</h2>
+            <h2 className="font-bold text-md leading-snug">{highlightText(title, searchQuery)}</h2>
             <p className="text-sm text-gray-700">{shortContent}</p>
 
             {image_url && (

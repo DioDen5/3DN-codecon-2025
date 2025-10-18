@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { listPublished } from "../api/announcements";
 import PostCard from "../components/PostCard";
@@ -21,8 +21,10 @@ const ForumPage = () => {
 
     const [raw, setRaw] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [searching, setSearching] = useState(false);
     const [error, setError] = useState("");
     const [q, setQ] = useState("");
+    const [searchQuery, setSearchQuery] = useState("");
     const [itemOffset, setItemOffset] = useState(0);
 
     const sortOptions = [
@@ -91,12 +93,30 @@ const ForumPage = () => {
         return 'Невідомий';
     };
 
+    const highlightText = (text, query) => {
+        if (!query || !text) return text;
+        
+        const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+        const parts = text.split(regex);
+        
+        return parts.map((part, index) => 
+            regex.test(part) ? (
+                <mark 
+                    key={index} 
+                    className="bg-yellow-300 text-black px-1 rounded font-semibold animate-pulse"
+                >
+                    {part}
+                </mark>
+            ) : part
+        );
+    };
+
     const loadData = async () => {
         setLoading(true);
+        setSearching(searchQuery.length > 0);
         setError("");
 
         try {
-            const searchQuery = typeof q === 'string' ? q.trim() : '';
             const arr = await listPublished({ q: searchQuery });
             const withCounts = await Promise.all(
                 arr.map(async (a) => {
@@ -114,12 +134,22 @@ const ForumPage = () => {
             console.error("Load error:", err);
         } finally {
             setLoading(false);
+            setSearching(false);
         }
     };
 
+    // Debounce search
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setSearchQuery(q.trim());
+        }, 300);
+        
+        return () => clearTimeout(timer);
+    }, [q]);
+
     useEffect(() => {
         loadData();
-    }, [q, isAuthed]);
+    }, [searchQuery, isAuthed]);
 
     // Підписка на оновлення форуму
     useEffect(() => {
@@ -178,6 +208,7 @@ const ForumPage = () => {
                 </div>
 
                 {loading && <p className="text-center">Завантаження...</p>}
+                {searching && <p className="text-center text-blue-400">Пошук...</p>}
                 {error && <p className="text-center text-red-500">{error}</p>}
 
                 {!loading && !error && (
@@ -198,6 +229,7 @@ const ForumPage = () => {
                                     voted={post._my === 1 ? 'like' : post._my === -1 ? 'dislike' : (post.counts?.userReaction === 1 ? 'like' : post.counts?.userReaction === -1 ? 'dislike' : null)}
                                     onVote={(id, t) => handleVote(id, t)}
                                     onClick={() => nav(`/forum/${post._id}`)}
+                                    searchQuery={searchQuery}
                                 />
                             ))}
                         </div>
