@@ -25,13 +25,13 @@ router.get('/', authRequired, requireVerified, async (req, res) => {
                 pipeline: [{ $project: { email: 1, displayName: 1 } }]
             }},
             { $unwind: '$authorId' },
-            { $sort: { score: -1, pinned: -1, publishedAt: -1 } },
+            { $sort: { score: -1, publishedAt: -1 } },
             { $limit: 20 }
         ]);
     } else {
         const cursor = Announcement.find(filter)
             .populate('authorId', 'email displayName')
-            .sort({ pinned: -1, publishedAt: -1 })
+            .sort({ publishedAt: -1 })
             .limit(20);
         docs = await cursor;
     }

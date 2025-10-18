@@ -4,16 +4,38 @@ import { ThumbsUp, ThumbsDown, MessageCircle } from 'lucide-react';
 const PostExpanded = ({ post, onReaction }) => {
     const [pending, setPending] = useState(false);
 
+    const formatDate = (dateString) => {
+        if (!dateString) return 'Невідомо';
+        
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return 'Невідомо';
+        
+        const now = new Date();
+        const diffMs = now - date;
+        const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        
+        if (diffDays < 1) {
+            if (diffHours < 1) {
+                const diffMinutes = Math.floor(diffMs / (1000 * 60));
+                return diffMinutes < 1 ? 'щойно' : `${diffMinutes}хв`;
+            }
+            return `${diffHours}г`;
+        }
+        
+        return date.toLocaleDateString('uk-UA');
+    };
+
     const getAuthorName = (post) => {
         if (post?.authorId) {
             if (post.authorId.displayName) {
-                return post.authorId.displayName;
+                return `@${post.authorId.displayName}`;
             }
             if (post.authorId.email) {
-                return post.authorId.email.split('@')[0];
+                return `@${post.authorId.email.split('@')[0]}`;
             }
         }
-        return 'Невідомий';
+        return '@Невідомий';
     };
 
     const onVote = async (val) => {
@@ -32,9 +54,9 @@ const PostExpanded = ({ post, onReaction }) => {
     return (
         <div className="bg-white text-black rounded-xl p-4 shadow-md">
             <div className="flex items-center gap-2 text-sm mb-1">
-                <span className="font-semibold">@{getAuthorName(post)}</span>
+                <span className="font-semibold">{getAuthorName(post)}</span>
                 <span className="text-gray-500">
-                    {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString() : ''}
+                    {formatDate(post.publishedAt || post.createdAt)}
                 </span>
             </div>
 

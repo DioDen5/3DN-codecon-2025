@@ -34,16 +34,38 @@ const ForumPage = () => {
     const pageCount = Math.ceil(sortedData.length / ITEMS_PER_PAGE) || 1;
     const currentPage = Math.floor(itemOffset / ITEMS_PER_PAGE);
 
+    const formatDate = (dateString) => {
+        if (!dateString) return 'Невідомо';
+        
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return 'Невідомо';
+        
+        const now = new Date();
+        const diffMs = now - date;
+        const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        
+        if (diffDays < 1) {
+            if (diffHours < 1) {
+                const diffMinutes = Math.floor(diffMs / (1000 * 60));
+                return diffMinutes < 1 ? 'щойно' : `${diffMinutes}хв`;
+            }
+            return `${diffHours}г`;
+        }
+        
+        return date.toLocaleDateString('uk-UA');
+    };
+
     const getAuthorName = (announcement) => {
         if (announcement?.authorId) {
             if (announcement.authorId.displayName) {
-                return announcement.authorId.displayName;
+                return `@${announcement.authorId.displayName}`;
             }
             if (announcement.authorId.email) {
-                return announcement.authorId.email.split('@')[0];
+                return `@${announcement.authorId.email.split('@')[0]}`;
             }
         }
-        return 'Невідомий';
+        return '@Невідомий';
     };
 
     const loadData = async () => {
@@ -147,10 +169,8 @@ const ForumPage = () => {
                                     likes={post.counts?.likes ?? 0}
                                     dislikes={post.counts?.dislikes ?? 0}
                                     comments={post.metrics?.comments ?? 0}
-                                    username={`@${getAuthorName(post)}`}
-                                    date={new Date(
-                                        post.publishedAt || post.createdAt
-                                    ).toLocaleDateString()}
+                                    username={getAuthorName(post)}
+                                    date={formatDate(post.publishedAt || post.createdAt)}
                                     voted={post._my === 1 ? 'like' : post._my === -1 ? 'dislike' : (post.counts?.userReaction === 1 ? 'like' : post.counts?.userReaction === -1 ? 'dislike' : null)}
                                     onVote={(id, t) => handleVote(id, t)}
                                     onClick={() => nav(`/forum/${post._id}`)}
