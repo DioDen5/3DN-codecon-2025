@@ -58,6 +58,18 @@ teacherSchema.virtual('averageRating').get(function() {
     return Math.round((percentage / 10) * 10) / 10;
 });
 
+teacherSchema.methods.calculateRating = function() {
+    if (this.totalVotes === 0) return 0;
+    const positiveVotes = this.likes;
+    const negativeVotes = this.dislikes;
+    const totalVotes = positiveVotes + negativeVotes;
+    
+    if (totalVotes === 0) return 0;
+    
+    const percentage = (positiveVotes / totalVotes) * 100;
+    return Math.round((percentage / 10) * 10) / 10;
+};
+
 teacherSchema.set('toJSON', { virtuals: true });
 
 export const Teacher = mongoose.model('Teacher', teacherSchema);

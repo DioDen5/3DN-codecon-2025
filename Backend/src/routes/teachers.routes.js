@@ -45,10 +45,18 @@ router.get('/', async (req, res) => {
             .skip(skip)
             .limit(parseInt(limit));
             
+        const teachersWithRating = teachers.map(teacher => {
+            const rating = teacher.calculateRating();
+            return {
+                ...teacher.toObject(),
+                rating: rating
+            };
+        });
+            
         const total = await Teacher.countDocuments(filter);
         
         res.json({
-            teachers,
+            teachers: teachersWithRating,
             pagination: {
                 currentPage: parseInt(page),
                 totalPages: Math.ceil(total / limit),
@@ -142,7 +150,7 @@ router.post('/:id/vote', authRequired, async (req, res) => {
             userReaction = newValue;
         }
         
-        teacher.rating = teacher.averageRating;
+        teacher.rating = teacher.calculateRating();
         await teacher.save();
         
         res.json({
