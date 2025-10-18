@@ -57,6 +57,7 @@ const ForumPage = () => {
     };
 
     const getAuthorName = (announcement) => {
+        console.log('Getting author name for:', announcement.title, 'authorId:', announcement.authorId);
         if (announcement?.authorId) {
             if (announcement.authorId.displayName) {
                 return `@${announcement.authorId.displayName}`;

@@ -12,9 +12,9 @@ router.get('/', authRequired, requireVerified, async (req, res) => {
     const q = req.query.q?.trim();
     const filter = { status: 'published', visibility: 'students' };
     
-    let docs;
+    let pipeline;
     if (q) {
-        docs = await Announcement.aggregate([
+        pipeline = [
             { $match: { ...filter, $text: { $search: q } } },
             { $addFields: { score: { $meta: 'textScore' } } },
             { $lookup: {
@@ -27,14 +27,28 @@ router.get('/', authRequired, requireVerified, async (req, res) => {
             { $unwind: '$authorId' },
             { $sort: { score: -1, publishedAt: -1 } },
             { $limit: 20 }
-        ]);
+        ];
     } else {
-        const cursor = Announcement.find(filter)
-            .populate('authorId', 'email displayName')
-            .sort({ publishedAt: -1 })
-            .limit(20);
-        docs = await cursor;
+        pipeline = [
+            { $match: filter },
+            { $lookup: {
+                from: 'users',
+                localField: 'authorId',
+                foreignField: '_id',
+                as: 'authorId',
+                pipeline: [{ $project: { email: 1, displayName: 1 } }]
+            }},
+            { $unwind: '$authorId' },
+            { $sort: { publishedAt: -1 } },
+            { $limit: 20 }
+        ];
     }
+    
+    const docs = await Announcement.aggregate(pipeline);
+    console.log('Announcements with authorId:', JSON.stringify(docs.map(d => ({ 
+        title: d.title, 
+        authorId: d.authorId 
+    })), null, 2));
     res.json(docs);
 });
 

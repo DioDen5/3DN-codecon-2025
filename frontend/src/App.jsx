@@ -45,6 +45,18 @@ function App() {
             <ErrorBoundary>
                 <Routes>
                     <Route path="/" element={<HomePage />} />
+                    
+                    <Route 
+                        path="/login" 
+                        element={
+                            <Modal isOpen={true} onClose={() => window.history.back()}>
+                                <LoginForm
+                                    switchToReset={() => setModalType("reset")}
+                                    onSuccess={() => window.history.back()}
+                                />
+                            </Modal>
+                        } 
+                    />
 
                     <Route
                         path="/forum"
