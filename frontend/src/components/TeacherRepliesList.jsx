@@ -168,7 +168,7 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
                                 )}
                             </div>
                             <p className="text-sm text-gray-800 whitespace-pre-line mb-2">
-                                {reply.body || reply.message || (reply.rating ? 'Оцінка без коментаря' : '')}
+                                {reply.body || reply.message || ''}
                             </p>
                             <div className="flex items-center gap-4 text-sm">
                                 <button
