@@ -7,111 +7,111 @@ const teachersData = [
         name: 'Костів Оксана Миколаївна',
         university: 'ЛНУ імені Івана Франка',
         subject: 'Кафедра української мови',
-        image: '/assets/v6.jpg',
+        image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=400&fit=crop&crop=face',
         rating: 0,
-        likes: 33,
-        dislikes: 6,
-        comments: 22,
-        totalVotes: 39
+        likes: 0,
+        dislikes: 0,
+        comments: 0,
+        totalVotes: 0
     },
     {
         name: 'Іваненко Ігор Петрович',
         university: 'ЛНУ імені Івана Франка',
         subject: 'Фізика',
-        image: '/assets/4v.jpg',
+        image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
         rating: 0,
-        likes: 21,
-        dislikes: 3,
-        comments: 18,
-        totalVotes: 24
+        likes: 0,
+        dislikes: 0,
+        comments: 0,
+        totalVotes: 0
     },
     {
         name: 'Сидоренко Іван Олексійович',
         university: 'ЛНУ імені Івана Франка',
         subject: 'Право',
-        image: '/assets/v-8.jpeg',
+        image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face',
         rating: 0,
-        likes: 44,
-        dislikes: 4,
-        comments: 27,
-        totalVotes: 48
+        likes: 0,
+        dislikes: 0,
+        comments: 0,
+        totalVotes: 0
     },
     {
         name: 'Литвин Андрій Васильович',
         university: 'ЛНУ імені Івана Франка',
         subject: 'Інформатика',
-        image: '/assets/v7.jpg',
+        image: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&h=400&fit=crop&crop=face',
         rating: 0,
-        likes: 28,
-        dislikes: 5,
-        comments: 19,
-        totalVotes: 33
+        likes: 0,
+        dislikes: 0,
+        comments: 0,
+        totalVotes: 0
     },
     {
         name: 'Петренко Ольга Степанівна',
         university: 'ЛНУ імені Івана Франка',
         subject: 'Психологія',
-        image: '/assets/icon.jpg',
+        image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=400&fit=crop&crop=face',
         rating: 0,
-        likes: 39,
-        dislikes: 2,
-        comments: 25,
-        totalVotes: 41
+        likes: 0,
+        dislikes: 0,
+        comments: 0,
+        totalVotes: 0
     },
     {
         name: 'Коваленко Максим Сергійович',
         university: 'ЛНУ імені Івана Франка',
         subject: 'Соціологія',
-        image: '/assets/icon.jpg',
+        image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop&crop=face',
         rating: 0,
-        likes: 19,
-        dislikes: 6,
-        comments: 10,
-        totalVotes: 25
+        likes: 0,
+        dislikes: 0,
+        comments: 0,
+        totalVotes: 0
     },
     {
         name: 'Ткачук Ірина Миколаївна',
         university: 'ЛНУ імені Івана Франка',
         subject: 'Англійська мова',
-        image: '/assets/icon.jpg',
+        image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=400&fit=crop&crop=face',
         rating: 0,
-        likes: 30,
-        dislikes: 3,
-        comments: 21,
-        totalVotes: 33
+        likes: 0,
+        dislikes: 0,
+        comments: 0,
+        totalVotes: 0
     },
     {
         name: 'Гриценко Олег Іванович',
         university: 'ЛНУ імені Івана Франка',
         subject: 'Філософія',
-        image: '/assets/icon.jpg',
+        image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
         rating: 0,
-        likes: 25,
-        dislikes: 4,
-        comments: 15,
-        totalVotes: 29
+        likes: 0,
+        dislikes: 0,
+        comments: 0,
+        totalVotes: 0
     },
     {
         name: 'Мельник Світлана Анатоліївна',
         university: 'ЛНУ імені Івана Франка',
         subject: 'Економіка',
-        image: '/assets/icon.jpg',
+        image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=400&fit=crop&crop=face',
         rating: 0,
-        likes: 41,
-        dislikes: 1,
-        comments: 30,
-        totalVotes: 42
+        likes: 0,
+        dislikes: 0,
+        comments: 0,
+        totalVotes: 0
     },
     {
         name: 'Семенюк Володимир Степанович',
         university: 'ЛНУ імені Івана Франка',
         subject: 'Політологія',
-        image: '/assets/icon.jpg',
+        image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face',
         rating: 0,
-        likes: 20,
-        dislikes: 5,
-        comments: 12,
-        totalVotes: 25
+        likes: 0,
+        dislikes: 0,
+        comments: 0,
+        totalVotes: 0
     }
 ];
 
