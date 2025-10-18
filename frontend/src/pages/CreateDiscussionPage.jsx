@@ -56,12 +56,12 @@ const CreateDiscussionPage = () => {
         if (title.trim() || content.trim() || image) {
             setShowCancelConfirm(true);
         } else {
-            navigate(-1);
+            navigate('/forum');
         }
     };
 
     const confirmCancel = () => {
-        navigate(-1);
+        navigate('/forum');
     };
 
     return (

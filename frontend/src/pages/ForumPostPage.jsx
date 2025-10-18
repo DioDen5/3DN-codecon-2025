@@ -149,7 +149,7 @@ const ForumPostPage = () => {
         <div className="min-h-[calc(100vh-68px)] px-6 py-10 bg-gradient-to-b from-black to-gray-900 text-white">
             <div className="max-w-4xl mx-auto space-y-6">
                 <button
-                    onClick={() => navigate(-1)}
+                    onClick={() => navigate('/forum')}
                     className="text-sm underline text-white hover:text-purple-300 transition cursor-pointer"
                 >
                     ← Назад
