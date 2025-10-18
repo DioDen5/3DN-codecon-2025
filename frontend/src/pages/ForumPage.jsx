@@ -29,9 +29,14 @@ const ForumPage = () => {
 
     const sortOptions = [
         {
-            label: '🔤 Від А до Я',
-            value: 'alphabet',
-            sort: (a, b) => (a.title || '').localeCompare(b.title || ''),
+            label: '🕓 Найновіші',
+            value: 'newest',
+            sort: (a, b) => new Date(b.publishedAt || b.createdAt) - new Date(a.publishedAt || a.createdAt),
+        },
+        {
+            label: '🕰️ Найстаріші',
+            value: 'oldest',
+            sort: (a, b) => new Date(a.publishedAt || a.createdAt) - new Date(b.publishedAt || b.createdAt),
         },
         {
             label: '🤍 За лайками',
@@ -42,11 +47,6 @@ const ForumPage = () => {
             label: '💬 За коментарями',
             value: 'comments',
             sort: (a, b) => (b.metrics?.comments || 0) - (a.metrics?.comments || 0),
-        },
-        {
-            label: '🕓 Найновіші',
-            value: 'newest',
-            sort: (a, b) => new Date(b.publishedAt || b.createdAt) - new Date(a.publishedAt || a.createdAt),
         },
     ];
 
