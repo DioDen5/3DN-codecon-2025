@@ -178,7 +178,7 @@ const TeacherProfilePage = () => {
                                 </div>
                                 
                                 <div className="text-right">
-                                    <div className="text-4xl font-bold text-blue-500 mb-2 flex items-center">
+                                    <div className="text-4xl font-bold text-blue-500 mb-2 flex items-center justify-end">
                                         <div className="relative overflow-hidden inline-block">
                                             <div 
                                                 key={currentRating}
