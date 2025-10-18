@@ -1,19 +1,28 @@
-import React, { useState } from 'react'
-import teachers from '../data/teachers'
+import React, { useState, useEffect, useMemo } from 'react'
 import SearchInput from '../components/SearchInput'
 import TeacherCard from '../components/TeacherCard'
-import ShowMoreButton from '../components/ShowMoreButton'
-import { useSort } from '../hooks/useSort' // твій хук
+import Pagination from '../components/Pagination'
+import { getTeachers } from '../api/teachers'
+import { useSort } from '../hooks/useSort'
 
 const TeachersPage = () => {
+    const [teachers, setTeachers] = useState([])
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState('')
     const [query, setQuery] = useState('')
-    const [visibleCount, setVisibleCount] = useState(12)
+    const [searchQuery, setSearchQuery] = useState('')
+    const [currentPage, setCurrentPage] = useState(1)
+    const [totalPages, setTotalPages] = useState(1)
+    const [sortBy, setSortBy] = useState('rating')
 
-    // 🔽 кастомізовані опції сортування
-    const {
-        sortedData: sortedTeachers,
-        SortDropdown
-    } = useSort(teachers, [
+    const ITEMS_PER_PAGE = 8
+
+    const sortOptions = [
+        {
+            label: '⭐ За рейтингом',
+            value: 'rating',
+            sort: (a, b) => (b.rating || 0) - (a.rating || 0),
+        },
         {
             label: '🤍 За лайками',
             value: 'likes',
@@ -21,17 +30,69 @@ const TeachersPage = () => {
         },
         {
             label: '💬 За відгуками',
-            value: 'reviews',
-            sort: (a, b) => (b.reviews || 0) - (a.reviews || 0),
+            value: 'comments',
+            sort: (a, b) => (b.comments || 0) - (a.comments || 0),
         },
-    ])
+    ]
 
-    // 🔍 пошук
-    const filtered = sortedTeachers.filter((t) =>
-        t.name.toLowerCase().includes(query.toLowerCase())
-    )
+    const { sortedData, SortDropdown } = useSort(teachers, sortOptions)
 
-    const visibleTeachers = filtered.slice(0, visibleCount)
+    const highlightText = (text, query) => {
+        if (!query || !text) return text;
+        
+        const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+        const parts = text.split(regex);
+        
+        return parts.map((part, index) => 
+            regex.test(part) ? (
+                <mark 
+                    key={index} 
+                    className="bg-yellow-300 text-black px-1 rounded font-semibold animate-pulse"
+                >
+                    {part}
+                </mark>
+            ) : part
+        );
+    };
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setSearchQuery(query);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [query]);
+
+    const loadTeachers = async () => {
+        setLoading(true);
+        setError('');
+        try {
+            const params = {
+                page: currentPage,
+                limit: ITEMS_PER_PAGE,
+                sort: sortBy
+            };
+            
+            if (searchQuery) {
+                params.q = searchQuery;
+            }
+            
+            const data = await getTeachers(params);
+            setTeachers(data.teachers);
+            setTotalPages(data.pagination.totalPages);
+        } catch (err) {
+            setError('Помилка завантаження викладачів');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        loadTeachers();
+    }, [currentPage, searchQuery, sortBy]);
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+    };
 
     return (
         <div className="min-h-[calc(100vh-68px)] bg-gradient-to-b from-black to-gray-900 px-6 py-10 text-white">
@@ -46,15 +107,31 @@ const TeachersPage = () => {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {visibleTeachers.map((teacher, index) => (
-                        <TeacherCard key={index} {...teacher} />
-                    ))}
-                </div>
+                {loading && <p className="text-center">Завантаження...</p>}
+                {error && <p className="text-center text-red-500">{error}</p>}
 
-                {visibleCount < filtered.length && (
-                    <div className="flex justify-center mt-10">
-                        <ShowMoreButton onClick={() => setVisibleCount(prev => prev + 12)} />
+                {!loading && !error && (
+                    <div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+                            {teachers.map((teacher) => (
+                                <TeacherCard 
+                                    key={teacher._id} 
+                                    {...teacher} 
+                                    searchQuery={searchQuery}
+                                    highlightText={highlightText}
+                                />
+                            ))}
+                        </div>
+
+                        {totalPages > 1 && (
+                            <div className="flex justify-center mt-10">
+                                <Pagination
+                                    pageCount={totalPages}
+                                    currentPage={currentPage}
+                                    onPageChange={handlePageChange}
+                                />
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
