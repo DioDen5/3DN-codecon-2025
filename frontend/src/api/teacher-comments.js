@@ -10,9 +10,9 @@ export async function getTeacherComments(teacherId, page = 1, limit = 50) {
     }
 }
 
-export async function createTeacherComment(teacherId, body) {
+export async function createTeacherComment(teacherId, body, rating) {
     try {
-        const { data } = await http.post(`/teacher-comments/${teacherId}`, { body });
+        const { data } = await http.post(`/teacher-comments/${teacherId}`, { body, rating });
         return data;
     } catch (err) {
         console.error('Error creating teacher comment:', err);

@@ -104,7 +104,7 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
                     <path d="M21 15V8A2 2 0 0019 6H5a2 2 0 00-2 2v7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                     <path d="M7 9h10M7 12h7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 </svg>
-                <h2 className="text-xl font-semibold">Відповіді</h2>
+                <h2 className="text-xl font-semibold">Відгуки</h2>
             </div>
 
             {error && <p className="text-red-500">{error}</p>}
@@ -116,8 +116,18 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
                             <div className="flex items-center gap-2 text-sm mb-1">
                                 <span className="font-semibold">@{getUserName(reply)}</span>
                                 <span className="text-gray-500">{formatDate(reply.createdAt || reply.created_at)}</span>
+                                {reply.rating && (
+                                    <div className="flex items-center gap-1">
+                                        <span className="text-blue-500 text-sm">⭐</span>
+                                        <span className="text-xs text-gray-600 font-medium">
+                                            {reply.rating}/5
+                                        </span>
+                                    </div>
+                                )}
                             </div>
-                            <p className="text-sm text-gray-800 whitespace-pre-line mb-2">{reply.body || reply.message}</p>
+                            <p className="text-sm text-gray-800 whitespace-pre-line mb-2">
+                                {reply.body || reply.message || (reply.rating ? 'Оцінка без коментаря' : '')}
+                            </p>
                             <div className="flex items-center gap-4 text-sm">
                                 <button
                                     disabled={pendingVotes.has(reply._id)}
@@ -158,7 +168,7 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
                         </div>
                     ))
                 ) : (
-                    <p className="text-gray-500">Немає відповідей на цей коментар.</p>
+                    <p className="text-gray-500">Немає відгуків для цього викладача.</p>
                 )}
             </div>
         </div>

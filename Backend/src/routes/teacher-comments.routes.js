@@ -61,8 +61,8 @@ router.post('/:teacherId', authRequired, requireVerified, async (req, res) => {
             return res.status(400).json({ error: 'Comment body is required' });
         }
 
-        if (!rating || ![1, -1].includes(rating)) {
-            return res.status(400).json({ error: 'Rating is required and must be 1 or -1' });
+        if (!rating || ![1, 2, 3, 4, 5].includes(rating)) {
+            return res.status(400).json({ error: 'Rating is required and must be between 1 and 5' });
         }
 
         // Перевіряємо, чи користувач вже залишив відгук для цього викладача

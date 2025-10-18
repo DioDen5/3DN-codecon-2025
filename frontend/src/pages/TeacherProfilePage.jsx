@@ -4,22 +4,23 @@ import { ArrowLeft, ThumbsUp, ThumbsDown, Star, GraduationCap, BookOpen } from '
 import { getTeacher, voteTeacher, getTeacherReactions } from '../api/teachers'
 import { getTeacherComments, createTeacherComment, getTeacherCommentCounts } from '../api/teacher-comments'
 import { useAuthState } from '../api/useAuthState'
-import CommentInput from '../components/CommentInput'
+import ReviewInput from '../components/ReviewInput'
 import TeacherRepliesList from '../components/TeacherRepliesList'
 import StarRating from '../components/StarRating'
 
 const TeacherProfilePage = () => {
     const { id } = useParams()
     const navigate = useNavigate()
-    const { isAuthed: isAuthenticated } = useAuthState()
+    const { isAuthed: isAuthenticated, user } = useAuthState()
     
     const [teacher, setTeacher] = useState(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
-    const [userReaction, setUserReaction] = useState(0)
+    const [userRating, setUserRating] = useState(0)
     const [isVoting, setIsVoting] = useState(false)
     const [currentRating, setCurrentRating] = useState(0)
     const [replies, setReplies] = useState([])
+    const [hasSubmittedReview, setHasSubmittedReview] = useState(false)
 
     const loadTeacher = async () => {
         setLoading(true)
@@ -29,10 +30,7 @@ const TeacherProfilePage = () => {
             setTeacher(data)
             setCurrentRating(data.rating)
             
-            if (isAuthenticated) {
-                const reactionData = await getTeacherReactions(id)
-                setUserReaction(reactionData.userReaction)
-            }
+            // Не завантажуємо userReaction з сервера, оскільки тепер зберігаємо локально
             
             // Fetch comments for the teacher
             const commentsData = await getTeacherComments(id)
@@ -48,6 +46,25 @@ const TeacherProfilePage = () => {
                 })
             )
             setReplies(commentsWithCounts)
+            
+            // Перевіряємо, чи користувач вже залишив відгук
+            if (isAuthenticated && user) {
+                const userId = user._id || user.id
+                const userHasReview = commentsWithCounts.some(comment => 
+                    comment.authorId && comment.authorId._id === userId
+                )
+                setHasSubmittedReview(userHasReview)
+                
+                // Якщо користувач вже залишив відгук, завантажуємо його оцінку з коментаря
+                if (userHasReview) {
+                    const userComment = commentsWithCounts.find(comment => 
+                        comment.authorId && comment.authorId._id === userId
+                    )
+                    if (userComment && userComment.rating) {
+                        setUserRating(userComment.rating)
+                    }
+                }
+            }
         } catch (err) {
             setError('Помилка завантаження профілю викладача')
         } finally {
@@ -59,43 +76,32 @@ const TeacherProfilePage = () => {
         loadTeacher()
     }, [id, isAuthenticated])
 
-    const handleVote = async (type) => {
-        console.log('Voting:', type, 'isAuthenticated:', isAuthenticated)
-        
-        if (!isAuthenticated) {
-            console.log('Not authenticated, redirecting to login')
-            navigate('/login')
-            return
-        }
-
-        setIsVoting(true)
-        try {
-            console.log('Sending vote request...')
-            const data = await voteTeacher(id, type)
-            console.log('Vote response:', data)
-            console.log('New teacher rating:', data.teacher.rating)
-            setTeacher(data.teacher)
-            setUserReaction(data.userReaction)
-            
-            // Оновлюємо currentRating для анімації
-            setCurrentRating(data.teacher.rating)
-        } catch (err) {
-            console.error('Error voting:', err)
-            console.error('Error details:', err.response?.data)
-        } finally {
-            setIsVoting(false)
-        }
+    const handleRatingChange = (rating) => {
+        setUserRating(rating)
     }
 
 
-    const handleCommentSubmit = async (commentText) => {
-        console.log('Comment submitted:', commentText)
+    const handleReviewSubmit = async (commentText, rating) => {
+        console.log('Review submitted:', commentText, 'Rating:', rating)
         
         try {
-            const newComment = await createTeacherComment(id, commentText)
+            // Спочатку відправляємо оцінку на сервер
+            const voteData = await voteTeacher(id, rating >= 3 ? 'like' : 'dislike')
+            console.log('Vote response:', voteData)
+            
+            // Оновлюємо дані викладача з сервера
+            setTeacher(voteData.teacher)
+            setCurrentRating(voteData.teacher.rating)
+            
+            // Потім створюємо коментар з оцінкою
+            const newComment = await createTeacherComment(id, commentText, rating)
             setReplies(prev => [newComment, ...prev])
+            
+            // Показуємо оцінку в блоці "Ваша оцінка"
+            setHasSubmittedReview(true)
+            setUserRating(rating)
         } catch (err) {
-            console.error('Error creating comment:', err)
+            console.error('Error creating review:', err)
             // You could add error handling here
         }
     }
@@ -225,32 +231,19 @@ const TeacherProfilePage = () => {
                             {isAuthenticated && (
                                 <div className="border-t pt-6">
                                     <h3 className="text-lg font-semibold mb-4">Ваша оцінка</h3>
-                                    <div className="flex gap-4">
-                                        <button
-                                            onClick={() => handleVote('like')}
-                                            disabled={isVoting}
-                                            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition ${
-                                                userReaction === 1 
-                                                    ? 'bg-green-500 text-white' 
-                                                    : 'bg-gray-100 hover:bg-green-100 text-gray-700'
-                                            } ${isVoting ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                        >
-                                            <ThumbsUp size={20} />
-                                            Позитивна
-                                        </button>
-                                        
-                                        <button
-                                            onClick={() => handleVote('dislike')}
-                                            disabled={isVoting}
-                                            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition ${
-                                                userReaction === -1 
-                                                    ? 'bg-red-500 text-white' 
-                                                    : 'bg-gray-100 hover:bg-red-100 text-gray-700'
-                                            } ${isVoting ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                        >
-                                            <ThumbsDown size={20} />
-                                            Негативна
-                                        </button>
+                                    <div className="flex items-center gap-4">
+                                        {!hasSubmittedReview ? (
+                                            <div className="flex items-center gap-2 px-6 py-3 rounded-lg bg-gray-100 text-gray-500">
+                                                <span>Оберіть оцінку</span>
+                                            </div>
+                                        ) : (
+                                            <div className="flex items-center gap-3 px-6 py-4 rounded-xl font-medium bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg">
+                                                <span className="text-lg">⭐</span>
+                                                <span className="text-sm font-semibold">
+                                                    {userRating} з 5 зірок
+                                                </span>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             )}
@@ -270,7 +263,14 @@ const TeacherProfilePage = () => {
                         </div>
                     </div>
                 </div>
-                        <CommentInput onSubmit={handleCommentSubmit} />
+                        {!hasSubmittedReview && (
+                            <ReviewInput 
+                                onSubmit={handleReviewSubmit} 
+                                userRating={userRating}
+                                onRatingChange={handleRatingChange}
+                                isVoting={isVoting}
+                            />
+                        )}
                         <TeacherRepliesList replies={replies} onRepliesUpdate={setReplies} />
             </div>
         </div>
