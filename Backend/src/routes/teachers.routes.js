@@ -107,6 +107,7 @@ router.post('/', authRequired, async (req, res) => {
 
 router.post('/:id/vote', authRequired, async (req, res) => {
     try {
+        console.log('Vote request:', req.params, req.body, req.user);
         const { id } = req.params;
         const { type } = req.body;
         const userId = req.user.id;
@@ -117,8 +118,8 @@ router.post('/:id/vote', authRequired, async (req, res) => {
         
         const existingReaction = await Reaction.findOne({
             targetType: 'teacher',
-            targetId: id,
-            authorId: userId
+            targetId: new mongoose.Types.ObjectId(id),
+            userId: new mongoose.Types.ObjectId(userId)
         });
         
         const teacher = await Teacher.findById(id);
@@ -146,8 +147,8 @@ router.post('/:id/vote', authRequired, async (req, res) => {
         } else {
             await Reaction.create({
                 targetType: 'teacher',
-                targetId: id,
-                authorId: userId,
+                targetId: new mongoose.Types.ObjectId(id),
+                userId: new mongoose.Types.ObjectId(userId),
                 value: newValue
             });
             teacher.likes += type === 'like' ? 1 : 0;
@@ -164,8 +165,9 @@ router.post('/:id/vote', authRequired, async (req, res) => {
             userReaction,
             message: 'Vote updated successfully'
         });
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to vote' });
+        } catch (error) {
+        console.error('Vote error:', error);
+        res.status(500).json({ error: 'Failed to vote', details: error.message });
     }
 });
 
@@ -184,8 +186,8 @@ router.get('/:id/reactions', authRequired, async (req, res) => {
         
         const userReaction = await Reaction.findOne({
             targetType: 'teacher',
-            targetId: id,
-            authorId: userId
+            targetId: new mongoose.Types.ObjectId(id),
+            userId: new mongoose.Types.ObjectId(userId)
         });
         
         const counts = {

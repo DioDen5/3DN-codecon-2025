@@ -43,20 +43,26 @@ const TeacherProfilePage = () => {
     }, [id, isAuthenticated])
 
     const handleVote = async (type) => {
+        console.log('Voting:', type, 'isAuthenticated:', isAuthenticated)
+        
         if (!isAuthenticated) {
+            console.log('Not authenticated, redirecting to login')
             navigate('/login')
             return
         }
 
         setIsVoting(true)
         try {
+            console.log('Sending vote request...')
             const data = await voteTeacher(id, type)
+            console.log('Vote response:', data)
             setTeacher(data.teacher)
             setUserReaction(data.userReaction)
             
             animateRatingChange(data.teacher.rating)
         } catch (err) {
             console.error('Error voting:', err)
+            console.error('Error details:', err.response?.data)
         } finally {
             setIsVoting(false)
         }

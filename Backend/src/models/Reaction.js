@@ -6,7 +6,7 @@ const reactionSchema = new Schema(
     {
         targetType: {
             type: String,
-            enum: ['announcement', 'comment', 'review'],
+            enum: ['announcement', 'comment', 'review', 'teacher'],
             required: true,
             index: true,
         },
