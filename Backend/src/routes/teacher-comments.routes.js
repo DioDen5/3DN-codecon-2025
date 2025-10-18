@@ -50,7 +50,7 @@ router.get('/:teacherId', async (req, res) => {
 router.post('/:teacherId', authRequired, requireVerified, async (req, res) => {
     try {
         const { teacherId } = req.params;
-        const { body } = req.body;
+        const { body, rating } = req.body;
         const userId = req.user.id;
 
         if (!mongoose.isValidObjectId(teacherId)) {
@@ -61,10 +61,26 @@ router.post('/:teacherId', authRequired, requireVerified, async (req, res) => {
             return res.status(400).json({ error: 'Comment body is required' });
         }
 
+        if (!rating || ![1, -1].includes(rating)) {
+            return res.status(400).json({ error: 'Rating is required and must be 1 or -1' });
+        }
+
+        // Перевіряємо, чи користувач вже залишив відгук для цього викладача
+        const existingComment = await TeacherComment.findOne({
+            teacherId,
+            authorId: userId,
+            status: 'visible'
+        });
+
+        if (existingComment) {
+            return res.status(400).json({ error: 'Ви вже залишили відгук для цього викладача' });
+        }
+
         const comment = new TeacherComment({
             teacherId,
             authorId: userId,
-            body: body.trim()
+            body: body.trim(),
+            rating
         });
 
         await comment.save();

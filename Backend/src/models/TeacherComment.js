@@ -21,6 +21,11 @@ const teacherCommentSchema = new Schema(
             required: true,
             trim: true,
         },
+        rating: {
+            type: Number,
+            enum: [1, -1],
+            required: true,
+        },
         status: {
             type: String,
             enum: ['visible', 'hidden', 'deleted'],
