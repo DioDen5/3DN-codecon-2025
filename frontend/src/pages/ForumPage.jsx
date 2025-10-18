@@ -32,6 +32,7 @@ const ForumPage = () => {
         [sortedData, itemOffset]
     );
     const pageCount = Math.ceil(sortedData.length / ITEMS_PER_PAGE) || 1;
+    const currentPage = Math.floor(itemOffset / ITEMS_PER_PAGE);
 
     const getAuthorName = (announcement) => {
         if (announcement?.authorId) {
@@ -159,6 +160,7 @@ const ForumPage = () => {
 
                         <Pagination
                             pageCount={pageCount}
+                            currentPage={currentPage}
                             handlePageClick={(e) => {
                                 const newOffset =
                                     (e.selected * ITEMS_PER_PAGE) % sortedData.length;
