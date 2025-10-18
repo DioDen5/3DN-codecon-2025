@@ -45,10 +45,6 @@ router.get('/', authRequired, requireVerified, async (req, res) => {
     }
     
     const docs = await Announcement.aggregate(pipeline);
-    console.log('Announcements with authorId:', JSON.stringify(docs.map(d => ({ 
-        title: d.title, 
-        authorId: d.authorId 
-    })), null, 2));
     res.json(docs);
 });
 
