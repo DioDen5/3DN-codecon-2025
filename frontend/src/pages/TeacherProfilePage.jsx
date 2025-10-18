@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, ThumbsUp, ThumbsDown, Star, GraduationCap, BookOpen } from 'lucide-react'
 import { getTeacher, voteTeacher, getTeacherReactions } from '../api/teachers'
+import { getTeacherComments, createTeacherComment, getTeacherCommentCounts } from '../api/teacher-comments'
 import { useAuthState } from '../api/useAuthState'
 import CommentInput from '../components/CommentInput'
-import RepliesList from '../components/RepliesList'
+import TeacherRepliesList from '../components/TeacherRepliesList'
 
 const TeacherProfilePage = () => {
     const { id } = useParams()
@@ -31,6 +32,21 @@ const TeacherProfilePage = () => {
                 const reactionData = await getTeacherReactions(id)
                 setUserReaction(reactionData.userReaction)
             }
+            
+            // Fetch comments for the teacher
+            const commentsData = await getTeacherComments(id)
+            const commentsWithCounts = await Promise.all(
+                (commentsData.comments || []).map(async (comment) => {
+                    try {
+                        const counts = await getTeacherCommentCounts(comment._id)
+                        return { ...comment, counts, userReaction: counts.userReaction }
+                    } catch (err) {
+                        console.error('Error fetching comment counts:', err)
+                        return { ...comment, counts: { likes: 0, dislikes: 0, userReaction: 0 } }
+                    }
+                })
+            )
+            setReplies(commentsWithCounts)
         } catch (err) {
             setError('Помилка завантаження профілю викладача')
         } finally {
@@ -89,22 +105,14 @@ const TeacherProfilePage = () => {
 
     const handleCommentSubmit = async (commentText) => {
         console.log('Comment submitted:', commentText)
-        const newComment = {
-            _id: Date.now().toString(),
-            body: commentText,
-            authorId: {
-                _id: 'current-user',
-                displayName: 'Current User',
-                email: 'user@example.com'
-            },
-            createdAt: new Date().toISOString(),
-            counts: {
-                likes: 0,
-                dislikes: 0,
-                userReaction: 0
-            }
+        
+        try {
+            const newComment = await createTeacherComment(id, commentText)
+            setReplies(prev => [newComment, ...prev])
+        } catch (err) {
+            console.error('Error creating comment:', err)
+            // You could add error handling here
         }
-        setReplies(prev => [...prev, newComment])
     }
 
     if (loading) {
@@ -247,8 +255,8 @@ const TeacherProfilePage = () => {
                         </div>
                     </div>
                 </div>
-                <CommentInput onSubmit={handleCommentSubmit} />
-                <RepliesList replies={replies} />
+                        <CommentInput onSubmit={handleCommentSubmit} />
+                        <TeacherRepliesList replies={replies} onRepliesUpdate={setReplies} />
             </div>
         </div>
     )
