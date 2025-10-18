@@ -25,7 +25,30 @@ const ForumPage = () => {
     const [q, setQ] = useState("");
     const [itemOffset, setItemOffset] = useState(0);
 
-    const { sortedData, SortDropdown } = useSort(raw);
+    const sortOptions = [
+        {
+            label: '🔤 Від А до Я',
+            value: 'alphabet',
+            sort: (a, b) => (a.title || '').localeCompare(b.title || ''),
+        },
+        {
+            label: '🤍 За лайками',
+            value: 'likes',
+            sort: (a, b) => (b.counts?.likes || 0) - (a.counts?.likes || 0),
+        },
+        {
+            label: '💬 За коментарями',
+            value: 'comments',
+            sort: (a, b) => (b.metrics?.comments || 0) - (a.metrics?.comments || 0),
+        },
+        {
+            label: '🕓 Найновіші',
+            value: 'newest',
+            sort: (a, b) => new Date(b.publishedAt || b.createdAt) - new Date(a.publishedAt || a.createdAt),
+        },
+    ];
+
+    const { sortedData, SortDropdown } = useSort(raw, sortOptions);
 
     const currentItems = useMemo(
         () => sortedData.slice(itemOffset, itemOffset + ITEMS_PER_PAGE),
