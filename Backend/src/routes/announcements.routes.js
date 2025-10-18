@@ -14,9 +14,17 @@ router.get('/', authRequired, requireVerified, async (req, res) => {
     
     let pipeline;
     if (q) {
+        const searchRegex = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
         pipeline = [
-            { $match: { ...filter, $text: { $search: q } } },
-            { $addFields: { score: { $meta: 'textScore' } } },
+            { 
+                $match: { 
+                    ...filter, 
+                    $or: [
+                        { title: { $regex: searchRegex } },
+                        { body: { $regex: searchRegex } }
+                    ]
+                } 
+            },
             { $lookup: {
                 from: 'users',
                 localField: 'authorId',
@@ -25,7 +33,7 @@ router.get('/', authRequired, requireVerified, async (req, res) => {
                 pipeline: [{ $project: { email: 1, displayName: 1 } }]
             }},
             { $unwind: '$authorId' },
-            { $sort: { score: -1, publishedAt: -1 } },
+            { $sort: { publishedAt: -1 } },
             { $limit: 20 }
         ];
     } else {
