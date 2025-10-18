@@ -1,23 +1,63 @@
 import mongoose from 'mongoose';
 
-const metricsSchema = new mongoose.Schema({
-    avgRating: { type: Number, default: 0 },  // денормалізований середній бал
-    reviews:   { type: Number, default: 0 }   // денормалізована кількість відгуків
-}, { _id: false });
-
 const teacherSchema = new mongoose.Schema({
-    fullName:   { type: String, required: true, index: true },
-    department: { type: String, default: '', index: true },
-    position:   { type: String, default: '' },
-    photoUrl:   { type: String, default: '' },
-    metrics:    { type: metricsSchema, default: () => ({}) },
-    createdAt:  { type: Date, default: () => new Date() },
-    updatedAt:  { type: Date, default: () => new Date() }
-}, { versionKey: false });
-
-teacherSchema.pre('save', function(next){
-    this.updatedAt = new Date();
-    next();
+    name: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    university: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    subject: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    image: {
+        type: String,
+        required: true
+    },
+    rating: {
+        type: Number,
+        default: 0,
+        min: 0,
+        max: 10
+    },
+    likes: {
+        type: Number,
+        default: 0
+    },
+    dislikes: {
+        type: Number,
+        default: 0
+    },
+    comments: {
+        type: Number,
+        default: 0
+    },
+    totalVotes: {
+        type: Number,
+        default: 0
+    }
+}, {
+    timestamps: true
 });
 
-export const Teacher = mongoose.model('teachers', teacherSchema);
+teacherSchema.virtual('averageRating').get(function() {
+    if (this.totalVotes === 0) return 0;
+    const positiveVotes = this.likes;
+    const negativeVotes = this.dislikes;
+    const totalVotes = positiveVotes + negativeVotes;
+    
+    if (totalVotes === 0) return 0;
+    
+    const percentage = (positiveVotes / totalVotes) * 100;
+    return Math.round((percentage / 10) * 10) / 10;
+});
+
+teacherSchema.set('toJSON', { virtuals: true });
+
+export const Teacher = mongoose.model('Teacher', teacherSchema);
