@@ -48,7 +48,11 @@ const ForumPage = () => {
         },
     ];
 
-    const { sortedData, SortDropdown } = useSort(raw, sortOptions);
+    const { sortedData, SortDropdown, sortOption } = useSort(raw, sortOptions);
+    
+    console.log("Raw data:", raw.length, "items");
+    console.log("Sorted data:", sortedData.length, "items");
+    console.log("Current sort option:", sortOption);
 
     const currentItems = useMemo(
         () => sortedData.slice(itemOffset, itemOffset + ITEMS_PER_PAGE),
@@ -96,7 +100,9 @@ const ForumPage = () => {
         setError("");
 
         try {
+            console.log("Searching with query:", q.trim());
             const arr = await listPublished({ q: q.trim() });
+            console.log("API returned:", arr.length, "items");
             const withCounts = await Promise.all(
                 arr.map(async (a) => {
                     try {
@@ -107,6 +113,7 @@ const ForumPage = () => {
                     }
                 })
             );
+            console.log("Final data:", withCounts.length, "items");
             setRaw(withCounts);
         } catch (err) {
             setError("Помилка завантаження обговорень");
