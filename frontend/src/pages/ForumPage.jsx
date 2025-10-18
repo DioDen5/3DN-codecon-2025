@@ -25,7 +25,30 @@ const ForumPage = () => {
     const [q, setQ] = useState("");
     const [itemOffset, setItemOffset] = useState(0);
 
-    const { sortedData, SortDropdown } = useSort(raw);
+    const sortOptions = [
+        {
+            label: '🔤 Від А до Я',
+            value: 'alphabet',
+            sort: (a, b) => (a.title || '').localeCompare(b.title || ''),
+        },
+        {
+            label: '🤍 За лайками',
+            value: 'likes',
+            sort: (a, b) => (b.counts?.likes || 0) - (a.counts?.likes || 0),
+        },
+        {
+            label: '💬 За коментарями',
+            value: 'comments',
+            sort: (a, b) => (b.metrics?.comments || 0) - (a.metrics?.comments || 0),
+        },
+        {
+            label: '🕓 Найновіші',
+            value: 'newest',
+            sort: (a, b) => new Date(b.publishedAt || b.createdAt) - new Date(a.publishedAt || a.createdAt),
+        },
+    ];
+
+    const { sortedData, SortDropdown, sortOption } = useSort(raw, sortOptions);
 
     const currentItems = useMemo(
         () => sortedData.slice(itemOffset, itemOffset + ITEMS_PER_PAGE),
@@ -73,7 +96,8 @@ const ForumPage = () => {
         setError("");
 
         try {
-            const arr = await listPublished({ q: q.trim() });
+            const searchQuery = typeof q === 'string' ? q.trim() : '';
+            const arr = await listPublished({ q: searchQuery });
             const withCounts = await Promise.all(
                 arr.map(async (a) => {
                     try {
@@ -140,7 +164,7 @@ const ForumPage = () => {
                 <h1 className="text-center text-3xl font-semibold mb-8">ОБГОВОРЕННЯ</h1>
 
                 <div className="max-w-xl mx-auto mb-4">
-                    <SearchInput value={q} onChange={setQ} />
+                    <SearchInput value={q} onChange={(e) => setQ(e.target.value)} />
                 </div>
 
                 <div className="flex justify-between items-center mb-6">
