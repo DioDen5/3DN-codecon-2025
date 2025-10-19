@@ -7,6 +7,8 @@ const userSchema = new mongoose.Schema({
     role:      { type: String, enum: ['student','admin'], default: 'student' },
     status:    { type: String, enum: ['pending','verified','rejected','suspended'], default: 'pending', index: true },
     isOwner:   { type: Boolean, default: false },
+    rememberMe: { type: Boolean, default: false },
+    lastLoginEmail: { type: String, default: null },
     createdAt: { type: Date, default: () => new Date() },
     updatedAt: { type: Date, default: () => new Date() }
 }, { versionKey: false });
