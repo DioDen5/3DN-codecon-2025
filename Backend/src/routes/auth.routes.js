@@ -12,9 +12,9 @@ const router = express.Router();
 const registerSchema = z.object({
     email: z.string().email(),
     password: z.string().min(8),
-    displayName: z.string().min(2),
-    firstName: z.string().min(2),
-    lastName: z.string().min(2)
+    displayName: z.string().min(2).refine(val => /^[а-яіїєґА-ЯІЇЄҐ\s]+$/.test(val), 'Ім\'я має містити тільки українські літери'),
+    firstName: z.string().min(2).refine(val => /^[а-яіїєґА-ЯІЇЄҐ\s]+$/.test(val), 'Ім\'я має містити тільки українські літери'),
+    lastName: z.string().min(2).refine(val => /^[а-яіїєґА-ЯІЇЄҐ\s]+$/.test(val), 'Прізвище має містити тільки українські літери')
 });
 
 function isAllowedEduEmail(email) {
@@ -35,7 +35,11 @@ function setRefreshCookie(res, token) {
 
 router.post('/register', async (req, res) => {
     const parse = registerSchema.safeParse(req.body);
-    if (!parse.success) return res.status(400).json({ error: 'Invalid input' });
+    if (!parse.success) {
+        console.log('Validation error:', parse.error.errors);
+        const errorMessage = parse.error?.errors?.[0]?.message || 'Invalid input';
+        return res.status(400).json({ error: errorMessage });
+    }
 
     const { email, password, displayName, firstName, lastName } = parse.data;
 
