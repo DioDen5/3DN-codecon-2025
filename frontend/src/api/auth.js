@@ -30,8 +30,8 @@ export async function login(email, password, rememberMe = false) {
     return data;
 }
 
-export async function register({ email, password, displayName }) {
-    const { data } = await http.post('/auth/register', { email, password, displayName });
+export async function register({ email, password, displayName, firstName, lastName }) {
+    const { data } = await http.post('/auth/register', { email, password, displayName, firstName, lastName });
     if (data?.token) tokenStore.set(data.token);
     if (data?.user)  setMe(data.user);
     return data;

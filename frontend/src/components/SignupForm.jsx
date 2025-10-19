@@ -20,16 +20,21 @@ const SignupForm = ({ switchToLogin }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await register(
-                formData.firstName,
-                formData.lastName,
-                formData.email,
-                formData.password,
-                formData.passwordConfirm
-            );
+            // Валідація паролів
+            if (formData.password !== formData.passwordConfirm) {
+                throw new Error('Паролі не співпадають');
+            }
+            
+            await register({
+                email: formData.email,
+                password: formData.password,
+                displayName: `${formData.firstName} ${formData.lastName}`,
+                firstName: formData.firstName,
+                lastName: formData.lastName
+            });
             switchToLogin(); // ← Перекидання на форму логіну
         } catch (error) {
-            throw new Error(error);
+            console.error('Registration error:', error);
             // можеш додати логіку відображення помилки
         }
     };
