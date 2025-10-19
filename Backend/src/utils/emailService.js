@@ -11,9 +11,9 @@ const createTransporter = () => {
         return null;
     }
     
-    return nodemailer.createTransporter({
-        host: 'smtp.gmail.com',
-        port: 587,
+    return nodemailer.createTransport({
+        host: process.env.EMAIL_HOST || 'smtp.sendgrid.net',
+        port: process.env.EMAIL_PORT || 587,
         secure: false, // true for 465, false for other ports
         auth: {
             user: emailUser,
@@ -90,7 +90,7 @@ export const sendPasswordResetEmail = async (email, resetUrl, userName) => {
         const template = getPasswordResetTemplate(resetUrl, userName);
         
         const mailOptions = {
-            from: `"${process.env.EMAIL_FROM_NAME || '3DN CodeCon'}" <${process.env.EMAIL_USER}>`,
+            from: `"${process.env.EMAIL_FROM_NAME || 'StudLink'}" <denyszastavniy@gmail.com>`,
             to: email,
             ...template
         };
