@@ -10,7 +10,9 @@ const router = express.Router();
 const registerSchema = z.object({
     email: z.string().email(),
     password: z.string().min(8),
-    displayName: z.string().min(2)
+    displayName: z.string().min(2),
+    firstName: z.string().min(2),
+    lastName: z.string().min(2)
 });
 
 function isAllowedEduEmail(email) {
@@ -33,7 +35,7 @@ router.post('/register', async (req, res) => {
     const parse = registerSchema.safeParse(req.body);
     if (!parse.success) return res.status(400).json({ error: 'Invalid input' });
 
-    const { email, password, displayName } = parse.data;
+    const { email, password, displayName, firstName, lastName } = parse.data;
 
     if (!isAllowedEduEmail(email)) {
         return res.status(400).json({ error: 'Реєстрація дозволена тільки з корпоративної пошти університету' });
@@ -44,7 +46,7 @@ router.post('/register', async (req, res) => {
 
     const passwordHash = await bcrypt.hash(password, 10);
     const user = await User.create({
-        email, passwordHash, displayName,
+        email, passwordHash, displayName, firstName, lastName,
         role: 'student',
         status: 'pending'
     });
