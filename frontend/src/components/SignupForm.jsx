@@ -24,11 +24,27 @@ const SignupForm = ({ switchToLogin }) => {
                        formData.password && 
                        formData.passwordConfirm;
 
+    // Function to validate name format (first letter uppercase, rest lowercase)
+    const isValidNameFormat = (name) => {
+        if (!name.trim()) return false;
+        const trimmed = name.trim();
+        return /^[А-ЯЇІЄҐ][а-яїієґ]+$/.test(trimmed);
+    };
+
     const handleChange = (e) => {
         const { name, value } = e.target;
+        
+        // Автоматичне форматування для імені та прізвища
+        let formattedValue = value;
+        if (name === 'firstName' || name === 'lastName') {
+            if (value.length > 0) {
+                formattedValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+            }
+        }
+        
         setFormData({
             ...formData,
-            [name]: value,
+            [name]: formattedValue,
         });
         
         // Очищаємо помилку для цього поля
@@ -51,10 +67,14 @@ const SignupForm = ({ switchToLogin }) => {
         
         if (!formData.firstName.trim()) {
             newErrors.firstName = 'Ім\'я обов\'язкове';
+        } else if (!isValidNameFormat(formData.firstName)) {
+            newErrors.firstName = 'Ім\'я має починатися з великої літери, решта - малі';
         }
         
         if (!formData.lastName.trim()) {
             newErrors.lastName = 'Прізвище обов\'язкове';
+        } else if (!isValidNameFormat(formData.lastName)) {
+            newErrors.lastName = 'Прізвище має починатися з великої літери, решта - малі';
         }
         
         if (!formData.email.trim()) {

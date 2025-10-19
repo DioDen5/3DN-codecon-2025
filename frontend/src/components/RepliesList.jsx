@@ -119,7 +119,7 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
                     replies.map(reply => (
                         <div key={reply._id || reply.id} className="bg-white text-black rounded-xl p-4 shadow-sm">
                             <div className="flex items-center gap-2 text-sm mb-1">
-                                <span className="font-semibold">@{getUserName(reply)}</span>
+                                <span className="font-semibold">{getUserName(reply)}</span>
                                 <span className="text-gray-500">{formatDate(reply.createdAt || reply.created_at)}</span>
                             </div>
                             <p className="text-sm text-gray-800 whitespace-pre-line mb-2">{reply.body || reply.message}</p>
