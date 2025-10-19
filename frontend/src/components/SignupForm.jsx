@@ -13,8 +13,16 @@ const SignupForm = ({ switchToLogin }) => {
     });
     const [errors, setErrors] = useState({});
     const [success, setSuccess] = useState(false);
+    const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false); // Track if user tried to submit
     const navigate = useNavigate();
     const { loginSuccess } = useAuth();
+
+    // Check if all required fields are filled
+    const isFormValid = formData.firstName.trim() && 
+                       formData.lastName.trim() && 
+                       formData.email.trim() && 
+                       formData.password && 
+                       formData.passwordConfirm;
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -34,6 +42,7 @@ const SignupForm = ({ switchToLogin }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setHasAttemptedSubmit(true); // Mark that user attempted to submit
         setErrors({});
         setSuccess(false);
         
@@ -110,9 +119,9 @@ const SignupForm = ({ switchToLogin }) => {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6 p-15 w-full text-white">
-            <h2 className="text-2xl font-semibold mb-4">Profile</h2>
+            <h2 className="text-2xl font-semibold mb-4">Профіль</h2>
             <div>
-                <label className="block text-md">First Name</label>
+                <label className="block text-md">Ім'я</label>
                 <input
                     name="firstName"
                     value={formData.firstName}
@@ -129,7 +138,7 @@ const SignupForm = ({ switchToLogin }) => {
                 )}
             </div>
             <div>
-                <label className="block text-md">Last Name</label>
+                <label className="block text-md">Прізвище</label>
                 <input
                     name="lastName"
                     value={formData.lastName}
@@ -146,7 +155,7 @@ const SignupForm = ({ switchToLogin }) => {
                 )}
             </div>
             <div>
-                <label className="block text-md">Email</label>
+                <label className="block text-md">Пошта</label>
                 <input
                     type="email"
                     name="email"
@@ -157,14 +166,15 @@ const SignupForm = ({ switchToLogin }) => {
                             ? 'bg-red-100 border-2 border-red-400' 
                             : 'bg-[#D9D9D9]/20'
                     }`}
-                    placeholder="Email"
+                    placeholder="Пошта"
                 />
                 {errors.email && (
                     <p className="text-red-400 text-sm mt-1">{errors.email}</p>
                 )}
             </div>
-            <h2 className="text-2xl font-semibold mb-4">Password</h2>
+            <h2 className="text-2xl font-semibold mb-4">Пароль</h2>
             <div>
+                <label className="block text-md">Пароль</label>
                 <input
                     type="password"
                     name="password"
@@ -175,24 +185,25 @@ const SignupForm = ({ switchToLogin }) => {
                             ? 'bg-red-100 border-2 border-red-400' 
                             : 'bg-white/60'
                     }`}
-                    placeholder="Your Password"
+                    placeholder="Ваш пароль"
                 />
                 {errors.password && (
                     <p className="text-red-400 text-sm mt-1">{errors.password}</p>
                 )}
             </div>
             <div>
+                <label className="block text-md">Підтвердження пароля</label>
                 <input
                     type="password"
                     name="passwordConfirm"
                     value={formData.passwordConfirm}
                     onChange={handleChange}
-                    className={`w-full px-4 py-2 rounded-md outline-none mb-8 input text-gray-800 ${
+                    className={`w-full px-4 py-2 rounded-md outline-none  input text-gray-800 ${
                         errors.passwordConfirm 
                             ? 'bg-red-100 border-2 border-red-400' 
                             : 'bg-white/60'
                     }`}
-                    placeholder="Confirm Password"
+                    placeholder="Підтвердіть пароль"
                 />
                 {errors.passwordConfirm && (
                     <p className="text-red-400 text-sm mt-1">{errors.passwordConfirm}</p>
@@ -242,11 +253,13 @@ const SignupForm = ({ switchToLogin }) => {
                     
                     <button 
                         type="submit" 
-                        disabled={success}
-                        className={`w-full p-3 outline-none rounded-lg cursor-pointer transition-all duration-300 transform ${
+                        disabled={success || !isFormValid}
+                        className={`w-full p-3 outline-none rounded-lg transition-all duration-300 transform ${
                             success 
                                 ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white cursor-not-allowed scale-105 shadow-lg shadow-green-500/25' 
-                                : 'bg-blue-700 hover:bg-blue-800 text-white hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25'
+                                : isFormValid
+                                    ? 'bg-blue-700 hover:bg-blue-800 text-white hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25 cursor-pointer'
+                                    : 'bg-blue-800 text-blue-200 cursor-not-allowed opacity-50'
                         }`}
                     >
                         <span className="flex items-center justify-center space-x-2">
@@ -256,7 +269,11 @@ const SignupForm = ({ switchToLogin }) => {
                                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
                             )}
-                            <span>{success ? 'Успішно!' : 'Confirm'}</span>
+                            <span>
+                                {success ? 'Успішно!' : 
+                                 isFormValid ? 'Підтвердити' : 
+                                 'Заповніть всі поля'}
+                            </span>
                         </span>
                     </button>
                 </form>
