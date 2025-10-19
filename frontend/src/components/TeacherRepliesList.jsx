@@ -167,7 +167,7 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
             <div className="space-y-4">
                 {replies.length > 0 ? (
                     replies.map(reply => (
-                        <div key={reply._id || reply.id} className="bg-white text-black rounded-xl p-4 shadow-sm">
+                        <div key={reply._id || reply.id} className="bg-white text-black rounded-xl p-4 shadow-sm overflow-hidden">
                             <div className="flex items-center justify-between text-sm mb-1">
                                 <div className="flex items-center gap-2">
                                     <span className="font-semibold">@{getUserName(reply)}</span>
@@ -208,25 +208,40 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
                                 {isOwnComment(reply) && (
                                     <div className="relative">
                                         <button
-                                            onClick={() => setOpenMenuId(openMenuId === reply._id ? null : reply._id)}
-                                            className="flex items-center justify-center w-8 h-8 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-all duration-200"
+                                            onClick={(event) => {
+                                                setOpenMenuId(openMenuId === reply._id ? null : reply._id);
+                                                // Додаємо клас для анімації пульсації
+                                                const button = event.target.closest('button');
+                                                button.classList.add('button-pulse');
+                                                setTimeout(() => button.classList.remove('button-pulse'), 600);
+                                            }}
+                                            className={`flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 transform ${
+                                                openMenuId === reply._id 
+                                                    ? 'text-blue-600 bg-blue-50 scale-110 shadow-lg' 
+                                                    : 'text-gray-500 hover:text-blue-600 hover:bg-blue-50 hover:scale-105'
+                                            }`}
                                             title="Опції"
                                         >
-                                            <MoreVertical size={16} />
+                                            <MoreVertical 
+                                                size={16} 
+                                                className={`transition-all duration-300 ${
+                                                    openMenuId === reply._id ? 'rotate-90 icon-bounce' : 'rotate-0'
+                                                }`}
+                                            />
                                         </button>
                                         
                                         {openMenuId === reply._id && (
-                                            <div className="absolute right-0 top-8 z-50 bg-white border border-gray-200 rounded-lg shadow-lg py-1 min-w-[120px]">
-                                                <button
-                                                    onClick={() => {
-                                                        handleDelete(reply._id);
-                                                        setOpenMenuId(null);
-                                                    }}
-                                                    className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                                                >
-                                                    <Trash2 size={14} />
-                                                    Видалити
-                                                </button>
+                                            <div className="absolute right-2 top-8 z-50 bg-white border border-gray-200 rounded-lg shadow-xl py-[1px] w-[120px]  overflow-hidden menu-enter backdrop-blur-sm">
+                                            <button
+                                                onClick={() => {
+                                                    handleDelete(reply._id);
+                                                    setOpenMenuId(null);
+                                                }}
+                                                className="flex items-center justify-center gap-1 w-full px-4 py-2 text-xs text-red-600 bg-transparent transition-all duration-300 ease-out hover:bg-red-200 hover:text-red-900 hover:scale-110 hover:shadow-lg relative overflow-hidden group"
+                                            >
+                                                <Trash2 size={12} className="transition-all duration-300 ease-out hover:scale-110 hover:text-red-800 hover:rotate-6 group-hover:drop-shadow-lg" />
+                                                Видалити
+                                            </button>
                                             </div>
                                         )}
                                     </div>
