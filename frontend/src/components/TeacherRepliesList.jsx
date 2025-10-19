@@ -160,8 +160,29 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
                                 <span className="text-gray-500">{formatDate(reply.createdAt || reply.created_at)}</span>
                                 {reply.rating && (
                                     <div className="flex items-center gap-1">
-                                        <svg className="w-4 h-4 text-blue-500" viewBox="0 0 24 24" fill="currentColor">
-                                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+                                            <defs>
+                                                <linearGradient id={`starGradient-${reply._id}`} x1="0%" y1="0%" x2="100%" y2="0%">
+                                                    <stop offset="0%" stopColor="#60a5fa" />
+                                                    <stop offset="50%" stopColor="#3b82f6" />
+                                                    <stop offset="100%" stopColor="#2563eb" />
+                                                </linearGradient>
+                                                <filter id={`glow-${reply._id}`}>
+                                                    <feGaussianBlur stdDeviation="0.5" result="coloredBlur"/>
+                                                    <feMerge> 
+                                                        <feMergeNode in="coloredBlur"/>
+                                                        <feMergeNode in="SourceGraphic"/>
+                                                    </feMerge>
+                                                </filter>
+                                            </defs>
+                                            <path
+                                                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+                                                fill={`url(#starGradient-${reply._id})`}
+                                                stroke="#3b82f6"
+                                                strokeWidth="0.5"
+                                                className="drop-shadow-sm"
+                                                filter={`url(#glow-${reply._id})`}
+                                            />
                                         </svg>
                                         <span className="text-xs text-gray-600 font-medium">
                                             {reply.rating}/5
