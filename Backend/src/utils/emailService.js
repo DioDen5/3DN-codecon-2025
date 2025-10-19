@@ -3,15 +3,21 @@ import { ENV } from '../config/env.js';
 
 // Create transporter for email sending
 const createTransporter = () => {
-    // For development, we'll use a test account
-    // In production, configure with real SMTP settings
+    const emailUser = process.env.EMAIL_USER;
+    const emailPass = process.env.EMAIL_PASS;
+    
+    if (!emailUser || !emailPass) {
+        console.warn('EMAIL_USER or EMAIL_PASS not set. Using dev mode.');
+        return null;
+    }
+    
     return nodemailer.createTransporter({
-        host: 'smtp.gmail.com', // or your SMTP server
+        host: 'smtp.gmail.com',
         port: 587,
         secure: false, // true for 465, false for other ports
         auth: {
-            user: process.env.EMAIL_USER || 'your-email@gmail.com',
-            pass: process.env.EMAIL_PASS || 'your-app-password'
+            user: emailUser,
+            pass: emailPass
         }
     });
 };
@@ -75,20 +81,28 @@ const getPasswordResetTemplate = (resetUrl, userName) => {
 export const sendPasswordResetEmail = async (email, resetUrl, userName) => {
     try {
         const transporter = createTransporter();
+        
+        if (!transporter) {
+            // Fallback to dev mode if no email config
+            return await sendPasswordResetEmailDev(email, resetUrl, userName);
+        }
+        
         const template = getPasswordResetTemplate(resetUrl, userName);
         
         const mailOptions = {
-            from: `"3DN CodeCon" <${process.env.EMAIL_USER || 'noreply@3dncodecon.com'}>`,
+            from: `"${process.env.EMAIL_FROM_NAME || '3DN CodeCon'}" <${process.env.EMAIL_USER}>`,
             to: email,
             ...template
         };
         
         const result = await transporter.sendMail(mailOptions);
-        console.log('Password reset email sent:', result.messageId);
+        console.log('Password reset email sent successfully:', result.messageId);
         return { success: true, messageId: result.messageId };
     } catch (error) {
         console.error('Error sending password reset email:', error);
-        return { success: false, error: error.message };
+        // Fallback to dev mode on error
+        console.log('Falling back to dev mode...');
+        return await sendPasswordResetEmailDev(email, resetUrl, userName);
     }
 };
 

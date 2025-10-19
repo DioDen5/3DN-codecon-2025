@@ -5,7 +5,7 @@ import { User } from '../models/User.js';
 import { PasswordResetToken } from '../models/PasswordResetToken.js';
 import allowed from '../config/allowed-edu-domains.json' with { type: 'json' };
 import { signJwt, verifyJwt } from '../middleware/auth.js';
-import { sendPasswordResetEmailDev } from '../utils/emailService.js';
+import { sendPasswordResetEmail } from '../utils/emailService.js';
 
 const router = express.Router();
 
@@ -185,8 +185,8 @@ router.post('/forgot-password', async (req, res) => {
         // Generate reset URL
         const resetUrl = `${process.env.FRONTEND_ORIGIN || 'http://localhost:5176'}/reset-password?token=${token}`;
 
-        // Send email (in dev mode, just log)
-        await sendPasswordResetEmailDev(email, resetUrl, user.displayName);
+        // Send email
+        await sendPasswordResetEmail(email, resetUrl, user.displayName);
 
         return res.json({ 
             message: 'Якщо акаунт з такою поштою існує, ми надішлемо інструкції для відновлення пароля' 
