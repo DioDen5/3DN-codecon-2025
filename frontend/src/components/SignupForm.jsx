@@ -11,29 +11,67 @@ const SignupForm = ({ switchToLogin }) => {
         password: "",
         passwordConfirm: "",
     });
-    const [error, setError] = useState(null);
+    const [errors, setErrors] = useState({});
     const [success, setSuccess] = useState(false);
     const navigate = useNavigate();
     const { loginSuccess } = useAuth();
 
     const handleChange = (e) => {
+        const { name, value } = e.target;
         setFormData({
             ...formData,
-            [e.target.name]: e.target.value,
+            [name]: value,
         });
+        
+        // Очищаємо помилку для цього поля
+        if (errors[name]) {
+            setErrors({
+                ...errors,
+                [name]: null
+            });
+        }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError(null);
+        setErrors({});
         setSuccess(false);
+        
+        // Валідація полів
+        const newErrors = {};
+        
+        if (!formData.firstName.trim()) {
+            newErrors.firstName = 'Ім\'я обов\'язкове';
+        }
+        
+        if (!formData.lastName.trim()) {
+            newErrors.lastName = 'Прізвище обов\'язкове';
+        }
+        
+        if (!formData.email.trim()) {
+            newErrors.email = 'Email обов\'язковий';
+        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+            newErrors.email = 'Невірний формат email';
+        }
+        
+        if (!formData.password) {
+            newErrors.password = 'Пароль обов\'язковий';
+        } else if (formData.password.length < 8) {
+            newErrors.password = 'Пароль має бути мінімум 8 символів';
+        }
+        
+        if (!formData.passwordConfirm) {
+            newErrors.passwordConfirm = 'Підтвердження пароля обов\'язкове';
+        } else if (formData.password !== formData.passwordConfirm) {
+            newErrors.passwordConfirm = 'Паролі не співпадають';
+        }
+        
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            return;
+        }
+        
         try {
-            // Валідація паролів
-            if (formData.password !== formData.passwordConfirm) {
-                setError('Паролі не співпадають');
-                return;
-            }
-            
             const registrationData = {
                 email: formData.email,
                 password: formData.password,
@@ -60,11 +98,11 @@ const SignupForm = ({ switchToLogin }) => {
             console.error('Error response:', error.response?.data);
             
             if (error.response?.status === 409) {
-                setError('Користувач з таким email вже існує');
+                setErrors({ email: 'Користувач з таким email вже існує' });
             } else if (error.response?.status === 400) {
-                setError('Невірні дані. Перевірте правильність заповнення полів');
+                setErrors({ general: 'Невірні дані. Перевірте правильність заповнення полів' });
             } else {
-                setError('Помилка реєстрації. Спробуйте ще раз');
+                setErrors({ general: 'Помилка реєстрації. Спробуйте ще раз' });
             }
         }
     };
@@ -79,9 +117,16 @@ const SignupForm = ({ switchToLogin }) => {
                     name="firstName"
                     value={formData.firstName}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 placeholder-white/50 focus:outline-none input text-gray-800"
+                    className={`w-full px-4 py-2 rounded-md placeholder-white/50 focus:outline-none input text-gray-800 ${
+                        errors.firstName 
+                            ? 'bg-red-100 border-2 border-red-400' 
+                            : 'bg-[#D9D9D9]/20'
+                    }`}
                     placeholder="Anna"
                 />
+                {errors.firstName && (
+                    <p className="text-red-400 text-sm mt-1">{errors.firstName}</p>
+                )}
             </div>
             <div>
                 <label className="block text-md">Last Name</label>
@@ -89,9 +134,16 @@ const SignupForm = ({ switchToLogin }) => {
                     name="lastName"
                     value={formData.lastName}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 placeholder-white/50 focus:outline-none input text-gray-800"
+                    className={`w-full px-4 py-2 rounded-md placeholder-white/50 focus:outline-none input text-gray-800 ${
+                        errors.lastName 
+                            ? 'bg-red-100 border-2 border-red-400' 
+                            : 'bg-[#D9D9D9]/20'
+                    }`}
                     placeholder="Last Name"
                 />
+                {errors.lastName && (
+                    <p className="text-red-400 text-sm mt-1">{errors.lastName}</p>
+                )}
             </div>
             <div>
                 <label className="block text-md">Email</label>
@@ -100,9 +152,16 @@ const SignupForm = ({ switchToLogin }) => {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 placeholder-white/50 focus:outline-none input text-gray-800"
+                    className={`w-full px-4 py-2 rounded-md placeholder-white/50 focus:outline-none input text-gray-800 ${
+                        errors.email 
+                            ? 'bg-red-100 border-2 border-red-400' 
+                            : 'bg-[#D9D9D9]/20'
+                    }`}
                     placeholder="Email"
                 />
+                {errors.email && (
+                    <p className="text-red-400 text-sm mt-1">{errors.email}</p>
+                )}
             </div>
             <h2 className="text-2xl font-semibold mb-4">Password</h2>
             <div>
@@ -111,9 +170,16 @@ const SignupForm = ({ switchToLogin }) => {
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 rounded-md bg-white/60 outline-none input text-gray-800"
+                    className={`w-full px-4 py-2 rounded-md outline-none input text-gray-800 ${
+                        errors.password 
+                            ? 'bg-red-100 border-2 border-red-400' 
+                            : 'bg-white/60'
+                    }`}
                     placeholder="Your Password"
                 />
+                {errors.password && (
+                    <p className="text-red-400 text-sm mt-1">{errors.password}</p>
+                )}
             </div>
             <div>
                 <input
@@ -121,17 +187,23 @@ const SignupForm = ({ switchToLogin }) => {
                     name="passwordConfirm"
                     value={formData.passwordConfirm}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 rounded-md bg-white/60 outline-none mb-8 input text-gray-800"
+                    className={`w-full px-4 py-2 rounded-md outline-none mb-8 input text-gray-800 ${
+                        errors.passwordConfirm 
+                            ? 'bg-red-100 border-2 border-red-400' 
+                            : 'bg-white/60'
+                    }`}
                     placeholder="Confirm Password"
                 />
+                {errors.passwordConfirm && (
+                    <p className="text-red-400 text-sm mt-1">{errors.passwordConfirm}</p>
+                )}
             </div>
-                    {error && (
-                        <div className="animate-fade-in">
-                            <p className="text-red-400 text-sm bg-red-900/20 border border-red-500/30 rounded-lg px-4 py-2 backdrop-blur-sm">
-                                {error}
-                            </p>
-                        </div>
-                    )}
+            
+            {errors.general && (
+                <div className="text-red-400 text-sm text-center mb-4">
+                    {errors.general}
+                </div>
+            )}
                     
                     {success && (
                         <div className="animate-success-pop">
