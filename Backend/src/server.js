@@ -10,6 +10,7 @@ import announcementRoutes from './routes/announcements.routes.js'
 import commentsRoutes from './routes/comments.routes.js'
 import reactionsRoutes from './routes/reactions.routes.js'
 import teachersRoutes from './routes/teachers.routes.js'
+import teacherCommentsRoutes from './routes/teacher-comments.routes.js'
 
 const app = express()
 
@@ -40,6 +41,7 @@ app.use('/api/announcements', announcementRoutes)
 app.use('/api', commentsRoutes)
 app.use('/api', reactionsRoutes)
 app.use('/api/teachers', teachersRoutes)
+app.use('/api/teacher-comments', teacherCommentsRoutes)
 
 app.use((req, res) => {
     res.status(404).json({ error: 'Not found' })

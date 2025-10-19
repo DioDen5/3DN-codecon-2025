@@ -60,14 +60,8 @@ teacherSchema.virtual('averageRating').get(function() {
 
 teacherSchema.methods.calculateRating = function() {
     if (this.totalVotes === 0) return 0;
-    const positiveVotes = this.likes;
-    const negativeVotes = this.dislikes;
-    const totalVotes = positiveVotes + negativeVotes;
     
-    if (totalVotes === 0) return 0;
-    
-    const percentage = (positiveVotes / totalVotes) * 100;
-    return Math.round((percentage / 10) * 10) / 10;
+    return this.rating || 0;
 };
 
 teacherSchema.set('toJSON', { virtuals: true });

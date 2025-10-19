@@ -21,6 +21,101 @@
     }
 }
 
+/* Кастомні анімації для меню */
+@keyframes menuSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes menuSlideOut {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+}
+
+@keyframes buttonPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 8px rgba(59, 130, 246, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+    }
+}
+
+@keyframes iconBounce {
+    0%, 100% {
+        transform: rotate(0deg) scale(1);
+    }
+    50% {
+        transform: rotate(90deg) scale(1.1);
+    }
+}
+
+.menu-enter {
+    animation: menuSlideIn 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.menu-exit {
+    animation: menuSlideOut 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.button-pulse {
+    animation: buttonPulse 0.6s ease-out;
+}
+
+.icon-bounce {
+    animation: iconBounce 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Ripple ефект */
+.ripple-effect {
+    position: relative;
+    overflow: hidden;
+}
+
+.ripple-effect::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(239, 68, 68, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.ripple-effect:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+/* Градієнтні ефекти */
+.gradient-hover {
+    background: linear-gradient(45deg, #fef2f2, #fee2e2);
+    transition: all 0.3s ease;
+}
+
+.gradient-hover:hover {
+    background: linear-gradient(45deg, #fecaca, #fca5a5);
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+}
+
 .fade-mask {
     -webkit-mask-image: linear-gradient(to left, black 50%, transparent 0%, white 100%);
     mask-image: linear-gradient(to left, black 35%, transparent 0%, white 100%);

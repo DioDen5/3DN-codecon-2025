@@ -80,7 +80,7 @@ router.post('/reactions/toggle', auth, requireVerified, async (req, res) => {
         res.set('Cache-Control', 'no-store');
         const { targetType, targetId, value } = req.body;
 
-        if (!['announcement','comment','review'].includes(targetType)) {
+        if (!['announcement','comment','review','teacher'].includes(targetType)) {
             return res.status(400).json({ error: 'Invalid targetType' });
         }
         if (![1,-1].includes(Number(value))) {
@@ -118,7 +118,7 @@ router.get('/reactions/:targetType/:targetId/counts', auth, async (req, res) => 
         res.set('Cache-Control', 'no-store');
         const { targetType, targetId } = req.params;
 
-        if (!['announcement','comment','review'].includes(targetType)) {
+        if (!['announcement','comment','review','teacher'].includes(targetType)) {
             return res.status(400).json({ error: 'Invalid targetType' });
         }
         if (!mongoose.isValidObjectId(targetId)) {

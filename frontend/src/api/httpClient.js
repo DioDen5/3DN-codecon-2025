@@ -48,8 +48,8 @@ http.interceptors.response.use(
                 console.log('Token refresh failed, redirecting to login');
                 tokenStore.clear();
                 // Очищаємо localStorage/sessionStorage
-                localStorage.removeItem('studlink-token');
-                sessionStorage.removeItem('studlink-token');
+                localStorage.removeItem('token');
+                sessionStorage.removeItem('token');
                 // Перенаправляємо на логін
                 window.location.href = '/login';
                 isRefreshing = false;
