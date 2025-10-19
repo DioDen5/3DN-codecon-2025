@@ -24,18 +24,13 @@ const TeachersPage = () => {
             sort: (a, b) => (b.rating || 0) - (a.rating || 0),
         },
         {
-            label: '🤍 За лайками',
-            value: 'likes',
-            sort: (a, b) => (b.likes || 0) - (a.likes || 0),
-        },
-        {
             label: '💬 За відгуками',
             value: 'comments',
             sort: (a, b) => (b.comments || 0) - (a.comments || 0),
         },
     ]
 
-    const { sortedData, SortDropdown } = useSort(teachers, sortOptions)
+    const { SortDropdown, sortOption, setSortOption } = useSort(teachers, sortOptions)
 
     const highlightText = (text, query) => {
         if (!query || !text) return text;
@@ -61,6 +56,16 @@ const TeachersPage = () => {
         }, 300);
         return () => clearTimeout(timer);
     }, [query]);
+
+    // sync selected sort with backend fetch param
+    useEffect(() => {
+        if (!sortOption) {
+            setSortOption('rating')
+            setSortBy('rating')
+            return
+        }
+        setSortBy(sortOption)
+    }, [sortOption, setSortOption])
 
     const loadTeachers = async () => {
         setLoading(true);
