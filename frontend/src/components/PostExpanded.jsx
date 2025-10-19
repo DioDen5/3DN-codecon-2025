@@ -29,13 +29,13 @@ const PostExpanded = ({ post, onReaction, searchQuery = '' }) => {
     const getAuthorName = (post) => {
         if (post?.authorId) {
             if (post.authorId.displayName) {
-                return `@${post.authorId.displayName}`;
+                return post.authorId.displayName;
             }
             if (post.authorId.email) {
-                return `@${post.authorId.email.split('@')[0]}`;
+                return post.authorId.email.split('@')[0];
             }
         }
-        return '@Невідомий';
+        return 'Невідомий';
     };
 
     const highlightText = (text, query) => {
