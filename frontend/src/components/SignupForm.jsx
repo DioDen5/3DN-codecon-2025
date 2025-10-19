@@ -28,9 +28,9 @@ const SignupForm = ({ switchToLogin }) => {
     const isValidNameFormat = (name) => {
         if (!name.trim()) return false;
         const trimmed = name.trim();
-        // Дозволяємо і українські, і англійські літери з правильною капіталізацією
-        // Перша літера велика, решта може бути великими або малими (для складних імен)
-        return /^[А-ЯЇІЄҐA-Z][а-яїієґa-zA-Z\s'-]+$/.test(trimmed);
+        // Дозволяємо і українські, і англійські літери
+        // Перша літера велика, решта малі
+        return /^[А-ЯЇІЄҐA-Z][а-яїієґa-z]+$/.test(trimmed);
     };
 
     const handleChange = (e) => {
@@ -40,8 +40,8 @@ const SignupForm = ({ switchToLogin }) => {
         let formattedValue = value;
         if (name === 'firstName' || name === 'lastName') {
             if (value.length > 0) {
-                // Тільки перша літера велика, решта залишається як є
-                formattedValue = value.charAt(0).toUpperCase() + value.slice(1);
+                // Перша літера велика, решта малі
+                formattedValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
             }
         }
         
@@ -71,13 +71,13 @@ const SignupForm = ({ switchToLogin }) => {
         if (!formData.firstName.trim()) {
             newErrors.firstName = 'Ім\'я обов\'язкове';
         } else if (!isValidNameFormat(formData.firstName)) {
-            newErrors.firstName = 'Ім\'я має починатися з великої літери та містити тільки літери';
+            newErrors.firstName = 'Ім\'я має починатися з великої літери, решта - малі';
         }
         
         if (!formData.lastName.trim()) {
             newErrors.lastName = 'Прізвище обов\'язкове';
         } else if (!isValidNameFormat(formData.lastName)) {
-            newErrors.lastName = 'Прізвище має починатися з великої літери та містити тільки літери';
+            newErrors.lastName = 'Прізвище має починатися з великої літери, решта - малі';
         }
         
         if (!formData.email.trim()) {
