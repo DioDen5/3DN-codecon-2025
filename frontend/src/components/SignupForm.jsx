@@ -24,11 +24,13 @@ const SignupForm = ({ switchToLogin }) => {
                        formData.password && 
                        formData.passwordConfirm;
 
-    // Function to validate name format (first letter uppercase, rest lowercase)
+    // Function to validate name format (allows both Ukrainian and English names)
     const isValidNameFormat = (name) => {
         if (!name.trim()) return false;
         const trimmed = name.trim();
-        return /^[А-ЯЇІЄҐ][а-яїієґ]+$/.test(trimmed);
+        // Дозволяємо і українські, і англійські літери з правильною капіталізацією
+        // Перша літера велика, решта може бути великими або малими (для складних імен)
+        return /^[А-ЯЇІЄҐA-Z][а-яїієґa-zA-Z\s'-]+$/.test(trimmed);
     };
 
     const handleChange = (e) => {
@@ -38,7 +40,8 @@ const SignupForm = ({ switchToLogin }) => {
         let formattedValue = value;
         if (name === 'firstName' || name === 'lastName') {
             if (value.length > 0) {
-                formattedValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+                // Тільки перша літера велика, решта залишається як є
+                formattedValue = value.charAt(0).toUpperCase() + value.slice(1);
             }
         }
         
@@ -68,13 +71,13 @@ const SignupForm = ({ switchToLogin }) => {
         if (!formData.firstName.trim()) {
             newErrors.firstName = 'Ім\'я обов\'язкове';
         } else if (!isValidNameFormat(formData.firstName)) {
-            newErrors.firstName = 'Ім\'я має починатися з великої літери, решта - малі';
+            newErrors.firstName = 'Ім\'я має починатися з великої літери та містити тільки літери';
         }
         
         if (!formData.lastName.trim()) {
             newErrors.lastName = 'Прізвище обов\'язкове';
         } else if (!isValidNameFormat(formData.lastName)) {
-            newErrors.lastName = 'Прізвище має починатися з великої літери, решта - малі';
+            newErrors.lastName = 'Прізвище має починатися з великої літери та містити тільки літери';
         }
         
         if (!formData.email.trim()) {

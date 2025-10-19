@@ -12,9 +12,9 @@ const router = express.Router();
 const registerSchema = z.object({
     email: z.string().email(),
     password: z.string().min(8),
-    displayName: z.string().min(2).refine(val => /^[а-яіїєґА-ЯІЇЄҐ\s]+$/.test(val), 'Ім\'я має містити тільки українські літери'),
-    firstName: z.string().min(2).refine(val => /^[а-яіїєґА-ЯІЇЄҐ\s]+$/.test(val), 'Ім\'я має містити тільки українські літери'),
-    lastName: z.string().min(2).refine(val => /^[а-яіїєґА-ЯІЇЄҐ\s]+$/.test(val), 'Прізвище має містити тільки українські літери')
+    displayName: z.string().min(2),
+    firstName: z.string().min(2),
+    lastName: z.string().min(2)
 });
 
 function isAllowedEduEmail(email) {
@@ -36,7 +36,6 @@ function setRefreshCookie(res, token) {
 router.post('/register', async (req, res) => {
     const parse = registerSchema.safeParse(req.body);
     if (!parse.success) {
-        console.log('Validation error:', parse.error.errors);
         const errorMessage = parse.error?.errors?.[0]?.message || 'Invalid input';
         return res.status(400).json({ error: errorMessage });
     }
@@ -45,6 +44,22 @@ router.post('/register', async (req, res) => {
 
     if (!isAllowedEduEmail(email)) {
         return res.status(400).json({ error: 'Реєстрація дозволена тільки з корпоративної пошти університету' });
+    }
+
+    // Перевірка на суміш мов в іменах
+    const isUkrainian = (text) => /^[а-яіїєґА-ЯІЇЄҐ\s]+$/.test(text);
+    const isEnglish = (text) => /^[a-zA-Z\s]+$/.test(text);
+    
+    const firstNameLang = isUkrainian(firstName) ? 'uk' : isEnglish(firstName) ? 'en' : 'mixed';
+    const lastNameLang = isUkrainian(lastName) ? 'uk' : isEnglish(lastName) ? 'en' : 'mixed';
+    const displayNameLang = isUkrainian(displayName) ? 'uk' : isEnglish(displayName) ? 'en' : 'mixed';
+    
+    if (firstNameLang === 'mixed' || lastNameLang === 'mixed' || displayNameLang === 'mixed') {
+        return res.status(400).json({ error: 'Ім\'я та прізвище мають містити тільки літери однієї мови (української або англійської)' });
+    }
+    
+    if (firstNameLang !== lastNameLang || firstNameLang !== displayNameLang) {
+        return res.status(400).json({ error: 'Всі імена мають бути написаними однією мовою (або українською, або англійською)' });
     }
 
     const exists = await User.findOne({ email });
@@ -197,6 +212,40 @@ router.post('/forgot-password', async (req, res) => {
         });
     } catch (error) {
         console.error('Forgot password error:', error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Update profile endpoint
+router.patch('/profile', async (req, res) => {
+    try {
+        const { firstName, lastName, displayName } = req.body;
+        
+        if (!firstName || !lastName || !displayName) {
+            return res.status(400).json({ error: 'Всі поля обов\'язкові' });
+        }
+
+        // Перевірка на суміш мов в іменах
+        const isUkrainian = (text) => /^[а-яіїєґА-ЯІЇЄҐ\s]+$/.test(text);
+        const isEnglish = (text) => /^[a-zA-Z\s]+$/.test(text);
+        
+        const firstNameLang = isUkrainian(firstName) ? 'uk' : isEnglish(firstName) ? 'en' : 'mixed';
+        const lastNameLang = isUkrainian(lastName) ? 'uk' : isEnglish(lastName) ? 'en' : 'mixed';
+        const displayNameLang = isUkrainian(displayName) ? 'uk' : isEnglish(displayName) ? 'en' : 'mixed';
+        
+        if (firstNameLang === 'mixed' || lastNameLang === 'mixed' || displayNameLang === 'mixed') {
+            return res.status(400).json({ error: 'Ім\'я та прізвище мають містити тільки літери однієї мови (української або англійської)' });
+        }
+        
+        if (firstNameLang !== lastNameLang || firstNameLang !== displayNameLang) {
+            return res.status(400).json({ error: 'Всі імена мають бути написаними однією мовою (або українською, або англійською)' });
+        }
+
+        // Тут треба буде додати авторизацію та оновлення користувача
+        // Поки що просто повертаємо успіх
+        return res.json({ message: 'Профіль оновлено успішно' });
+    } catch (error) {
+        console.error('Update profile error:', error);
         return res.status(500).json({ error: 'Internal server error' });
     }
 });
