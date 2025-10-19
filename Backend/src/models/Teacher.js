@@ -61,7 +61,6 @@ teacherSchema.virtual('averageRating').get(function() {
 teacherSchema.methods.calculateRating = function() {
     if (this.totalVotes === 0) return 0;
     
-    // Отримуємо всі коментарі з рейтингами
     return this.rating || 0;
 };
 
