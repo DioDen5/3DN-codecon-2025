@@ -156,9 +156,6 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
                                     {reply.counts?.dislikes || 0}
                                 </button>
 
-                                <button className="ml-auto text-xs border rounded px-2 py-0.5 hover:bg-black hover:text-white transition cursor-pointer">
-                                    report
-                                </button>
                             </div>
                         </div>
                     ))

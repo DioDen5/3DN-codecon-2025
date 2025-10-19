@@ -167,7 +167,7 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
             <div className="space-y-4">
                 {replies.length > 0 ? (
                     replies.map(reply => (
-                        <div key={reply._id || reply.id} className="bg-white text-black rounded-xl p-4 shadow-sm overflow-hidden">
+                        <div key={reply._id || reply.id} className="bg-white text-black rounded-xl p-4 shadow-sm">
                             <div className="flex items-center justify-between text-sm mb-1">
                                 <div className="flex items-center gap-2">
                                     <span className="font-semibold">@{getUserName(reply)}</span>
@@ -231,17 +231,47 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
                                         </button>
                                         
                                         {openMenuId === reply._id && (
-                                            <div className="absolute right-2 top-8 z-50 bg-white border border-gray-200 rounded-lg shadow-xl py-[1px] w-[120px]  overflow-hidden menu-enter backdrop-blur-sm">
-                                            <button
-                                                onClick={() => {
-                                                    handleDelete(reply._id);
-                                                    setOpenMenuId(null);
-                                                }}
-                                                className="flex items-center justify-center gap-1 w-full px-4 py-2 text-xs text-red-600 bg-transparent transition-all duration-300 ease-out hover:bg-red-200 hover:text-red-900 hover:scale-110 hover:shadow-lg relative overflow-hidden group"
-                                            >
-                                                <Trash2 size={12} className="transition-all duration-300 ease-out hover:scale-110 hover:text-red-800 hover:rotate-6 group-hover:drop-shadow-lg" />
-                                                Видалити
-                                            </button>
+                                            <div className="absolute right-0 top-8 z-[9999] bg-white border border-gray-200 rounded-lg shadow-xl w-[140px] menu-enter backdrop-blur-sm overflow-hidden">
+                                                <button
+                                                    onClick={() => {
+                                                        // TODO: Implement edit functionality
+                                                        setOpenMenuId(null);
+                                                    }}
+                                                    className="flex items-center justify-center gap-1 w-full px-4 py-2 text-xs text-blue-600 bg-transparent hover:text-blue-800 transition-colors duration-200"
+                                                >
+                                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                    </svg>
+                                                    Редагувати
+                                                </button>
+                                                
+                                                <div className="border-b border-gray-200"></div>
+                                                
+                                                <button
+                                                    onClick={() => {
+                                                        // TODO: Implement report functionality
+                                                        setOpenMenuId(null);
+                                                    }}
+                                                    className="flex items-center justify-center gap-1 w-full px-4 py-2 text-xs text-orange-600 bg-transparent hover:text-orange-800 transition-colors duration-200"
+                                                >
+                                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                                    </svg>
+                                                    Поскаржитись
+                                                </button>
+                                                
+                                                <div className="border-b border-gray-200"></div>
+                                                
+                                                <button
+                                                    onClick={() => {
+                                                        handleDelete(reply._id);
+                                                        setOpenMenuId(null);
+                                                    }}
+                                                    className="flex items-center justify-center gap-1 w-full px-4 py-2 text-xs text-red-600 bg-transparent hover:text-red-800 transition-colors duration-200"
+                                                >
+                                                    <Trash2 size={12} />
+                                                    Видалити
+                                                </button>
                                             </div>
                                         )}
                                     </div>
@@ -283,9 +313,6 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
                                     {reply.counts?.dislikes || 0}
                                 </button>
                                 
-                                <button className="ml-auto text-xs border rounded px-2 py-0.5 hover:bg-black hover:text-white transition cursor-pointer">
-                                    report
-                                </button>
                             </div>
                         </div>
                     ))
