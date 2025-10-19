@@ -13,10 +13,20 @@ function setMe(user) {
     window.dispatchEvent(new Event('studlink:auth-changed'));
 }
 
-export async function login(email, password) {
-    const { data } = await http.post('/auth/login', { email, password });
+export async function login(email, password, rememberMe = false) {
+    const { data } = await http.post('/auth/login', { email, password, rememberMe });
     if (data?.token) tokenStore.set(data.token);
     if (data?.user)  setMe(data.user);
+    
+    // Зберігаємо налаштування rememberMe в localStorage
+    if (rememberMe) {
+        localStorage.setItem('rememberMe', 'true');
+        localStorage.setItem('rememberedEmail', email);
+    } else {
+        localStorage.removeItem('rememberMe');
+        localStorage.removeItem('rememberedEmail');
+    }
+    
     return data;
 }
 
@@ -37,4 +47,22 @@ export async function logout() {
     await http.post('/auth/logout', null, { _skipAuthHandler: true }).catch(()=>{});
     tokenStore.clear();
     setMe(null);
+}
+
+// Функція для отримання збережених даних логіну
+export async function getRememberedLogin() {
+    try {
+        const { data } = await http.get('/auth/remembered-login');
+        return data;
+    } catch (error) {
+        console.error('Error fetching remembered login:', error);
+        return { email: null, rememberMe: false };
+    }
+}
+
+// Функція для отримання збережених даних з localStorage
+export function getLocalRememberedLogin() {
+    const rememberMe = localStorage.getItem('rememberMe') === 'true';
+    const email = localStorage.getItem('rememberedEmail');
+    return { email, rememberMe };
 }

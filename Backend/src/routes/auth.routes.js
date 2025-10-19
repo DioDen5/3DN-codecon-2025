@@ -61,13 +61,18 @@ router.post('/register', async (req, res) => {
 });
 
 router.post('/login', async (req, res) => {
-    const { email, password } = req.body ?? {};
+    const { email, password, rememberMe } = req.body ?? {};
 
     const user = await User.findOne({ email });
     if (!user) return res.status(401).json({ error: 'Invalid credentials' });
 
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) return res.status(401).json({ error: 'Invalid credentials' });
+
+    // Оновлюємо налаштування rememberMe та зберігаємо email
+    user.rememberMe = rememberMe || false;
+    user.lastLoginEmail = rememberMe ? email : null;
+    await user.save();
 
     const access = signJwt({ id: user._id, role: user.role, status: user.status }, 'access');
     const refresh = signJwt({ id: user._id }, 'refresh');
@@ -76,7 +81,9 @@ router.post('/login', async (req, res) => {
 
     return res.json({
         token: access,
-        user: { id: user._id, displayName: user.displayName, role: user.role, status: user.status }
+        user: { id: user._id, displayName: user.displayName, role: user.role, status: user.status },
+        rememberMe: user.rememberMe,
+        lastLoginEmail: user.lastLoginEmail
     });
 });
 
@@ -106,6 +113,29 @@ router.post('/refresh', async (req, res) => {
 router.post('/logout', (_req, res) => {
     res.clearCookie('refreshToken', { path: '/api/auth' });
     return res.json({ ok: true });
+});
+
+// Новий endpoint для отримання збережених даних логіну
+router.get('/remembered-login', async (req, res) => {
+    try {
+        // Шукаємо користувача, який має активне rememberMe
+        const user = await User.findOne({ 
+            rememberMe: true, 
+            lastLoginEmail: { $exists: true, $ne: null } 
+        });
+        
+        if (!user) {
+            return res.json({ email: null, rememberMe: false });
+        }
+
+        return res.json({ 
+            email: user.lastLoginEmail, 
+            rememberMe: user.rememberMe 
+        });
+    } catch (error) {
+        console.error('Error fetching remembered login:', error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
 });
 
 export default router;
