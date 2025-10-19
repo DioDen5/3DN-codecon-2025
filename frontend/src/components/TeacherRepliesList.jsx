@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ThumbsUp, ThumbsDown, Trash2 } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, Trash2, MoreVertical } from 'lucide-react';
 import { toggleTeacherComment, deleteTeacherComment } from '../api/teacher-comments';
 import { useAuthState } from '../api/useAuthState';
 
@@ -7,6 +7,7 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
     const { isAuthed, user } = useAuthState();
     const [error, setError] = useState(null);
     const [pendingVotes, setPendingVotes] = useState(new Set());
+    const [openMenuId, setOpenMenuId] = useState(null);
 
     const handleVote = async (commentId, type) => {
         if (pendingVotes.has(commentId)) return;
@@ -139,6 +140,18 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
         return false;
     };
 
+    // Закрити меню при кліку поза ним
+    React.useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (openMenuId && !event.target.closest('.relative')) {
+                setOpenMenuId(null);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [openMenuId]);
+
     return (
         <div className="pt-8">
             <div className="flex items-center gap-2 mb-4">
@@ -155,38 +168,67 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
                 {replies.length > 0 ? (
                     replies.map(reply => (
                         <div key={reply._id || reply.id} className="bg-white text-black rounded-xl p-4 shadow-sm">
-                            <div className="flex items-center gap-2 text-sm mb-1">
-                                <span className="font-semibold">@{getUserName(reply)}</span>
-                                <span className="text-gray-500">{formatDate(reply.createdAt || reply.created_at)}</span>
-                                {reply.rating && (
-                                    <div className="flex items-center gap-1">
-                                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
-                                            <defs>
-                                                <linearGradient id={`starGradient-${reply._id}`} x1="0%" y1="0%" x2="100%" y2="0%">
-                                                    <stop offset="0%" stopColor="#60a5fa" />
-                                                    <stop offset="50%" stopColor="#3b82f6" />
-                                                    <stop offset="100%" stopColor="#2563eb" />
-                                                </linearGradient>
-                                                <filter id={`glow-${reply._id}`}>
-                                                    <feGaussianBlur stdDeviation="0.5" result="coloredBlur"/>
-                                                    <feMerge> 
-                                                        <feMergeNode in="coloredBlur"/>
-                                                        <feMergeNode in="SourceGraphic"/>
-                                                    </feMerge>
-                                                </filter>
-                                            </defs>
-                                            <path
-                                                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-                                                fill={`url(#starGradient-${reply._id})`}
-                                                stroke="#3b82f6"
-                                                strokeWidth="0.5"
-                                                className="drop-shadow-sm"
-                                                filter={`url(#glow-${reply._id})`}
-                                            />
-                                        </svg>
-                                        <span className="text-xs text-gray-600 font-medium">
-                                            {reply.rating}/5
-                                        </span>
+                            <div className="flex items-center justify-between text-sm mb-1">
+                                <div className="flex items-center gap-2">
+                                    <span className="font-semibold">@{getUserName(reply)}</span>
+                                    <span className="text-gray-500">{formatDate(reply.createdAt || reply.created_at)}</span>
+                                    {reply.rating && (
+                                        <div className="flex items-center gap-1">
+                                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+                                                <defs>
+                                                    <linearGradient id={`starGradient-${reply._id}`} x1="0%" y1="0%" x2="100%" y2="0%">
+                                                        <stop offset="0%" stopColor="#60a5fa" />
+                                                        <stop offset="50%" stopColor="#3b82f6" />
+                                                        <stop offset="100%" stopColor="#2563eb" />
+                                                    </linearGradient>
+                                                    <filter id={`glow-${reply._id}`}>
+                                                        <feGaussianBlur stdDeviation="0.5" result="coloredBlur"/>
+                                                        <feMerge> 
+                                                            <feMergeNode in="coloredBlur"/>
+                                                            <feMergeNode in="SourceGraphic"/>
+                                                        </feMerge>
+                                                    </filter>
+                                                </defs>
+                                                <path
+                                                    d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+                                                    fill={`url(#starGradient-${reply._id})`}
+                                                    stroke="#3b82f6"
+                                                    strokeWidth="0.5"
+                                                    className="drop-shadow-sm"
+                                                    filter={`url(#glow-${reply._id})`}
+                                                />
+                                            </svg>
+                                            <span className="text-xs text-gray-600 font-medium">
+                                                {reply.rating}/5
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+                                
+                                {isOwnComment(reply) && (
+                                    <div className="relative">
+                                        <button
+                                            onClick={() => setOpenMenuId(openMenuId === reply._id ? null : reply._id)}
+                                            className="flex items-center justify-center w-8 h-8 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-all duration-200"
+                                            title="Опції"
+                                        >
+                                            <MoreVertical size={16} />
+                                        </button>
+                                        
+                                        {openMenuId === reply._id && (
+                                            <div className="absolute right-0 top-8 z-50 bg-white border border-gray-200 rounded-lg shadow-lg py-1 min-w-[120px]">
+                                                <button
+                                                    onClick={() => {
+                                                        handleDelete(reply._id);
+                                                        setOpenMenuId(null);
+                                                    }}
+                                                    className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                                                >
+                                                    <Trash2 size={14} />
+                                                    Видалити
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
@@ -225,17 +267,6 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
                                     <ThumbsDown size={12} />
                                     {reply.counts?.dislikes || 0}
                                 </button>
-
-                                {isOwnComment(reply) && (
-                                    <button
-                                        onClick={() => handleDelete(reply._id)}
-                                        className="flex items-center gap-1 text-xs text-red-600 hover:text-red-800 hover:bg-red-50 rounded px-2 py-0.5 transition"
-                                        title="Видалити відгук"
-                                    >
-                                        <Trash2 size={12} />
-                                        Видалити
-                                    </button>
-                                )}
                                 
                                 <button className="ml-auto text-xs border rounded px-2 py-0.5 hover:bg-black hover:text-white transition cursor-pointer">
                                     report
