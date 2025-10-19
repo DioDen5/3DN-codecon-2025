@@ -14,7 +14,7 @@ import teacherCommentsRoutes from './routes/teacher-comments.routes.js'
 
 const app = express()
 
-const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'http://localhost:5174'
+const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'http://localhost:5175'
 
 app.use(
     helmet({

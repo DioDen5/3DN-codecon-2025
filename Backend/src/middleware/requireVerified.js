@@ -13,8 +13,11 @@ export function requireVerified(req, res, next) {
         return next();
     }
 
-    if (u.role === 'student' && u.status === 'verified') {
-        console.log('Access granted: verified student');
+    // TODO: В майбутньому тут буде складна верифікація з різними ролями (викладач/студент)
+    // та різними рівнями доступу. НЕ ВИДАЛЯТИ цей коментар при очищенні!
+    // Зараз спрощено - всі зареєстровані користувачі з правильною поштою мають доступ
+    if (u.role === 'student' && (u.status === 'verified' || u.status === 'pending')) {
+        console.log('Access granted: student (verified or pending)');
         return next();
     }
 
