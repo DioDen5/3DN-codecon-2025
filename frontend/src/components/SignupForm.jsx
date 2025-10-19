@@ -9,6 +9,7 @@ const SignupForm = ({ switchToLogin }) => {
         password: "",
         passwordConfirm: "",
     });
+    const [error, setError] = useState(null);
 
     const handleChange = (e) => {
         setFormData({
@@ -19,23 +20,37 @@ const SignupForm = ({ switchToLogin }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setError(null);
         try {
             // Валідація паролів
             if (formData.password !== formData.passwordConfirm) {
-                throw new Error('Паролі не співпадають');
+                setError('Паролі не співпадають');
+                return;
             }
             
-            await register({
+            const registrationData = {
                 email: formData.email,
                 password: formData.password,
                 displayName: `${formData.firstName} ${formData.lastName}`,
                 firstName: formData.firstName,
                 lastName: formData.lastName
-            });
+            };
+            
+            console.log('Sending registration data:', registrationData);
+            
+            await register(registrationData);
             switchToLogin(); // ← Перекидання на форму логіну
         } catch (error) {
             console.error('Registration error:', error);
-            // можеш додати логіку відображення помилки
+            console.error('Error response:', error.response?.data);
+            
+            if (error.response?.status === 409) {
+                setError('Користувач з таким email вже існує');
+            } else if (error.response?.status === 400) {
+                setError('Невірні дані. Перевірте правильність заповнення полів');
+            } else {
+                setError('Помилка реєстрації. Спробуйте ще раз');
+            }
         }
     };
 
@@ -95,11 +110,13 @@ const SignupForm = ({ switchToLogin }) => {
                     placeholder="Confirm Password"
                 />
             </div>
-            <button type="submit" className="w-full bg-blue-700 p-2 outline-none rounded-lg cursor-pointer">
-                Confirm
-            </button>
-        </form>
-    );
-};
+                    {error && <p className="text-red-400 text-sm">{error}</p>}
+                    
+                    <button type="submit" className="w-full bg-blue-700 p-2 outline-none rounded-lg cursor-pointer">
+                        Confirm
+                    </button>
+                </form>
+            );
+        };
 
 export default SignupForm;
