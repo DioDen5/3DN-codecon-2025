@@ -3,7 +3,6 @@ import mongoose from 'mongoose';
 import { Reaction } from '../models/Reaction.js';
 import { Announcement } from '../models/Announcement.js';
 import { Comment } from '../models/Comment.js';
-// import { Review } from '../models/Review.js';
 import { authRequired as auth } from '../middleware/auth.js';
 import { requireVerified } from '../middleware/requireVerified.js';
 
@@ -23,8 +22,6 @@ const isValidTarget = async (type, id) => {
         return !!doc;
     }
     if (type === 'review') {
-        // const doc = await Review.findById(id).lean();
-        // return !!doc;
         return false;
     }
     return false;
@@ -60,7 +57,6 @@ const countsForWithUser = async (targetType, targetId, userId) => {
     const likes = agg?.likes || 0;
     const dislikes = agg?.dislikes || 0;
     
-    // Отримуємо реакцію поточного користувача
     const userReaction = await Reaction.findOne({ 
         targetType, 
         targetId: new mongoose.Types.ObjectId(targetId), 

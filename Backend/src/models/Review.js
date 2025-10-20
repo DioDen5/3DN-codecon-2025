@@ -13,7 +13,6 @@ const reviewSchema = new mongoose.Schema({
 }, { versionKey: false });
 
 reviewSchema.index({ teacherId: 1, status: 1, createdAt: -1 });
-// один відгук від користувача на викладача за семестр
 reviewSchema.index({ authorId: 1, teacherId: 1, semester: 1 }, { unique: true });
 
 reviewSchema.pre('save', function(next){

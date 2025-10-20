@@ -140,7 +140,6 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
         return false;
     };
 
-    // Закрити меню при кліку поза ним
     React.useEffect(() => {
         const handleClickOutside = (event) => {
             if (openMenuId && !event.target.closest('.relative')) {
@@ -210,7 +209,6 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
                                         <button
                                             onClick={(event) => {
                                                 setOpenMenuId(openMenuId === reply._id ? null : reply._id);
-                                                // Додаємо клас для анімації пульсації
                                                 const button = event.target.closest('button');
                                                 button.classList.add('button-pulse');
                                                 setTimeout(() => button.classList.remove('button-pulse'), 600);
@@ -234,7 +232,6 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
                                             <div className="absolute right-0 top-8 z-[9999] bg-white border border-gray-200 rounded-lg shadow-xl w-[140px] menu-enter backdrop-blur-sm overflow-hidden">
                                                 <button
                                                     onClick={() => {
-                                                        // TODO: Implement edit functionality
                                                         setOpenMenuId(null);
                                                     }}
                                                     className="flex items-center justify-center gap-1 w-full px-4 py-2 text-xs text-blue-600 bg-transparent hover:text-blue-800 transition-colors duration-200"
@@ -249,7 +246,6 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
                                                 
                                                 <button
                                                     onClick={() => {
-                                                        // TODO: Implement report functionality
                                                         setOpenMenuId(null);
                                                     }}
                                                     className="flex items-center justify-center gap-1 w-full px-4 py-2 text-xs text-orange-600 bg-transparent hover:text-orange-800 transition-colors duration-200"

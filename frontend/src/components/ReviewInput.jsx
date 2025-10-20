@@ -20,7 +20,6 @@ export default function ReviewInput({ onSubmit, userRating, onRatingChange, isVo
             return;
         }
 
-        // Перевіряємо чи поставлена оцінка
         if (userRating < 1 || userRating > 5) {
             setErr('Спочатку поставте оцінку від 1 до 5 зірок');
             return;

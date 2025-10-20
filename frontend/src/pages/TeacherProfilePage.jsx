@@ -36,9 +36,7 @@ const TeacherProfilePage = () => {
             setTeacher(data)
             setCurrentRating(data.rating)
             
-            // Не завантажуємо userReaction з сервера, оскільки тепер зберігаємо локально
             
-            // Fetch comments for the teacher
             const commentsData = await getTeacherComments(id)
             const commentsWithCounts = await Promise.all(
                 (commentsData.comments || []).map(async (comment) => {
@@ -53,7 +51,6 @@ const TeacherProfilePage = () => {
             )
             setReplies(commentsWithCounts)
             
-            // Перевіряємо, чи користувач вже залишив відгук
             if (isAuthenticated && user) {
                 const userId = user._id || user.id
                 const userHasReview = commentsWithCounts.some(comment => 
@@ -61,7 +58,6 @@ const TeacherProfilePage = () => {
                 )
                 setHasSubmittedReview(userHasReview)
                 
-                // Якщо користувач вже залишив відгук, завантажуємо його оцінку з коментаря
                 if (userHasReview) {
                     const userComment = commentsWithCounts.find(comment => 
                         comment.authorId && comment.authorId._id === userId
@@ -92,12 +88,10 @@ const TeacherProfilePage = () => {
         
         try {
             console.log('Creating teacher comment with rating:', rating)
-            // Створюємо коментар з оцінкою (це автоматично оновить лічильники)
             const newComment = await createTeacherComment(id, commentText, rating)
             console.log('Created comment:', newComment)
             setReplies(prev => [newComment, ...prev])
             
-            // Оновлюємо дані викладача з сервера
             const updatedTeacher = await getTeacher(id)
             console.log('Updated teacher data:', {
                 comments: updatedTeacher.comments,
@@ -108,12 +102,10 @@ const TeacherProfilePage = () => {
             setTeacher(updatedTeacher)
             setCurrentRating(updatedTeacher.rating)
             
-            // Показуємо оцінку в блоці "Ваша оцінка"
             setHasSubmittedReview(true)
             setUserRating(rating)
         } catch (err) {
             console.error('Error creating review:', err)
-            // You could add error handling here
         }
     }
 
@@ -323,13 +315,10 @@ const TeacherProfilePage = () => {
                         <TeacherRepliesList 
                             replies={replies} 
             onRepliesUpdate={(updateFunction) => {
-                // Оновлюємо стан відгуків
                 setReplies(updateFunction);
                 
-                // Отримуємо новий масив відгуків для перевірки
                 const newReplies = updateFunction(replies);
                 
-                // Перевіряємо, чи користувач все ще має відгук
                 if (isAuthenticated && user) {
                     const userId = user._id || user.id;
                     const userHasReview = newReplies.some(comment => 
@@ -337,7 +326,6 @@ const TeacherProfilePage = () => {
                     );
                     setHasSubmittedReview(userHasReview);
                     
-                    // Якщо користувач видалив свій відгук, скидаємо рейтинг
                     if (!userHasReview) {
                         setUserRating(0);
                     }

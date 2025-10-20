@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
 
-// Глобальний стан для оновлення форуму
 let refreshTrigger = 0;
 let refreshCallbacks = new Set();
 
@@ -21,7 +20,6 @@ export const useForumRefresh = () => {
     return { refresh, subscribe, trigger };
 };
 
-// Функція для тригера оновлення з будь-якого місця
 export const triggerForumRefresh = () => {
     refreshTrigger++;
     refreshCallbacks.forEach(callback => callback());

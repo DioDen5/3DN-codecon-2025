@@ -17,30 +17,24 @@ const SignupForm = ({ switchToLogin }) => {
     const navigate = useNavigate();
     const { loginSuccess } = useAuth();
 
-    // Check if all required fields are filled
     const isFormValid = formData.firstName.trim() && 
                        formData.lastName.trim() && 
                        formData.email.trim() && 
                        formData.password && 
                        formData.passwordConfirm;
 
-    // Function to validate name format (allows both Ukrainian and English names)
     const isValidNameFormat = (name) => {
         if (!name.trim()) return false;
         const trimmed = name.trim();
-        // Дозволяємо і українські, і англійські літери
-        // Перша літера велика, решта малі
         return /^[А-ЯЇІЄҐA-Z][а-яїієґa-z]+$/.test(trimmed);
     };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         
-        // Автоматичне форматування для імені та прізвища
         let formattedValue = value;
         if (name === 'firstName' || name === 'lastName') {
             if (value.length > 0) {
-                // Перша літера велика, решта малі
                 formattedValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
             }
         }
@@ -50,7 +44,6 @@ const SignupForm = ({ switchToLogin }) => {
             [name]: formattedValue,
         });
         
-        // Очищаємо помилку для цього поля
         if (errors[name]) {
             setErrors({
                 ...errors,
@@ -61,11 +54,10 @@ const SignupForm = ({ switchToLogin }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setHasAttemptedSubmit(true); // Mark that user attempted to submit
+        setHasAttemptedSubmit(true);
         setErrors({});
         setSuccess(false);
         
-        // Валідація полів
         const newErrors = {};
         
         if (!formData.firstName.trim()) {
@@ -116,12 +108,9 @@ const SignupForm = ({ switchToLogin }) => {
             
             const { token, user } = await register(registrationData);
             
-            // Показуємо повідомлення про успіх
             setSuccess(true);
             
-            // Невелика затримка для показу повідомлення
             setTimeout(() => {
-                // Автоматичний логін після реєстрації
                 loginSuccess({ token, user });
                 navigate("/forum"); // Перекидання на головну сторінку
             }, 1500);

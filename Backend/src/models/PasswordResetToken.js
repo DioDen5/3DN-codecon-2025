@@ -30,17 +30,14 @@ const passwordResetTokenSchema = new mongoose.Schema({
     }
 }, { versionKey: false });
 
-// Generate secure random token
 passwordResetTokenSchema.statics.generateToken = function() {
     return crypto.randomBytes(32).toString('hex');
 };
 
-// Check if token is valid and not expired
 passwordResetTokenSchema.methods.isValid = function() {
     return !this.used && this.expiresAt > new Date();
 };
 
-// Mark token as used
 passwordResetTokenSchema.methods.markAsUsed = function() {
     this.used = true;
     return this.save();
