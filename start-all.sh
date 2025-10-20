@@ -83,6 +83,12 @@ clean_vite_cache() {
 
 # Запуск MongoDB
 start_mongodb() {
+    # Перевірити, чи MongoDB вже працює
+    if pgrep -f "mongod.*dbpath" >/dev/null; then
+        print_success "MongoDB is already running"
+        return 0
+    fi
+    
     print_status "Starting MongoDB..."
     
     # Створити директорію для логів
@@ -101,6 +107,12 @@ start_mongodb() {
 
 # Запуск Backend
 start_backend() {
+    # Перевірити, чи Backend вже працює
+    if pgrep -f "node.*server.js" >/dev/null; then
+        print_success "Backend is already running"
+        return 0
+    fi
+    
     print_status "Starting Backend..."
     
     cd Backend
@@ -128,6 +140,12 @@ start_backend() {
 
 # Запуск Frontend
 start_frontend() {
+    # Перевірити, чи Frontend вже працює
+    if pgrep -f "vite" >/dev/null; then
+        print_success "Frontend is already running"
+        return 0
+    fi
+    
     print_status "Starting Frontend..."
     
     if [ ! -d "frontend" ]; then

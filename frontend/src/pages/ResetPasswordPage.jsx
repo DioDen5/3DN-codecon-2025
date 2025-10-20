@@ -29,7 +29,6 @@ const ResetPasswordPage = () => {
             [name]: value
         });
         
-        // Clear error when user starts typing
         if (errors[name]) {
             setErrors({
                 ...errors,
@@ -45,7 +44,6 @@ const ResetPasswordPage = () => {
         setMessage('');
         setErrors({});
 
-        // Validation
         const newErrors = {};
         
         if (!formData.password) {
@@ -70,7 +68,6 @@ const ResetPasswordPage = () => {
             await resetPassword(token, formData.password);
             setMessage('Пароль успішно оновлено! Тепер ви можете увійти з новим паролем.');
             
-            // Redirect to login after 3 seconds
             setTimeout(() => {
                 navigate('/login');
             }, 3000);

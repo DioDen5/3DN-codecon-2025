@@ -11,7 +11,6 @@ const LoginForm = ({ switchToReset, onSuccess }) => {
     const navigate = useNavigate();
     const { loginSuccess } = useAuth();
 
-    // Завантажуємо збережені дані при ініціалізації
     useEffect(() => {
         const rememberedData = getLocalRememberedLogin();
         if (rememberedData.rememberMe && rememberedData.email) {
@@ -25,9 +24,9 @@ const LoginForm = ({ switchToReset, onSuccess }) => {
         setError(null);
         try {
             const { token, user } = await login(email, password, rememberMe);
-            loginSuccess({ token, user });  // оновлюємо глобальний стан
-            onSuccess?.();                  // закриваємо модалку
-            navigate("/forum");             // йдемо на форум
+            loginSuccess({ token, user }); 
+            onSuccess?.();                 
+            navigate("/forum");           
         } catch {
             setError("Невірна пошта або пароль");
         }

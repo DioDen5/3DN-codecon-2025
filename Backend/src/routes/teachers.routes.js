@@ -138,16 +138,13 @@ router.post('/:id/vote', authRequired, async (req, res) => {
                 teacher.totalVotes -= 1;
                 userReaction = 0;
             } else {
-                // Змінюємо голос з лайка на дизлайк або навпаки
                 const oldValue = existingReaction.value;
                 existingReaction.value = newValue;
                 await existingReaction.save();
                 
-                // Віднімаємо старий голос
                 teacher.likes -= oldValue === 1 ? 1 : 0;
                 teacher.dislikes -= oldValue === -1 ? 1 : 0;
                 
-                // Додаємо новий голос
                 teacher.likes += newValue === 1 ? 1 : 0;
                 teacher.dislikes += newValue === -1 ? 1 : 0;
                 

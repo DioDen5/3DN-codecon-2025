@@ -2,7 +2,6 @@ import * as Ann from './announcements';
 import * as Com from './comments';
 import * as Rx from './reactions';
 
-// Безпечне форматування дати
 function asDateString(d) {
     try {
         if (!d) return '';
@@ -52,7 +51,6 @@ function mapReply(c = {}, counts = {}) {
     };
 }
 
-// ----- posts -----
 export async function articleList() {
     const items = await Ann.listPublished();
     const mapped = await Promise.all(items.map(async a => {
@@ -75,7 +73,6 @@ export async function voteArticle(id, type) {
     return res;
 }
 
-// ----- comments -----
 export async function commentsList(postId) {
     const items = await Com.list(postId, { limit: 100 });
     const mapped = await Promise.all(items.map(async c => {
@@ -97,7 +94,6 @@ export async function voteComment(commentId, action) {
     return res;
 }
 
-// ----- create (published) -----
 export async function articleCreate(title, content, imageFile) {
     const doc = await Ann.createPublished({ title, body: content, tags: [] });
     return { id: doc._id };

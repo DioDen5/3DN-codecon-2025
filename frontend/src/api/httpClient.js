@@ -47,10 +47,8 @@ http.interceptors.response.use(
             } catch (refreshError) {
                 console.log('Token refresh failed, redirecting to login');
                 tokenStore.clear();
-                // Очищаємо localStorage/sessionStorage
                 localStorage.removeItem('token');
                 sessionStorage.removeItem('token');
-                // Перенаправляємо на логін
                 window.location.href = '/login';
                 isRefreshing = false;
                 queue.forEach((r) => r());

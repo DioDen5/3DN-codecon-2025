@@ -57,7 +57,6 @@ const TeachersPage = () => {
         return () => clearTimeout(timer);
     }, [query]);
 
-    // sync selected sort with backend fetch param
     useEffect(() => {
         if (!sortOption) {
             setSortOption('rating')

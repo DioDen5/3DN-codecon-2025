@@ -12,7 +12,6 @@ export function useAuthState() {
         const onChange = () => setUser(getMe());
         window.addEventListener('studlink:auth-changed', onChange);
         
-        // Автоматичне оновлення токенів кожні 50 хвилин
         const refreshInterval = setInterval(async () => {
             if (token) {
                 try {
@@ -24,7 +23,6 @@ export function useAuthState() {
                     }
                 } catch (error) {
                     console.log('Auto-refresh failed:', error);
-                    // Не робимо нічого, користувач залишається залогіненим до наступного запиту
                 }
             }
         }, 50 * 60 * 1000); // 50 хвилин

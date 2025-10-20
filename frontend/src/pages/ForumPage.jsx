@@ -138,7 +138,6 @@ const ForumPage = () => {
         }
     };
 
-    // Debounce search
     useEffect(() => {
         const timer = setTimeout(() => {
             setSearchQuery(q.trim());
@@ -151,7 +150,6 @@ const ForumPage = () => {
         loadData();
     }, [searchQuery, isAuthed]);
 
-    // Підписка на оновлення форуму
     useEffect(() => {
         const unsubscribe = subscribe(() => {
             loadData();

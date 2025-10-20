@@ -46,7 +46,6 @@ router.post('/register', async (req, res) => {
         return res.status(400).json({ error: 'Реєстрація дозволена тільки з корпоративної пошти університету' });
     }
 
-    // Перевірка на суміш мов в іменах
     const isUkrainian = (text) => /^[а-яіїєґА-ЯІЇЄҐ\s]+$/.test(text);
     const isEnglish = (text) => /^[a-zA-Z\s]+$/.test(text);
     
@@ -92,7 +91,6 @@ router.post('/login', async (req, res) => {
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) return res.status(401).json({ error: 'Invalid credentials' });
 
-    // Оновлюємо налаштування rememberMe та зберігаємо email
     user.rememberMe = rememberMe || false;
     user.lastLoginEmail = rememberMe ? email : null;
     await user.save();
@@ -161,7 +159,6 @@ router.get('/remembered-login', async (req, res) => {
     }
 });
 
-// Password reset schemas
 const forgotPasswordSchema = z.object({
     email: z.string().email()
 });
@@ -171,7 +168,6 @@ const resetPasswordSchema = z.object({
     password: z.string().min(8)
 });
 
-// Forgot password endpoint
 router.post('/forgot-password', async (req, res) => {
     try {
         const parse = forgotPasswordSchema.safeParse(req.body);
@@ -181,30 +177,24 @@ router.post('/forgot-password', async (req, res) => {
 
         const { email } = parse.data;
 
-        // Check if user exists
         const user = await User.findOne({ email });
         if (!user) {
-            // Don't reveal if user exists or not for security
             return res.json({ 
                 message: 'Якщо акаунт з такою поштою існує, ми надішлемо інструкції для відновлення пароля' 
             });
         }
 
-        // Generate reset token
         const token = PasswordResetToken.generateToken();
-        const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+        const expiresAt = new Date(Date.now() + 60 * 60 * 1000); 
 
-        // Save token to database
         await PasswordResetToken.create({
             userId: user._id,
             token,
             expiresAt
         });
 
-        // Generate reset URL
         const resetUrl = `${process.env.FRONTEND_ORIGIN || 'http://localhost:5176'}/reset-password?token=${token}`;
 
-        // Send email
         await sendPasswordResetEmail(email, resetUrl, user.displayName);
 
         return res.json({ 
@@ -216,7 +206,6 @@ router.post('/forgot-password', async (req, res) => {
     }
 });
 
-// Update profile endpoint
 router.patch('/profile', async (req, res) => {
     try {
         const { firstName, lastName, displayName } = req.body;
@@ -225,7 +214,6 @@ router.patch('/profile', async (req, res) => {
             return res.status(400).json({ error: 'Всі поля обов\'язкові' });
         }
 
-        // Перевірка на суміш мов в іменах
         const isUkrainian = (text) => /^[а-яіїєґА-ЯІЇЄҐ\s]+$/.test(text);
         const isEnglish = (text) => /^[a-zA-Z\s]+$/.test(text);
         
@@ -250,7 +238,6 @@ router.patch('/profile', async (req, res) => {
     }
 });
 
-// Reset password endpoint
 router.post('/reset-password', async (req, res) => {
     try {
         const parse = resetPasswordSchema.safeParse(req.body);
@@ -271,20 +258,16 @@ router.post('/reset-password', async (req, res) => {
             return res.status(400).json({ error: 'Недійсний або прострочений токен' });
         }
 
-        // Find user
         const user = await User.findById(resetToken.userId);
         if (!user) {
             return res.status(400).json({ error: 'Користувач не знайдений' });
         }
 
-        // Hash new password
         const passwordHash = await bcrypt.hash(password, 10);
 
-        // Update user password
         user.passwordHash = passwordHash;
         await user.save();
 
-        // Mark token as used
         await resetToken.markAsUsed();
 
         return res.json({ message: 'Пароль успішно оновлено' });

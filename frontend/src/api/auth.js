@@ -18,7 +18,6 @@ export async function login(email, password, rememberMe = false) {
     if (data?.token) tokenStore.set(data.token);
     if (data?.user)  setMe(data.user);
     
-    // Зберігаємо налаштування rememberMe в localStorage
     if (rememberMe) {
         localStorage.setItem('rememberMe', 'true');
         localStorage.setItem('rememberedEmail', email);
@@ -49,7 +48,6 @@ export async function logout() {
     setMe(null);
 }
 
-// Функція для отримання збережених даних логіну
 export async function getRememberedLogin() {
     try {
         const { data } = await http.get('/auth/remembered-login');
@@ -60,7 +58,6 @@ export async function getRememberedLogin() {
     }
 }
 
-// Функція для отримання збережених даних з localStorage
 export function getLocalRememberedLogin() {
     const rememberMe = localStorage.getItem('rememberMe') === 'true';
     const email = localStorage.getItem('rememberedEmail');

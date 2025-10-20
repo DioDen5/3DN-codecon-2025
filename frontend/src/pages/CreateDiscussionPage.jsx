@@ -26,13 +26,10 @@ const CreateDiscussionPage = () => {
         try {
             const result = await articleCreate(title, content, image);
             
-            // Тригеримо оновлення форуму
             triggerForumRefresh();
             
-            // Показуємо успішне повідомлення
             setSuccess('Обговорення створено успішно!');
             
-            // Через 1.5 секунди переходимо до створеного обговорення
             setTimeout(() => {
                 navigate(`/forum/${result.id}`);
             }, 1500);

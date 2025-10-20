@@ -1,7 +1,6 @@
 import nodemailer from 'nodemailer';
 import { ENV } from '../config/env.js';
 
-// Create transporter for email sending
 const createTransporter = () => {
     const emailUser = process.env.EMAIL_USER;
     const emailPass = process.env.EMAIL_PASS;
@@ -22,7 +21,6 @@ const createTransporter = () => {
     });
 };
 
-// Email templates
 const getPasswordResetTemplate = (resetUrl, userName) => {
     return {
         subject: 'Відновлення пароля - 3DN CodeCon',
@@ -77,13 +75,11 @@ const getPasswordResetTemplate = (resetUrl, userName) => {
     };
 };
 
-// Send password reset email
 export const sendPasswordResetEmail = async (email, resetUrl, userName) => {
     try {
         const transporter = createTransporter();
         
         if (!transporter) {
-            // Fallback to dev mode if no email config
             return await sendPasswordResetEmailDev(email, resetUrl, userName);
         }
         
@@ -100,13 +96,11 @@ export const sendPasswordResetEmail = async (email, resetUrl, userName) => {
         return { success: true, messageId: result.messageId };
     } catch (error) {
         console.error('Error sending password reset email:', error);
-        // Fallback to dev mode on error
         console.log('Falling back to dev mode...');
         return await sendPasswordResetEmailDev(email, resetUrl, userName);
     }
 };
 
-// For development - log email instead of sending
 export const sendPasswordResetEmailDev = async (email, resetUrl, userName) => {
     console.log('\n=== PASSWORD RESET EMAIL (DEV MODE) ===');
     console.log('To:', email);

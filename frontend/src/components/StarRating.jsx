@@ -1,7 +1,6 @@
 import React from 'react';
 
 const StarRating = ({ rating, maxRating = 10, size = 'md', showNumber = true, animated = false }) => {
-    // Перевіряємо валідність rating
     const safeRating = isNaN(rating) || rating === null || rating === undefined ? 0 : Number(rating);
     const normalizedRating = Math.max(0, Math.min(5, (safeRating / maxRating) * 5)); // Нормалізуємо до 5 зірок з обмеженнями
     const fullStars = Math.floor(normalizedRating);

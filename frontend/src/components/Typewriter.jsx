@@ -10,6 +10,7 @@ const Typewriter = ({
     const [textIndex, setTextIndex] = useState(0)
     const [displayText, setDisplayText] = useState('')
     const [isTyping, setIsTyping] = useState(true)
+    const [isErasing, setIsErasing] = useState(false)
 
     useEffect(() => {
         if (!texts || texts.length === 0) return
@@ -29,10 +30,12 @@ const Typewriter = ({
             }
         } else {
             if (displayText.length > 0) {
+                setIsErasing(true)
                 timer = setTimeout(() => {
                     setDisplayText((prev) => prev.slice(0, -1))
                 }, erasingSpeed)
             } else {
+                setIsErasing(false)
                 timer = setTimeout(() => {
                     setTextIndex((prev) => (prev + 1) % texts.length)
                     setIsTyping(true)
@@ -44,9 +47,9 @@ const Typewriter = ({
     }, [displayText, isTyping, textIndex, texts, typingSpeed, erasingSpeed, delayBeforeErase, delayBeforeType])
 
     return (
-        <span className="text-white text-sm md:text-base font-medium max-w-xl relative whitespace-nowrap">
+        <span className={`text-sm md:text-base font-medium max-w-xl relative whitespace-nowrap transition-all duration-[2000ms] ${isErasing ? 'text-gray-400' : 'text-white'}`}>
       {displayText}
-            <span className="inline-block w-[1px] h-[1.2em] relative top-1 bg-white ml-1 animate-blink" />
+            <span className="inline-block w-[2px] h-[1.2em] relative top-1 bg-gray-100 ml-1 animate-neon-blink" />
     </span>
     )
 }
