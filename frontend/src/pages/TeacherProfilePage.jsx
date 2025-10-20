@@ -168,7 +168,7 @@ const TeacherProfilePage = () => {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-0 mb-8">
+                            <div className="flex gap-6 mb-8">
                                 <div className="text-left">
                                     <p className="text-sm text-gray-500 text-left mb-2">Загальна оцінка</p>
                                     <div className="text-4xl font-bold text-blue-500 mb-2 flex items-center">
@@ -195,7 +195,7 @@ const TeacherProfilePage = () => {
                                         />
                                     </div>
                                 </div>
-                                <div className="text-center">
+                                <div className="text-center ml-14">
                                     <p className="text-sm text-gray-500 mb-2">Відгуки</p>
                                     <div className="text-4xl font-bold text-blue-600 mb-2">{teacher.comments}</div>
                                 </div>
