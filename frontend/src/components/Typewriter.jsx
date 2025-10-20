@@ -12,12 +12,15 @@ const Typewriter = ({
     const [isTyping, setIsTyping] = useState(true)
 
     useEffect(() => {
+        if (!texts || texts.length === 0) return
+        
         let timer
+        const currentText = texts[textIndex]
 
         if (isTyping) {
-            if (displayText.length < texts[textIndex].length) {
+            if (displayText.length < currentText.length) {
                 timer = setTimeout(() => {
-                    setDisplayText((prev) => prev + texts[textIndex][prev.length])
+                    setDisplayText((prev) => prev + currentText[prev.length])
                 }, typingSpeed)
             } else {
                 timer = setTimeout(() => {
