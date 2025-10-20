@@ -24,11 +24,13 @@ const SignupForm = ({ switchToLogin }) => {
                        formData.password && 
                        formData.passwordConfirm;
 
-    // Function to validate name format (first letter uppercase, rest lowercase)
+    // Function to validate name format (allows both Ukrainian and English names)
     const isValidNameFormat = (name) => {
         if (!name.trim()) return false;
         const trimmed = name.trim();
-        return /^[А-ЯЇІЄҐ][а-яїієґ]+$/.test(trimmed);
+        // Дозволяємо і українські, і англійські літери
+        // Перша літера велика, решта малі
+        return /^[А-ЯЇІЄҐA-Z][а-яїієґa-z]+$/.test(trimmed);
     };
 
     const handleChange = (e) => {
@@ -38,6 +40,7 @@ const SignupForm = ({ switchToLogin }) => {
         let formattedValue = value;
         if (name === 'firstName' || name === 'lastName') {
             if (value.length > 0) {
+                // Перша літера велика, решта малі
                 formattedValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
             }
         }

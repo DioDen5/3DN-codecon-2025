@@ -2,8 +2,10 @@ import express from 'express';
 import { z } from 'zod';
 import bcrypt from 'bcrypt';
 import { User } from '../models/User.js';
+import { PasswordResetToken } from '../models/PasswordResetToken.js';
 import allowed from '../config/allowed-edu-domains.json' with { type: 'json' };
 import { signJwt, verifyJwt } from '../middleware/auth.js';
+import { sendPasswordResetEmail } from '../utils/emailService.js';
 
 const router = express.Router();
 
@@ -33,12 +35,31 @@ function setRefreshCookie(res, token) {
 
 router.post('/register', async (req, res) => {
     const parse = registerSchema.safeParse(req.body);
-    if (!parse.success) return res.status(400).json({ error: 'Invalid input' });
+    if (!parse.success) {
+        const errorMessage = parse.error?.errors?.[0]?.message || 'Invalid input';
+        return res.status(400).json({ error: errorMessage });
+    }
 
     const { email, password, displayName, firstName, lastName } = parse.data;
 
     if (!isAllowedEduEmail(email)) {
         return res.status(400).json({ error: 'Реєстрація дозволена тільки з корпоративної пошти університету' });
+    }
+
+    // Перевірка на суміш мов в іменах
+    const isUkrainian = (text) => /^[а-яіїєґА-ЯІЇЄҐ\s]+$/.test(text);
+    const isEnglish = (text) => /^[a-zA-Z\s]+$/.test(text);
+    
+    const firstNameLang = isUkrainian(firstName) ? 'uk' : isEnglish(firstName) ? 'en' : 'mixed';
+    const lastNameLang = isUkrainian(lastName) ? 'uk' : isEnglish(lastName) ? 'en' : 'mixed';
+    const displayNameLang = isUkrainian(displayName) ? 'uk' : isEnglish(displayName) ? 'en' : 'mixed';
+    
+    if (firstNameLang === 'mixed' || lastNameLang === 'mixed' || displayNameLang === 'mixed') {
+        return res.status(400).json({ error: 'Ім\'я та прізвище мають містити тільки літери однієї мови (української або англійської)' });
+    }
+    
+    if (firstNameLang !== lastNameLang || firstNameLang !== displayNameLang) {
+        return res.status(400).json({ error: 'Всі імена мають бути написаними однією мовою (або українською, або англійською)' });
     }
 
     const exists = await User.findOne({ email });
@@ -136,6 +157,139 @@ router.get('/remembered-login', async (req, res) => {
         });
     } catch (error) {
         console.error('Error fetching remembered login:', error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Password reset schemas
+const forgotPasswordSchema = z.object({
+    email: z.string().email()
+});
+
+const resetPasswordSchema = z.object({
+    token: z.string().min(1),
+    password: z.string().min(8)
+});
+
+// Forgot password endpoint
+router.post('/forgot-password', async (req, res) => {
+    try {
+        const parse = forgotPasswordSchema.safeParse(req.body);
+        if (!parse.success) {
+            return res.status(400).json({ error: 'Invalid email format' });
+        }
+
+        const { email } = parse.data;
+
+        // Check if user exists
+        const user = await User.findOne({ email });
+        if (!user) {
+            // Don't reveal if user exists or not for security
+            return res.json({ 
+                message: 'Якщо акаунт з такою поштою існує, ми надішлемо інструкції для відновлення пароля' 
+            });
+        }
+
+        // Generate reset token
+        const token = PasswordResetToken.generateToken();
+        const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+        // Save token to database
+        await PasswordResetToken.create({
+            userId: user._id,
+            token,
+            expiresAt
+        });
+
+        // Generate reset URL
+        const resetUrl = `${process.env.FRONTEND_ORIGIN || 'http://localhost:5176'}/reset-password?token=${token}`;
+
+        // Send email
+        await sendPasswordResetEmail(email, resetUrl, user.displayName);
+
+        return res.json({ 
+            message: 'Якщо акаунт з такою поштою існує, ми надішлемо інструкції для відновлення пароля' 
+        });
+    } catch (error) {
+        console.error('Forgot password error:', error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Update profile endpoint
+router.patch('/profile', async (req, res) => {
+    try {
+        const { firstName, lastName, displayName } = req.body;
+        
+        if (!firstName || !lastName || !displayName) {
+            return res.status(400).json({ error: 'Всі поля обов\'язкові' });
+        }
+
+        // Перевірка на суміш мов в іменах
+        const isUkrainian = (text) => /^[а-яіїєґА-ЯІЇЄҐ\s]+$/.test(text);
+        const isEnglish = (text) => /^[a-zA-Z\s]+$/.test(text);
+        
+        const firstNameLang = isUkrainian(firstName) ? 'uk' : isEnglish(firstName) ? 'en' : 'mixed';
+        const lastNameLang = isUkrainian(lastName) ? 'uk' : isEnglish(lastName) ? 'en' : 'mixed';
+        const displayNameLang = isUkrainian(displayName) ? 'uk' : isEnglish(displayName) ? 'en' : 'mixed';
+        
+        if (firstNameLang === 'mixed' || lastNameLang === 'mixed' || displayNameLang === 'mixed') {
+            return res.status(400).json({ error: 'Ім\'я та прізвище мають містити тільки літери однієї мови (української або англійської)' });
+        }
+        
+        if (firstNameLang !== lastNameLang || firstNameLang !== displayNameLang) {
+            return res.status(400).json({ error: 'Всі імена мають бути написаними однією мовою (або українською, або англійською)' });
+        }
+
+        // Тут треба буде додати авторизацію та оновлення користувача
+        // Поки що просто повертаємо успіх
+        return res.json({ message: 'Профіль оновлено успішно' });
+    } catch (error) {
+        console.error('Update profile error:', error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Reset password endpoint
+router.post('/reset-password', async (req, res) => {
+    try {
+        const parse = resetPasswordSchema.safeParse(req.body);
+        if (!parse.success) {
+            return res.status(400).json({ error: 'Invalid input' });
+        }
+
+        const { token, password } = parse.data;
+
+        // Find valid token
+        const resetToken = await PasswordResetToken.findOne({ 
+            token, 
+            used: false,
+            expiresAt: { $gt: new Date() }
+        });
+
+        if (!resetToken) {
+            return res.status(400).json({ error: 'Недійсний або прострочений токен' });
+        }
+
+        // Find user
+        const user = await User.findById(resetToken.userId);
+        if (!user) {
+            return res.status(400).json({ error: 'Користувач не знайдений' });
+        }
+
+        // Hash new password
+        const passwordHash = await bcrypt.hash(password, 10);
+
+        // Update user password
+        user.passwordHash = passwordHash;
+        await user.save();
+
+        // Mark token as used
+        await resetToken.markAsUsed();
+
+        return res.json({ message: 'Пароль успішно оновлено' });
+    } catch (error) {
+        console.error('Reset password error:', error);
         return res.status(500).json({ error: 'Internal server error' });
     }
 });

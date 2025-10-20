@@ -66,3 +66,13 @@ export function getLocalRememberedLogin() {
     const email = localStorage.getItem('rememberedEmail');
     return { email, rememberMe };
 }
+
+export async function forgotPassword(email) {
+    const { data } = await http.post('/auth/forgot-password', { email });
+    return data;
+}
+
+export async function resetPassword(token, password) {
+    const { data } = await http.post('/auth/reset-password', { token, password });
+    return data;
+}

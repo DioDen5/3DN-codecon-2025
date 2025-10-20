@@ -183,6 +183,19 @@
     }
 }
 
+@keyframes blink {
+    0%, 50% {
+        opacity: 1;
+    }
+    51%, 100% {
+        opacity: 0;
+    }
+}
+
+.animate-blink {
+    animation: blink 1s infinite;
+}
+
 @keyframes glow {
     0%, 100% {
         box-shadow: 0 0 5px rgba(34, 197, 94, 0.3);
