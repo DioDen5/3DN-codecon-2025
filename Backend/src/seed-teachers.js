@@ -4,17 +4,6 @@ import { connectDB } from './config/db.js';
 
 const teachersData = [
     {
-        name: 'Костів Оксана Миколаївна',
-        university: 'ЛНУ імені Івана Франка',
-        subject: 'Кафедра української мови',
-        image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
-        rating: 0,
-        likes: 0,
-        dislikes: 0,
-        comments: 0,
-        totalVotes: 0
-    },
-    {
         name: 'Іваненко Ігор Петрович',
         university: 'ЛНУ імені Івана Франка',
         subject: 'Фізика',
@@ -85,17 +74,6 @@ const teachersData = [
         university: 'ЛНУ імені Івана Франка',
         subject: 'Філософія',
         image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
-        rating: 0,
-        likes: 0,
-        dislikes: 0,
-        comments: 0,
-        totalVotes: 0
-    },
-    {
-        name: 'Мельник Світлана Анатоліївна',
-        university: 'ЛНУ імені Івана Франка',
-        subject: 'Економіка',
-        image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
         rating: 0,
         likes: 0,
         dislikes: 0,
