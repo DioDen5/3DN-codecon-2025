@@ -156,21 +156,22 @@ const TeacherProfilePage = () => {
                         </div>
                         
                         <div className="md:w-2/3 p-8">
-                            <div className="flex items-start justify-between mb-6">
-                                <div>
-                                    <h1 className="text-3xl font-bold mb-2">{teacher.name}</h1>
-                                    <div className="flex items-center gap-2 text-gray-600 mb-2">
-                                        <GraduationCap size={20} />
-                                        <span>{teacher.university}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-gray-600">
-                                        <BookOpen size={20} />
-                                        <span>{teacher.subject}</span>
-                                    </div>
+                            <div className="mb-6">
+                                <h1 className="text-3xl font-bold mb-2">{teacher.name}</h1>
+                                <div className="flex items-center gap-2 text-gray-600 mb-2">
+                                    <GraduationCap size={20} />
+                                    <span>{teacher.university}</span>
                                 </div>
-                                
-                                <div className="text-right">
-                                    <div className="text-4xl font-bold text-blue-500 mb-2 flex items-center justify-end">
+                                <div className="flex items-center gap-2 text-gray-600">
+                                    <BookOpen size={20} />
+                                    <span>{teacher.subject}</span>
+                                </div>
+                            </div>
+
+                            <div className="flex gap-6 mb-8">
+                                <div className="text-left">
+                                    <p className="text-sm text-gray-500 text-left mb-2">Загальна оцінка</p>
+                                    <div className="text-4xl font-bold text-blue-500 mb-2 flex items-center">
                                         <div className="relative overflow-hidden inline-block">
                                             <div 
                                                 key={currentRating}
@@ -193,41 +194,10 @@ const TeacherProfilePage = () => {
                                             animated={true}
                                         />
                                     </div>
-                                    <p className="text-sm text-gray-500">Загальна оцінка</p>
-                                    <style>{`
-                                        @keyframes ratingSlideIn {
-                                            0% {
-                                                transform: translateY(30px);
-                                                opacity: 0;
-                                                filter: blur(2px);
-                                            }
-                                            50% {
-                                                transform: translateY(-5px);
-                                                opacity: 0.8;
-                                                filter: blur(0px);
-                                            }
-                                            100% {
-                                                transform: translateY(0);
-                                                opacity: 1;
-                                                filter: blur(0px);
-                                            }
-                                        }
-                                    `}</style>
                                 </div>
-                            </div>
-
-                            <div className="grid grid-cols-3 gap-6 mb-8">
-                                <div className="text-center">
-                                    <div className="text-2xl font-bold text-green-600">{teacher.likes}</div>
-                                    <p className="text-sm text-gray-600">Позитивні</p>
-                                </div>
-                                <div className="text-center">
-                                    <div className="text-2xl font-bold text-red-600">{teacher.dislikes}</div>
-                                    <p className="text-sm text-gray-600">Негативні</p>
-                                </div>
-                                <div className="text-center">
-                                    <div className="text-2xl font-bold text-blue-600">{teacher.comments}</div>
-                                    <p className="text-sm text-gray-600">Відгуки</p>
+                                <div className="text-center ml-14">
+                                    <p className="text-sm text-gray-500 mb-2">Відгуки</p>
+                                    <div className="text-4xl font-bold text-blue-600 mb-2">{teacher.comments}</div>
                                 </div>
                             </div>
 
@@ -333,6 +303,26 @@ const TeacherProfilePage = () => {
             }}
                         />
             </div>
+            
+            <style>{`
+                @keyframes ratingSlideIn {
+                    0% {
+                        transform: translateY(30px);
+                        opacity: 0;
+                        filter: blur(2px);
+                    }
+                    50% {
+                        transform: translateY(-5px);
+                        opacity: 0.8;
+                        filter: blur(0px);
+                    }
+                    100% {
+                        transform: translateY(0);
+                        opacity: 1;
+                        filter: blur(0px);
+                    }
+                }
+            `}</style>
         </div>
     )
 }
