@@ -250,6 +250,65 @@ router.delete('/:commentId', authRequired, async (req, res) => {
     }
 });
 
+// Update a comment (text and/or rating)
+router.patch('/:commentId', authRequired, async (req, res) => {
+    try {
+        const { commentId } = req.params;
+        const { body, rating } = req.body;
+        const userId = req.user.id;
+
+        if (!mongoose.isValidObjectId(commentId)) {
+            return res.status(400).json({ error: 'Invalid comment ID' });
+        }
+
+        const comment = await TeacherComment.findOne({ _id: commentId, authorId: userId, status: 'visible' });
+        if (!comment) {
+            return res.status(404).json({ error: 'Comment not found' });
+        }
+
+        const teacher = await Teacher.findById(comment.teacherId);
+
+        const prevRating = comment.rating;
+        if (typeof body === 'string') {
+            comment.body = body.trim();
+        }
+        if (rating !== undefined) {
+            if (![1, 2, 3, 4, 5].includes(Number(rating))) {
+                return res.status(400).json({ error: 'Rating must be between 1 and 5' });
+            }
+            comment.rating = Number(rating);
+        }
+
+        await comment.save();
+        await comment.populate('authorId', 'displayName email');
+
+        // If rating changed, recalc teacher aggregates and rating
+        if (teacher && rating !== undefined && Number(prevRating) !== Number(rating)) {
+            // Recompute likes/dislikes/totalVotes from all visible comments to keep consistency
+            const allComments = await TeacherComment.find({ teacherId: comment.teacherId, status: 'visible' });
+            teacher.comments = allComments.length;
+            teacher.likes = allComments.reduce((sum, c) => sum + (c.rating >= 3 ? 1 : 0), 0);
+            teacher.dislikes = allComments.reduce((sum, c) => sum + (c.rating < 3 ? 1 : 0), 0);
+            teacher.totalVotes = allComments.length;
+
+            if (allComments.length > 0) {
+                const totalStars = allComments.reduce((sum, c) => sum + (c.rating || 0), 0);
+                const averageStars = totalStars / allComments.length;
+                teacher.rating = Math.round((averageStars / 5) * 10);
+            } else {
+                teacher.rating = 0;
+            }
+
+            await teacher.save();
+        }
+
+        res.json(comment);
+    } catch (error) {
+        console.error('Error updating teacher comment:', error);
+        res.status(500).json({ error: 'Failed to update comment' });
+    }
+});
+
 // Toggle reaction for teacher comment
 router.post('/:commentId/toggle', authRequired, requireVerified, async (req, res) => {
     try {
