@@ -13,6 +13,7 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
     const [editText, setEditText] = useState('');
     const [editRating, setEditRating] = useState(null);
     const [saving, setSaving] = useState(false);
+    const [isClosing, setIsClosing] = useState(false);
 
     const handleVote = async (commentId, type) => {
         if (pendingVotes.has(commentId)) return;
@@ -122,9 +123,13 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
     };
 
     const cancelEdit = () => {
-        setEditingId(null);
-        setEditText('');
-        setEditRating(null);
+        setIsClosing(true);
+        setTimeout(() => {
+            setEditingId(null);
+            setEditText('');
+            setEditRating(null);
+            setIsClosing(false);
+        }, 400);
     };
 
     const saveEdit = async (reply) => {
@@ -335,21 +340,23 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
                                 )}
                             </div>
                             {editingId === reply._id ? (
-                                <div className="mb-2 bg-gray-50 rounded-lg p-3">
-                                    <div className="mb-3">
+                                <div className={`mb-2 bg-gray-50 rounded-lg p-3 ${isClosing ? 'animate-slideUp' : 'animate-slideDown'}`} style={{ overflow: 'hidden' }}>
+                                    <div className="mb-3 animate-fadeIn">
                                         <StarRatingInput
                                             rating={editRating ?? reply.rating ?? 0}
                                             onRatingChange={(r) => setEditRating(r)}
                                         />
                                     </div>
-                                    <textarea
-                                        className="w-full border rounded-lg p-3 resize-none text-sm"
-                                        rows={3}
-                                        placeholder="Оновіть ваш відгук..."
-                                        value={editText}
-                                        onChange={(e) => setEditText(e.target.value)}
-                                    />
-                                    <div className="flex items-center justify-end mt-3 gap-3">
+                                    <div className="animate-fadeIn" style={{ animationDelay: '0.1s' }}>
+                                        <textarea
+                                            className="w-full border rounded-lg p-3 resize-none text-sm"
+                                            rows={3}
+                                            placeholder="Оновіть ваш відгук..."
+                                            value={editText}
+                                            onChange={(e) => setEditText(e.target.value)}
+                                        />
+                                    </div>
+                                    <div className="flex items-center justify-end mt-3 gap-3 animate-fadeIn" style={{ animationDelay: '0.2s' }}>
                                         <button
                                             onClick={cancelEdit}
                                             className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 hover:scale-105 active:scale-95 transition-all duration-300 ease-out shadow-sm hover:shadow-md"
