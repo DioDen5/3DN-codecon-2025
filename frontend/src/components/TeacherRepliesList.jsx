@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ThumbsUp, ThumbsDown, Trash2, MoreVertical } from 'lucide-react';
-import { toggleTeacherComment, deleteTeacherComment } from '../api/teacher-comments';
+import { toggleTeacherComment, deleteTeacherComment, updateTeacherComment } from '../api/teacher-comments';
+import StarRatingInput from './StarRatingInput';
 import { useAuthState } from '../api/useAuthState';
 
 const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
@@ -8,6 +9,10 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
     const [error, setError] = useState(null);
     const [pendingVotes, setPendingVotes] = useState(new Set());
     const [openMenuId, setOpenMenuId] = useState(null);
+    const [editingId, setEditingId] = useState(null);
+    const [editText, setEditText] = useState('');
+    const [editRating, setEditRating] = useState(null);
+    const [saving, setSaving] = useState(false);
 
     const handleVote = async (commentId, type) => {
         if (pendingVotes.has(commentId)) return;
@@ -102,6 +107,56 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
         }
         
         return date.toLocaleDateString('uk-UA');
+    };
+
+    const formatFullDateTime = (dateString) => {
+        const d = new Date(dateString);
+        if (isNaN(d.getTime())) return 'Невідомо';
+        return d.toLocaleString('uk-UA');
+    };
+
+    const startEdit = (reply) => {
+        setEditingId(reply._id);
+        setEditText(reply.body || '');
+        setEditRating(reply.rating || null);
+    };
+
+    const cancelEdit = () => {
+        setEditingId(null);
+        setEditText('');
+        setEditRating(null);
+    };
+
+    const saveEdit = async (reply) => {
+        if (!isAuthed) {
+            setError('Потрібно увійти в систему для редагування відгуку');
+            return;
+        }
+        if (editRating !== null && (editRating < 1 || editRating > 5)) {
+            setError('Оцінка має бути від 1 до 5');
+            return;
+        }
+        const payloadBody = editText;
+        const payloadRating = editRating === null ? undefined : editRating;
+        const nothingChanged = (payloadBody === (reply.body || '')) && (payloadRating === undefined || payloadRating === reply.rating);
+        if (nothingChanged) {
+            cancelEdit();
+            return;
+        }
+        setSaving(true);
+        setError(null);
+        try {
+            const updated = await updateTeacherComment(reply._id, payloadBody, payloadRating);
+            if (onRepliesUpdate) {
+                onRepliesUpdate(prev => prev.map(r => r._id === reply._id ? { ...r, ...updated } : r));
+            }
+            cancelEdit();
+        } catch (err) {
+            console.error('Update error:', err);
+            setError(err?.response?.data?.error || 'Помилка при оновленні відгуку');
+        } finally {
+            setSaving(false);
+        }
     };
 
     const getUserName = (comment) => {
@@ -200,6 +255,11 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
                                             <span className="text-xs text-gray-600 font-medium">
                                                 {reply.rating}/5
                                             </span>
+                                            {reply.updatedAt && reply.updatedAt !== reply.createdAt && (
+                                                <span className="text-xs text-gray-500 font-medium" title={`Оновлено: ${formatFullDateTime(reply.updatedAt)}`}>
+                                                    • редаговано
+                                                </span>
+                                            )}
                                         </div>
                                     )}
                                 </div>
@@ -232,6 +292,7 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
                                             <div className="absolute right-0 top-8 z-[9999] bg-white border border-gray-200 rounded-lg shadow-xl w-[140px] menu-enter backdrop-blur-sm overflow-hidden">
                                                 <button
                                                     onClick={() => {
+                                                        startEdit(reply);
                                                         setOpenMenuId(null);
                                                     }}
                                                     className="flex items-center justify-center gap-1 w-full px-4 py-2 text-xs text-blue-600 bg-transparent hover:text-blue-800 transition-colors duration-200"
@@ -273,43 +334,77 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
                                     </div>
                                 )}
                             </div>
-                            <p className="text-sm text-gray-800 whitespace-pre-line mb-2">
-                                {reply.body || reply.message || ''}
-                            </p>
-                            <div className="flex items-center gap-4 text-sm">
-                                <button
-                                    disabled={pendingVotes.has(reply._id)}
-                                    onClick={() => handleVote(reply._id, 'like')}
-                                    className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition ${
-                                        reply.userReaction === 1 
-                                            ? 'bg-green-100 text-green-700' 
-                                            : 'bg-gray-100 text-gray-600 hover:bg-green-50'
-                                    } ${
-                                        pendingVotes.has(reply._id) ? 'opacity-60 cursor-not-allowed' : ''
-                                    }`}
-                                    aria-label="like"
-                                >
-                                    <ThumbsUp size={12} />
-                                    {reply.counts?.likes || 0}
-                                </button>
+                            {editingId === reply._id ? (
+                                <div className="mb-2 bg-gray-50 rounded-lg p-3">
+                                    <div className="mb-3">
+                                        <StarRatingInput
+                                            rating={editRating ?? reply.rating ?? 0}
+                                            onRatingChange={(r) => setEditRating(r)}
+                                        />
+                                    </div>
+                                    <textarea
+                                        className="w-full border rounded-lg p-3 resize-none text-sm"
+                                        rows={3}
+                                        placeholder="Оновіть ваш відгук..."
+                                        value={editText}
+                                        onChange={(e) => setEditText(e.target.value)}
+                                    />
+                                    <div className="flex items-center justify-end mt-3 gap-3">
+                                        <button
+                                            onClick={cancelEdit}
+                                            className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 hover:scale-105 active:scale-95 transition-all duration-300 ease-out shadow-sm hover:shadow-md"
+                                        >
+                                            Скасувати
+                                        </button>
+                                        <button
+                                            onClick={() => saveEdit(reply)}
+                                            disabled={saving}
+                                            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 hover:scale-105 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-300 ease-out shadow-sm hover:shadow-md"
+                                        >
+                                            {saving ? 'Зберігаємо...' : 'Зберегти'}
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <p className="text-sm text-gray-800 whitespace-pre-line mb-2">
+                                    {reply.body || reply.message || ''}
+                                </p>
+                            )}
+                            {editingId !== reply._id && (
+                                <div className="flex items-center gap-4 text-sm">
+                                    <button
+                                        disabled={pendingVotes.has(reply._id)}
+                                        onClick={() => handleVote(reply._id, 'like')}
+                                        className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition ${
+                                            reply.userReaction === 1 
+                                                ? 'bg-green-100 text-green-700' 
+                                                : 'bg-gray-100 text-gray-600 hover:bg-green-50'
+                                        } ${
+                                            pendingVotes.has(reply._id) ? 'opacity-60 cursor-not-allowed' : ''
+                                        }`}
+                                        aria-label="like"
+                                    >
+                                        <ThumbsUp size={12} />
+                                        {reply.counts?.likes || 0}
+                                    </button>
 
-                                <button
-                                    disabled={pendingVotes.has(reply._id)}
-                                    onClick={() => handleVote(reply._id, 'dislike')}
-                                    className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition ${
-                                        reply.userReaction === -1 
-                                            ? 'bg-red-100 text-red-700' 
-                                            : 'bg-gray-100 text-gray-600 hover:bg-red-50'
-                                    } ${
-                                        pendingVotes.has(reply._id) ? 'opacity-60 cursor-not-allowed' : ''
-                                    }`}
-                                    aria-label="dislike"
-                                >
-                                    <ThumbsDown size={12} />
-                                    {reply.counts?.dislikes || 0}
-                                </button>
-                                
-                            </div>
+                                    <button
+                                        disabled={pendingVotes.has(reply._id)}
+                                        onClick={() => handleVote(reply._id, 'dislike')}
+                                        className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition ${
+                                            reply.userReaction === -1 
+                                                ? 'bg-red-100 text-red-700' 
+                                                : 'bg-gray-100 text-gray-600 hover:bg-red-50'
+                                        } ${
+                                            pendingVotes.has(reply._id) ? 'opacity-60 cursor-not-allowed' : ''
+                                        }`}
+                                        aria-label="dislike"
+                                    >
+                                        <ThumbsDown size={12} />
+                                        {reply.counts?.dislikes || 0}
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     ))
                 ) : (

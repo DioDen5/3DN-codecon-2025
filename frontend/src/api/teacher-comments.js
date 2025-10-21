@@ -49,3 +49,13 @@ export async function deleteTeacherComment(commentId) {
         throw err;
     }
 }
+
+export async function updateTeacherComment(commentId, body, rating) {
+    try {
+        const { data } = await http.patch(`/teacher-comments/${commentId}`, { body, rating });
+        return data;
+    } catch (err) {
+        console.error('Error updating teacher comment:', err);
+        throw err;
+    }
+}
