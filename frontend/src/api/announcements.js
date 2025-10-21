@@ -30,3 +30,8 @@ export async function createPublished({ title, body, tags = [] }) {
     const { data } = await http.post('/announcements', payload);
     return data;
 }
+
+export async function remove(id) {
+    const { data } = await http.delete(`/announcements/${id}`);
+    return data;
+}

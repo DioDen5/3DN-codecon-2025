@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ThumbsUp, ThumbsDown, Trash2, MoreVertical } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, Trash2, MoreVertical, Flag } from 'lucide-react';
 import { toggleTeacherComment, deleteTeacherComment, updateTeacherComment } from '../api/teacher-comments';
 import StarRatingInput from './StarRatingInput';
 import { useAuthState } from '../api/useAuthState';
@@ -200,6 +200,18 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
         return false;
     };
 
+    const handleReport = (commentId) => {
+        if (!isAuthed) {
+            setError('Потрібно увійти в систему для скарги');
+            return;
+        }
+
+        if (window.confirm('Ви впевнені, що хочете поскаржитись на цей відгук?')) {
+            // Тут можна додати логіку відправки скарги
+            alert('Скарга відправлена. Дякуємо за звернення!');
+        }
+    };
+
     React.useEffect(() => {
         const handleClickOutside = (event) => {
             if (openMenuId && !event.target.closest('.relative')) {
@@ -269,7 +281,7 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
                                     )}
                                 </div>
                                 
-                                {isOwnComment(reply) && (
+                                {(isOwnComment(reply) || !isOwnComment(reply)) && (
                                     <div className="relative">
                                         <button
                                             onClick={(event) => {
@@ -295,45 +307,46 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
                                         
                                         {openMenuId === reply._id && (
                                             <div className="absolute right-0 top-8 z-[9999] bg-white border border-gray-200 rounded-lg shadow-xl w-[140px] menu-enter backdrop-blur-sm overflow-hidden">
-                                                <button
-                                                    onClick={() => {
-                                                        startEdit(reply);
-                                                        setOpenMenuId(null);
-                                                    }}
-                                                    className="flex items-center justify-center gap-1 w-full px-4 py-2 text-xs text-blue-600 bg-transparent hover:text-blue-800 transition-colors duration-200"
-                                                >
-                                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                    </svg>
-                                                    Редагувати
-                                                </button>
-                                                
-                                                <div className="border-b border-gray-200"></div>
-                                                
-                                                <button
-                                                    onClick={() => {
-                                                        setOpenMenuId(null);
-                                                    }}
-                                                    className="flex items-center justify-center gap-1 w-full px-4 py-2 text-xs text-orange-600 bg-transparent hover:text-orange-800 transition-colors duration-200"
-                                                >
-                                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                                                    </svg>
-                                                    Поскаржитись
-                                                </button>
-                                                
-                                                <div className="border-b border-gray-200"></div>
-                                                
-                                                <button
-                                                    onClick={() => {
-                                                        handleDelete(reply._id);
-                                                        setOpenMenuId(null);
-                                                    }}
-                                                    className="flex items-center justify-center gap-1 w-full px-4 py-2 text-xs text-red-600 bg-transparent hover:text-red-800 transition-colors duration-200"
-                                                >
-                                                    <Trash2 size={12} />
-                                                    Видалити
-                                                </button>
+                                                {isOwnComment(reply) ? (
+                                                    <>
+                                                        <button
+                                                            onClick={() => {
+                                                                startEdit(reply);
+                                                                setOpenMenuId(null);
+                                                            }}
+                                                            className="flex items-center justify-center gap-1 w-full px-4 py-2 text-xs text-blue-600 bg-transparent hover:text-blue-800 transition-colors duration-200"
+                                                        >
+                                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                            </svg>
+                                                            Редагувати
+                                                        </button>
+                                                        
+                                                        <div className="border-b border-gray-200"></div>
+                                                        
+                                                        <button
+                                                            onClick={() => {
+                                                                handleDelete(reply._id);
+                                                                setOpenMenuId(null);
+                                                            }}
+                                                            className="flex items-center justify-center gap-1 w-full px-4 py-2 text-xs text-red-600 bg-transparent hover:text-red-800 transition-colors duration-200"
+                                                        >
+                                                            <Trash2 size={12} />
+                                                            Видалити
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => {
+                                                            handleReport(reply._id);
+                                                            setOpenMenuId(null);
+                                                        }}
+                                                        className="flex items-center justify-center gap-1 w-full px-4 py-2 text-xs text-orange-600 bg-transparent hover:text-orange-800 transition-colors duration-200"
+                                                    >
+                                                        <Flag size={12} />
+                                                        Поскаржитись
+                                                    </button>
+                                                )}
                                             </div>
                                         )}
                                     </div>

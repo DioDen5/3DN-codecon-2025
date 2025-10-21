@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
-import { ThumbsUp, ThumbsDown, MessageCircle } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, MessageCircle, MoreVertical, Trash2 } from 'lucide-react';
+import { useAuthState } from '../api/useAuthState';
+import { remove as deleteAnnouncement } from '../api/announcements';
 
-const PostExpanded = ({ post, onReaction, searchQuery = '' }) => {
+const PostExpanded = ({ post, onReaction, searchQuery = '', onDelete }) => {
     const [pending, setPending] = useState(false);
+    const { isAuthed, user } = useAuthState();
+    const [openMenu, setOpenMenu] = useState(false);
 
     const formatDate = (dateString) => {
         if (!dateString) return 'Невідомо';
@@ -38,6 +42,43 @@ const PostExpanded = ({ post, onReaction, searchQuery = '' }) => {
         return 'Невідомий';
     };
 
+    const isOwnPost = (post) => {
+        if (!user || !post) return false;
+        const userId = user._id || user.id;
+        
+        if (post?.authorId) {
+            if (typeof post.authorId === 'string') {
+                return post.authorId === userId;
+            }
+            if (post.authorId._id) {
+                return post.authorId._id === userId;
+            }
+        }
+        
+        return false;
+    };
+
+    const handleDelete = async () => {
+        if (!isAuthed) {
+            alert('Потрібно увійти в систему для видалення обговорення');
+            return;
+        }
+
+        if (!window.confirm('Ви впевнені, що хочете видалити це обговорення?')) {
+            return;
+        }
+
+        try {
+            await deleteAnnouncement(post._id);
+            if (onDelete) {
+                onDelete();
+            }
+        } catch (err) {
+            console.error('Error deleting post:', err);
+            alert('Помилка при видаленні обговорення');
+        }
+    };
+
     const highlightText = (text, query) => {
         if (!query || !text) return text;
         
@@ -67,15 +108,69 @@ const PostExpanded = ({ post, onReaction, searchQuery = '' }) => {
         }
     };
 
+    React.useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (openMenu && !event.target.closest('.relative')) {
+                setOpenMenu(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [openMenu]);
+
     if (!post) return <p className="text-white/80">Завантаження...</p>;
 
     return (
         <div className="bg-white text-black rounded-xl p-4 shadow-md">
-            <div className="flex items-center gap-2 text-sm mb-1">
-                <span className="font-semibold">{getAuthorName(post)}</span>
-                <span className="text-gray-500">
-                    {formatDate(post.publishedAt || post.createdAt)}
-                </span>
+            <div className="flex items-center justify-between text-sm mb-1">
+                <div className="flex items-center gap-2">
+                    <span className="font-semibold">{getAuthorName(post)}</span>
+                    <span className="text-gray-500">
+                        {formatDate(post.publishedAt || post.createdAt)}
+                    </span>
+                </div>
+                
+                {isOwnPost(post) && (
+                    <div className="relative">
+                        <button
+                            onClick={(event) => {
+                                setOpenMenu(!openMenu);
+                                const button = event.target.closest('button');
+                                button.classList.add('button-pulse');
+                                setTimeout(() => button.classList.remove('button-pulse'), 600);
+                            }}
+                            className={`flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 transform ${
+                                openMenu 
+                                    ? 'text-blue-600 bg-blue-50 scale-110 shadow-lg' 
+                                    : 'text-gray-500 hover:text-blue-600 hover:bg-blue-50 hover:scale-105'
+                            }`}
+                            title="Опції"
+                        >
+                            <MoreVertical 
+                                size={16} 
+                                className={`transition-all duration-300 ${
+                                    openMenu ? 'rotate-90 icon-bounce' : 'rotate-0'
+                                }`}
+                            />
+                        </button>
+                        
+                        {openMenu && (
+                            <div className="absolute right-0 top-8 z-[9999] bg-white border border-gray-200 rounded-lg shadow-xl w-[140px] menu-enter backdrop-blur-sm overflow-hidden">
+                                <button
+                                    onClick={() => {
+                                        handleDelete();
+                                        setOpenMenu(false);
+                                    }}
+                                    className="flex items-center justify-center gap-1 w-full px-4 py-2 text-xs text-red-600 bg-transparent hover:text-red-800 transition-colors duration-200"
+                                >
+                                    <Trash2 size={12} />
+                                    Видалити
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
 
             {post.title && <h2 className="font-bold text-lg mb-2 leading-snug">{highlightText(post.title, searchQuery)}</h2>}
