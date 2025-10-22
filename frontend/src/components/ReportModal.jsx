@@ -6,6 +6,7 @@ import { useNotification } from '../contexts/NotificationContext';
 const ReportModal = ({ isOpen, onClose, targetType, targetId, targetTitle = '' }) => {
     const [reason, setReason] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isClosing, setIsClosing] = useState(false);
     const { showSuccess } = useNotification();
 
     const handleSubmit = async (e) => {
@@ -31,14 +32,20 @@ const ReportModal = ({ isOpen, onClose, targetType, targetId, targetTitle = '' }
     };
 
     const handleClose = () => {
-        setReason('');
-        onClose();
+        setIsClosing(true);
+        setTimeout(() => {
+            setReason('');
+            setIsClosing(false);
+            onClose();
+        }, 400); // Тривалість анімації закриття
     };
 
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+        <div className={`fixed inset-0 z-[9999] flex items-center justify-center p-4 ${
+            isClosing ? 'modal-closing' : ''
+        }`}>
             {/* Backdrop */}
             <div 
                 className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-backdrop-fade"
@@ -46,7 +53,9 @@ const ReportModal = ({ isOpen, onClose, targetType, targetId, targetTitle = '' }
             />
             
             {/* Modal */}
-            <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden animate-modal-slide-in">
+            <div className={`relative bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden modal-content ${
+                isClosing ? '' : 'animate-modal-slide-in'
+            }`}>
                 {/* Header */}
                 <div className="bg-gradient-to-r from-orange-500 via-orange-600 to-orange-700 px-6 py-4 relative overflow-hidden">
                     {/* Background decoration */}
@@ -76,20 +85,27 @@ const ReportModal = ({ isOpen, onClose, targetType, targetId, targetTitle = '' }
                     <div className="mb-6">
                         <div className="flex items-center gap-3 mb-4">
                             <div className="p-2 bg-gradient-to-r from-orange-100 to-orange-200 rounded-full">
-                                <AlertTriangle className="w-5 h-5 text-orange-600" />
+                                <AlertTriangle className="w-5 h-5 text-orange-600 animate-icon-shake" />
                             </div>
                             <p className="text-gray-700 text-sm leading-relaxed font-medium">
-                                Опишіть причину скарги на цей контент
+                                Опишіть причину скарги на це обговорення
                             </p>
                         </div>
                         
                         {targetTitle && (
-                            <div className="mt-4 p-4 bg-gradient-to-r from-orange-50 to-orange-100 rounded-xl border border-orange-200 relative overflow-hidden">
+                            <div className="mt-4 p-4 bg-gradient-to-r from-orange-50 to-orange-100 rounded-xl border border-orange-200 relative overflow-hidden comment-animate-orange">
                                 <div className="absolute top-0 right-0 w-16 h-16 bg-orange-100/30 rounded-full -translate-y-8 translate-x-8"></div>
                                 <div className="relative">
-                                    <p className="text-sm text-orange-800 font-medium mb-1">
-                                        Контент:
-                                    </p>
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <div className="p-1 bg-orange-200 rounded-lg">
+                                            <svg className="w-3 h-3 text-orange-600 planet-icon" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                                            </svg>
+                                        </div>
+                                        <p className="text-sm text-orange-800 font-medium">
+                                            Обговорення:
+                                        </p>
+                                    </div>
                                     <p className="text-sm text-orange-600 italic">
                                         "{targetTitle.length > 100 ? targetTitle.substring(0, 100) + '...' : targetTitle}"
                                     </p>
@@ -102,13 +118,13 @@ const ReportModal = ({ isOpen, onClose, targetType, targetId, targetTitle = '' }
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
                             <label htmlFor="reason" className="block text-sm font-medium text-gray-700 mb-2">
-                                Причина скарги *
+                                Причина скарги:
                             </label>
                             <textarea
                                 id="reason"
                                 value={reason}
                                 onChange={(e) => setReason(e.target.value)}
-                                placeholder="Опишіть, що саме вас не влаштовує в цьому контенті..."
+                                placeholder="Опишіть, що саме вас не влаштовує в цьому обговоренні..."
                                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 resize-none"
                                 rows={4}
                                 maxLength={500}

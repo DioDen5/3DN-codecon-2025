@@ -751,3 +751,40 @@
     animation: commentSlideInSmooth 1.71s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
+/* Варіант 4: Блимання + тінь */
+@keyframes commentBlink {
+    0%, 100% {
+        opacity: 1;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    50% {
+        opacity: 0.8;
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+    }
+}
+
+.comment-animate-v4 {
+    animation: commentBlink 1.8s ease-in-out infinite;
+}
+
+/* Активний варіант 4 */
+.comment-animate {
+    animation: commentBlink 1.8s ease-in-out infinite;
+}
+
+/* Варіант 4 для модалки репорту: Блимання + тінь в жовто-помаранчевих тонах */
+@keyframes commentBlinkOrange {
+    0%, 100% {
+        opacity: 1;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    50% {
+        opacity: 0.8;
+        box-shadow: 0 4px 15px rgba(251, 146, 60, 0.4);
+    }
+}
+
+.comment-animate-orange {
+    animation: commentBlinkOrange 1.8s ease-in-out infinite;
+}
+
