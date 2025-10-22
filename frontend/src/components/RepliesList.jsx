@@ -34,6 +34,7 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
         
         try {
             const value = type === 'like' ? 1 : -1;
+            console.log('Voting:', { commentId, type, value }); // Додаємо логування
             const result = await toggleComment(commentId, value);
             console.log('Toggle result:', result); // Додаємо логування
             

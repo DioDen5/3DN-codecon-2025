@@ -35,6 +35,7 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
         
         try {
             const value = type === 'like' ? 1 : -1;
+            console.log('Voting:', { commentId, type, value }); // Додаємо логування
             const result = await toggleTeacherComment(commentId, value);
             console.log('Toggle result:', result); // Додаємо логування
             

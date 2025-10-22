@@ -177,11 +177,12 @@ const PostExpanded = ({ post, onReaction, searchQuery = '', onDelete }) => {
             {post.body && <p className="text-sm text-gray-800 whitespace-pre-line mb-4">{post.body}</p>}
 
             <div className="flex items-center gap-4 text-sm">
+                {console.log('PostExpanded - post.counts?.userReaction:', post.counts?.userReaction, 'post.userReaction:', post.userReaction)}
                 <button
                     disabled={pending}
                     onClick={() => onVote(1)}
-                    className={`flex items-center gap-2 border border-black rounded px-3 py-2 transition hover:bg-black hover:text-white ${
-                        (post.counts?.userReaction === 1 || post.userReaction === 1) ? 'bg-black text-white' : ''
+                    className={`flex items-center gap-2 border border-black rounded px-3 py-2 transition-all duration-300 ease-out hover:scale-105 active:scale-95 hover:bg-black hover:text-white ${
+                        post.counts?.userReaction === 1 ? 'bg-black text-white' : ''
                     } ${
                         pending ? 'opacity-60 cursor-not-allowed' : ''
                     }`}
@@ -194,8 +195,8 @@ const PostExpanded = ({ post, onReaction, searchQuery = '', onDelete }) => {
                 <button
                     disabled={pending}
                     onClick={() => onVote(-1)}
-                    className={`flex items-center gap-2 border border-black rounded px-3 py-2 transition hover:bg-black hover:text-white ${
-                        (post.counts?.userReaction === -1 || post.userReaction === -1) ? 'bg-black text-white' : ''
+                    className={`flex items-center gap-2 border border-black rounded px-3 py-2 transition-all duration-300 ease-out hover:scale-105 active:scale-95 hover:bg-black hover:text-white ${
+                        post.counts?.userReaction === -1 ? 'bg-black text-white' : ''
                     } ${
                         pending ? 'opacity-60 cursor-not-allowed' : ''
                     }`}
