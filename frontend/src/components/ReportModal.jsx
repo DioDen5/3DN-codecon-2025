@@ -48,7 +48,7 @@ const ReportModal = ({ isOpen, onClose, targetType, targetId, targetTitle = '' }
         }`} onClick={(e) => e.stopPropagation()}>
             {/* Backdrop */}
             <div 
-                className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-backdrop-fade"
+                className="absolute inset-0 bg-black/60 backdrop-blur-md animate-backdrop-fade"
                 onClick={handleClose}
             />
             
