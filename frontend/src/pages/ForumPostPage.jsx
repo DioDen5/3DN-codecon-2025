@@ -141,6 +141,10 @@ const ForumPostPage = () => {
         }
     };
 
+    const handleDelete = () => {
+        navigate('/forum');
+    };
+
     if (loading) return <div className="text-white p-10">Завантаження...</div>;
     if (error) return <div className="text-white p-10">Помилка: {error}</div>;
     if (!post) return <div className="text-white p-10">Пост не знайдено</div>;
@@ -159,6 +163,7 @@ const ForumPostPage = () => {
                     post={post} 
                     onReaction={handleReaction}
                     searchQuery=""
+                    onDelete={handleDelete}
                 />
 
                 <CommentInput onSubmit={handleCreate} />

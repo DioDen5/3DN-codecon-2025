@@ -151,4 +151,35 @@ router.post('/:id/submit', authRequired, requireVerified, async (req, res) => {
     res.json(doc);
 });
 
+// Delete an announcement
+router.delete('/:id', authRequired, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const userId = req.user.id;
+
+        if (!mongoose.isValidObjectId(id)) {
+            return res.status(400).json({ error: 'Invalid announcement ID' });
+        }
+
+        const announcement = await Announcement.findOne({ _id: id, authorId: userId });
+        if (!announcement) {
+            return res.status(404).json({ error: 'Announcement not found' });
+        }
+
+        // Delete all related comments
+        await Comment.deleteMany({ announcementId: id });
+        
+        // Delete all related reactions
+        await Reaction.deleteMany({ targetType: 'announcement', targetId: new mongoose.Types.ObjectId(id) });
+
+        // Delete the announcement
+        await Announcement.findByIdAndDelete(id);
+
+        res.json({ message: 'Announcement deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting announcement:', error);
+        res.status(500).json({ error: 'Failed to delete announcement' });
+    }
+});
+
 export default router;

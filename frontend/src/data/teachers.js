@@ -7,7 +7,7 @@ import iconCurrent from '../assets/icon.jpg'
 const teachers = [
     {
         id: 0,
-        image: Photo3,
+        image: Photo4,
         name: 'Костів Оксана Миколаївна',
         university: 'ЛНУ імені Івана Франка',
         subject: 'Кафедра української мови',
@@ -95,7 +95,7 @@ const teachers = [
     },
     {
         id: 8,
-        image: iconCurrent,
+        image: Photo5,
         name: 'Мельник Світлана Анатоліївна',
         university: 'ЛНУ імені Івана Франка',
         subject: 'Економіка',
