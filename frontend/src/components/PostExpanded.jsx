@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import { ThumbsUp, ThumbsDown, MessageCircle, MoreVertical, Trash2 } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, MessageCircle, MoreVertical, Trash2, Flag } from 'lucide-react';
 import { useAuthState } from '../api/useAuthState';
 import { remove as deleteAnnouncement } from '../api/announcements';
+import ReportModal from './ReportModal';
 
 const PostExpanded = ({ post, onReaction, searchQuery = '', onDelete }) => {
     const [pending, setPending] = useState(false);
     const { isAuthed, user } = useAuthState();
     const [openMenu, setOpenMenu] = useState(false);
+    const [showReportModal, setShowReportModal] = useState(false);
 
     const formatDate = (dateString) => {
         if (!dateString) return 'Невідомо';
@@ -79,6 +81,11 @@ const PostExpanded = ({ post, onReaction, searchQuery = '', onDelete }) => {
         }
     };
 
+    const handleReport = () => {
+        setShowReportModal(true);
+        setOpenMenu(false);
+    };
+
     const highlightText = (text, query) => {
         if (!query || !text) return text;
         
@@ -131,7 +138,7 @@ const PostExpanded = ({ post, onReaction, searchQuery = '', onDelete }) => {
                     </span>
                 </div>
                 
-                {isOwnPost(post) && (
+                {isOwnPost(post) ? (
                     <div className="relative">
                         <button
                             onClick={(event) => {
@@ -166,6 +173,42 @@ const PostExpanded = ({ post, onReaction, searchQuery = '', onDelete }) => {
                                 >
                                     <Trash2 size={12} />
                                     Видалити
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    <div className="relative">
+                        <button
+                            onClick={(event) => {
+                                setOpenMenu(!openMenu);
+                                const button = event.target.closest('button');
+                                button.classList.add('button-pulse');
+                                setTimeout(() => button.classList.remove('button-pulse'), 600);
+                            }}
+                            className={`flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 transform ${
+                                openMenu 
+                                    ? 'text-orange-600 bg-orange-50 scale-110 shadow-lg' 
+                                    : 'text-gray-500 hover:text-orange-600 hover:bg-orange-50 hover:scale-105'
+                            }`}
+                            title="Опції"
+                        >
+                            <MoreVertical 
+                                size={16} 
+                                className={`transition-all duration-300 ${
+                                    openMenu ? 'rotate-90 icon-bounce' : 'rotate-0'
+                                }`}
+                            />
+                        </button>
+                        
+                        {openMenu && (
+                            <div className="absolute right-0 top-8 z-[9999] bg-white border border-gray-200 rounded-lg shadow-xl w-[140px] menu-enter backdrop-blur-sm overflow-hidden">
+                                <button
+                                    onClick={handleReport}
+                                    className="flex items-center justify-center gap-1 w-full px-4 py-2 text-xs text-orange-600 bg-transparent hover:text-orange-800 hover:bg-orange-50 transition-colors duration-200"
+                                >
+                                    <Flag size={12} />
+                                    Поскаржитися
                                 </button>
                             </div>
                         )}
@@ -211,6 +254,15 @@ const PostExpanded = ({ post, onReaction, searchQuery = '', onDelete }) => {
                     {post.commentsCount || 0} коментарів
                 </div>
             </div>
+
+            {/* Report Modal */}
+            <ReportModal
+                isOpen={showReportModal}
+                onClose={() => setShowReportModal(false)}
+                targetType="announcement"
+                targetId={post._id}
+                targetTitle={post.title}
+            />
         </div>
     );
 };

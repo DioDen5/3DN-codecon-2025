@@ -16,7 +16,7 @@ const ITEMS_PER_PAGE = 3;
 
 const ForumPage = () => {
     const nav = useNavigate();
-    const { isAuthed } = useAuthState();
+    const { isAuthed, user } = useAuthState();
     const { subscribe } = useForumRefresh();
 
     const [raw, setRaw] = useState([]);
@@ -91,6 +91,22 @@ const ForumPage = () => {
             }
         }
         return 'Невідомий';
+    };
+
+    const isOwnPost = (post) => {
+        if (!user || !post) return false;
+        const userId = user._id || user.id;
+        
+        if (post?.authorId) {
+            if (typeof post.authorId === 'string') {
+                return post.authorId === userId;
+            }
+            if (post.authorId._id) {
+                return post.authorId._id === userId;
+            }
+        }
+        
+        return false;
     };
 
     const highlightText = (text, query) => {
@@ -228,6 +244,7 @@ const ForumPage = () => {
                                     onVote={(id, t) => handleVote(id, t)}
                                     onClick={() => nav(`/forum/${post._id}`)}
                                     searchQuery={searchQuery}
+                                    isOwnPost={isOwnPost(post)}
                                 />
                             ))}
                         </div>
