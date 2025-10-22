@@ -73,9 +73,9 @@ const DeleteConfirmationModal = ({
                         <button
                             onClick={handleClose}
                             disabled={isLoading}
-                            className="p-2 text-white/60 hover:text-white/90 hover:bg-white/20 rounded-full transition-all duration-200 hover:scale-110 backdrop-blur-sm"
+                            className="p-2 text-white/60 hover:text-white/90 hover:bg-white/20 rounded-full transition-all duration-200 hover:scale-110 backdrop-blur-sm group"
                         >
-                            <X className="w-5 h-5" />
+                            <X className="w-5 h-5 spin-close" />
                         </button>
                     </div>
                 </div>
@@ -121,7 +121,7 @@ const DeleteConfirmationModal = ({
                         <button
                             onClick={handleClose}
                             disabled={isLoading}
-                            className="px-6 py-3 text-sm font-medium text-gray-600 bg-white border-2 border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 hover:scale-102 active:scale-98 transition-all duration-300 ease-out shadow-sm hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 group"
+                            className="px-6 py-3 text-sm font-medium text-gray-600 bg-gray-200 rounded-xl hover:bg-gray-300 hover:scale-102 active:scale-98 transition-all duration-300 ease-out shadow-sm hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 group"
                         >
                             <svg className="w-4 h-4 bounce-x transition-all duration-300 ease-out" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
