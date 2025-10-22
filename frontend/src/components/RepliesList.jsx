@@ -3,6 +3,7 @@ import { ThumbsUp, ThumbsDown, MoreVertical, Trash2, Flag } from 'lucide-react';
 import { toggleComment } from '../api/reactions';
 import { remove, update } from '../api/comments';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
+import ReportCommentModal from './ReportCommentModal';
 import { useAuthState } from '../api/useAuthState';
 import { useNotification } from '../contexts/NotificationContext';
 
@@ -17,6 +18,7 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
     const [saving, setSaving] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
     const [deleteModal, setDeleteModal] = useState({ isOpen: false, commentId: null, commentText: '' });
+    const [reportModal, setReportModal] = useState({ isOpen: false, commentId: null, commentText: '' });
     const [deleting, setDeleting] = useState(false);
     const [deletingCommentId, setDeletingCommentId] = useState(null);
     const [newCommentId, setNewCommentId] = useState(null);
@@ -123,6 +125,14 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
         });
     };
 
+    const handleReportClick = (commentId, commentText) => {
+        setReportModal({
+            isOpen: true,
+            commentId,
+            commentText: commentText || 'цей коментар'
+        });
+    };
+
     const handleDeleteConfirm = async () => {
         if (!deleteModal.commentId) return;
 
@@ -162,6 +172,10 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
 
     const handleDeleteCancel = () => {
         setDeleteModal({ isOpen: false, commentId: null, commentText: '' });
+    };
+
+    const handleReportCancel = () => {
+        setReportModal({ isOpen: false, commentId: null, commentText: '' });
     };
 
     const startEdit = (comment) => {
@@ -350,13 +364,13 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
                                                 ) : (
                                                     <button
                                                         onClick={() => {
-                                                            handleReport(reply._id);
+                                                            handleReportClick(reply._id, reply.body?.substring(0, 50) + '...');
                                                             setOpenMenuId(null);
                                                         }}
                                                         className="flex items-center justify-center gap-1 w-full px-4 py-2 text-xs text-orange-600 bg-transparent hover:text-orange-800 transition-colors duration-200"
                                                     >
                                                         <Flag size={12} />
-                                                        Поскаржитись
+                                                        Поскаржитися
                                                     </button>
                                                 )}
                                             </div>
@@ -453,6 +467,17 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
                         isLoading={deleting}
                     />
                 </div>
+            )}
+
+            {/* Report Comment Modal */}
+            {reportModal.isOpen && (
+                <ReportCommentModal
+                    isOpen={reportModal.isOpen}
+                    onClose={handleReportCancel}
+                    targetType="comment"
+                    targetId={reportModal.commentId}
+                    targetTitle={reportModal.commentText}
+                />
             )}
 
         </div>
