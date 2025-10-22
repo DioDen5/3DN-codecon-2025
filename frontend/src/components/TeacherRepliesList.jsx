@@ -480,15 +480,19 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
                 )}
             </div>
 
-            <DeleteConfirmationModal
-                isOpen={deleteModal.isOpen}
-                onClose={handleDeleteCancel}
-                onConfirm={handleDeleteConfirm}
-                title="Видалити відгук"
-                message="Ви впевнені, що хочете видалити цей відгук?"
-                itemName={deleteModal.commentText}
-                isLoading={deleting}
-            />
+            {deleteModal.isOpen && (
+                <div onClick={(e) => e.stopPropagation()}>
+                    <DeleteConfirmationModal
+                        isOpen={deleteModal.isOpen}
+                        onClose={handleDeleteCancel}
+                        onConfirm={handleDeleteConfirm}
+                        title="Видалити відгук"
+                        message="Ви впевнені, що хочете видалити цей відгук?"
+                        itemName={deleteModal.commentText}
+                        isLoading={deleting}
+                    />
+                </div>
+            )}
 
         </div>
     );

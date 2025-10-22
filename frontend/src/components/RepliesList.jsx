@@ -441,15 +441,19 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
             </div>
 
             {/* Delete Confirmation Modal */}
-            <DeleteConfirmationModal
-                isOpen={deleteModal.isOpen}
-                onClose={handleDeleteCancel}
-                onConfirm={handleDeleteConfirm}
-                title="Видалити коментар"
-                message="Ви впевнені, що хочете видалити цей коментар?"
-                itemName={deleteModal.commentText}
-                isLoading={deleting}
-            />
+            {deleteModal.isOpen && (
+                <div onClick={(e) => e.stopPropagation()}>
+                    <DeleteConfirmationModal
+                        isOpen={deleteModal.isOpen}
+                        onClose={handleDeleteCancel}
+                        onConfirm={handleDeleteConfirm}
+                        title="Видалити коментар"
+                        message="Ви впевнені, що хочете видалити цей коментар?"
+                        itemName={deleteModal.commentText}
+                        isLoading={deleting}
+                    />
+                </div>
+            )}
 
         </div>
     );

@@ -41,7 +41,7 @@ const DeleteConfirmationModal = ({
     return (
         <div className={`fixed inset-0 z-[9999] flex items-center justify-center p-4 ${
             isClosing ? 'modal-closing' : ''
-        }`}>
+        }`} onClick={(e) => e.stopPropagation()}>
             {/* Backdrop */}
             <div 
                 className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-backdrop-fade"
@@ -52,7 +52,7 @@ const DeleteConfirmationModal = ({
             <div 
                 className={`relative bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden modal-content ${
                     isClosing ? '' : 'animate-modal-slide-in'
-                }`}
+                }`} onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
                 <div className="bg-gradient-to-r from-red-500 via-red-600 to-red-700 px-6 py-4 relative overflow-hidden">

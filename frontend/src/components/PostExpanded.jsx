@@ -256,13 +256,17 @@ const PostExpanded = ({ post, onReaction, searchQuery = '', onDelete }) => {
             </div>
 
             {/* Report Modal */}
-            <ReportModal
-                isOpen={showReportModal}
-                onClose={() => setShowReportModal(false)}
-                targetType="announcement"
-                targetId={post._id}
-                targetTitle={post.title}
-            />
+            {showReportModal && (
+                <div onClick={(e) => e.stopPropagation()}>
+                    <ReportModal
+                        isOpen={showReportModal}
+                        onClose={() => setShowReportModal(false)}
+                        targetType="announcement"
+                        targetId={post._id}
+                        targetTitle={post.title}
+                    />
+                </div>
+            )}
         </div>
     );
 };

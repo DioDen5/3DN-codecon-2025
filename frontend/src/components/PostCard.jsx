@@ -191,13 +191,17 @@ const PostCard = ({
             </div>
 
             {/* Report Modal */}
-            <ReportModal
-                isOpen={showReportModal}
-                onClose={() => setShowReportModal(false)}
-                targetType="announcement"
-                targetId={id}
-                targetTitle={title}
-            />
+            {showReportModal && (
+                <div onClick={(e) => e.stopPropagation()}>
+                    <ReportModal
+                        isOpen={showReportModal}
+                        onClose={() => setShowReportModal(false)}
+                        targetType="announcement"
+                        targetId={id}
+                        targetTitle={title}
+                    />
+                </div>
+            )}
         </div>
     );
 };
