@@ -20,7 +20,8 @@ const PostCard = ({
                       voted = null,
                       searchQuery = '',
                       isOwnPost = false,
-                      onDelete
+                      onDelete,
+                      isDeletingPost = false
                   }) => {
     const [showReportModal, setShowReportModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -109,7 +110,9 @@ const PostCard = ({
         <>
         <div
             onClick={onClick}
-            className="bg-white text-black rounded-xl p-4 shadow-sm cursor-pointer hover:bg-gray-200 transition space-y-3"
+            className={`bg-white text-black rounded-xl p-4 shadow-sm cursor-pointer hover:bg-gray-200 transition space-y-3 ${
+                isDeletingPost ? 'comment-delete-slide' : ''
+            }`}
         >
             <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">

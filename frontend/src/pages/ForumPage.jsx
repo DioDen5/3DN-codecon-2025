@@ -26,6 +26,7 @@ const ForumPage = () => {
     const [q, setQ] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
     const [itemOffset, setItemOffset] = useState(0);
+    const [deletingPostId, setDeletingPostId] = useState(null);
 
     const sortOptions = [
         {
@@ -173,6 +174,7 @@ const ForumPage = () => {
         return unsubscribe;
     }, [subscribe]);
 
+
     const handleVote = async (id, type) => {
         const value = type === "like" ? 1 : -1;
         setRaw((prev) =>
@@ -203,7 +205,13 @@ const ForumPage = () => {
     };
 
     const handleDelete = (postId) => {
-        setRaw((prev) => prev.filter((p) => p._id !== postId));
+        setDeletingPostId(postId);
+        
+        // Анімація видалення - зсув вправо
+        setTimeout(() => {
+            setRaw((prev) => prev.filter((p) => p._id !== postId));
+            setDeletingPostId(null);
+        }, 600); // Тривалість анімації
     };
 
     return (
@@ -250,6 +258,7 @@ const ForumPage = () => {
                                     searchQuery={searchQuery}
                                     isOwnPost={isOwnPost(post)}
                                     onDelete={handleDelete}
+                                    isDeletingPost={deletingPostId === post._id}
                                 />
                             ))}
                         </div>
