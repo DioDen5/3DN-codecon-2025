@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ThumbsUp, ThumbsDown, MoreVertical, Trash2, Flag } from 'lucide-react';
 import { toggleComment } from '../api/reactions';
 import { remove, update } from '../api/comments';
+import DeleteConfirmationModal from './DeleteConfirmationModal';
 import { useAuthState } from '../api/useAuthState';
 
 const RepliesList = ({ replies, onRepliesUpdate }) => {
@@ -13,6 +14,8 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
     const [editText, setEditText] = useState('');
     const [saving, setSaving] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
+    const [deleteModal, setDeleteModal] = useState({ isOpen: false, commentId: null, commentText: '' });
+    const [deleting, setDeleting] = useState(false);
 
     const handleVote = async (commentId, type) => {
         if (pendingVotes.has(commentId)) return;
@@ -99,30 +102,38 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
         return false;
     };
 
-    const handleDelete = async (commentId) => {
-        if (!isAuthed) {
-            setError('Потрібно увійти в систему для видалення коментаря');
-            return;
-        }
+    const handleDeleteClick = (commentId, commentText) => {
+        setDeleteModal({
+            isOpen: true,
+            commentId,
+            commentText: commentText || 'цей коментар'
+        });
+    };
 
-        if (!window.confirm('Ви впевнені, що хочете видалити цей коментар?')) {
-            return;
-        }
+    const handleDeleteConfirm = async () => {
+        if (!deleteModal.commentId) return;
 
+        setDeleting(true);
         setError(null);
-        
+
         try {
-            await remove(commentId);
-            
+            await remove(deleteModal.commentId);
             if (onRepliesUpdate) {
                 onRepliesUpdate(prevReplies => 
-                    prevReplies.filter(reply => reply._id !== commentId)
+                    prevReplies.filter(reply => reply._id !== deleteModal.commentId)
                 );
             }
+            setDeleteModal({ isOpen: false, commentId: null, commentText: '' });
         } catch (err) {
             console.error('Error deleting comment:', err);
             setError('Помилка при видаленні коментаря');
+        } finally {
+            setDeleting(false);
         }
+    };
+
+    const handleDeleteCancel = () => {
+        setDeleteModal({ isOpen: false, commentId: null, commentText: '' });
     };
 
     const startEdit = (comment) => {
@@ -291,7 +302,7 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
                                                         <div className="border-b border-gray-200"></div>
                                                         <button
                                                             onClick={() => {
-                                                                handleDelete(reply._id);
+                                                                handleDeleteClick(reply._id, reply.body?.substring(0, 50) + '...');
                                                                 setOpenMenuId(null);
                                                             }}
                                                             className="flex items-center justify-center gap-1 w-full px-4 py-2 text-xs text-red-600 bg-transparent hover:text-red-800 transition-colors duration-200"
@@ -391,6 +402,17 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
                     <p className="text-gray-500">Немає відповідей на цей коментар.</p>
                 )}
             </div>
+
+            {/* Delete Confirmation Modal */}
+            <DeleteConfirmationModal
+                isOpen={deleteModal.isOpen}
+                onClose={handleDeleteCancel}
+                onConfirm={handleDeleteConfirm}
+                title="Видалити коментар"
+                message="Ви впевнені, що хочете видалити цей коментар?"
+                itemName={deleteModal.commentText}
+                isLoading={deleting}
+            />
         </div>
     );
 }

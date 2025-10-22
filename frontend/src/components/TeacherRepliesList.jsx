@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ThumbsUp, ThumbsDown, Trash2, MoreVertical, Flag } from 'lucide-react';
 import { toggleTeacherComment, deleteTeacherComment, updateTeacherComment } from '../api/teacher-comments';
 import StarRatingInput from './StarRatingInput';
+import DeleteConfirmationModal from './DeleteConfirmationModal';
 import { useAuthState } from '../api/useAuthState';
 
 const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
@@ -14,6 +15,8 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
     const [editRating, setEditRating] = useState(null);
     const [saving, setSaving] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
+    const [deleteModal, setDeleteModal] = useState({ isOpen: false, commentId: null, commentText: '' });
+    const [deleting, setDeleting] = useState(false);
 
     const handleVote = async (commentId, type) => {
         if (pendingVotes.has(commentId)) return;
@@ -62,30 +65,38 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
         }
     };
 
-    const handleDelete = async (commentId) => {
-        if (!isAuthed) {
-            setError('Потрібно увійти в систему для видалення відгуку');
-            return;
-        }
+    const handleDeleteClick = (commentId, commentText) => {
+        setDeleteModal({
+            isOpen: true,
+            commentId,
+            commentText: commentText || 'цей відгук'
+        });
+    };
 
-        if (!window.confirm('Ви впевнені, що хочете видалити цей відгук?')) {
-            return;
-        }
+    const handleDeleteConfirm = async () => {
+        if (!deleteModal.commentId) return;
 
+        setDeleting(true);
         setError(null);
-        
+
         try {
-            await deleteTeacherComment(commentId);
-            
+            await deleteTeacherComment(deleteModal.commentId);
             if (onRepliesUpdate) {
                 onRepliesUpdate(prevReplies => 
-                    prevReplies.filter(reply => reply._id !== commentId)
+                    prevReplies.filter(reply => reply._id !== deleteModal.commentId)
                 );
             }
+            setDeleteModal({ isOpen: false, commentId: null, commentText: '' });
         } catch (err) {
-            console.error('Error deleting comment:', err);
-            setError('Помилка при видаленні відгуку');
+            console.error('Error deleting teacher comment:', err);
+            setError('Помилка при видаленні коментаря');
+        } finally {
+            setDeleting(false);
         }
+    };
+
+    const handleDeleteCancel = () => {
+        setDeleteModal({ isOpen: false, commentId: null, commentText: '' });
     };
 
     const formatDate = (dateString) => {
@@ -326,7 +337,7 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
                                                         
                                                         <button
                                                             onClick={() => {
-                                                                handleDelete(reply._id);
+                                                                handleDeleteClick(reply._id, reply.body?.substring(0, 50) + '...');
                                                                 setOpenMenuId(null);
                                                             }}
                                                             className="flex items-center justify-center gap-1 w-full px-4 py-2 text-xs text-red-600 bg-transparent hover:text-red-800 transition-colors duration-200"
@@ -431,6 +442,16 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
                     <p className="text-gray-500">Немає відгуків для цього викладача.</p>
                 )}
             </div>
+
+            <DeleteConfirmationModal
+                isOpen={deleteModal.isOpen}
+                onClose={handleDeleteCancel}
+                onConfirm={handleDeleteConfirm}
+                title="Видалити відгук"
+                message="Ви впевнені, що хочете видалити цей відгук?"
+                itemName={deleteModal.commentText}
+                isLoading={deleting}
+            />
         </div>
     );
 };
