@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { MessageCircle, ThumbsDown, ThumbsUp, Flag, MoreVertical, Trash2 } from 'lucide-react';
 import ReportModal from './ReportModal';
+import DeleteAnnouncementModal from './DeleteAnnouncementModal';
 import { remove as deleteAnnouncement } from '../api/announcements';
 
 const PostCard = ({
@@ -22,7 +23,9 @@ const PostCard = ({
                       onDelete
                   }) => {
     const [showReportModal, setShowReportModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [openMenu, setOpenMenu] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
     const shortContent = content?.length > 180 ? content.slice(0, 180) + '...' : content || '';
 
     const highlightText = (text, query) => {
@@ -64,23 +67,31 @@ const PostCard = ({
         setOpenMenu(!openMenu);
     };
 
-    const handleDelete = async (e) => {
+    const handleDeleteClick = (e) => {
         e.stopPropagation();
-        if (!window.confirm('Ви впевнені, що хочете видалити це обговорення?')) {
-            return;
-        }
+        setShowDeleteModal(true);
+        setOpenMenu(false);
+    };
 
+    const handleDeleteConfirm = async () => {
+        setIsDeleting(true);
         try {
             await deleteAnnouncement(id);
             // Оновлення списку відбувається через батьківський компонент
             if (onDelete) {
                 onDelete(id);
             }
+            setShowDeleteModal(false);
         } catch (err) {
             console.error('Error deleting post:', err);
             alert('Помилка при видаленні обговорення');
+        } finally {
+            setIsDeleting(false);
         }
-        setOpenMenu(false);
+    };
+
+    const handleDeleteCancel = () => {
+        setShowDeleteModal(false);
     };
 
     React.useEffect(() => {
@@ -129,7 +140,7 @@ const PostCard = ({
                         <div className="absolute right-0 top-8 z-[9999] bg-white border border-gray-200 rounded-lg shadow-xl w-[140px] menu-enter backdrop-blur-sm overflow-hidden">
                             {isOwnPost ? (
                                 <button
-                                    onClick={handleDelete}
+                                    onClick={handleDeleteClick}
                                     className="flex items-center justify-center gap-1 w-full px-4 py-2 text-xs text-red-600 bg-transparent hover:text-red-800 hover:bg-red-50 transition-colors duration-200"
                                 >
                                     <Trash2 size={12} />
@@ -199,6 +210,21 @@ const PostCard = ({
                         targetType="announcement"
                         targetId={id}
                         targetTitle={title}
+                    />
+                </div>
+            )}
+
+            {/* Delete Modal */}
+            {showDeleteModal && (
+                <div onClick={(e) => e.stopPropagation()}>
+                    <DeleteAnnouncementModal
+                        isOpen={showDeleteModal}
+                        onClose={handleDeleteCancel}
+                        onConfirm={handleDeleteConfirm}
+                        title="Видалити обговорення"
+                        message="Ви впевнені, що хочете видалити це обговорення?"
+                        itemName={title}
+                        isLoading={isDeleting}
                     />
                 </div>
             )}

@@ -3,12 +3,15 @@ import { ThumbsUp, ThumbsDown, MessageCircle, MoreVertical, Trash2, Flag } from 
 import { useAuthState } from '../api/useAuthState';
 import { remove as deleteAnnouncement } from '../api/announcements';
 import ReportModal from './ReportModal';
+import DeleteAnnouncementModal from './DeleteAnnouncementModal';
 
 const PostExpanded = ({ post, onReaction, searchQuery = '', onDelete }) => {
     const [pending, setPending] = useState(false);
     const { isAuthed, user } = useAuthState();
     const [openMenu, setOpenMenu] = useState(false);
     const [showReportModal, setShowReportModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const formatDate = (dateString) => {
         if (!dateString) return 'Невідомо';
@@ -60,25 +63,33 @@ const PostExpanded = ({ post, onReaction, searchQuery = '', onDelete }) => {
         return false;
     };
 
-    const handleDelete = async () => {
+    const handleDeleteClick = () => {
         if (!isAuthed) {
             alert('Потрібно увійти в систему для видалення обговорення');
             return;
         }
+        setShowDeleteModal(true);
+        setOpenMenu(false);
+    };
 
-        if (!window.confirm('Ви впевнені, що хочете видалити це обговорення?')) {
-            return;
-        }
-
+    const handleDeleteConfirm = async () => {
+        setIsDeleting(true);
         try {
             await deleteAnnouncement(post._id);
             if (onDelete) {
                 onDelete();
             }
+            setShowDeleteModal(false);
         } catch (err) {
             console.error('Error deleting post:', err);
             alert('Помилка при видаленні обговорення');
+        } finally {
+            setIsDeleting(false);
         }
+    };
+
+    const handleDeleteCancel = () => {
+        setShowDeleteModal(false);
     };
 
     const handleReport = () => {
@@ -165,10 +176,7 @@ const PostExpanded = ({ post, onReaction, searchQuery = '', onDelete }) => {
                         {openMenu && (
                             <div className="absolute right-0 top-8 z-[9999] bg-white border border-gray-200 rounded-lg shadow-xl w-[140px] menu-enter backdrop-blur-sm overflow-hidden">
                                 <button
-                                    onClick={() => {
-                                        handleDelete();
-                                        setOpenMenu(false);
-                                    }}
+                                    onClick={handleDeleteClick}
                                     className="flex items-center justify-center gap-1 w-full px-4 py-2 text-xs text-red-600 bg-transparent hover:text-red-800 transition-colors duration-200"
                                 >
                                     <Trash2 size={12} />
@@ -264,6 +272,21 @@ const PostExpanded = ({ post, onReaction, searchQuery = '', onDelete }) => {
                         targetType="announcement"
                         targetId={post._id}
                         targetTitle={post.title}
+                    />
+                </div>
+            )}
+
+            {/* Delete Modal */}
+            {showDeleteModal && (
+                <div onClick={(e) => e.stopPropagation()}>
+                    <DeleteAnnouncementModal
+                        isOpen={showDeleteModal}
+                        onClose={handleDeleteCancel}
+                        onConfirm={handleDeleteConfirm}
+                        title="Видалити обговорення"
+                        message="Ви впевнені, що хочете видалити це обговорення?"
+                        itemName={post.title}
+                        isLoading={isDeleting}
                     />
                 </div>
             )}
