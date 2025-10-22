@@ -2,10 +2,14 @@ import React, { useState } from 'react';
 import { ThumbsUp, ThumbsDown, MoreVertical, Trash2, Flag } from 'lucide-react';
 import { toggleComment } from '../api/reactions';
 import { remove, update } from '../api/comments';
+import DeleteConfirmationModal from './DeleteConfirmationModal';
+import ReportCommentModal from './ReportCommentModal';
 import { useAuthState } from '../api/useAuthState';
+import { useNotification } from '../contexts/NotificationContext';
 
 const RepliesList = ({ replies, onRepliesUpdate }) => {
     const { isAuthed, user } = useAuthState();
+    const { showSuccess } = useNotification();
     const [error, setError] = useState(null);
     const [pendingVotes, setPendingVotes] = useState(new Set());
     const [openMenuId, setOpenMenuId] = useState(null);
@@ -13,6 +17,11 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
     const [editText, setEditText] = useState('');
     const [saving, setSaving] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
+    const [deleteModal, setDeleteModal] = useState({ isOpen: false, commentId: null, commentText: '' });
+    const [reportModal, setReportModal] = useState({ isOpen: false, commentId: null, commentText: '' });
+    const [deleting, setDeleting] = useState(false);
+    const [deletingCommentId, setDeletingCommentId] = useState(null);
+    const [newCommentId, setNewCommentId] = useState(null);
 
     const handleVote = async (commentId, type) => {
         if (pendingVotes.has(commentId)) return;
@@ -27,7 +36,9 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
         
         try {
             const value = type === 'like' ? 1 : -1;
+            console.log('Voting:', { commentId, type, value }); // Додаємо логування
             const result = await toggleComment(commentId, value);
+            console.log('Toggle result:', result); // Додаємо логування
             
             if (onRepliesUpdate) {
                 onRepliesUpdate(prevReplies => 
@@ -42,6 +53,13 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
                     )
                 );
             }
+            
+            // Примусове оновлення компонента
+            setTimeout(() => {
+                if (onRepliesUpdate) {
+                    onRepliesUpdate(prevReplies => [...prevReplies]);
+                }
+            }, 100);
         } catch (err) {
             console.error('Vote error:', err);
             if (err?.response?.status === 401) {
@@ -99,30 +117,65 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
         return false;
     };
 
-    const handleDelete = async (commentId) => {
-        if (!isAuthed) {
-            setError('Потрібно увійти в систему для видалення коментаря');
-            return;
-        }
+    const handleDeleteClick = (commentId, commentText) => {
+        setDeleteModal({
+            isOpen: true,
+            commentId,
+            commentText: commentText || 'цей коментар'
+        });
+    };
 
-        if (!window.confirm('Ви впевнені, що хочете видалити цей коментар?')) {
-            return;
-        }
+    const handleReportClick = (commentId, commentText) => {
+        setReportModal({
+            isOpen: true,
+            commentId,
+            commentText: commentText || 'цей коментар'
+        });
+    };
 
+    const handleDeleteConfirm = async () => {
+        if (!deleteModal.commentId) return;
+
+        setDeleting(true);
+        setDeletingCommentId(deleteModal.commentId);
         setError(null);
-        
+
         try {
-            await remove(commentId);
-            
-            if (onRepliesUpdate) {
-                onRepliesUpdate(prevReplies => 
-                    prevReplies.filter(reply => reply._id !== commentId)
-                );
-            }
+            await remove(deleteModal.commentId);
+
+            setTimeout(() => {
+                const deletingElement = document.querySelector(`[data-comment-id="${deleteModal.commentId}"]`);
+                if (deletingElement) {
+                    deletingElement.classList.add('fade-out');
+                }
+                
+                setTimeout(() => {
+                    if (onRepliesUpdate) {
+                        onRepliesUpdate(prevReplies =>
+                            prevReplies.filter(reply => reply._id !== deleteModal.commentId)
+                        );
+                    }
+                    setDeletingCommentId(null);
+                    showSuccess('Коментар успішно видалено');
+                }, 400);
+            }, 800);
+
+            setDeleteModal({ isOpen: false, commentId: null, commentText: '' });
         } catch (err) {
             console.error('Error deleting comment:', err);
             setError('Помилка при видаленні коментаря');
+            setDeletingCommentId(null);
+        } finally {
+            setDeleting(false);
         }
+    };
+
+    const handleDeleteCancel = () => {
+        setDeleteModal({ isOpen: false, commentId: null, commentText: '' });
+    };
+
+    const handleReportCancel = () => {
+        setReportModal({ isOpen: false, commentId: null, commentText: '' });
     };
 
     const startEdit = (comment) => {
@@ -238,10 +291,18 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
 
             {error && <p className="text-red-500">{error}</p>}
 
-            <div className="space-y-4">
-                {replies.length > 0 ? (
-                    replies.map(reply => (
-                        <div key={reply._id || reply.id} className="bg-white text-black rounded-xl p-4 shadow-sm">
+            <div className="space-y-4 comments-container">
+                        {replies.length > 0 ? (
+                            replies.map(reply => (
+                                <div 
+                                    key={reply._id || reply.id} 
+                                    data-comment-id={reply._id}
+                                    className={`bg-white text-black rounded-xl p-4 shadow-sm comment-item ${
+                                        deletingCommentId === reply._id ? 'comment-deleting' : ''
+                                    } ${
+                                        newCommentId === reply._id ? 'comment-appearing' : ''
+                                    }`}
+                                >
                             <div className="flex items-center justify-between text-sm mb-1">
                                 <div className="flex items-center gap-2">
                                     <span className="font-semibold">{getUserName(reply)}</span>
@@ -291,7 +352,7 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
                                                         <div className="border-b border-gray-200"></div>
                                                         <button
                                                             onClick={() => {
-                                                                handleDelete(reply._id);
+                                                                handleDeleteClick(reply._id, reply.body?.substring(0, 50) + '...');
                                                                 setOpenMenuId(null);
                                                             }}
                                                             className="flex items-center justify-center gap-1 w-full px-4 py-2 text-xs text-red-600 bg-transparent hover:text-red-800 transition-colors duration-200"
@@ -303,13 +364,13 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
                                                 ) : (
                                                     <button
                                                         onClick={() => {
-                                                            handleReport(reply._id);
+                                                            handleReportClick(reply._id, reply.body?.substring(0, 50) + '...');
                                                             setOpenMenuId(null);
                                                         }}
                                                         className="flex items-center justify-center gap-1 w-full px-4 py-2 text-xs text-orange-600 bg-transparent hover:text-orange-800 transition-colors duration-200"
                                                     >
                                                         <Flag size={12} />
-                                                        Поскаржитись
+                                                        Поскаржитися
                                                     </button>
                                                 )}
                                             </div>
@@ -351,10 +412,11 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
                             
                             {editingId !== reply._id && (
                                 <div className="flex items-center gap-4 text-sm">
+                                    {console.log('Reply userReaction:', reply.userReaction, 'for reply:', reply._id)}
                                 <button
                                     disabled={pendingVotes.has(reply._id)}
                                     onClick={() => handleVote(reply._id, 'like')}
-                                    className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition ${
+                                    className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-all duration-300 ease-out hover:scale-105 active:scale-95 ${
                                         reply.userReaction === 1 
                                             ? 'bg-green-100 text-green-700' 
                                             : 'bg-gray-100 text-gray-600 hover:bg-green-50'
@@ -370,7 +432,7 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
                                 <button
                                     disabled={pendingVotes.has(reply._id)}
                                     onClick={() => handleVote(reply._id, 'dislike')}
-                                    className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition ${
+                                    className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-all duration-300 ease-out hover:scale-105 active:scale-95 ${
                                         reply.userReaction === -1 
                                             ? 'bg-red-100 text-red-700' 
                                             : 'bg-gray-100 text-gray-600 hover:bg-red-50'
@@ -391,6 +453,33 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
                     <p className="text-gray-500">Немає відповідей на цей коментар.</p>
                 )}
             </div>
+
+            {/* Delete Confirmation Modal */}
+            {deleteModal.isOpen && (
+                <div onClick={(e) => e.stopPropagation()}>
+                    <DeleteConfirmationModal
+                        isOpen={deleteModal.isOpen}
+                        onClose={handleDeleteCancel}
+                        onConfirm={handleDeleteConfirm}
+                        title="Видалити коментар"
+                        message="Ви впевнені, що хочете видалити цей коментар?"
+                        itemName={deleteModal.commentText}
+                        isLoading={deleting}
+                    />
+                </div>
+            )}
+
+            {/* Report Comment Modal */}
+            {reportModal.isOpen && (
+                <ReportCommentModal
+                    isOpen={reportModal.isOpen}
+                    onClose={handleReportCancel}
+                    targetType="comment"
+                    targetId={reportModal.commentId}
+                    targetTitle={reportModal.commentText}
+                />
+            )}
+
         </div>
     );
 }

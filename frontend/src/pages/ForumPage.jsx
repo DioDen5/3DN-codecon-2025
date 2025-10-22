@@ -16,7 +16,7 @@ const ITEMS_PER_PAGE = 3;
 
 const ForumPage = () => {
     const nav = useNavigate();
-    const { isAuthed } = useAuthState();
+    const { isAuthed, user } = useAuthState();
     const { subscribe } = useForumRefresh();
 
     const [raw, setRaw] = useState([]);
@@ -26,6 +26,7 @@ const ForumPage = () => {
     const [q, setQ] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
     const [itemOffset, setItemOffset] = useState(0);
+    const [deletingPostId, setDeletingPostId] = useState(null);
 
     const sortOptions = [
         {
@@ -93,6 +94,22 @@ const ForumPage = () => {
         return 'Невідомий';
     };
 
+    const isOwnPost = (post) => {
+        if (!user || !post) return false;
+        const userId = user._id || user.id;
+        
+        if (post?.authorId) {
+            if (typeof post.authorId === 'string') {
+                return post.authorId === userId;
+            }
+            if (post.authorId._id) {
+                return post.authorId._id === userId;
+            }
+        }
+        
+        return false;
+    };
+
     const highlightText = (text, query) => {
         if (!query || !text) return text;
         
@@ -157,6 +174,7 @@ const ForumPage = () => {
         return unsubscribe;
     }, [subscribe]);
 
+
     const handleVote = async (id, type) => {
         const value = type === "like" ? 1 : -1;
         setRaw((prev) =>
@@ -184,6 +202,16 @@ const ForumPage = () => {
         } catch {
             listPublished({ q }).then(setRaw).catch(() => {});
         }
+    };
+
+    const handleDelete = (postId) => {
+        setDeletingPostId(postId);
+        
+        // Анімація видалення - зсув вправо
+        setTimeout(() => {
+            setRaw((prev) => prev.filter((p) => p._id !== postId));
+            setDeletingPostId(null);
+        }, 600); // Тривалість анімації
     };
 
     return (
@@ -228,6 +256,9 @@ const ForumPage = () => {
                                     onVote={(id, t) => handleVote(id, t)}
                                     onClick={() => nav(`/forum/${post._id}`)}
                                     searchQuery={searchQuery}
+                                    isOwnPost={isOwnPost(post)}
+                                    onDelete={handleDelete}
+                                    isDeletingPost={deletingPostId === post._id}
                                 />
                             ))}
                         </div>
