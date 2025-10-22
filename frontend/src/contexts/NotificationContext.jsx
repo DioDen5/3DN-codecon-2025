@@ -14,20 +14,23 @@ export const useNotification = () => {
 export const NotificationProvider = ({ children }) => {
     const [notification, setNotification] = useState({
         isVisible: false,
-        message: ''
+        message: '',
+        type: 'success'
     });
 
-    const showSuccess = (message) => {
+    const showSuccess = (message, type = 'success') => {
         setNotification({
             isVisible: true,
-            message
+            message,
+            type
         });
     };
 
     const hideNotification = () => {
         setNotification({
             isVisible: false,
-            message: ''
+            message: '',
+            type: 'success'
         });
     };
 
@@ -37,6 +40,7 @@ export const NotificationProvider = ({ children }) => {
             <SuccessNotification
                 isVisible={notification.isVisible}
                 message={notification.message}
+                type={notification.type}
                 onClose={hideNotification}
             />
         </NotificationContext.Provider>

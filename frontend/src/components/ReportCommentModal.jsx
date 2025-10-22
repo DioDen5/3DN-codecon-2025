@@ -17,7 +17,7 @@ const ReportCommentModal = ({ isOpen, onClose, targetType, targetId, targetTitle
         setIsSubmitting(true);
         try {
             await createReport(targetType, targetId, reason.trim());
-            showSuccess('Скаргу успішно надіслано!');
+            showSuccess('Скаргу успішно надіслано!', 'report');
             setReason('');
             onClose();
         } catch (error) {
