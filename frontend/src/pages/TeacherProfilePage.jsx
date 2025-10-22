@@ -98,7 +98,7 @@ const TeacherProfilePage = () => {
                     newElement.classList.add('comment-appearing');
                     setTimeout(() => {
                         newElement.classList.remove('comment-appearing');
-                    }, 1800);
+                    }, 1710);
                 }
             }, 100);
             

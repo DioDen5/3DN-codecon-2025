@@ -35,6 +35,7 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
         try {
             const value = type === 'like' ? 1 : -1;
             const result = await toggleComment(commentId, value);
+            console.log('Toggle result:', result); // Додаємо логування
             
             if (onRepliesUpdate) {
                 onRepliesUpdate(prevReplies => 
@@ -49,6 +50,13 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
                     )
                 );
             }
+            
+            // Примусове оновлення компонента
+            setTimeout(() => {
+                if (onRepliesUpdate) {
+                    onRepliesUpdate(prevReplies => [...prevReplies]);
+                }
+            }, 100);
         } catch (err) {
             console.error('Vote error:', err);
             if (err?.response?.status === 401) {
@@ -389,10 +397,11 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
                             
                             {editingId !== reply._id && (
                                 <div className="flex items-center gap-4 text-sm">
+                                    {console.log('Reply userReaction:', reply.userReaction, 'for reply:', reply._id)}
                                 <button
                                     disabled={pendingVotes.has(reply._id)}
                                     onClick={() => handleVote(reply._id, 'like')}
-                                    className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition ${
+                                    className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-all duration-300 ease-out hover:scale-105 active:scale-95 ${
                                         reply.userReaction === 1 
                                             ? 'bg-green-100 text-green-700' 
                                             : 'bg-gray-100 text-gray-600 hover:bg-green-50'
@@ -408,7 +417,7 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
                                 <button
                                     disabled={pendingVotes.has(reply._id)}
                                     onClick={() => handleVote(reply._id, 'dislike')}
-                                    className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition ${
+                                    className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-all duration-300 ease-out hover:scale-105 active:scale-95 ${
                                         reply.userReaction === -1 
                                             ? 'bg-red-100 text-red-700' 
                                             : 'bg-gray-100 text-gray-600 hover:bg-red-50'
