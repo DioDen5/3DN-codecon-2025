@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Flag, X, AlertTriangle } from 'lucide-react';
 import { createReport } from '../api/reports';
 import { useNotification } from '../contexts/NotificationContext';
@@ -42,13 +43,13 @@ const ReportModal = ({ isOpen, onClose, targetType, targetId, targetTitle = '' }
 
     if (!isOpen) return null;
 
-    return (
+    return createPortal(
         <div className={`fixed inset-0 z-[9999] flex items-center justify-center p-4 ${
             isClosing ? 'modal-closing' : ''
         }`} onClick={(e) => e.stopPropagation()}>
             {/* Backdrop */}
             <div 
-                className="absolute inset-0 bg-black/60 backdrop-blur-md animate-backdrop-fade"
+                className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-backdrop-fade"
                 onClick={handleClose}
             />
             
@@ -169,7 +170,8 @@ const ReportModal = ({ isOpen, onClose, targetType, targetId, targetTitle = '' }
                     </form>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 
