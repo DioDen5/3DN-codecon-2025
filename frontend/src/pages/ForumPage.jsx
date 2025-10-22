@@ -202,6 +202,10 @@ const ForumPage = () => {
         }
     };
 
+    const handleDelete = (postId) => {
+        setRaw((prev) => prev.filter((p) => p._id !== postId));
+    };
+
     return (
         <div className="min-h-[calc(100vh-68px)] bg-gradient-to-b from-black to-gray-900 px-6 py-10 text-white">
             <div className="max-w-4xl mx-auto relative z-10">
@@ -245,6 +249,7 @@ const ForumPage = () => {
                                     onClick={() => nav(`/forum/${post._id}`)}
                                     searchQuery={searchQuery}
                                     isOwnPost={isOwnPost(post)}
+                                    onDelete={handleDelete}
                                 />
                             ))}
                         </div>
