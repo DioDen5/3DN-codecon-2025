@@ -12,6 +12,7 @@ const PostExpanded = ({ post, onReaction, searchQuery = '', onDelete }) => {
     const [showReportModal, setShowReportModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [isDeletingPost, setIsDeletingPost] = useState(false);
 
     const formatDate = (dateString) => {
         if (!dateString) return 'Невідомо';
@@ -76,10 +77,25 @@ const PostExpanded = ({ post, onReaction, searchQuery = '', onDelete }) => {
         setIsDeleting(true);
         try {
             await deleteAnnouncement(post._id);
-            if (onDelete) {
-                onDelete();
-            }
+            
+            // Запускаємо анімацію видалення
+            setIsDeletingPost(true);
+            
+            // Показуємо повідомлення про успішне видалення
+            setTimeout(() => {
+                alert('Обговорення успішно видалено!');
+            }, 300);
+            
+            // Закриваємо модальне вікно
             setShowDeleteModal(false);
+            
+            // Видаляємо пост після анімації
+            setTimeout(() => {
+                if (onDelete) {
+                    onDelete();
+                }
+            }, 600); // Тривалість анімації
+            
         } catch (err) {
             console.error('Error deleting post:', err);
             alert('Помилка при видаленні обговорення');
@@ -141,7 +157,9 @@ const PostExpanded = ({ post, onReaction, searchQuery = '', onDelete }) => {
 
     return (
         <>
-        <div className="bg-white text-black rounded-xl p-4 shadow-md">
+        <div className={`bg-white text-black rounded-xl p-4 shadow-md ${
+            isDeletingPost ? 'comment-delete-slide' : ''
+        }`}>
             <div className="flex items-center justify-between text-sm mb-1">
                 <div className="flex items-center gap-2">
                     <span className="font-semibold">{getAuthorName(post)}</span>
