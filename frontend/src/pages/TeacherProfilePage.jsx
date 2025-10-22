@@ -4,6 +4,7 @@ import { ArrowLeft, ThumbsUp, ThumbsDown, Star, GraduationCap, BookOpen } from '
 import { getTeacher, voteTeacher, getTeacherReactions } from '../api/teachers'
 import { getTeacherComments, createTeacherComment, getTeacherCommentCounts } from '../api/teacher-comments'
 import { useAuthState } from '../api/useAuthState'
+import { useNotification } from '../contexts/NotificationContext'
 import ReviewInput from '../components/ReviewInput'
 import TeacherRepliesList from '../components/TeacherRepliesList'
 import StarRating from '../components/StarRating'
@@ -12,6 +13,7 @@ const TeacherProfilePage = () => {
     const { id } = useParams()
     const navigate = useNavigate()
     const { isAuthed: isAuthenticated, user } = useAuthState()
+    const { showSuccess } = useNotification()
     
     const [teacher, setTeacher] = useState(null)
     const [loading, setLoading] = useState(true)
@@ -91,6 +93,9 @@ const TeacherProfilePage = () => {
             const newComment = await createTeacherComment(id, commentText, rating)
             console.log('Created comment:', newComment)
             setReplies(prev => [newComment, ...prev])
+            
+            // Показуємо повідомлення про успішне додавання відгуку
+            showSuccess('Відгук успішно додано!')
             
             setTimeout(() => {
                 const newElement = document.querySelector(`[data-comment-id="${newComment._id}"]`);

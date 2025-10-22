@@ -7,10 +7,10 @@ const SuccessNotification = ({ message, isVisible, onClose }) => {
     useEffect(() => {
         if (isVisible) {
             setIsClosing(false);
-            // Автоматично закрити через 3 секунди
+            // Автоматично закрити через 4.5 секунди (3 + 1.5)
             const timer = setTimeout(() => {
                 handleClose();
-            }, 3000);
+            }, 4500);
 
             return () => clearTimeout(timer);
         }
@@ -28,27 +28,37 @@ const SuccessNotification = ({ message, isVisible, onClose }) => {
 
     return (
         <div className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-[10000] ${isClosing ? 'opacity-0 scale-95' : 'opacity-100 scale-100'} transition-all duration-300`}>
-            <div className="success-notification notification-slide-down bg-green-500 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 min-w-[300px] relative overflow-hidden">
-                {/* Фоновий ефект */}
-                <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-green-600 opacity-90"></div>
-                <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
-                <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/5 rounded-full translate-y-8 -translate-x-8"></div>
+            <div className="success-notification notification-slide-down bg-gradient-to-r from-green-500 via-green-600 to-green-700 text-white px-8 py-6 rounded-2xl shadow-2xl flex items-center gap-4 min-w-[350px] relative overflow-hidden border border-green-400/20">
+                {/* Анімовані фонові елементи */}
+                <div className="absolute inset-0 bg-gradient-to-r from-green-400/20 to-green-500/20"></div>
+                <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-12 translate-x-12 animate-pulse"></div>
+                <div className="absolute bottom-0 left-0 w-20 h-20 bg-white/5 rounded-full translate-y-10 -translate-x-10 animate-pulse" style={{animationDelay: '0.5s'}}></div>
+                <div className="absolute top-1/2 left-1/2 w-16 h-16 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2 animate-spin" style={{animationDuration: '8s'}}></div>
+                
+                {/* Хрестик закриття в правому верхньому кутку */}
+                <button
+                    onClick={handleClose}
+                    className="absolute top-3 right-3 p-2 hover:bg-white/20 rounded-full transition-all duration-200 hover:scale-110 group z-10"
+                >
+                    <X className="w-5 h-5 spin-close" />
+                </button>
                 
                 {/* Контент */}
-                <div className="relative flex items-center gap-3">
-                    <div className="p-2 bg-white/20 rounded-full">
-                        <CheckCircle className="w-5 h-5 text-white" />
+                <div className="relative flex items-center gap-4 pr-8">
+                    <div className="p-3 bg-white/20 rounded-full animate-bounce">
+                        <CheckCircle className="w-6 h-6 text-white animate-pulse" />
                     </div>
                     <div className="flex-1">
-                        <p className="font-semibold text-sm">Успішно!</p>
-                        <p className="text-xs text-green-100">{message}</p>
+                        <p className="font-bold text-base">Успішно!</p>
+                        <p className="text-sm text-green-100 font-medium">{message}</p>
                     </div>
-                    <button
-                        onClick={handleClose}
-                        className="p-1 hover:bg-white/20 rounded-full transition-colors duration-200"
-                    >
-                        <X className="w-4 h-4" />
-                    </button>
+                </div>
+                
+                {/* Анімовані крапки */}
+                <div className="absolute bottom-2 right-4 flex gap-1">
+                    <div className="w-1.5 h-1.5 bg-white/60 rounded-full animate-bounce"></div>
+                    <div className="w-1.5 h-1.5 bg-white/60 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                    <div className="w-1.5 h-1.5 bg-white/60 rounded-full animate-bounce" style={{animationDelay: '0.4s'}}></div>
                 </div>
             </div>
         </div>
