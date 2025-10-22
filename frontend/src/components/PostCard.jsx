@@ -106,6 +106,7 @@ const PostCard = ({
     }, [openMenu]);
 
     return (
+        <>
         <div
             onClick={onClick}
             className="bg-white text-black rounded-xl p-4 shadow-sm cursor-pointer hover:bg-gray-200 transition space-y-3"
@@ -201,34 +202,32 @@ const PostCard = ({
                 </div>
             </div>
 
-            {/* Report Modal */}
-            {showReportModal && (
-                <div onClick={(e) => e.stopPropagation()}>
-                    <ReportModal
-                        isOpen={showReportModal}
-                        onClose={() => setShowReportModal(false)}
-                        targetType="announcement"
-                        targetId={id}
-                        targetTitle={title}
-                    />
-                </div>
-            )}
-
-            {/* Delete Modal */}
-            {showDeleteModal && (
-                <div onClick={(e) => e.stopPropagation()}>
-                    <DeleteAnnouncementModal
-                        isOpen={showDeleteModal}
-                        onClose={handleDeleteCancel}
-                        onConfirm={handleDeleteConfirm}
-                        title="Видалити обговорення"
-                        message="Ви впевнені, що хочете видалити це обговорення?"
-                        itemName={title}
-                        isLoading={isDeleting}
-                    />
-                </div>
-            )}
         </div>
+
+        {/* Report Modal */}
+        {showReportModal && (
+            <ReportModal
+                isOpen={showReportModal}
+                onClose={() => setShowReportModal(false)}
+                targetType="announcement"
+                targetId={id}
+                targetTitle={title}
+            />
+        )}
+
+        {/* Delete Modal */}
+        {showDeleteModal && (
+            <DeleteAnnouncementModal
+                isOpen={showDeleteModal}
+                onClose={handleDeleteCancel}
+                onConfirm={handleDeleteConfirm}
+                title="Видалити обговорення"
+                message="Ви впевнені, що хочете видалити це обговорення?"
+                itemName={title}
+                isLoading={isDeleting}
+            />
+        )}
+        </>
     );
 };
 

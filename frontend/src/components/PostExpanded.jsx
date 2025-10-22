@@ -140,6 +140,7 @@ const PostExpanded = ({ post, onReaction, searchQuery = '', onDelete }) => {
     if (!post) return <p className="text-white/80">Завантаження...</p>;
 
     return (
+        <>
         <div className="bg-white text-black rounded-xl p-4 shadow-md">
             <div className="flex items-center justify-between text-sm mb-1">
                 <div className="flex items-center gap-2">
@@ -263,34 +264,32 @@ const PostExpanded = ({ post, onReaction, searchQuery = '', onDelete }) => {
                 </div>
             </div>
 
-            {/* Report Modal */}
-            {showReportModal && (
-                <div onClick={(e) => e.stopPropagation()}>
-                    <ReportModal
-                        isOpen={showReportModal}
-                        onClose={() => setShowReportModal(false)}
-                        targetType="announcement"
-                        targetId={post._id}
-                        targetTitle={post.title}
-                    />
-                </div>
-            )}
-
-            {/* Delete Modal */}
-            {showDeleteModal && (
-                <div onClick={(e) => e.stopPropagation()}>
-                    <DeleteAnnouncementModal
-                        isOpen={showDeleteModal}
-                        onClose={handleDeleteCancel}
-                        onConfirm={handleDeleteConfirm}
-                        title="Видалити обговорення"
-                        message="Ви впевнені, що хочете видалити це обговорення?"
-                        itemName={post.title}
-                        isLoading={isDeleting}
-                    />
-                </div>
-            )}
         </div>
+
+        {/* Report Modal */}
+        {showReportModal && (
+            <ReportModal
+                isOpen={showReportModal}
+                onClose={() => setShowReportModal(false)}
+                targetType="announcement"
+                targetId={post._id}
+                targetTitle={post.title}
+            />
+        )}
+
+        {/* Delete Modal */}
+        {showDeleteModal && (
+            <DeleteAnnouncementModal
+                isOpen={showDeleteModal}
+                onClose={handleDeleteCancel}
+                onConfirm={handleDeleteConfirm}
+                title="Видалити обговорення"
+                message="Ви впевнені, що хочете видалити це обговорення?"
+                itemName={post.title}
+                isLoading={isDeleting}
+            />
+        )}
+        </>
     );
 };
 
