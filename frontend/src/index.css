@@ -500,3 +500,26 @@
 .active\:scale-98:active {
     transform: scale(0.98);
 }
+
+.hover\:rotate-15:hover {
+    transform: rotate(15deg);
+}
+
+@keyframes bounceX {
+    0% {
+        transform: translateY(0);
+    }
+    30% {
+        transform: translateY(-3px);
+    }
+    60% {
+        transform: translateY(2px);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+
+.group:hover .bounce-x {
+    animation: bounceX 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}

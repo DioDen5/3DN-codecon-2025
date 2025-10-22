@@ -117,13 +117,13 @@ const DeleteConfirmationModal = ({
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center justify-end gap-4">
+                    <div className="flex items-center justify-center gap-4">
                         <button
                             onClick={handleClose}
                             disabled={isLoading}
-                            className="px-6 py-3 text-sm font-medium text-gray-600 bg-white border-2 border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 hover:scale-102 active:scale-98 transition-all duration-300 ease-out shadow-sm hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            className="px-6 py-3 text-sm font-medium text-gray-600 bg-white border-2 border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 hover:scale-102 active:scale-98 transition-all duration-300 ease-out shadow-sm hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 group"
                         >
-                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-4 h-4 bounce-x transition-all duration-300 ease-out" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
                             </svg>
                             Скасувати
@@ -131,7 +131,7 @@ const DeleteConfirmationModal = ({
                         <button
                             onClick={handleConfirm}
                             disabled={isLoading}
-                            className="px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-red-500 to-red-600 rounded-xl hover:from-red-600 hover:to-red-700 hover:scale-102 active:scale-98 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-300 ease-out shadow-lg hover:shadow-xl flex items-center gap-2 relative overflow-hidden"
+                            className="px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-red-500 to-red-600 rounded-xl hover:from-red-600 hover:to-red-700 hover:scale-102 active:scale-98 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-300 ease-out shadow-lg hover:shadow-xl flex items-center gap-2 relative overflow-hidden group"
                         >
                             <div className="absolute inset-0 bg-gradient-to-r from-red-400 to-red-500 opacity-0 hover:opacity-20 transition-opacity duration-300"></div>
                             {isLoading ? (
@@ -141,9 +141,7 @@ const DeleteConfirmationModal = ({
                                 </>
                             ) : (
                                 <>
-                                    <svg className="w-4 h-4 relative z-10" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-                                    </svg>
+                                    <Trash2 className="w-4 h-4 relative z-10 group-hover:rotate-15 transition-transform duration-300 ease-out" />
                                     <span className="relative z-10">Видалити</span>
                                 </>
                             )}
