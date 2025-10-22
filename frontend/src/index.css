@@ -549,3 +549,119 @@
 .group:not(:hover) .spin-close {
     animation: spinCloseBack 0.3s ease-out;
 }
+
+@keyframes commentSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateX(-20px) scale(0.95);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+@keyframes commentGlow {
+    0%, 100% {
+        box-shadow: 0 0 0 rgba(59, 130, 246, 0);
+        border-color: rgba(59, 130, 246, 0.2);
+    }
+    50% {
+        box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+        border-color: rgba(59, 130, 246, 0.4);
+    }
+}
+
+@keyframes commentFloat {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-2px);
+    }
+}
+
+/* Варіант 1: Багатошарова анімація (запам'ятаний) */
+.comment-animate-v1 {
+    animation: commentSlideIn 0.6s ease-out, commentGlow 3s ease-in-out infinite 0.8s, commentFloat 4s ease-in-out infinite 1.2s;
+}
+
+/* Варіант 2: Хвиля + обертання */
+@keyframes commentWave {
+    0%, 100% {
+        transform: scale(1) rotate(0deg);
+    }
+    25% {
+        transform: scale(1.02) rotate(1deg);
+    }
+    50% {
+        transform: scale(1.05) rotate(0deg);
+    }
+    75% {
+        transform: scale(1.02) rotate(-1deg);
+    }
+}
+
+@keyframes commentRotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.comment-animate-v2 {
+    animation: commentWave 2s ease-in-out infinite, commentRotate 8s linear infinite;
+}
+
+/* Варіант 3: Пульсація + кольори */
+@keyframes commentPulse {
+    0%, 100% {
+        transform: scale(1);
+        background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+    }
+    50% {
+        transform: scale(1.03);
+        background: linear-gradient(135deg, #bfdbfe, #93c5fd);
+    }
+}
+
+.comment-animate-v3 {
+    animation: commentPulse 2.5s ease-in-out infinite;
+}
+
+/* Варіант 4: Блимання + тінь */
+@keyframes commentBlink {
+    0%, 100% {
+        opacity: 1;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    50% {
+        opacity: 0.8;
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+    }
+}
+
+.comment-animate-v4 {
+    animation: commentBlink 1.8s ease-in-out infinite;
+}
+
+/* Активний варіант 4 */
+.comment-animate {
+    animation: commentBlink 1.8s ease-in-out infinite;
+}
+
+@keyframes planetRotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.planet-icon {
+    animation: planetRotate 4s linear infinite;
+}
+
