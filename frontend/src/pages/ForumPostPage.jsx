@@ -73,6 +73,16 @@ const ForumPostPage = () => {
             };
             setReplies(prev => [commentWithCounts, ...prev]);
             
+            setTimeout(() => {
+                const newElement = document.querySelector(`[data-comment-id="${doc._id}"]`);
+                if (newElement) {
+                    newElement.classList.add('comment-appearing');
+                    setTimeout(() => {
+                        newElement.classList.remove('comment-appearing');
+                    }, 1800);
+                }
+            }, 100);
+            
             setPost(prev => ({
                 ...prev,
                 commentsCount: (prev.commentsCount || 0) + 1

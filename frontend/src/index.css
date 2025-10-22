@@ -896,3 +896,53 @@
     transition: all 0.8s ease-in-out;
 }
 
+@keyframes commentSlideInSmooth {
+    0% {
+        transform: translateX(-100vw);
+        opacity: 0;
+        filter: blur(30px);
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+        filter: blur(0px);
+    }
+}
+
+@keyframes commentShake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    10% {
+        transform: translateX(-1px);
+    }
+    20% {
+        transform: translateX(1px);
+    }
+    30% {
+        transform: translateX(-1px);
+    }
+    40% {
+        transform: translateX(1px);
+    }
+    50% {
+        transform: translateX(-1px);
+    }
+    60% {
+        transform: translateX(1px);
+    }
+    70% {
+        transform: translateX(-1px);
+    }
+    80% {
+        transform: translateX(1px);
+    }
+    90% {
+        transform: translateX(-1px);
+    }
+}
+
+.comment-appearing {
+    animation: commentSlideInSmooth 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+

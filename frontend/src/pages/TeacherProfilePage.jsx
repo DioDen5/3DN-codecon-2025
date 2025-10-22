@@ -92,6 +92,16 @@ const TeacherProfilePage = () => {
             console.log('Created comment:', newComment)
             setReplies(prev => [newComment, ...prev])
             
+            setTimeout(() => {
+                const newElement = document.querySelector(`[data-comment-id="${newComment._id}"]`);
+                if (newElement) {
+                    newElement.classList.add('comment-appearing');
+                    setTimeout(() => {
+                        newElement.classList.remove('comment-appearing');
+                    }, 1800);
+                }
+            }, 100);
+            
             const updatedTeacher = await getTeacher(id)
             console.log('Updated teacher data:', {
                 comments: updatedTeacher.comments,

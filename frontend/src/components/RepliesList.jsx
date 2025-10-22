@@ -19,6 +19,7 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
     const [deleteModal, setDeleteModal] = useState({ isOpen: false, commentId: null, commentText: '' });
     const [deleting, setDeleting] = useState(false);
     const [deletingCommentId, setDeletingCommentId] = useState(null);
+    const [newCommentId, setNewCommentId] = useState(null);
 
     const handleVote = async (commentId, type) => {
         if (pendingVotes.has(commentId)) return;
@@ -275,6 +276,8 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
                                     data-comment-id={reply._id}
                                     className={`bg-white text-black rounded-xl p-4 shadow-sm comment-item ${
                                         deletingCommentId === reply._id ? 'comment-deleting' : ''
+                                    } ${
+                                        newCommentId === reply._id ? 'comment-appearing' : ''
                                     }`}
                                 >
                             <div className="flex items-center justify-between text-sm mb-1">
