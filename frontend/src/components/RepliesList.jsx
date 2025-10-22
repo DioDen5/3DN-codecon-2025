@@ -4,9 +4,11 @@ import { toggleComment } from '../api/reactions';
 import { remove, update } from '../api/comments';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
 import { useAuthState } from '../api/useAuthState';
+import { useNotification } from '../contexts/NotificationContext';
 
 const RepliesList = ({ replies, onRepliesUpdate }) => {
     const { isAuthed, user } = useAuthState();
+    const { showSuccess } = useNotification();
     const [error, setError] = useState(null);
     const [pendingVotes, setPendingVotes] = useState(new Set());
     const [openMenuId, setOpenMenuId] = useState(null);
@@ -16,6 +18,7 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
     const [isClosing, setIsClosing] = useState(false);
     const [deleteModal, setDeleteModal] = useState({ isOpen: false, commentId: null, commentText: '' });
     const [deleting, setDeleting] = useState(false);
+    const [deletingCommentId, setDeletingCommentId] = useState(null);
 
     const handleVote = async (commentId, type) => {
         if (pendingVotes.has(commentId)) return;
@@ -114,19 +117,34 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
         if (!deleteModal.commentId) return;
 
         setDeleting(true);
+        setDeletingCommentId(deleteModal.commentId);
         setError(null);
 
         try {
             await remove(deleteModal.commentId);
-            if (onRepliesUpdate) {
-                onRepliesUpdate(prevReplies => 
-                    prevReplies.filter(reply => reply._id !== deleteModal.commentId)
-                );
-            }
+
+            setTimeout(() => {
+                const deletingElement = document.querySelector(`[data-comment-id="${deleteModal.commentId}"]`);
+                if (deletingElement) {
+                    deletingElement.classList.add('fade-out');
+                }
+                
+                setTimeout(() => {
+                    if (onRepliesUpdate) {
+                        onRepliesUpdate(prevReplies =>
+                            prevReplies.filter(reply => reply._id !== deleteModal.commentId)
+                        );
+                    }
+                    setDeletingCommentId(null);
+                    showSuccess('Коментар успішно видалено');
+                }, 400);
+            }, 800);
+
             setDeleteModal({ isOpen: false, commentId: null, commentText: '' });
         } catch (err) {
             console.error('Error deleting comment:', err);
             setError('Помилка при видаленні коментаря');
+            setDeletingCommentId(null);
         } finally {
             setDeleting(false);
         }
@@ -249,10 +267,16 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
 
             {error && <p className="text-red-500">{error}</p>}
 
-            <div className="space-y-4">
-                {replies.length > 0 ? (
-                    replies.map(reply => (
-                        <div key={reply._id || reply.id} className="bg-white text-black rounded-xl p-4 shadow-sm">
+            <div className="space-y-4 comments-container">
+                        {replies.length > 0 ? (
+                            replies.map(reply => (
+                                <div 
+                                    key={reply._id || reply.id} 
+                                    data-comment-id={reply._id}
+                                    className={`bg-white text-black rounded-xl p-4 shadow-sm comment-item ${
+                                        deletingCommentId === reply._id ? 'comment-deleting' : ''
+                                    }`}
+                                >
                             <div className="flex items-center justify-between text-sm mb-1">
                                 <div className="flex items-center gap-2">
                                     <span className="font-semibold">{getUserName(reply)}</span>
@@ -413,6 +437,7 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
                 itemName={deleteModal.commentText}
                 isLoading={deleting}
             />
+
         </div>
     );
 }

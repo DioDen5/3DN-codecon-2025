@@ -17,6 +17,7 @@ import ResetPasswordPage from "./pages/ResetPasswordPage";
 
 import RequireAuth from "./utils/RequireAuth";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { NotificationProvider } from "./contexts/NotificationContext";
 
 function App() {
     const [modalType, setModalType] = useState(null);
@@ -37,13 +38,14 @@ function App() {
     }, []);
 
     return (
-        <Router>
-            <Header
-                onLoginOpen={() => setModalType("login")}
-                onSignupOpen={() => setModalType("signup")}
-            />
+        <NotificationProvider>
+            <Router>
+                <Header
+                    onLoginOpen={() => setModalType("login")}
+                    onSignupOpen={() => setModalType("signup")}
+                />
 
-            <ErrorBoundary>
+                <ErrorBoundary>
                 <Routes>
                     <Route path="/" element={<HomePage />} />
                     
@@ -108,7 +110,8 @@ function App() {
                     <ResetPasswordForm switchToLogin={() => setModalType("login")} />
                 )}
             </Modal>
-        </Router>
+            </Router>
+        </NotificationProvider>
     );
 }
 

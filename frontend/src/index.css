@@ -781,3 +781,118 @@
     animation: modalCloseBlur 0.4s ease-in-out;
 }
 
+/* Анімації для видалення коментарів */
+@keyframes commentDeleteSlide {
+    0% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    50% {
+        transform: translateX(100px);
+        opacity: 0.5;
+    }
+    100% {
+        transform: translateX(100vw);
+        opacity: 0;
+    }
+}
+
+@keyframes commentDeleteShrink {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(0.8);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(0);
+        opacity: 0;
+    }
+}
+
+@keyframes commentDeleteRotate {
+    0% {
+        transform: rotate(0deg) scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: rotate(-10deg) scale(0.9);
+        opacity: 0.5;
+    }
+    100% {
+        transform: rotate(-45deg) scale(0);
+        opacity: 0;
+    }
+}
+
+.comment-deleting {
+    animation: commentDeleteSlide 0.8s ease-in-out forwards;
+    overflow: hidden;
+    max-height: 200px;
+    transition: max-height 0.8s ease-in-out, margin 0.8s ease-in-out, padding 0.8s ease-in-out;
+}
+
+.comment-deleting.fade-out {
+    max-height: 0;
+    margin: 0;
+    padding: 0;
+    opacity: 0;
+}
+
+.comment-deleting-shrink {
+    animation: commentDeleteShrink 0.6s ease-in-out forwards;
+}
+
+.comment-deleting-rotate {
+    animation: commentDeleteRotate 0.7s ease-in-out forwards;
+}
+
+/* Анімація для повідомлення про успішне видалення */
+@keyframes successNotification {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.8);
+    }
+    20% {
+        opacity: 1;
+        transform: translateY(0) scale(1.05);
+    }
+    80% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+}
+
+.success-notification {
+    animation: successNotification 3s ease-in-out forwards;
+}
+
+@keyframes slideDownFromTop {
+    0% {
+        transform: translateY(-100px);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.notification-slide-down {
+    animation: slideDownFromTop 0.5s ease-out;
+}
+
+.comments-container {
+    transition: all 0.8s ease-in-out;
+}
+
+.comments-container .comment-item {
+    transition: all 0.8s ease-in-out;
+}
+
