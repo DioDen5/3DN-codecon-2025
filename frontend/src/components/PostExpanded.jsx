@@ -175,9 +175,7 @@ const PostExpanded = ({ post, onReaction, searchQuery = '', onDelete }) => {
 
     return (
         <>
-        <div className={`text-black rounded-xl p-4 shadow-md ${
-            isOwnPost(post) ? 'user-content-mega' : 'other-content-hover'
-        }`}>
+        <div className="bg-white text-black rounded-xl p-4 shadow-md">
             <div className="flex items-center justify-between text-sm mb-1">
                 <div className="flex items-center gap-2">
                     <span className="font-semibold">{getAuthorName(post)}</span>
