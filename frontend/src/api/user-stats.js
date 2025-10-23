@@ -9,3 +9,13 @@ export async function getUserStats() {
         throw error;
     }
 }
+
+export async function getUserActivity(limit = 20) {
+    try {
+        const { data } = await http.get(`/user/activity?limit=${limit}`);
+        return data;
+    } catch (error) {
+        console.error('Error fetching user activity:', error);
+        throw error;
+    }
+}

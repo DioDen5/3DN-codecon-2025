@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User, Activity, Settings, Mail, Calendar, Award, MessageCircle, MessageSquare, ThumbsUp, Star, GraduationCap } from 'lucide-react';
 import { useAuthState } from '../api/useAuthState';
-import { getUserStats } from '../api/user-stats';
+import { getUserStats, getUserActivity } from '../api/user-stats';
 
 const UserProfilePage = () => {
     const { user } = useAuthState();
@@ -13,6 +13,8 @@ const UserProfilePage = () => {
         totalLikes: 0
     });
     const [loading, setLoading] = useState(true);
+    const [activity, setActivity] = useState([]);
+    const [activityLoading, setActivityLoading] = useState(true);
 
     // Функція для завантаження статистики
     const loadUserStats = async () => {
@@ -25,6 +27,20 @@ const UserProfilePage = () => {
             // Використовуємо значення за замовчуванням при помилці
         } finally {
             setLoading(false);
+        }
+    };
+
+    // Функція для завантаження активності
+    const loadUserActivity = async () => {
+        try {
+            setActivityLoading(true);
+            const userActivity = await getUserActivity(20);
+            setActivity(userActivity);
+        } catch (error) {
+            console.error('Error loading user activity:', error);
+            setActivity([]);
+        } finally {
+            setActivityLoading(false);
         }
     };
 
@@ -42,6 +58,13 @@ const UserProfilePage = () => {
         }
     }, [activeTab, user]);
 
+    // Завантаження активності при переключенні на вкладку активності
+    useEffect(() => {
+        if (user && activeTab === 'activity') {
+            loadUserActivity();
+        }
+    }, [activeTab, user]);
+
     const tabs = [
         { id: 'profile', label: 'Профіль', icon: User },
         { id: 'activity', label: 'Активність', icon: Activity },
@@ -56,6 +79,31 @@ const UserProfilePage = () => {
             month: 'long',
             day: 'numeric'
         });
+    };
+
+    // Функція для форматування відносної дати
+    const formatRelativeDate = (dateString) => {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffInSeconds = Math.floor((now - date) / 1000);
+        
+        if (diffInSeconds < 60) {
+            return 'щойно';
+        } else if (diffInSeconds < 3600) {
+            const minutes = Math.floor(diffInSeconds / 60);
+            return `${minutes} хвилин тому`;
+        } else if (diffInSeconds < 86400) {
+            const hours = Math.floor(diffInSeconds / 3600);
+            return `${hours} годин тому`;
+        } else if (diffInSeconds < 604800) {
+            const days = Math.floor(diffInSeconds / 86400);
+            return `${days} днів тому`;
+        } else if (diffInSeconds < 2592000) {
+            const weeks = Math.floor(diffInSeconds / 604800);
+            return `${weeks} тижнів тому`;
+        } else {
+            return formatDate(dateString);
+        }
     };
 
     const getUserDisplayName = () => {
@@ -158,12 +206,6 @@ const UserProfilePage = () => {
 
     const achievements = getAchievements();
 
-    const recentActivity = [
-        { type: 'discussion', title: 'Питання про математику', date: '2 години тому', likes: 5 },
-        { type: 'comment', title: 'Коментар до "Фізика"', date: '1 день тому', likes: 2 },
-        { type: 'review', title: 'Відгук про викладача', date: '3 дні тому', likes: 8 },
-        { type: 'discussion', title: 'Проблеми з хімією', date: '1 тиждень тому', likes: 12 }
-    ];
 
     const renderProfileTab = () => (
         <div className="space-y-6 md:space-y-8">
@@ -281,38 +323,50 @@ const UserProfilePage = () => {
         <div className="space-y-6">
             <div className="bg-white text-black rounded-xl p-6 shadow-sm">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Остання активність</h3>
-                <div className="space-y-4">
-                    {recentActivity.map((activity, index) => (
-                        <div 
-                            key={index} 
-                            className="flex items-center justify-between p-4 bg-gray-50 rounded-lg cursor-pointer hover:scale-105 transition-transform duration-300"
-                            style={{ animationDelay: `${index * 0.1}s` }}
-                        >
-                            <div className="flex items-center gap-3">
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                                    activity.type === 'discussion' ? 'bg-blue-500' :
-                                    activity.type === 'comment' ? 'bg-green-500' : 'bg-yellow-500'
-                                }`}>
-                                    {activity.type === 'discussion' ? (
-                                        <MessageCircle className="w-4 h-4 text-white" />
-                                    ) : activity.type === 'comment' ? (
-                                        <MessageCircle className="w-4 h-4 text-white" />
-                                    ) : (
-                                        <Star className="w-4 h-4 text-white" />
-                                    )}
+                {activityLoading ? (
+                    <div className="flex justify-center items-center py-8">
+                        <div className="text-gray-500">Завантаження...</div>
+                    </div>
+                ) : activity.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                        <Activity className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                        <p>Поки що немає активності</p>
+                        <p className="text-sm">Створіть обговорення або залиште коментар!</p>
+                    </div>
+                ) : (
+                    <div className="space-y-3 md:space-y-4">
+                        {activity.map((activityItem, index) => (
+                            <div 
+                                key={activityItem.id || index} 
+                                className="flex items-center justify-between p-3 md:p-4 bg-gray-50 rounded-lg cursor-pointer hover:scale-105 transition-transform duration-300"
+                                style={{ animationDelay: `${index * 0.1}s` }}
+                            >
+                                <div className="flex items-center gap-2 md:gap-3">
+                                    <div className={`w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center ${
+                                        activityItem.type === 'discussion' ? 'bg-blue-500' :
+                                        activityItem.type === 'comment' ? 'bg-green-500' : 'bg-yellow-500'
+                                    }`}>
+                                        {activityItem.type === 'discussion' ? (
+                                            <MessageSquare className="w-3 h-3 md:w-4 md:h-4 text-white" />
+                                        ) : activityItem.type === 'comment' ? (
+                                            <MessageCircle className="w-3 h-3 md:w-4 md:h-4 text-white" />
+                                        ) : (
+                                            <Star className="w-3 h-3 md:w-4 md:h-4 text-white" />
+                                        )}
+                                    </div>
+                                    <div>
+                                        <h4 className="text-sm md:text-base font-medium text-gray-900">{activityItem.title}</h4>
+                                        <p className="text-xs md:text-sm text-gray-500">{formatRelativeDate(activityItem.date)}</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h4 className="font-medium text-gray-900">{activity.title}</h4>
-                                    <p className="text-sm text-gray-500">{activity.date}</p>
+                                <div className="flex items-center gap-1 text-xs md:text-sm text-gray-600">
+                                    <ThumbsUp className="w-3 h-3 md:w-4 md:h-4" />
+                                    <span>{activityItem.likes || 0}</span>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2 text-sm text-gray-600">
-                                <ThumbsUp className="w-4 h-4" />
-                                {activity.likes}
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );

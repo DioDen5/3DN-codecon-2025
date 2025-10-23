@@ -97,4 +97,86 @@ router.get('/stats', authRequired, async (req, res) => {
     }
 });
 
+// Get user activity
+router.get('/activity', authRequired, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const limit = parseInt(req.query.limit) || 20;
+
+        // Get user's announcements
+        const announcements = await Announcement.find({
+            authorId: new mongoose.Types.ObjectId(userId),
+            status: 'published'
+        })
+        .select('title createdAt')
+        .sort({ createdAt: -1 })
+        .limit(limit);
+
+        // Get user's comments
+        const comments = await Comment.find({
+            authorId: new mongoose.Types.ObjectId(userId),
+            status: 'visible'
+        })
+        .populate('announcementId', 'title')
+        .select('body createdAt announcementId')
+        .sort({ createdAt: -1 })
+        .limit(limit);
+
+        // Get user's teacher reviews
+        const reviews = await TeacherComment.find({
+            authorId: new mongoose.Types.ObjectId(userId),
+            status: 'visible'
+        })
+        .populate('teacherId', 'name')
+        .select('body rating createdAt teacherId')
+        .sort({ createdAt: -1 })
+        .limit(limit);
+
+        // Combine and format activities
+        const activities = [];
+
+        // Add announcements
+        announcements.forEach(announcement => {
+            activities.push({
+                type: 'discussion',
+                title: announcement.title,
+                date: announcement.createdAt,
+                likes: 0, // Will be calculated separately if needed
+                id: announcement._id
+            });
+        });
+
+        // Add comments
+        comments.forEach(comment => {
+            activities.push({
+                type: 'comment',
+                title: `Коментар до "${comment.announcementId?.title || 'Обговорення'}"`,
+                date: comment.createdAt,
+                likes: 0,
+                id: comment._id
+            });
+        });
+
+        // Add reviews
+        reviews.forEach(review => {
+            activities.push({
+                type: 'review',
+                title: `Відгук про викладача ${review.teacherId?.name || 'Невідомо'}`,
+                date: review.createdAt,
+                likes: 0,
+                id: review._id
+            });
+        });
+
+        // Sort by date (newest first) and limit
+        activities.sort((a, b) => new Date(b.date) - new Date(a.date));
+        const limitedActivities = activities.slice(0, limit);
+
+        res.json(limitedActivities);
+    } catch (error) {
+        console.error('Error fetching user activity:', error);
+        res.status(500).json({ error: 'Failed to fetch user activity' });
+    }
+});
+
 export default router;
