@@ -5,7 +5,10 @@ import { getUserStats, getUserActivity } from '../api/user-stats';
 
 const UserProfilePage = () => {
     const { user } = useAuthState();
-    const [activeTab, setActiveTab] = useState('profile');
+    const [activeTab, setActiveTab] = useState(() => {
+        // Відновлюємо вибрану вкладку з localStorage або використовуємо 'profile' за замовчуванням
+        return localStorage.getItem('userProfileActiveTab') || 'profile';
+    });
     const [stats, setStats] = useState({
         discussions: 0,
         comments: 0,
@@ -15,6 +18,12 @@ const UserProfilePage = () => {
     const [loading, setLoading] = useState(true);
     const [activity, setActivity] = useState([]);
     const [activityLoading, setActivityLoading] = useState(true);
+
+    // Функція для зміни вкладки з збереженням в localStorage
+    const handleTabChange = (tabId) => {
+        setActiveTab(tabId);
+        localStorage.setItem('userProfileActiveTab', tabId);
+    };
 
     // Функція для завантаження статистики
     const loadUserStats = async () => {
@@ -447,7 +456,7 @@ const UserProfilePage = () => {
                                 return (
                                     <button
                                         key={tab.id}
-                                        onClick={() => setActiveTab(tab.id)}
+                                        onClick={() => handleTabChange(tab.id)}
                                         className={`profile-tab flex items-center gap-2 md:gap-3 py-3 md:py-4 px-3 md:px-6 rounded-xl font-bold text-sm md:text-lg transition-all duration-300 ${
                                             activeTab === tab.id
                                                 ? 'bg-blue-600 text-white shadow-lg transform scale-105'
