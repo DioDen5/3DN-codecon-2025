@@ -32,7 +32,9 @@ const UserProfilePage = () => {
     const [showNameChangeModal, setShowNameChangeModal] = useState(false);
     const [privacySettings, setPrivacySettings] = useState({
         allowProfileView: true,
-        receiveNotifications: true
+        receiveNotifications: true,
+        anonymousTeacherReviews: false,
+        emailOnPostComments: true
     });
 
     // Функція для зміни вкладки з збереженням в localStorage
@@ -829,16 +831,16 @@ const UserProfilePage = () => {
                             <div className="relative">
                                 <input 
                                     type="checkbox" 
-                                    checked={privacySettings.receiveNotifications}
-                                    onChange={(e) => handlePrivacySettingChange('receiveNotifications', e.target.checked)}
+                                    checked={privacySettings.anonymousTeacherReviews}
+                                    onChange={(e) => handlePrivacySettingChange('anonymousTeacherReviews', e.target.checked)}
                                     className="sr-only"
                                 />
                                 <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200 ${
-                                    privacySettings.receiveNotifications 
+                                    privacySettings.anonymousTeacherReviews 
                                         ? 'bg-blue-600 border-blue-600' 
                                         : 'border-gray-300 hover:border-blue-400'
                                 }`}>
-                                    {privacySettings.receiveNotifications && (
+                                    {privacySettings.anonymousTeacherReviews && (
                                         <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                         </svg>
@@ -846,8 +848,36 @@ const UserProfilePage = () => {
                                 </div>
                             </div>
                             <div className="flex-1">
-                                <span className="text-sm font-medium text-gray-800">Отримувати сповіщення про нові коментарі</span>
-                                <p className="text-xs text-gray-600 mt-1">Ви будете отримувати email сповіщення про нові коментарі</p>
+                                <span className="text-sm font-medium text-gray-800">Анонімні відгуки про викладачів</span>
+                                <p className="text-xs text-gray-600 mt-1">Ваші відгуки про викладачів будуть опубліковані анонімно</p>
+                            </div>
+                        </label>
+                    </div>
+                    
+                    <div className="bg-gradient-to-br from-blue-50/85 via-blue-100/70 to-blue-200/55 rounded-xl p-4 border border-blue-200/85 group/field privacy-field">
+                        <label className="flex items-center gap-3 cursor-pointer">
+                            <div className="relative">
+                                <input 
+                                    type="checkbox" 
+                                    checked={privacySettings.emailOnPostComments}
+                                    onChange={(e) => handlePrivacySettingChange('emailOnPostComments', e.target.checked)}
+                                    className="sr-only"
+                                />
+                                <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200 ${
+                                    privacySettings.emailOnPostComments 
+                                        ? 'bg-blue-600 border-blue-600' 
+                                        : 'border-gray-300 hover:border-blue-400'
+                                }`}>
+                                    {privacySettings.emailOnPostComments && (
+                                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                        </svg>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="flex-1">
+                                <span className="text-sm font-medium text-gray-800">Email сповіщення про коментарі</span>
+                                <p className="text-xs text-gray-600 mt-1">Отримувати повідомлення на пошту про нові коментарі до ваших постів</p>
                             </div>
                         </label>
                     </div>
