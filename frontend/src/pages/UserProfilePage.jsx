@@ -53,9 +53,7 @@ const UserProfilePage = () => {
             if (animate) {
                 setActivityLoading(true);
             }
-            console.log('Loading user activity page:', page);
             const response = await getUserActivity(page, 5);
-            console.log('Received activity data:', response);
             
             if (animate) {
                 // Плавна анімація зміни контенту

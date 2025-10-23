@@ -4,6 +4,7 @@ import { authRequired } from '../middleware/auth.js';
 import { Announcement } from '../models/Announcement.js';
 import { Comment } from '../models/Comment.js';
 import { TeacherComment } from '../models/TeacherComment.js';
+import { Teacher } from '../models/Teacher.js';
 import { Reaction } from '../models/Reaction.js';
 
 const router = express.Router();
@@ -105,7 +106,6 @@ router.get('/activity', authRequired, async (req, res) => {
         const limit = parseInt(req.query.limit) || 5;
         const skip = (page - 1) * limit;
 
-        console.log('Fetching activity for user:', userId);
 
         let announcements = [];
         let comments = [];
@@ -120,7 +120,6 @@ router.get('/activity', authRequired, async (req, res) => {
             .select('title createdAt')
             .sort({ createdAt: -1 })
             .limit(limit);
-            console.log('Found announcements:', announcements.length);
         } catch (error) {
             console.error('Error fetching announcements:', error);
         }
@@ -135,23 +134,40 @@ router.get('/activity', authRequired, async (req, res) => {
             .select('body createdAt announcementId')
             .sort({ createdAt: -1 })
             .limit(limit);
-            console.log('Found comments:', comments.length);
         } catch (error) {
             console.error('Error fetching comments:', error);
         }
 
         try {
             // Get user's teacher reviews
-            const { TeacherComment: TeacherCommentModel } = await import('../models/TeacherComment.js');
-            reviews = await TeacherCommentModel.find({
+            
+            // Спробуємо обидва варіанти пошуку
+            let reviewsWithString = await TeacherComment.find({
+                authorId: userId,
+                status: 'visible'
+            })
+            .populate('teacherId', 'name')
+            .select('body rating createdAt teacherId authorId')
+            .sort({ createdAt: -1 })
+            .limit(limit);
+            
+            let reviewsWithObjectId = await TeacherComment.find({
                 authorId: new mongoose.Types.ObjectId(userId),
                 status: 'visible'
             })
             .populate('teacherId', 'name')
-            .select('body rating createdAt teacherId')
+            .select('body rating createdAt teacherId authorId')
             .sort({ createdAt: -1 })
             .limit(limit);
-            console.log('Found reviews:', reviews.length);
+            
+            // Використовуємо той результат, де знайшли більше відгуків
+            if (reviewsWithObjectId.length > 0) {
+                reviews = reviewsWithObjectId;
+            } else if (reviewsWithString.length > 0) {
+                reviews = reviewsWithString;
+            } else {
+                reviews = [];
+            }
         } catch (error) {
             console.error('Error fetching reviews:', error);
         }
@@ -165,15 +181,20 @@ router.get('/activity', authRequired, async (req, res) => {
             .populate([
                 {
                     path: 'targetId',
-                    populate: {
-                        path: 'authorId',
-                        select: 'displayName'
-                    }
+                    populate: [
+                        {
+                            path: 'authorId',
+                            select: 'displayName'
+                        },
+                        {
+                            path: 'teacherId',
+                            select: 'name'
+                        }
+                    ]
                 }
             ])
             .sort({ createdAt: -1 })
             .limit(limit);
-            console.log('Found reactions:', reactions.length);
         } catch (error) {
             console.error('Error fetching reactions:', error);
         }
@@ -220,14 +241,22 @@ router.get('/activity', authRequired, async (req, res) => {
             let title = '';
             let type = 'like';
             
+            
             if (reaction.targetType === 'announcement') {
-                title = `Лайк обговорення "${target?.title || 'Невідомо'}"`;
+                const actionText = reaction.value === 1 ? 'Лайк' : 'Дизлайк';
+                title = `${actionText} обговорення "${target?.title || 'Обговорення'}"`;
                 type = reaction.value === 1 ? 'like' : 'dislike';
             } else if (reaction.targetType === 'comment') {
-                title = `Лайк коментаря в "${target?.announcementId?.title || 'обговоренні'}"`;
+                const actionText = reaction.value === 1 ? 'Лайк' : 'Дизлайк';
+                title = `${actionText} коментаря в "${target?.announcementId?.title || 'обговоренні'}"`;
                 type = reaction.value === 1 ? 'like' : 'dislike';
             } else if (reaction.targetType === 'teacher') {
-                title = `Лайк викладача ${target?.name || 'Невідомо'}`;
+                const actionText = reaction.value === 1 ? 'Лайк' : 'Дизлайк';
+                title = `${actionText} викладача ${target?.name || 'Невідомо'}`;
+                type = reaction.value === 1 ? 'like' : 'dislike';
+            } else if (reaction.targetType === 'review') {
+                const actionText = reaction.value === 1 ? 'Лайк' : 'Дизлайк';
+                title = `${actionText} відгуку про викладача ${target?.teacherId?.name || 'Невідомо'}`;
                 type = reaction.value === 1 ? 'like' : 'dislike';
             }
             
@@ -250,9 +279,6 @@ router.get('/activity', authRequired, async (req, res) => {
         const hasNextPage = page < totalPages;
         const hasPrevPage = page > 1;
 
-        console.log('Total activities found:', totalActivities);
-        console.log('Page:', page, 'of', totalPages);
-        console.log('Activities on this page:', paginatedActivities.length);
 
         res.json({
             activities: paginatedActivities,
@@ -268,6 +294,46 @@ router.get('/activity', authRequired, async (req, res) => {
     } catch (error) {
         console.error('Error fetching user activity:', error);
         res.status(500).json({ error: 'Failed to fetch user activity' });
+    }
+});
+
+// Test endpoint for teacher reviews
+router.get('/test-reviews', authRequired, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        console.log('=== TEST REVIEWS ENDPOINT ===');
+        console.log('User ID:', userId);
+        console.log('User ID type:', typeof userId);
+        
+        const { TeacherComment: TeacherCommentModel } = await import('../models/TeacherComment.js');
+        
+        // Try different approaches
+        const reviews1 = await TeacherCommentModel.find({
+            authorId: userId,
+            status: 'visible'
+        });
+        console.log('Reviews with string userId:', reviews1.length);
+        
+        const reviews2 = await TeacherCommentModel.find({
+            authorId: new mongoose.Types.ObjectId(userId),
+            status: 'visible'
+        });
+        console.log('Reviews with ObjectId userId:', reviews2.length);
+        
+        const allReviews = await TeacherCommentModel.find({});
+        console.log('All reviews in database:', allReviews.length);
+        
+        res.json({
+            userId,
+            userIdType: typeof userId,
+            reviewsWithString: reviews1.length,
+            reviewsWithObjectId: reviews2.length,
+            allReviews: allReviews.length,
+            sampleReview: allReviews[0] || null
+        });
+    } catch (error) {
+        console.error('Error in test endpoint:', error);
+        res.status(500).json({ error: error.message });
     }
 });
 

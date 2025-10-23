@@ -515,7 +515,7 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
                 <ReportCommentModal
                     isOpen={reportModal.isOpen}
                     onClose={handleReportCancel}
-                    targetType="comment"
+                    targetType="review"
                     targetId={reportModal.commentId}
                     targetTitle={reportModal.commentText}
                 />
