@@ -298,7 +298,7 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
                                     key={reply._id || reply.id} 
                                     data-comment-id={reply._id}
                                     className={`text-black p-4 shadow-sm comment-item ${
-                                        isOwnComment(reply) ? 'user-content-mega' : 'bg-white rounded-xl'
+                                        isOwnComment(reply) ? 'user-content-mega' : 'other-content-hover'
                                     } ${
                                         deletingCommentId === reply._id ? 'comment-deleting' : ''
                                     } ${

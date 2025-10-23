@@ -985,4 +985,46 @@
     transition: opacity 0.8s ease-in-out, background 0.8s ease-in-out;
 }
 
+/* Стилі для чужих обговорень (без бордера) */
+.other-content-hover {
+    position: relative;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.4s ease;
+}
+
+.other-content-hover::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.08), transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(147, 51, 234, 0.06), transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(59, 130, 246, 0.04), transparent 50%);
+    animation: comboFloat 6s ease-in-out infinite;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.8s ease-in-out;
+}
+
+/* Hover ефекти для чужих обговорень */
+.other-content-hover:hover {
+    transform: scale(1.03);
+    box-shadow: 0 12px 35px rgba(59, 130, 246, 0.2);
+    animation: comboGlow 2s ease-in-out infinite;
+}
+
+.other-content-hover:hover::before {
+    opacity: 1;
+    background: 
+        radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.15), transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(147, 51, 234, 0.12), transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(59, 130, 246, 0.1), transparent 50%);
+    transition: opacity 0.8s ease-in-out, background 0.8s ease-in-out;
+}
+
 

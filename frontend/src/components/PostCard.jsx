@@ -110,8 +110,8 @@ const PostCard = ({
         <>
         <div
             onClick={onClick}
-            className={`text-black p-4 shadow-sm cursor-pointer hover:bg-gray-200 transition space-y-3 relative ${
-                isOwnPost ? 'user-content-mega' : 'bg-white rounded-xl'
+            className={`text-black p-4 shadow-sm cursor-pointer transition space-y-3 relative ${
+                isOwnPost ? 'user-content-mega' : 'other-content-hover'
             } ${
                 isDeletingPost ? 'comment-delete-slide' : ''
             }`}
