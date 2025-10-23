@@ -903,6 +903,28 @@
     }
 }
 
+/* Beautiful input styles for name change modal */
+.name-change-input {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-0 focus:border-blue-400 focus:outline-none transition-all duration-300 text-sm hover:border-gray-400 focus:shadow-sm focus:shadow-blue-100 bg-white hover:bg-gray-50/50;
+}
+
+.name-change-input::placeholder {
+    @apply text-gray-400 text-sm;
+    transition: color 0.2s ease-in-out;
+}
+
+.name-change-input:focus::placeholder {
+    @apply text-gray-300;
+}
+
+.name-change-label {
+    @apply block text-sm font-semibold text-gray-800 mb-2 transition-colors duration-200;
+}
+
+.name-change-label:hover {
+    @apply text-gray-900;
+}
+
 @keyframes comboBounce {
     0%, 20%, 50%, 80%, 100% {
         transform: translateY(0) scale(1);

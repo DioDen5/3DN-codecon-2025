@@ -10,25 +10,23 @@ const router = express.Router();
 const nameChangeSchema = z.object({
     newFirstName: z.string().min(2).max(50),
     newLastName: z.string().min(2).max(50),
-    newDisplayName: z.string().min(2).max(50),
     reason: z.string().max(500).optional()
 });
 
 // Функція для перевірки мови імені
-function validateNameLanguage(firstName, lastName, displayName) {
+function validateNameLanguage(firstName, lastName) {
     const isUkrainian = (text) => /^[а-яіїєґА-ЯІЇЄҐ\s'-]+$/.test(text);
     const isEnglish = (text) => /^[a-zA-Z\s'-]+$/.test(text);
     
     const firstNameLang = isUkrainian(firstName) ? 'uk' : isEnglish(firstName) ? 'en' : 'mixed';
     const lastNameLang = isUkrainian(lastName) ? 'uk' : isEnglish(lastName) ? 'en' : 'mixed';
-    const displayNameLang = isUkrainian(displayName) ? 'uk' : isEnglish(displayName) ? 'en' : 'mixed';
     
-    if (firstNameLang === 'mixed' || lastNameLang === 'mixed' || displayNameLang === 'mixed') {
+    if (firstNameLang === 'mixed' || lastNameLang === 'mixed') {
         return { valid: false, error: 'Ім\'я та прізвище мають містити тільки літери однієї мови (української або англійської)' };
     }
     
-    if (firstNameLang !== lastNameLang || firstNameLang !== displayNameLang) {
-        return { valid: false, error: 'Всі імена мають бути написаними однією мовою (або українською, або англійською)' };
+    if (firstNameLang !== lastNameLang) {
+        return { valid: false, error: 'Ім\'я та прізвище мають бути написаними однією мовою (або українською, або англійською)' };
     }
     
     return { valid: true };
@@ -38,13 +36,12 @@ function validateNameLanguage(firstName, lastName, displayName) {
 router.post('/request', authRequired, async (req, res) => {
     try {
         const userId = req.user.id;
-        const { newFirstName, newLastName, newDisplayName, reason } = req.body;
+        const { newFirstName, newLastName, reason } = req.body;
 
         // Валідація даних
         const validationResult = nameChangeSchema.safeParse({
             newFirstName,
             newLastName,
-            newDisplayName,
             reason
         });
 
@@ -56,7 +53,7 @@ router.post('/request', authRequired, async (req, res) => {
         }
 
         // Перевірка мови імені
-        const languageValidation = validateNameLanguage(newFirstName, newLastName, newDisplayName);
+        const languageValidation = validateNameLanguage(newFirstName, newLastName);
         if (!languageValidation.valid) {
             return res.status(400).json({ error: languageValidation.error });
         }
@@ -67,8 +64,11 @@ router.post('/request', authRequired, async (req, res) => {
             return res.status(404).json({ error: 'Користувач не знайдений' });
         }
 
+        // Генеруємо нове відображуване ім'я
+        const newDisplayName = `${newFirstName} ${newLastName}`;
+        
         // Перевіряємо, чи не змінилося ім'я
-        if (user.firstName === newFirstName && user.lastName === newLastName && user.displayName === newDisplayName) {
+        if (user.firstName === newFirstName && user.lastName === newLastName) {
             return res.status(400).json({ error: 'Нове ім\'я ідентичне поточному' });
         }
 

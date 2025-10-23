@@ -640,7 +640,7 @@ const UserProfilePage = () => {
                 <div className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Ім'я та прізвище
+                            Поточне ім'я та прізвище
                         </label>
                         <div className="flex items-center gap-3">
                             <input
