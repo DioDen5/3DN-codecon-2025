@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Activity, Settings, Mail, Calendar, Award, MessageCircle, MessageSquare, ThumbsUp, Star, GraduationCap, Edit3, Clock, CheckCircle, AlertCircle, Shield, Lock, Key } from 'lucide-react';
+import { User, Activity, Settings, Mail, Calendar, Award, MessageCircle, MessageSquare, ThumbsUp, Star, GraduationCap, Edit3, Clock, CheckCircle, AlertCircle, Shield, Lock, Key, Power, ToggleRight, Play, Smartphone, ShieldCheck } from 'lucide-react';
 import { useAuthState } from '../api/useAuthState';
 import { getUserStats, getUserActivity } from '../api/user-stats';
 import { getNameChangeStatus } from '../api/name-change';
@@ -752,7 +752,8 @@ const UserProfilePage = () => {
                                     <p className="text-sm text-gray-600">Не активована</p>
                                 </div>
                                 <div className="ml-auto">
-                                    <button className="px-4 py-2 bg-cyan-100 text-cyan-700 rounded-lg hover:bg-cyan-200 transition-colors text-sm font-medium">
+                                    <button className="px-5 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-xl hover:from-cyan-600 hover:to-blue-700 transition-all duration-300 hover:scale-105 flex items-center gap-2 shadow-lg hover:shadow-xl group/btn text-sm font-semibold">
+                                        <ShieldCheck className="w-4 h-4 group-hover/btn:rotate-12 transition-transform duration-300" />
                                         Увімкнути
                                     </button>
                                 </div>
