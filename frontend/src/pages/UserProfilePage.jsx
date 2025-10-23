@@ -543,7 +543,6 @@ const UserProfilePage = () => {
                                                 <span className="text-sm font-medium text-gray-700">
                                                     {pagination.currentPage} з {pagination.totalPages}
                                                 </span>
-                                                <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
                                             </div>
                                             
                                             {/* Прогрес бар */}
