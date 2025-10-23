@@ -41,8 +41,7 @@ const UserProfilePage = () => {
         discussions: 12,
         comments: 45,
         reviews: 8,
-        totalLikes: 127,
-        rating: 4.2
+        totalLikes: 127
     };
 
     const achievements = [
@@ -88,7 +87,7 @@ const UserProfilePage = () => {
             </div>
 
             {/* Статистика */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-white text-black rounded-xl p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
                     <MessageCircle className="w-8 h-8 text-blue-500 mx-auto mb-2" />
                     <div className="text-2xl font-bold text-gray-900">{stats.discussions}</div>
@@ -108,11 +107,6 @@ const UserProfilePage = () => {
                     <ThumbsUp className="w-8 h-8 text-purple-500 mx-auto mb-2" />
                     <div className="text-2xl font-bold text-gray-900">{stats.totalLikes}</div>
                     <div className="text-sm text-gray-600">Лайків</div>
-                </div>
-                <div className="bg-white text-black rounded-xl p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
-                    <Award className="w-8 h-8 text-orange-500 mx-auto mb-2" />
-                    <div className="text-2xl font-bold text-gray-900">{stats.rating}</div>
-                    <div className="text-sm text-gray-600">Рейтинг</div>
                 </div>
             </div>
 
