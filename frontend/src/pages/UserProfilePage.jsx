@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Activity, Settings, Mail, Calendar, Award, MessageCircle, MessageSquare, ThumbsUp, Star, GraduationCap, Edit3, Clock, CheckCircle, AlertCircle, Shield, Lock, Key, Power, ToggleRight, Play, Smartphone, ShieldCheck } from 'lucide-react';
+import { User, Activity, Settings, Mail, Calendar, Award, MessageCircle, MessageSquare, ThumbsUp, Star, GraduationCap, Edit3, Clock, CheckCircle, AlertCircle, Shield, Lock, Key, Power, ToggleRight, Play, Smartphone, ShieldCheck, Eye, EyeOff } from 'lucide-react';
 import { useAuthState } from '../api/useAuthState';
 import { getUserStats, getUserActivity } from '../api/user-stats';
 import { getNameChangeStatus } from '../api/name-change';
@@ -30,6 +30,10 @@ const UserProfilePage = () => {
     });
     const [nameChangeRequest, setNameChangeRequest] = useState(null);
     const [showNameChangeModal, setShowNameChangeModal] = useState(false);
+    const [privacySettings, setPrivacySettings] = useState({
+        allowProfileView: true,
+        receiveNotifications: true
+    });
 
     // Функція для зміни вкладки з збереженням в localStorage
     const handleTabChange = (tabId) => {
@@ -222,6 +226,15 @@ const UserProfilePage = () => {
         setShowNameChangeModal(false);
         // Перезавантажуємо статус після закриття модального вікна
         loadNameChangeStatus();
+    };
+
+    const handlePrivacySettingChange = (setting, value) => {
+        setPrivacySettings(prev => ({
+            ...prev,
+            [setting]: value
+        }));
+        // Тут можна додати API виклик для збереження налаштувань
+        console.log(`Privacy setting ${setting} changed to:`, value);
     };
 
     // Функція для правильного склонування українською мовою
@@ -772,20 +785,72 @@ const UserProfilePage = () => {
 
             <div className="bg-white text-black rounded-2xl p-6 shadow-xl border border-gray-200 relative overflow-hidden group privacy-card">
                 {/* Декоративні елементи */}
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-sky-100/50 to-cyan-100/30 rounded-full -translate-y-16 translate-x-16 animate-pulse decorative-element-1"></div>
-                <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-cyan-100/40 to-sky-100/30 rounded-full translate-y-12 -translate-x-12 animate-bounce decorative-element-2" style={{animationDuration: '3s'}}></div>
+                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-100/50 to-blue-200/30 rounded-full -translate-y-16 translate-x-16 animate-pulse decorative-element-1"></div>
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-indigo-100/40 to-blue-100/30 rounded-full translate-y-12 -translate-x-12 animate-bounce decorative-element-2" style={{animationDuration: '3s'}}></div>
                 
                 <div className="relative">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Приватність</h3>
-                <div className="space-y-3">
-                    <label className="flex items-center gap-3">
-                        <input type="checkbox" defaultChecked className="rounded" />
-                        <span className="text-sm text-gray-700">Дозволити іншим бачити мій профіль</span>
-                    </label>
-                    <label className="flex items-center gap-3">
-                        <input type="checkbox" defaultChecked className="rounded" />
-                        <span className="text-sm text-gray-700">Отримувати сповіщення про нові коментарі</span>
-                    </label>
+                    <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                        <div className="w-8 h-8 bg-gradient-to-br from-blue-400 via-blue-600 to-blue-800 rounded-lg flex items-center justify-center">
+                            <Eye className="w-4 h-4 text-white" />
+                        </div>
+                        Приватність
+                    </h3>
+                <div className="space-y-4">
+                    <div className="bg-gradient-to-br from-blue-50/85 via-blue-100/70 to-blue-200/55 rounded-xl p-4 border border-blue-200/85 group/field privacy-field">
+                        <label className="flex items-center gap-3 cursor-pointer">
+                            <div className="relative">
+                                <input 
+                                    type="checkbox" 
+                                    checked={privacySettings.allowProfileView}
+                                    onChange={(e) => handlePrivacySettingChange('allowProfileView', e.target.checked)}
+                                    className="sr-only"
+                                />
+                                <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200 ${
+                                    privacySettings.allowProfileView 
+                                        ? 'bg-blue-600 border-blue-600' 
+                                        : 'border-gray-300 hover:border-blue-400'
+                                }`}>
+                                    {privacySettings.allowProfileView && (
+                                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                        </svg>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="flex-1">
+                                <span className="text-sm font-medium text-gray-800">Дозволити іншим бачити мій профіль</span>
+                                <p className="text-xs text-gray-600 mt-1">Інші користувачі зможуть переглядати ваш профіль</p>
+                            </div>
+                        </label>
+                    </div>
+                    
+                    <div className="bg-gradient-to-br from-blue-50/85 via-blue-100/70 to-blue-200/55 rounded-xl p-4 border border-blue-200/85 group/field privacy-field">
+                        <label className="flex items-center gap-3 cursor-pointer">
+                            <div className="relative">
+                                <input 
+                                    type="checkbox" 
+                                    checked={privacySettings.receiveNotifications}
+                                    onChange={(e) => handlePrivacySettingChange('receiveNotifications', e.target.checked)}
+                                    className="sr-only"
+                                />
+                                <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200 ${
+                                    privacySettings.receiveNotifications 
+                                        ? 'bg-blue-600 border-blue-600' 
+                                        : 'border-gray-300 hover:border-blue-400'
+                                }`}>
+                                    {privacySettings.receiveNotifications && (
+                                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                        </svg>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="flex-1">
+                                <span className="text-sm font-medium text-gray-800">Отримувати сповіщення про нові коментарі</span>
+                                <p className="text-xs text-gray-600 mt-1">Ви будете отримувати email сповіщення про нові коментарі</p>
+                            </div>
+                        </label>
+                    </div>
                 </div>
                 </div>
             </div>
