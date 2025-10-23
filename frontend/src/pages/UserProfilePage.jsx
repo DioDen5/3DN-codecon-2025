@@ -1,10 +1,46 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, Activity, Settings, Mail, Calendar, Award, MessageCircle, MessageSquare, ThumbsUp, Star, GraduationCap } from 'lucide-react';
 import { useAuthState } from '../api/useAuthState';
+import { getUserStats } from '../api/user-stats';
 
 const UserProfilePage = () => {
     const { user } = useAuthState();
     const [activeTab, setActiveTab] = useState('profile');
+    const [stats, setStats] = useState({
+        discussions: 0,
+        comments: 0,
+        reviews: 0,
+        totalLikes: 0
+    });
+    const [loading, setLoading] = useState(true);
+
+    // Функція для завантаження статистики
+    const loadUserStats = async () => {
+        try {
+            setLoading(true);
+            const userStats = await getUserStats();
+            setStats(userStats);
+        } catch (error) {
+            console.error('Error loading user stats:', error);
+            // Використовуємо значення за замовчуванням при помилці
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Завантаження статистики користувача
+    useEffect(() => {
+        if (user) {
+            loadUserStats();
+        }
+    }, [user]);
+
+    // Оновлення статистики тільки при переключенні на вкладку профілю
+    useEffect(() => {
+        if (user && activeTab === 'profile') {
+            loadUserStats();
+        }
+    }, [activeTab, user]);
 
     const tabs = [
         { id: 'profile', label: 'Профіль', icon: User },
@@ -34,14 +70,6 @@ const UserProfilePage = () => {
 
     const getRegistrationDate = () => {
         return user?.createdAt ? formatDate(user.createdAt) : 'Невідомо';
-    };
-
-    // Мокові дані для статистики (потім замінимо на реальні)
-    const stats = {
-        discussions: 12,
-        comments: 45,
-        reviews: 8,
-        totalLikes: 127
     };
 
     const achievements = [
@@ -85,22 +113,22 @@ const UserProfilePage = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-white text-black rounded-xl p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
                     <MessageSquare className="w-8 h-8 text-blue-500 mx-auto mb-2" />
-                    <div className="text-2xl font-bold text-gray-900">{stats.discussions}</div>
+                    <div className="text-2xl font-bold text-gray-900">{loading ? '...' : stats.discussions}</div>
                     <div className="text-sm text-gray-600">Обговорень</div>
                 </div>
                 <div className="bg-white text-black rounded-xl p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
                     <MessageCircle className="w-8 h-8 text-green-500 mx-auto mb-2" />
-                    <div className="text-2xl font-bold text-gray-900">{stats.comments}</div>
+                    <div className="text-2xl font-bold text-gray-900">{loading ? '...' : stats.comments}</div>
                     <div className="text-sm text-gray-600">Коментарів</div>
                 </div>
                 <div className="bg-white text-black rounded-xl p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
                     <Star className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
-                    <div className="text-2xl font-bold text-gray-900">{stats.reviews}</div>
+                    <div className="text-2xl font-bold text-gray-900">{loading ? '...' : stats.reviews}</div>
                     <div className="text-sm text-gray-600">Відгуків</div>
                 </div>
                 <div className="bg-white text-black rounded-xl p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
                     <ThumbsUp className="w-8 h-8 text-purple-500 mx-auto mb-2" />
-                    <div className="text-2xl font-bold text-gray-900">{stats.totalLikes}</div>
+                    <div className="text-2xl font-bold text-gray-900">{loading ? '...' : stats.totalLikes}</div>
                     <div className="text-sm text-gray-600">Лайків</div>
                 </div>
             </div>
