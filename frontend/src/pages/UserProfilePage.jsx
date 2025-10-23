@@ -72,6 +72,17 @@ const UserProfilePage = () => {
         return user?.createdAt ? formatDate(user.createdAt) : 'Невідомо';
     };
 
+    // Функція для правильного склонування українською мовою
+    const getPluralForm = (count, forms) => {
+        if (count % 10 === 1 && count % 100 !== 11) {
+            return forms[0]; // 1, 21, 31, 41, 51, 61, 71, 81, 91
+        } else if ([2, 3, 4].includes(count % 10) && ![12, 13, 14].includes(count % 100)) {
+            return forms[1]; // 2-4, 22-24, 32-34, 42-44, 52-54, 62-64, 72-74, 82-84, 92-94
+        } else {
+            return forms[2]; // 0, 5-20, 25-30, 35-40, 45-50, 55-60, 65-70, 75-80, 85-90, 95-100
+        }
+    };
+
     const achievements = [
         { id: 'first_post', name: 'Перший пост', description: 'Створив перше обговорення', earned: true },
         { id: 'active_commenter', name: 'Активний коментатор', description: '10+ коментарів', earned: true },
@@ -114,22 +125,30 @@ const UserProfilePage = () => {
                 <div className="bg-white text-black rounded-xl p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
                     <MessageSquare className="w-8 h-8 text-blue-500 mx-auto mb-2" />
                     <div className="text-2xl font-bold text-gray-900">{loading ? '...' : stats.discussions}</div>
-                    <div className="text-sm text-gray-600">Обговорень</div>
+                    <div className="text-sm text-gray-600">
+                        {loading ? '...' : getPluralForm(stats.discussions, ['обговорення', 'обговорення', 'обговорень'])}
+                    </div>
                 </div>
                 <div className="bg-white text-black rounded-xl p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
                     <MessageCircle className="w-8 h-8 text-green-500 mx-auto mb-2" />
                     <div className="text-2xl font-bold text-gray-900">{loading ? '...' : stats.comments}</div>
-                    <div className="text-sm text-gray-600">Коментарів</div>
+                    <div className="text-sm text-gray-600">
+                        {loading ? '...' : getPluralForm(stats.comments, ['коментар', 'коментарі', 'коментарів'])}
+                    </div>
                 </div>
                 <div className="bg-white text-black rounded-xl p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
                     <Star className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
                     <div className="text-2xl font-bold text-gray-900">{loading ? '...' : stats.reviews}</div>
-                    <div className="text-sm text-gray-600">Відгуків</div>
+                    <div className="text-sm text-gray-600">
+                        {loading ? '...' : getPluralForm(stats.reviews, ['відгук', 'відгуки', 'відгуків'])}
+                    </div>
                 </div>
                 <div className="bg-white text-black rounded-xl p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
                     <ThumbsUp className="w-8 h-8 text-purple-500 mx-auto mb-2" />
                     <div className="text-2xl font-bold text-gray-900">{loading ? '...' : stats.totalLikes}</div>
-                    <div className="text-sm text-gray-600">Лайків</div>
+                    <div className="text-sm text-gray-600">
+                        {loading ? '...' : getPluralForm(stats.totalLikes, ['лайк', 'лайки', 'лайків'])}
+                    </div>
                 </div>
             </div>
 
