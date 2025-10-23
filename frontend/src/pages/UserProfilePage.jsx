@@ -674,8 +674,8 @@ const UserProfilePage = () => {
                         <div className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed flex items-center gap-2">
                             <Mail className="w-4 h-4 text-gray-400" />
                             <span className="text-sm font-medium">{getUserEmail()}</span>
+                            <span className="text-xs text-gray-400 ml-auto">Не можна змінити</span>
                         </div>
-                        <p className="text-xs text-gray-500 mt-1">Пошту не можна змінити</p>
                     </div>
                 </div>
 
