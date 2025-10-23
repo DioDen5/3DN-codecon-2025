@@ -31,8 +31,6 @@ const UserProfilePage = () => {
     const [nameChangeRequest, setNameChangeRequest] = useState(null);
     const [showNameChangeModal, setShowNameChangeModal] = useState(false);
     const [privacySettings, setPrivacySettings] = useState({
-        allowProfileView: true,
-        receiveNotifications: true,
         anonymousTeacherReviews: false,
         emailOnPostComments: true
     });
@@ -798,34 +796,6 @@ const UserProfilePage = () => {
                         Приватність
                     </h3>
                 <div className="space-y-4">
-                    <div className="bg-gradient-to-br from-blue-50/85 via-blue-100/70 to-blue-200/55 rounded-xl p-4 border border-blue-200/85 group/field privacy-field">
-                        <label className="flex items-center gap-3 cursor-pointer">
-                            <div className="relative">
-                                <input 
-                                    type="checkbox" 
-                                    checked={privacySettings.allowProfileView}
-                                    onChange={(e) => handlePrivacySettingChange('allowProfileView', e.target.checked)}
-                                    className="sr-only"
-                                />
-                                <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200 ${
-                                    privacySettings.allowProfileView 
-                                        ? 'bg-blue-600 border-blue-600' 
-                                        : 'border-gray-300 hover:border-blue-400'
-                                }`}>
-                                    {privacySettings.allowProfileView && (
-                                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                        </svg>
-                                    )}
-                                </div>
-                            </div>
-                            <div className="flex-1">
-                                <span className="text-sm font-medium text-gray-800">Дозволити іншим бачити мій профіль</span>
-                                <p className="text-xs text-gray-600 mt-1">Інші користувачі зможуть переглядати ваш профіль</p>
-                            </div>
-                        </label>
-                    </div>
-                    
                     <div className="bg-gradient-to-br from-blue-50/85 via-blue-100/70 to-blue-200/55 rounded-xl p-4 border border-blue-200/85 group/field privacy-field">
                         <label className="flex items-center gap-3 cursor-pointer">
                             <div className="relative">
