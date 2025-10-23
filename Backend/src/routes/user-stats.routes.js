@@ -154,6 +154,28 @@ router.get('/activity', authRequired, async (req, res) => {
             console.error('Error fetching reviews:', error);
         }
 
+        // Get user's reactions (likes/dislikes)
+        let reactions = [];
+        try {
+            reactions = await Reaction.find({
+                userId: new mongoose.Types.ObjectId(userId)
+            })
+            .populate([
+                {
+                    path: 'targetId',
+                    populate: {
+                        path: 'authorId',
+                        select: 'displayName'
+                    }
+                }
+            ])
+            .sort({ createdAt: -1 })
+            .limit(limit);
+            console.log('Found reactions:', reactions.length);
+        } catch (error) {
+            console.error('Error fetching reactions:', error);
+        }
+
         // Combine and format activities
         const activities = [];
 
@@ -187,6 +209,32 @@ router.get('/activity', authRequired, async (req, res) => {
                 date: review.createdAt,
                 likes: 0,
                 id: review._id
+            });
+        });
+
+        // Add reactions (likes/dislikes)
+        reactions.forEach(reaction => {
+            const target = reaction.targetId;
+            let title = '';
+            let type = 'like';
+            
+            if (reaction.targetType === 'announcement') {
+                title = `Лайк обговорення "${target?.title || 'Невідомо'}"`;
+                type = reaction.value === 1 ? 'like' : 'dislike';
+            } else if (reaction.targetType === 'comment') {
+                title = `Лайк коментаря в "${target?.announcementId?.title || 'обговоренні'}"`;
+                type = reaction.value === 1 ? 'like' : 'dislike';
+            } else if (reaction.targetType === 'teacher') {
+                title = `Лайк викладача ${target?.name || 'Невідомо'}`;
+                type = reaction.value === 1 ? 'like' : 'dislike';
+            }
+            
+            activities.push({
+                type: type,
+                title: title,
+                date: reaction.createdAt,
+                likes: 0,
+                id: reaction._id
             });
         });
 

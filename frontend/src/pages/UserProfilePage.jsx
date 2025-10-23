@@ -76,6 +76,18 @@ const UserProfilePage = () => {
         }
     }, [activeTab, user]);
 
+    // Оновлення активності при фокусі на сторінку
+    useEffect(() => {
+        const handleFocus = () => {
+            if (user && activeTab === 'activity') {
+                loadUserActivity();
+            }
+        };
+
+        window.addEventListener('focus', handleFocus);
+        return () => window.removeEventListener('focus', handleFocus);
+    }, [user, activeTab]);
+
     const tabs = [
         { id: 'profile', label: 'Профіль', icon: User },
         { id: 'activity', label: 'Активність', icon: Activity },
@@ -349,20 +361,29 @@ const UserProfilePage = () => {
                         {activity.map((activityItem, index) => (
                             <div 
                                 key={activityItem.id || index} 
-                                className="flex items-center justify-between p-3 md:p-4 bg-gray-50 rounded-lg cursor-pointer hover:scale-105 transition-transform duration-300"
+                                className="flex items-center justify-between p-3 md:p-4 bg-gray-100 rounded-lg cursor-pointer hover:scale-101 hover:bg-gray-200 transition-all duration-300"
                                 style={{ animationDelay: `${index * 0.1}s` }}
                             >
                                 <div className="flex items-center gap-2 md:gap-3">
                                     <div className={`w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center ${
                                         activityItem.type === 'discussion' ? 'bg-blue-500' :
-                                        activityItem.type === 'comment' ? 'bg-green-500' : 'bg-yellow-500'
+                                        activityItem.type === 'comment' ? 'bg-green-500' :
+                                        activityItem.type === 'review' ? 'bg-yellow-500' :
+                                        activityItem.type === 'like' ? 'bg-pink-500' :
+                                        activityItem.type === 'dislike' ? 'bg-red-500' : 'bg-gray-500'
                                     }`}>
                                         {activityItem.type === 'discussion' ? (
                                             <MessageSquare className="w-3 h-3 md:w-4 md:h-4 text-white" />
                                         ) : activityItem.type === 'comment' ? (
                                             <MessageCircle className="w-3 h-3 md:w-4 md:h-4 text-white" />
-                                        ) : (
+                                        ) : activityItem.type === 'review' ? (
                                             <Star className="w-3 h-3 md:w-4 md:h-4 text-white" />
+                                        ) : activityItem.type === 'like' ? (
+                                            <ThumbsUp className="w-3 h-3 md:w-4 md:h-4 text-white" />
+                                        ) : activityItem.type === 'dislike' ? (
+                                            <ThumbsUp className="w-3 h-3 md:w-4 md:h-4 text-white rotate-180" />
+                                        ) : (
+                                            <Activity className="w-3 h-3 md:w-4 md:h-4 text-white" />
                                         )}
                                     </div>
                                     <div>
