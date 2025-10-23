@@ -71,15 +71,15 @@ const UserProfilePage = () => {
                     <div className="flex-1">
                         <h1 className="text-2xl font-bold text-gray-900">{getUserDisplayName()}</h1>
                         <p className="text-gray-600 flex items-center gap-2">
-                            <Mail size={16} className="profile-icon" />
+                            <Mail size={16} />
                             {getUserEmail()}
                         </p>
                         <p className="text-gray-500 flex items-center gap-2 mt-1">
-                            <Calendar size={16} className="profile-icon" />
+                            <Calendar size={16} />
                             Зареєстрований {getRegistrationDate()}
                         </p>
                         <div className="flex items-center gap-2 mt-2">
-                            <span className="profile-badge bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                            <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
                                 ✅ Верифікований студент
                             </span>
                         </div>
@@ -283,7 +283,7 @@ const UserProfilePage = () => {
                                                 : 'text-gray-600 hover:text-gray-800 hover:bg-gray-300'
                                         }`}
                                     >
-                                        <Icon size={20} className={activeTab === tab.id ? 'profile-icon' : ''} />
+                                        <Icon size={20} className={activeTab === tab.id && tab.id === 'settings' ? 'profile-icon' : ''} />
                                         {tab.label}
                                     </button>
                                 );
