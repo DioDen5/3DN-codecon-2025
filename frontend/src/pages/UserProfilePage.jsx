@@ -279,8 +279,8 @@ const UserProfilePage = () => {
                                         onClick={() => setActiveTab(tab.id)}
                                         className={`profile-tab flex items-center gap-3 py-4 px-6 rounded-xl font-bold text-lg transition-all duration-300 ${
                                             activeTab === tab.id
-                                                ? 'bg-white text-gray-900 shadow-lg transform scale-105'
-                                                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-400'
+                                                ? 'bg-blue-600 text-white shadow-lg transform scale-105'
+                                                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-300'
                                         }`}
                                     >
                                         <Icon size={20} className={activeTab === tab.id ? 'profile-icon' : ''} />
