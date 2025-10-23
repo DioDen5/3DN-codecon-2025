@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { User, Activity, Settings, Mail, Calendar, Award, MessageCircle, MessageSquare, ThumbsUp, Star, GraduationCap } from 'lucide-react';
+import { User, Activity, Settings, Mail, Calendar, Award, MessageCircle, MessageSquare, ThumbsUp, Star, GraduationCap, Edit3, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import { useAuthState } from '../api/useAuthState';
 import { getUserStats, getUserActivity } from '../api/user-stats';
+import { getNameChangeStatus } from '../api/name-change';
+import NameChangeModal from '../components/NameChangeModal';
 
 const UserProfilePage = () => {
     const { user } = useAuthState();
@@ -26,6 +28,8 @@ const UserProfilePage = () => {
         hasPrevPage: false,
         totalActivities: 0
     });
+    const [nameChangeRequest, setNameChangeRequest] = useState(null);
+    const [showNameChangeModal, setShowNameChangeModal] = useState(false);
 
     // Функція для зміни вкладки з збереженням в localStorage
     const handleTabChange = (tabId) => {
@@ -44,6 +48,21 @@ const UserProfilePage = () => {
             // Використовуємо значення за замовчуванням при помилці
         } finally {
             setLoading(false);
+        }
+    };
+
+    // Функція для завантаження статусу запиту на зміну імені
+    const loadNameChangeStatus = async () => {
+        try {
+            const response = await getNameChangeStatus();
+            if (response.hasRequest) {
+                setNameChangeRequest(response.request);
+            } else {
+                setNameChangeRequest(null);
+            }
+        } catch (error) {
+            console.error('Error loading name change status:', error);
+            setNameChangeRequest(null);
         }
     };
 
@@ -109,6 +128,7 @@ const UserProfilePage = () => {
     useEffect(() => {
         if (user) {
             loadUserStats();
+            loadNameChangeStatus();
         }
     }, [user]);
 
@@ -191,6 +211,17 @@ const UserProfilePage = () => {
 
     const getRegistrationDate = () => {
         return user?.createdAt ? formatDate(user.createdAt) : 'Невідомо';
+    };
+
+    // Функції для обробки модального вікна зміни імені
+    const handleOpenNameChangeModal = () => {
+        setShowNameChangeModal(true);
+    };
+
+    const handleCloseNameChangeModal = () => {
+        setShowNameChangeModal(false);
+        // Перезавантажуємо статус після закриття модального вікна
+        loadNameChangeStatus();
     };
 
     // Функція для правильного склонування українською мовою
@@ -611,11 +642,22 @@ const UserProfilePage = () => {
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Ім'я та прізвище
                         </label>
-                        <input
-                            type="text"
-                            defaultValue={getUserDisplayName()}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 focus:scale-105"
-                        />
+                        <div className="flex items-center gap-3">
+                            <input
+                                type="text"
+                                value={getUserDisplayName()}
+                                disabled
+                                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
+                            />
+                            <button
+                                onClick={handleOpenNameChangeModal}
+                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 hover:scale-105 flex items-center gap-2"
+                            >
+                                <Edit3 size={16} />
+                                Змінити
+                            </button>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">Для зміни імені потрібне схвалення модераторів</p>
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -630,6 +672,41 @@ const UserProfilePage = () => {
                         <p className="text-xs text-gray-500 mt-1">Email не можна змінити</p>
                     </div>
                 </div>
+
+                {/* Статус запиту на зміну імені */}
+                {nameChangeRequest && (
+                    <div className="mt-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                        <div className="flex items-center gap-3 mb-3">
+                            {nameChangeRequest.status === 'pending' && <Clock className="w-5 h-5 text-yellow-500" />}
+                            {nameChangeRequest.status === 'approved' && <CheckCircle className="w-5 h-5 text-green-500" />}
+                            {nameChangeRequest.status === 'rejected' && <AlertCircle className="w-5 h-5 text-red-500" />}
+                            <h4 className="font-semibold text-gray-900">
+                                {nameChangeRequest.status === 'pending' && 'Запит на зміну імені очікує розгляду'}
+                                {nameChangeRequest.status === 'approved' && 'Запит на зміну імені схвалено'}
+                                {nameChangeRequest.status === 'rejected' && 'Запит на зміну імені відхилено'}
+                            </h4>
+                        </div>
+                        <div className="text-sm text-gray-600 space-y-1">
+                            <p><strong>Нове ім'я:</strong> {nameChangeRequest.newFirstName} {nameChangeRequest.newLastName}</p>
+                            <p><strong>Відображуване ім'я:</strong> {nameChangeRequest.newDisplayName}</p>
+                            {nameChangeRequest.reason && (
+                                <p><strong>Причина:</strong> {nameChangeRequest.reason}</p>
+                            )}
+                            <p><strong>Дата створення:</strong> {new Date(nameChangeRequest.createdAt).toLocaleDateString('uk-UA')}</p>
+                            {nameChangeRequest.reviewComment && (
+                                <p><strong>Коментар модератора:</strong> {nameChangeRequest.reviewComment}</p>
+                            )}
+                        </div>
+                        {nameChangeRequest.status === 'pending' && (
+                            <button
+                                onClick={handleOpenNameChangeModal}
+                                className="mt-3 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm"
+                            >
+                                Переглянути деталі
+                            </button>
+                        )}
+                    </div>
+                )}
             </div>
 
             <div className="bg-white text-black rounded-xl p-6 shadow-sm">
@@ -703,6 +780,13 @@ const UserProfilePage = () => {
                 {activeTab === 'activity' && renderActivityTab()}
                 {activeTab === 'settings' && renderSettingsTab()}
             </div>
+
+            {/* Модальне вікно для зміни імені */}
+            <NameChangeModal
+                isOpen={showNameChangeModal}
+                onClose={handleCloseNameChangeModal}
+                currentName={getUserDisplayName()}
+            />
         </div>
     );
 };
