@@ -101,7 +101,9 @@ router.get('/stats', authRequired, async (req, res) => {
 router.get('/activity', authRequired, async (req, res) => {
     try {
         const userId = req.user.id;
-        const limit = parseInt(req.query.limit) || 20;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 5;
+        const skip = (page - 1) * limit;
 
         console.log('Fetching activity for user:', userId);
 
@@ -238,14 +240,31 @@ router.get('/activity', authRequired, async (req, res) => {
             });
         });
 
-        // Sort by date (newest first) and limit
+        // Sort by date (newest first)
         activities.sort((a, b) => new Date(b.date) - new Date(a.date));
-        const limitedActivities = activities.slice(0, limit);
+        
+        // Apply pagination
+        const totalActivities = activities.length;
+        const paginatedActivities = activities.slice(skip, skip + limit);
+        const totalPages = Math.ceil(totalActivities / limit);
+        const hasNextPage = page < totalPages;
+        const hasPrevPage = page > 1;
 
-        console.log('Total activities found:', limitedActivities.length);
-        console.log('Activities:', limitedActivities);
+        console.log('Total activities found:', totalActivities);
+        console.log('Page:', page, 'of', totalPages);
+        console.log('Activities on this page:', paginatedActivities.length);
 
-        res.json(limitedActivities);
+        res.json({
+            activities: paginatedActivities,
+            pagination: {
+                currentPage: page,
+                totalPages,
+                hasNextPage,
+                hasPrevPage,
+                totalActivities,
+                limit
+            }
+        });
     } catch (error) {
         console.error('Error fetching user activity:', error);
         res.status(500).json({ error: 'Failed to fetch user activity' });

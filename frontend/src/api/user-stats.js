@@ -10,9 +10,9 @@ export async function getUserStats() {
     }
 }
 
-export async function getUserActivity(limit = 20) {
+export async function getUserActivity(page = 1, limit = 5) {
     try {
-        const { data } = await http.get(`/user/activity?limit=${limit}`);
+        const { data } = await http.get(`/user/activity?page=${page}&limit=${limit}`);
         return data;
     } catch (error) {
         console.error('Error fetching user activity:', error);
