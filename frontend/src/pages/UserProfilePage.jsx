@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Activity, Settings, Mail, Calendar, Award, MessageCircle, ThumbsUp, Star } from 'lucide-react';
+import { User, Activity, Settings, Mail, Calendar, Award, MessageCircle, MessageSquare, ThumbsUp, Star } from 'lucide-react';
 import { useAuthState } from '../api/useAuthState';
 
 const UserProfilePage = () => {
@@ -89,7 +89,7 @@ const UserProfilePage = () => {
             {/* Статистика */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-white text-black rounded-xl p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
-                    <MessageCircle className="w-8 h-8 text-blue-500 mx-auto mb-2" />
+                    <MessageSquare className="w-8 h-8 text-blue-500 mx-auto mb-2" />
                     <div className="text-2xl font-bold text-gray-900">{stats.discussions}</div>
                     <div className="text-sm text-gray-600">Обговорень</div>
                 </div>
