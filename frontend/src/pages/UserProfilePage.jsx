@@ -99,20 +99,20 @@ const UserProfilePage = () => {
     ];
 
     const renderProfileTab = () => (
-        <div className="space-y-8">
+        <div className="space-y-6 md:space-y-8">
             {/* Заголовок профілю */}
-            <div className="profile-card bg-white text-black rounded-xl p-8 shadow-sm mb-8">
-                <div className="flex items-center space-x-6">
-                    <div className="w-23 h-23 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+            <div className="profile-card bg-white text-black rounded-xl p-4 md:p-8 shadow-sm mb-6 md:mb-8">
+                <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-23 md:h-23 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-xl sm:text-2xl font-bold">
                         {getUserDisplayName().charAt(0).toUpperCase()}
                     </div>
-                    <div className="flex-1">
-                        <h1 className="text-2xl font-bold text-gray-900">{getUserDisplayName()}</h1>
-                        <p className="text-gray-600 flex items-center gap-2">
+                    <div className="flex-1 text-center sm:text-left">
+                        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{getUserDisplayName()}</h1>
+                        <p className="text-sm sm:text-base text-gray-600 flex items-center justify-center sm:justify-start gap-2 mt-1">
                             <Mail size={16} />
                             {getUserEmail()}
                         </p>
-                        <p className="text-gray-500 flex items-center gap-2 mt-1">
+                        <p className="text-sm sm:text-base text-gray-500 flex items-center justify-center sm:justify-start gap-2 mt-1">
                             <GraduationCap size={16} />
                             Студент
                         </p>
@@ -121,68 +121,68 @@ const UserProfilePage = () => {
             </div>
 
             {/* Статистика */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-white text-black rounded-xl p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
-                    <MessageSquare className="w-8 h-8 text-blue-500 mx-auto mb-2" />
-                    <div className="text-2xl font-bold text-gray-900">{loading ? '...' : stats.discussions}</div>
-                    <div className="text-sm text-gray-600">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+                <div className="bg-white text-black rounded-xl p-3 md:p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
+                    <MessageSquare className="w-6 h-6 md:w-8 md:h-8 text-blue-500 mx-auto mb-2" />
+                    <div className="text-lg md:text-2xl font-bold text-gray-900">{loading ? '...' : stats.discussions}</div>
+                    <div className="text-xs md:text-sm text-gray-600">
                         {loading ? '...' : getPluralForm(stats.discussions, ['обговорення', 'обговорення', 'обговорень'])}
                     </div>
                 </div>
-                <div className="bg-white text-black rounded-xl p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
-                    <MessageCircle className="w-8 h-8 text-green-500 mx-auto mb-2" />
-                    <div className="text-2xl font-bold text-gray-900">{loading ? '...' : stats.comments}</div>
-                    <div className="text-sm text-gray-600">
+                <div className="bg-white text-black rounded-xl p-3 md:p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
+                    <MessageCircle className="w-6 h-6 md:w-8 md:h-8 text-green-500 mx-auto mb-2" />
+                    <div className="text-lg md:text-2xl font-bold text-gray-900">{loading ? '...' : stats.comments}</div>
+                    <div className="text-xs md:text-sm text-gray-600">
                         {loading ? '...' : getPluralForm(stats.comments, ['коментар', 'коментарі', 'коментарів'])}
                     </div>
                 </div>
-                <div className="bg-white text-black rounded-xl p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
-                    <Star className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
-                    <div className="text-2xl font-bold text-gray-900">{loading ? '...' : stats.reviews}</div>
-                    <div className="text-sm text-gray-600">
+                <div className="bg-white text-black rounded-xl p-3 md:p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
+                    <Star className="w-6 h-6 md:w-8 md:h-8 text-yellow-500 mx-auto mb-2" />
+                    <div className="text-lg md:text-2xl font-bold text-gray-900">{loading ? '...' : stats.reviews}</div>
+                    <div className="text-xs md:text-sm text-gray-600">
                         {loading ? '...' : getPluralForm(stats.reviews, ['відгук', 'відгуки', 'відгуків'])}
                     </div>
                 </div>
-                <div className="bg-white text-black rounded-xl p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
-                    <ThumbsUp className="w-8 h-8 text-purple-500 mx-auto mb-2" />
-                    <div className="text-2xl font-bold text-gray-900">{loading ? '...' : stats.totalLikes}</div>
-                    <div className="text-sm text-gray-600">
+                <div className="bg-white text-black rounded-xl p-3 md:p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
+                    <ThumbsUp className="w-6 h-6 md:w-8 md:h-8 text-purple-500 mx-auto mb-2" />
+                    <div className="text-lg md:text-2xl font-bold text-gray-900">{loading ? '...' : stats.totalLikes}</div>
+                    <div className="text-xs md:text-sm text-gray-600">
                         {loading ? '...' : getPluralForm(stats.totalLikes, ['лайк', 'лайки', 'лайків'])}
                     </div>
                 </div>
             </div>
 
             {/* Досягнення */}
-            <div className="bg-white text-black rounded-xl p-6 shadow-sm">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Досягнення</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-white text-black rounded-xl p-4 md:p-6 shadow-sm">
+                <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-3 md:mb-4">Досягнення</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                     {achievements.map((achievement, index) => (
                         <div
                             key={achievement.id}
-                            className={`p-4 rounded-lg border-2 cursor-pointer hover:scale-105 transition-transform duration-300 ${
+                            className={`p-3 md:p-4 rounded-lg border-2 cursor-pointer hover:scale-105 transition-transform duration-300 ${
                                 achievement.earned
                                     ? 'border-green-200 bg-green-50'
                                     : 'border-gray-200 bg-gray-50'
                             }`}
                             style={{ animationDelay: `${index * 0.1}s` }}
                         >
-                            <div className="flex items-center gap-3">
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                            <div className="flex items-center gap-2 md:gap-3">
+                                <div className={`w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center ${
                                     achievement.earned ? 'bg-green-500' : 'bg-gray-400'
                                 }`}>
                                     {achievement.earned ? (
-                                        <span className="text-white text-sm">✓</span>
+                                        <span className="text-white text-xs md:text-sm">✓</span>
                                     ) : (
-                                        <span className="text-white text-sm">○</span>
+                                        <span className="text-white text-xs md:text-sm">○</span>
                                     )}
                                 </div>
                                 <div>
-                                    <h4 className={`font-medium ${
+                                    <h4 className={`text-sm md:text-base font-medium ${
                                         achievement.earned ? 'text-green-800' : 'text-gray-600'
                                     }`}>
                                         {achievement.name}
                                     </h4>
-                                    <p className={`text-sm ${
+                                    <p className={`text-xs md:text-sm ${
                                         achievement.earned ? 'text-green-600' : 'text-gray-500'
                                     }`}>
                                         {achievement.description}
@@ -302,29 +302,29 @@ const UserProfilePage = () => {
 
     return (
         <div className="min-h-[calc(100vh-68px)] bg-gradient-to-b from-black to-gray-900 text-white">
-            <div className="max-w-4xl mx-auto px-6 py-10">
+            <div className="max-w-4xl mx-auto px-3 md:px-6 py-6 md:py-10">
                 {/* Таби */}
-                <div className="bg-gray-100 rounded-2xl shadow-xl border border-gray-200 mb-8 overflow-hidden">
-                    <div className="bg-gray-200 p-2">
-                        <nav className="flex space-x-2">
+                <div className="bg-gray-100 rounded-2xl shadow-xl border border-gray-200 mb-6 md:mb-8 overflow-hidden">
+                    <div className="bg-gray-200 p-1 md:p-2">
+                        <nav className="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-2">
                             {tabs.map((tab) => {
                                 const Icon = tab.icon;
                                 return (
                                     <button
                                         key={tab.id}
                                         onClick={() => setActiveTab(tab.id)}
-                                        className={`profile-tab flex items-center gap-3 py-4 px-6 rounded-xl font-bold text-lg transition-all duration-300 ${
+                                        className={`profile-tab flex items-center gap-2 md:gap-3 py-3 md:py-4 px-3 md:px-6 rounded-xl font-bold text-sm md:text-lg transition-all duration-300 ${
                                             activeTab === tab.id
                                                 ? 'bg-blue-600 text-white shadow-lg transform scale-105'
                                                 : 'text-gray-600 hover:text-gray-800 hover:bg-gray-300'
                                         }`}
                                     >
-                                        <Icon size={20} className={
+                                        <Icon size={18} className={
                                             activeTab === tab.id && tab.id === 'settings' ? 'profile-icon-once' :
                                             activeTab === tab.id && tab.id === 'activity' ? 'profile-activity-icon' :
                                             activeTab === tab.id && tab.id === 'profile' ? 'profile-profile-icon' : ''
                                         } />
-                                        {tab.label}
+                                        <span>{tab.label}</span>
                                     </button>
                                 );
                             })}
