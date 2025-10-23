@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Activity, Settings, Mail, Calendar, Award, MessageCircle, MessageSquare, ThumbsUp, Star } from 'lucide-react';
+import { User, Activity, Settings, Mail, Calendar, Award, MessageCircle, MessageSquare, ThumbsUp, Star, GraduationCap } from 'lucide-react';
 import { useAuthState } from '../api/useAuthState';
 
 const UserProfilePage = () => {
@@ -29,7 +29,7 @@ const UserProfilePage = () => {
     };
 
     const getUserEmail = () => {
-        return user?.email || 'Невідомо';
+        return user?.email || 'student@lnu.edu.ua';
     };
 
     const getRegistrationDate = () => {
@@ -62,7 +62,7 @@ const UserProfilePage = () => {
     const renderProfileTab = () => (
         <div className="space-y-8">
             {/* Заголовок профілю */}
-            <div className="profile-card bg-white text-black rounded-xl p-6 shadow-sm mb-8">
+            <div className="profile-card bg-white text-black rounded-xl p-8 shadow-sm mb-8">
                 <div className="flex items-center space-x-6">
                     <div className="w-23 h-23 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
                         {getUserDisplayName().charAt(0).toUpperCase()}
@@ -74,14 +74,9 @@ const UserProfilePage = () => {
                             {getUserEmail()}
                         </p>
                         <p className="text-gray-500 flex items-center gap-2 mt-1">
-                            <Calendar size={16} />
-                            Зареєстрований {getRegistrationDate()}
+                            <GraduationCap size={16} />
+                            Студент
                         </p>
-                        <div className="flex items-center gap-2 mt-2">
-                            <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                                ✅ Верифікований студент
-                            </span>
-                        </div>
                     </div>
                 </div>
             </div>
