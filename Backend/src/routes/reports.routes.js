@@ -1,47 +1,46 @@
 import express from 'express';
 import { Report } from '../models/Report.js';
-import { auth } from '../middleware/auth.js';
+import { authRequired } from '../middleware/auth.js';
 import { requireVerified } from '../middleware/requireVerified.js';
-import { getUid } from '../utils/jwt.js';
 
 const router = express.Router();
 
 // Create a new report
-router.post('/', auth, requireVerified, async (req, res) => {
+router.post('/', authRequired, requireVerified, async (req, res) => {
     try {
         const { targetType, targetId, reason = '' } = req.body;
-        
+
         if (!['announcement', 'comment', 'review', 'user'].includes(targetType)) {
             return res.status(400).json({ error: 'Invalid targetType' });
         }
-        
+
         if (!targetId) {
             return res.status(400).json({ error: 'targetId is required' });
         }
-        
-        const uid = getUid(req.user);
-        if (!uid) {
-            return res.status(401).json({ error: 'No user id in auth context' });
+
+        const reporterId = req.user?.id;
+        if (!reporterId) {
+            return res.status(401).json({ error: 'Unauthorized' });
         }
-        
+
         // Check if user already reported this target
         const existingReport = await Report.findOne({
             targetType,
             targetId,
-            reporterId: uid
+            reporterId
         });
-        
+
         if (existingReport) {
             return res.status(400).json({ error: 'You have already reported this content' });
         }
-        
+
         const report = await Report.create({
             targetType,
             targetId,
-            reporterId: uid,
+            reporterId,
             reason: reason.trim()
         });
-        
+
         res.status(201).json({
             ok: true,
             report: {
@@ -60,17 +59,17 @@ router.post('/', auth, requireVerified, async (req, res) => {
 });
 
 // Get user's reports
-router.get('/my', auth, requireVerified, async (req, res) => {
+router.get('/my', authRequired, requireVerified, async (req, res) => {
     try {
-        const uid = getUid(req.user);
-        if (!uid) {
-            return res.status(401).json({ error: 'No user id in auth context' });
+        const reporterId = req.user?.id;
+        if (!reporterId) {
+            return res.status(401).json({ error: 'Unauthorized' });
         }
-        
-        const reports = await Report.find({ reporterId: uid })
+
+        const reports = await Report.find({ reporterId })
             .sort({ createdAt: -1 })
             .select('targetType targetId reason status createdAt updatedAt');
-        
+
         res.json({ reports });
     } catch (error) {
         console.error('Error fetching user reports:', error);
