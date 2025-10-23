@@ -635,40 +635,46 @@ const UserProfilePage = () => {
 
     const renderSettingsTab = () => (
         <div className="space-y-6">
-            <div className="bg-white text-black rounded-xl p-6 shadow-sm">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Налаштування профілю</h3>
+            <div className="bg-white text-black rounded-2xl p-6 shadow-xl border border-gray-200 relative overflow-hidden group profile-settings-card">
+                {/* Декоративні елементи */}
+                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-100/50 to-indigo-100/30 rounded-full -translate-y-16 translate-x-16 animate-pulse decorative-element-1"></div>
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-indigo-100/40 to-blue-100/30 rounded-full translate-y-12 -translate-x-12 animate-bounce decorative-element-2" style={{animationDuration: '3s'}}></div>
+                
+                <div className="relative">
+                    <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg flex items-center justify-center">
+                            <User className="w-4 h-4 text-white" />
+                        </div>
+                        Налаштування профілю
+                    </h3>
                 <div className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Поточне ім'я та прізвище
                         </label>
-                        <div className="flex items-center gap-3">
-                            <input
-                                type="text"
-                                value={getUserDisplayName()}
-                                disabled
-                                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
-                            />
-                            <button
-                                onClick={handleOpenNameChangeModal}
-                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 hover:scale-105 flex items-center gap-2"
-                            >
-                                <Edit3 size={16} />
-                                Змінити
-                            </button>
-                        </div>
+                            <div className="flex items-center gap-3">
+                                <div className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed flex items-center gap-2">
+                                    <User className="w-4 h-4 text-gray-400" />
+                                    <span className="text-sm font-medium">{getUserDisplayName()}</span>
+                                </div>
+                                <button
+                                    onClick={handleOpenNameChangeModal}
+                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 hover:scale-105 flex items-center gap-2"
+                                >
+                                    <Edit3 size={16} />
+                                    Змінити
+                                </button>
+                            </div>
                         <p className="text-xs text-gray-500 mt-1">Для зміни імені потрібне схвалення модераторів</p>
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Пошта
                         </label>
-                        <input
-                            type="email"
-                            value={getUserEmail()}
-                            disabled
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
-                        />
+                        <div className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed flex items-center gap-2">
+                            <Mail className="w-4 h-4 text-gray-400" />
+                            <span className="text-sm font-medium">{getUserEmail()}</span>
+                        </div>
                         <p className="text-xs text-gray-500 mt-1">Пошту не можна змінити</p>
                     </div>
                 </div>
@@ -707,6 +713,7 @@ const UserProfilePage = () => {
                         )}
                     </div>
                 )}
+                </div>
             </div>
 
             <div className="bg-white text-black rounded-2xl p-6 shadow-xl border border-gray-200 relative overflow-hidden group security-card">
