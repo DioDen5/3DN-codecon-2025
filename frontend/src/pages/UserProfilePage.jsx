@@ -63,23 +63,23 @@ const UserProfilePage = () => {
     const renderProfileTab = () => (
         <div className="space-y-8">
             {/* Заголовок профілю */}
-            <div className="bg-white text-black rounded-xl p-6 shadow-md mb-8">
+            <div className="profile-card bg-white text-black rounded-xl p-6 shadow-md mb-8">
                 <div className="flex items-center space-x-6">
-                    <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-pink-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+                    <div className="profile-avatar w-20 h-20 bg-gradient-to-br from-blue-500 to-pink-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
                         {getUserDisplayName().charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1">
                         <h1 className="text-2xl font-bold text-gray-900">{getUserDisplayName()}</h1>
                         <p className="text-gray-600 flex items-center gap-2">
-                            <Mail size={16} />
+                            <Mail size={16} className="profile-icon" />
                             {getUserEmail()}
                         </p>
                         <p className="text-gray-500 flex items-center gap-2 mt-1">
-                            <Calendar size={16} />
+                            <Calendar size={16} className="profile-icon" />
                             Зареєстрований {getRegistrationDate()}
                         </p>
                         <div className="flex items-center gap-2 mt-2">
-                            <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                            <span className="profile-badge bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
                                 ✅ Верифікований студент
                             </span>
                         </div>
@@ -89,28 +89,28 @@ const UserProfilePage = () => {
 
             {/* Статистика */}
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                <div className="bg-white text-black rounded-xl p-4 shadow-sm text-center">
-                    <MessageCircle className="w-8 h-8 text-blue-500 mx-auto mb-2" />
+                <div className="profile-stats-card bg-white text-black rounded-xl p-4 shadow-sm text-center group cursor-pointer">
+                    <MessageCircle className="w-8 h-8 text-blue-500 mx-auto mb-2 group-hover:scale-110 transition-transform duration-300" />
                     <div className="text-2xl font-bold text-gray-900">{stats.discussions}</div>
                     <div className="text-sm text-gray-600">Обговорень</div>
                 </div>
-                <div className="bg-white text-black rounded-xl p-4 shadow-sm text-center">
-                    <MessageCircle className="w-8 h-8 text-green-500 mx-auto mb-2" />
+                <div className="profile-stats-card bg-white text-black rounded-xl p-4 shadow-sm text-center group cursor-pointer">
+                    <MessageCircle className="w-8 h-8 text-green-500 mx-auto mb-2 group-hover:scale-110 transition-transform duration-300" />
                     <div className="text-2xl font-bold text-gray-900">{stats.comments}</div>
                     <div className="text-sm text-gray-600">Коментарів</div>
                 </div>
-                <div className="bg-white text-black rounded-xl p-4 shadow-sm text-center">
-                    <Star className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
+                <div className="profile-stats-card bg-white text-black rounded-xl p-4 shadow-sm text-center group cursor-pointer">
+                    <Star className="w-8 h-8 text-yellow-500 mx-auto mb-2 group-hover:scale-110 transition-transform duration-300" />
                     <div className="text-2xl font-bold text-gray-900">{stats.reviews}</div>
                     <div className="text-sm text-gray-600">Відгуків</div>
                 </div>
-                <div className="bg-white text-black rounded-xl p-4 shadow-sm text-center">
-                    <ThumbsUp className="w-8 h-8 text-purple-500 mx-auto mb-2" />
+                <div className="profile-stats-card bg-white text-black rounded-xl p-4 shadow-sm text-center group cursor-pointer">
+                    <ThumbsUp className="w-8 h-8 text-purple-500 mx-auto mb-2 group-hover:scale-110 transition-transform duration-300" />
                     <div className="text-2xl font-bold text-gray-900">{stats.totalLikes}</div>
                     <div className="text-sm text-gray-600">Лайків</div>
                 </div>
-                <div className="bg-white text-black rounded-xl p-4 shadow-sm text-center">
-                    <Award className="w-8 h-8 text-orange-500 mx-auto mb-2" />
+                <div className="profile-stats-card bg-white text-black rounded-xl p-4 shadow-sm text-center group cursor-pointer">
+                    <Award className="w-8 h-8 text-orange-500 mx-auto mb-2 group-hover:scale-110 transition-transform duration-300" />
                     <div className="text-2xl font-bold text-gray-900">{stats.rating}</div>
                     <div className="text-sm text-gray-600">Рейтинг</div>
                 </div>
@@ -120,14 +120,15 @@ const UserProfilePage = () => {
             <div className="bg-white text-black rounded-xl p-6 shadow-sm">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Досягнення</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {achievements.map((achievement) => (
+                    {achievements.map((achievement, index) => (
                         <div
                             key={achievement.id}
-                            className={`p-4 rounded-lg border-2 ${
+                            className={`profile-achievement p-4 rounded-lg border-2 cursor-pointer ${
                                 achievement.earned
                                     ? 'border-green-200 bg-green-50'
                                     : 'border-gray-200 bg-gray-50'
                             }`}
+                            style={{ animationDelay: `${index * 0.1}s` }}
                         >
                             <div className="flex items-center gap-3">
                                 <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
@@ -165,7 +166,11 @@ const UserProfilePage = () => {
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Остання активність</h3>
                 <div className="space-y-4">
                     {recentActivity.map((activity, index) => (
-                        <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                        <div 
+                            key={index} 
+                            className="profile-activity-item flex items-center justify-between p-4 bg-gray-50 rounded-lg cursor-pointer"
+                            style={{ animationDelay: `${index * 0.1}s` }}
+                        >
                             <div className="flex items-center gap-3">
                                 <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
                                     activity.type === 'discussion' ? 'bg-blue-500' :
@@ -207,7 +212,7 @@ const UserProfilePage = () => {
                         <input
                             type="text"
                             defaultValue={getUserDisplayName()}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="profile-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                     </div>
                     <div>
@@ -227,7 +232,7 @@ const UserProfilePage = () => {
 
             <div className="bg-white text-black rounded-xl p-6 shadow-sm">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Безпека</h3>
-                <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                <button className="profile-button w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                     Змінити пароль
                 </button>
             </div>
@@ -272,13 +277,13 @@ const UserProfilePage = () => {
                                     <button
                                         key={tab.id}
                                         onClick={() => setActiveTab(tab.id)}
-                                        className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                                        className={`profile-tab flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-all duration-300 ${
                                             activeTab === tab.id
                                                 ? 'border-blue-500 text-blue-600'
                                                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                         }`}
                                     >
-                                        <Icon size={18} />
+                                        <Icon size={18} className={activeTab === tab.id ? 'profile-icon' : ''} />
                                         {tab.label}
                                     </button>
                                 );
