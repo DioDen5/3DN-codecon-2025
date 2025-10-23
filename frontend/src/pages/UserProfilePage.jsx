@@ -929,14 +929,16 @@ const UserProfilePage = () => {
                 {/* Таби */}
                 <div className="bg-gray-100 rounded-2xl shadow-xl border border-gray-200 mb-6 md:mb-8 overflow-hidden">
                     <div className="bg-gray-200 p-1 md:p-2">
-                        <nav className="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-2">
+                        <nav className="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-4 justify-center">
                             {tabs.map((tab) => {
                                 const Icon = tab.icon;
                                 return (
                                     <button
                                         key={tab.id}
                                         onClick={() => handleTabChange(tab.id)}
-                                        className={`profile-tab flex items-center gap-2 md:gap-3 py-3 md:py-4 px-3 md:px-6 rounded-xl font-bold text-sm md:text-lg transition-all duration-300 ${
+                                        className={`profile-tab flex items-center justify-center gap-2 md:gap-3 py-3 md:py-4 px-3 md:px-6 rounded-xl font-bold text-sm md:text-lg transition-all duration-300 flex-1 ${
+                                            tab.id === 'profile' ? 'ml-2' : tab.id === 'settings' ? 'mr-2' : ''
+                                        } ${
                                             activeTab === tab.id
                                                 ? 'bg-blue-600 text-white shadow-lg transform scale-105'
                                                 : 'text-gray-600 hover:text-gray-800 hover:bg-gray-300'
