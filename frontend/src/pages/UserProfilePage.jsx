@@ -268,8 +268,8 @@ const UserProfilePage = () => {
         <div className="min-h-[calc(100vh-68px)] bg-gradient-to-b from-black to-gray-900 text-white">
             <div className="max-w-4xl mx-auto px-6 py-10">
                 {/* Таби */}
-                <div className="bg-white rounded-2xl shadow-xl border border-gray-200 mb-8 overflow-hidden">
-                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-2">
+                <div className="bg-gray-100 rounded-2xl shadow-xl border border-gray-200 mb-8 overflow-hidden">
+                    <div className="bg-gray-200 p-2">
                         <nav className="flex space-x-2">
                             {tabs.map((tab) => {
                                 const Icon = tab.icon;
@@ -279,8 +279,8 @@ const UserProfilePage = () => {
                                         onClick={() => setActiveTab(tab.id)}
                                         className={`profile-tab flex items-center gap-3 py-4 px-6 rounded-xl font-bold text-lg transition-all duration-300 ${
                                             activeTab === tab.id
-                                                ? 'bg-gradient-to-r from-blue-600 to-purple-500 text-white shadow-lg transform scale-105'
-                                                : 'text-gray-600 hover:text-blue-600 hover:bg-white/50'
+                                                ? 'bg-white text-gray-900 shadow-lg transform scale-105'
+                                                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-400'
                                         }`}
                                     >
                                         <Icon size={20} className={activeTab === tab.id ? 'profile-icon' : ''} />
