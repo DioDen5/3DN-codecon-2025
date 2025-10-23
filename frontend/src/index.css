@@ -1126,7 +1126,7 @@
 
 /* Стилі для сучасного профілю */
 .profile-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
     border-radius: 20px;
     position: relative;
     overflow: hidden;
@@ -1146,21 +1146,22 @@
 }
 
 .profile-avatar {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border: 3px solid rgba(255, 255, 255, 0.3);
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    border: 3px solid rgba(59, 130, 246, 0.3);
     animation: profilePulse 2s ease-in-out infinite;
 }
 
 .profile-stats-card {
-    background: white;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     transition: all 0.3s ease;
     animation: profileSlideIn 0.6s ease-out;
 }
 
 .profile-stats-card:hover {
     transform: translateY(-5px) scale(1.02);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
     animation: profileGlow 2s ease-in-out infinite;
 }
 
@@ -1176,7 +1177,7 @@
     left: 0;
     width: 0;
     height: 2px;
-    background: linear-gradient(90deg, #667eea, #764ba2);
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
     transition: width 0.3s ease;
 }
 
@@ -1185,7 +1186,7 @@
 }
 
 .profile-achievement {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
     border-radius: 15px;
     position: relative;
     overflow: hidden;
@@ -1210,7 +1211,8 @@
 }
 
 .profile-activity-item {
-    background: #f9fafb;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
     border-radius: 12px;
     transition: all 0.3s ease;
     animation: profileSlideIn 0.4s ease-out;
@@ -1219,11 +1221,10 @@
 .profile-activity-item:hover {
     transform: translateX(5px);
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    background: #f3f4f6;
 }
 
 .profile-button {
-    background: linear-gradient(135deg, #2563eb 0%, #ec4899 100%);
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
     border: none;
     border-radius: 12px;
     color: white;
@@ -1250,24 +1251,25 @@
 
 .profile-button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4);
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
 }
 
 .profile-input {
-    background: white;
-    border: 2px solid rgba(37, 99, 235, 0.2);
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(102, 126, 234, 0.2);
     border-radius: 12px;
     transition: all 0.3s ease;
 }
 
 .profile-input:focus {
-    border-color: #2563eb;
-    box-shadow: 0 0 20px rgba(37, 99, 235, 0.3);
+    border-color: #3b82f6;
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
     transform: scale(1.02);
 }
 
 .profile-badge {
-    background: linear-gradient(135deg, #2563eb 0%, #ec4899 100%);
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
     color: white;
     border-radius: 20px;
     padding: 4px 12px;
