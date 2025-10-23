@@ -12,6 +12,8 @@ import reactionsRoutes from './routes/reactions.routes.js'
 import teachersRoutes from './routes/teachers.routes.js'
 import teacherCommentsRoutes from './routes/teacher-comments.routes.js'
 import reportsRoutes from './routes/reports.routes.js'
+import userStatsRoutes from './routes/user-stats.routes.js'
+import nameChangeRoutes from './routes/name-change.routes.js'
 
 const app = express()
 
@@ -44,6 +46,8 @@ app.use('/api', reactionsRoutes)
 app.use('/api/teachers', teachersRoutes)
 app.use('/api/teacher-comments', teacherCommentsRoutes)
 app.use('/api/reports', reportsRoutes)
+app.use('/api/user', userStatsRoutes)
+app.use('/api/name-change', nameChangeRoutes)
 
 app.use((req, res) => {
     res.status(404).json({ error: 'Not found' })

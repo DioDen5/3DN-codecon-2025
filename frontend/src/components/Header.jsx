@@ -45,13 +45,13 @@ const Header = ({ onLoginOpen, onSignupOpen }) => {
                 </div>
             ) : (
                 <div className="flex items-center gap-3">
-                    {/* акуратна іконка користувача замість тексту */}
-                    <div
+                    <Link
+                        to="/profile"
                         title={user?.displayName || "Користувач"}
-                        className="h-8 w-8 rounded-full bg-white/10 border border-white/20 grid place-items-center text-white"
+                        className="h-8 w-8 rounded-full bg-white/10 border border-white/20 grid place-items-center text-white hover:bg-white/20 transition"
                     >
                         <UserRound size={16} />
-                    </div>
+                    </Link>
                     <button
                         onClick={handleLogout}
                         className="px-4 py-1.5 min-w-[80px] rounded-md bg-red-600 text-white font-medium hover:bg-red-700 transition"

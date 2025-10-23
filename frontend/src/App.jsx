@@ -13,6 +13,7 @@ import ForumPostPage from "./pages/ForumPostPage.jsx";
 import CreateDiscussionPage from "./pages/CreateDiscussionPage.jsx";
 import TeachersPage from "./pages/TeachersPage.jsx";
 import TeacherProfilePage from "./pages/TeacherProfilePage";
+import UserProfilePage from "./pages/UserProfilePage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 
 import RequireAuth from "./utils/RequireAuth";
@@ -90,6 +91,16 @@ function App() {
 
                     <Route path="/teachers" element={<TeachersPage />} />
                     <Route path="/teachers/:id" element={<TeacherProfilePage />} />
+                    
+                    <Route
+                        path="/profile"
+                        element={
+                            <RequireAuth>
+                                <UserProfilePage />
+                            </RequireAuth>
+                        }
+                    />
+                    
                     <Route path="/reset-password" element={<ResetPasswordPage />} />
                 </Routes>
             </ErrorBoundary>

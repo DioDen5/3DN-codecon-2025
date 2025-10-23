@@ -83,20 +83,15 @@ router.post('/:teacherId', authRequired, async (req, res) => {
             rating
         });
 
+
         await comment.save();
         await comment.populate('authorId', 'displayName email');
+        
 
         // Оновлюємо лічильники викладача
         const teacher = await Teacher.findById(teacherId);
         
         if (teacher) {
-            console.log('Before update - Teacher stats:', {
-                comments: teacher.comments,
-                likes: teacher.likes,
-                dislikes: teacher.dislikes,
-                totalVotes: teacher.totalVotes,
-                rating: teacher.rating
-            });
             
             // Додаємо коментар до загальної кількості
             teacher.comments += 1;
@@ -104,10 +99,8 @@ router.post('/:teacherId', authRequired, async (req, res) => {
             // Визначаємо чи це позитивна чи негативна оцінка
             if (rating >= 3) {
                 teacher.likes += 1;
-                console.log('Added positive rating:', rating);
             } else {
                 teacher.dislikes += 1;
-                console.log('Added negative rating:', rating);
             }
             
             // Оновлюємо загальну кількість голосів
@@ -125,16 +118,9 @@ router.post('/:teacherId', authRequired, async (req, res) => {
             }
             
             await teacher.save();
-            
-            console.log('After update - Teacher stats:', {
-                comments: teacher.comments,
-                likes: teacher.likes,
-                dislikes: teacher.dislikes,
-                totalVotes: teacher.totalVotes,
-                rating: teacher.rating
-            });
         }
 
+        
         res.status(201).json(comment);
     } catch (error) {
         console.error('Error creating teacher comment:', error);
