@@ -64,7 +64,7 @@ const UserProfilePage = () => {
             {/* Заголовок профілю */}
             <div className="profile-card bg-white text-black rounded-xl p-6 shadow-sm mb-8">
                 <div className="flex items-center space-x-6">
-                    <div className="profile-avatar w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+                    <div className="w-23 h-23 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
                         {getUserDisplayName().charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1">
