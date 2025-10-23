@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Activity, Settings, Mail, Calendar, Award, MessageCircle, MessageSquare, ThumbsUp, Star, GraduationCap, Edit3, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { User, Activity, Settings, Mail, Calendar, Award, MessageCircle, MessageSquare, ThumbsUp, Star, GraduationCap, Edit3, Clock, CheckCircle, AlertCircle, Shield, Lock, Key } from 'lucide-react';
 import { useAuthState } from '../api/useAuthState';
 import { getUserStats, getUserActivity } from '../api/user-stats';
 import { getNameChangeStatus } from '../api/name-change';
@@ -635,25 +635,11 @@ const UserProfilePage = () => {
 
     const renderSettingsTab = () => (
         <div className="space-y-6">
-            <div className="bg-gradient-to-br from-white via-blue-50/30 to-purple-50/20 text-black rounded-2xl p-6 shadow-xl border border-white/50 relative overflow-hidden hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
-                {/* Декоративні елементи */}
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-100/40 to-blue-200/20 rounded-full -translate-y-16 translate-x-16 animate-pulse"></div>
-                <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-100/30 to-pink-100/20 rounded-full translate-y-12 -translate-x-12 animate-bounce" style={{animationDuration: '3s'}}></div>
-                <div className="absolute top-1/2 left-1/2 w-16 h-16 bg-gradient-to-r from-yellow-100/20 to-orange-100/20 rounded-full -translate-x-8 -translate-y-8 animate-ping" style={{animationDuration: '4s'}}></div>
-                
-                <div className="relative">
-                    <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                            <User className="w-4 h-4 text-white" />
-                        </div>
-                        Налаштування профілю
-                    </h3>
-                <div className="space-y-6">
-                    <div className="bg-gradient-to-r from-blue-50/50 to-purple-50/30 rounded-xl p-4 border border-blue-100/50">
-                        <label className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-3">
-                            <div className="w-5 h-5 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
-                                <User className="w-3 h-3 text-white" />
-                            </div>
+            <div className="bg-white text-black rounded-xl p-6 shadow-sm">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Налаштування профілю</h3>
+                <div className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
                             Поточне ім'я та прізвище
                         </label>
                         <div className="flex items-center gap-3">
@@ -661,44 +647,35 @@ const UserProfilePage = () => {
                                 type="text"
                                 value={getUserDisplayName()}
                                 disabled
-                                className="flex-1 px-4 py-3 border border-gray-200 rounded-xl bg-white/80 text-gray-700 font-medium shadow-sm focus:outline-none"
+                                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
                             />
                             <button
                                 onClick={handleOpenNameChangeModal}
-                                className="px-5 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:scale-105 flex items-center gap-2 shadow-lg hover:shadow-xl"
+                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 hover:scale-105 flex items-center gap-2"
                             >
                                 <Edit3 size={16} />
                                 Змінити
                             </button>
                         </div>
-                        <p className="text-xs text-gray-600 mt-2 flex items-center gap-1">
-                            <div className="w-1 h-1 bg-blue-400 rounded-full"></div>
-                            Для зміни імені потрібне схвалення модераторів
-                        </p>
+                        <p className="text-xs text-gray-500 mt-1">Для зміни імені потрібне схвалення модераторів</p>
                     </div>
-                    <div className="bg-gradient-to-r from-gray-50/50 to-slate-50/30 rounded-xl p-4 border border-gray-100/50">
-                        <label className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-3">
-                            <div className="w-5 h-5 bg-gradient-to-r from-gray-500 to-gray-600 rounded-full flex items-center justify-center">
-                                <Mail className="w-3 h-3 text-white" />
-                            </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
                             Пошта
                         </label>
                         <input
                             type="email"
                             value={getUserEmail()}
                             disabled
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white/80 text-gray-600 font-medium shadow-sm focus:outline-none"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
                         />
-                        <p className="text-xs text-gray-600 mt-2 flex items-center gap-1">
-                            <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
-                            Пошту не можна змінити
-                        </p>
+                        <p className="text-xs text-gray-500 mt-1">Пошту не можна змінити</p>
                     </div>
                 </div>
 
                 {/* Статус запиту на зміну імені */}
                 {nameChangeRequest && (
-                    <div className="mt-6 p-5 bg-gradient-to-r from-amber-50/50 to-orange-50/30 rounded-xl border border-amber-100/50 shadow-sm">
+                    <div className="mt-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
                         <div className="flex items-center gap-3 mb-3">
                             {nameChangeRequest.status === 'pending' && <Clock className="w-5 h-5 text-yellow-500" />}
                             {nameChangeRequest.status === 'approved' && <CheckCircle className="w-5 h-5 text-green-500" />}
@@ -732,15 +709,66 @@ const UserProfilePage = () => {
                 )}
             </div>
 
-            <div className="bg-white text-black rounded-xl p-6 shadow-sm">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Безпека</h3>
-                <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 hover:scale-105">
-                    Змінити пароль
-                </button>
+            <div className="bg-white text-black rounded-2xl p-6 shadow-xl border border-gray-200 relative overflow-hidden group security-card">
+                {/* Декоративні елементи */}
+                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-100/50 to-blue-200/30 rounded-full -translate-y-16 translate-x-16 animate-pulse decorative-element-1"></div>
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-indigo-100/40 to-blue-100/30 rounded-full translate-y-12 -translate-x-12 animate-bounce decorative-element-2" style={{animationDuration: '3s'}}></div>
+                <div className="absolute top-1/2 left-1/2 w-16 h-16 bg-gradient-to-r from-cyan-100/30 to-blue-100/30 rounded-full -translate-x-8 -translate-y-8 animate-ping decorative-element-3" style={{animationDuration: '4s'}}></div>
+                
+                <div className="relative">
+                    <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                        <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg flex items-center justify-center">
+                            <Shield className="w-4 h-4 text-white" />
+                        </div>
+                        Безпека
+                    </h3>
+                    
+                    <div className="space-y-4">
+                        <div className="bg-gradient-to-r from-blue-100/65 to-blue-200/45 rounded-xl p-4 border border-blue-300/65 group/field security-field">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-blue-800 rounded-full flex items-center justify-center security-icon">
+                                        <Lock className="w-5 h-5 text-white" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-semibold text-gray-800">Пароль</h4>
+                                        <p className="text-sm text-gray-600">Остання зміна: 3 місяці тому</p>
+                                    </div>
+                                </div>
+                                <button className="px-5 py-3 bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-xl hover:from-blue-700 hover:to-blue-900 transition-all duration-300 hover:scale-105 flex items-center gap-2 shadow-lg hover:shadow-xl group/btn">
+                                    <Key className="w-4 h-4 group-hover/btn:rotate-12 transition-transform duration-300" />
+                                    Змінити пароль
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div className="bg-gradient-to-r from-cyan-100/65 to-blue-100/45 rounded-xl p-4 border border-cyan-200/65 group/field security-field">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full flex items-center justify-center security-icon">
+                                    <Shield className="w-5 h-5 text-white" />
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold text-gray-800">Двофакторна автентифікація</h4>
+                                    <p className="text-sm text-gray-600">Не активована</p>
+                                </div>
+                                <div className="ml-auto">
+                                    <button className="px-4 py-2 bg-cyan-100 text-cyan-700 rounded-lg hover:bg-cyan-200 transition-colors text-sm font-medium">
+                                        Увімкнути
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div className="bg-white text-black rounded-xl p-6 shadow-sm">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Приватність</h3>
+            <div className="bg-white text-black rounded-2xl p-6 shadow-xl border border-gray-200 relative overflow-hidden group privacy-card">
+                {/* Декоративні елементи */}
+                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-sky-100/50 to-cyan-100/30 rounded-full -translate-y-16 translate-x-16 animate-pulse decorative-element-1"></div>
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-cyan-100/40 to-sky-100/30 rounded-full translate-y-12 -translate-x-12 animate-bounce decorative-element-2" style={{animationDuration: '3s'}}></div>
+                
+                <div className="relative">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Приватність</h3>
                 <div className="space-y-3">
                     <label className="flex items-center gap-3">
                         <input type="checkbox" defaultChecked className="rounded" />
@@ -751,7 +779,6 @@ const UserProfilePage = () => {
                         <span className="text-sm text-gray-700">Отримувати сповіщення про нові коментарі</span>
                     </label>
                 </div>
-            </div>
                 </div>
             </div>
         </div>
