@@ -34,6 +34,10 @@ const UserProfilePage = () => {
         anonymousTeacherReviews: false,
         emailOnPostComments: true
     });
+    const [checkboxAnimations, setCheckboxAnimations] = useState({
+        anonymousTeacherReviews: false,
+        emailOnPostComments: false
+    });
 
     // Функція для зміни вкладки з збереженням в localStorage
     const handleTabChange = (tabId) => {
@@ -233,6 +237,21 @@ const UserProfilePage = () => {
             ...prev,
             [setting]: value
         }));
+        
+        // Запускаємо анімацію
+        setCheckboxAnimations(prev => ({
+            ...prev,
+            [setting]: true
+        }));
+        
+        // Вимикаємо анімацію через час
+        setTimeout(() => {
+            setCheckboxAnimations(prev => ({
+                ...prev,
+                [setting]: false
+            }));
+        }, 800);
+        
         // Тут можна додати API виклик для збереження налаштувань
         console.log(`Privacy setting ${setting} changed to:`, value);
     };
@@ -796,7 +815,11 @@ const UserProfilePage = () => {
                         Приватність
                     </h3>
                 <div className="space-y-4">
-                    <div className="bg-gradient-to-br from-blue-50/85 via-blue-100/70 to-blue-200/55 rounded-xl p-4 border border-blue-200/85 group/field privacy-field">
+                    <div className={`rounded-xl p-4 border group/field privacy-field transition-all duration-300 ${
+                        privacySettings.anonymousTeacherReviews 
+                            ? 'bg-gradient-to-br from-blue-50/85 via-blue-100/70 to-blue-200/55 border-blue-200/85' 
+                            : 'bg-gradient-to-br from-blue-50/60 via-blue-100/45 to-blue-150/35 border-blue-200/60'
+                    }`}>
                         <label className="flex items-center gap-3 cursor-pointer">
                             <div className="relative">
                                 <input 
@@ -809,22 +832,30 @@ const UserProfilePage = () => {
                                     privacySettings.anonymousTeacherReviews 
                                         ? 'bg-blue-600 border-blue-600' 
                                         : 'border-gray-300 hover:border-blue-400'
-                                }`}>
+                                } ${checkboxAnimations.anonymousTeacherReviews ? 'checkbox-pulse' : ''}`}>
                                     {privacySettings.anonymousTeacherReviews && (
-                                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <svg className={`w-3 h-3 text-white ${checkboxAnimations.anonymousTeacherReviews ? 'checkbox-animate' : ''}`} fill="currentColor" viewBox="0 0 20 20">
                                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                         </svg>
                                     )}
                                 </div>
                             </div>
                             <div className="flex-1">
-                                <span className="text-sm font-medium text-gray-800">Анонімні відгуки про викладачів</span>
-                                <p className="text-xs text-gray-600 mt-1">Ваші відгуки про викладачів будуть опубліковані анонімно</p>
+                                <span className={`text-sm font-medium transition-colors duration-200 ${
+                                    privacySettings.anonymousTeacherReviews ? 'text-gray-800' : 'text-gray-600'
+                                }`}>Анонімні відгуки про викладачів</span>
+                                <p className={`text-xs mt-1 transition-colors duration-200 ${
+                                    privacySettings.anonymousTeacherReviews ? 'text-gray-600' : 'text-gray-500'
+                                }`}>Ваші відгуки про викладачів будуть опубліковані анонімно</p>
                             </div>
                         </label>
                     </div>
                     
-                    <div className="bg-gradient-to-br from-blue-50/85 via-blue-100/70 to-blue-200/55 rounded-xl p-4 border border-blue-200/85 group/field privacy-field">
+                    <div className={`rounded-xl p-4 border group/field privacy-field transition-all duration-300 ${
+                        privacySettings.emailOnPostComments 
+                            ? 'bg-gradient-to-br from-blue-50/85 via-blue-100/70 to-blue-200/55 border-blue-200/85' 
+                            : 'bg-gradient-to-br from-blue-50/60 via-blue-100/45 to-blue-150/35 border-blue-200/60'
+                    }`}>
                         <label className="flex items-center gap-3 cursor-pointer">
                             <div className="relative">
                                 <input 
@@ -837,17 +868,21 @@ const UserProfilePage = () => {
                                     privacySettings.emailOnPostComments 
                                         ? 'bg-blue-600 border-blue-600' 
                                         : 'border-gray-300 hover:border-blue-400'
-                                }`}>
+                                } ${checkboxAnimations.emailOnPostComments ? 'checkbox-pulse' : ''}`}>
                                     {privacySettings.emailOnPostComments && (
-                                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <svg className={`w-3 h-3 text-white ${checkboxAnimations.emailOnPostComments ? 'checkbox-animate' : ''}`} fill="currentColor" viewBox="0 0 20 20">
                                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                         </svg>
                                     )}
                                 </div>
                             </div>
                             <div className="flex-1">
-                                <span className="text-sm font-medium text-gray-800">Email сповіщення про коментарі</span>
-                                <p className="text-xs text-gray-600 mt-1">Отримувати повідомлення на пошту про нові коментарі до ваших постів</p>
+                                <span className={`text-sm font-medium transition-colors duration-200 ${
+                                    privacySettings.emailOnPostComments ? 'text-gray-800' : 'text-gray-600'
+                                }`}>Email сповіщення про коментарі</span>
+                                <p className={`text-xs mt-1 transition-colors duration-200 ${
+                                    privacySettings.emailOnPostComments ? 'text-gray-600' : 'text-gray-500'
+                                }`}>Отримувати повідомлення на пошту про нові коментарі до ваших постів</p>
                             </div>
                         </label>
                     </div>

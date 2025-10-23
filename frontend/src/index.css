@@ -925,6 +925,58 @@
     @apply text-gray-900;
 }
 
+/* Checkbox animations */
+@keyframes checkmarkBounce {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes checkmarkPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+    }
+}
+
+@keyframes checkmarkShake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-2px);
+    }
+    75% {
+        transform: translateX(2px);
+    }
+}
+
+.checkbox-animate {
+    animation: checkmarkBounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.checkbox-pulse {
+    animation: checkmarkPulse 0.8s ease-out;
+}
+
+.checkbox-shake {
+    animation: checkmarkShake 0.3s ease-in-out;
+}
+
 @keyframes comboBounce {
     0%, 20%, 50%, 80%, 100% {
         transform: translateY(0) scale(1);
