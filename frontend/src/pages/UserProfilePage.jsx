@@ -43,7 +43,9 @@ const UserProfilePage = () => {
     const loadUserActivity = async () => {
         try {
             setActivityLoading(true);
+            console.log('Loading user activity...');
             const userActivity = await getUserActivity(20);
+            console.log('Received activity data:', userActivity);
             setActivity(userActivity);
         } catch (error) {
             console.error('Error loading user activity:', error);

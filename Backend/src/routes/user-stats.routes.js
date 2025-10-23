@@ -103,34 +103,56 @@ router.get('/activity', authRequired, async (req, res) => {
         const userId = req.user.id;
         const limit = parseInt(req.query.limit) || 20;
 
-        // Get user's announcements
-        const announcements = await Announcement.find({
-            authorId: new mongoose.Types.ObjectId(userId),
-            status: 'published'
-        })
-        .select('title createdAt')
-        .sort({ createdAt: -1 })
-        .limit(limit);
+        console.log('Fetching activity for user:', userId);
 
-        // Get user's comments
-        const comments = await Comment.find({
-            authorId: new mongoose.Types.ObjectId(userId),
-            status: 'visible'
-        })
-        .populate('announcementId', 'title')
-        .select('body createdAt announcementId')
-        .sort({ createdAt: -1 })
-        .limit(limit);
+        let announcements = [];
+        let comments = [];
+        let reviews = [];
 
-        // Get user's teacher reviews
-        const reviews = await TeacherComment.find({
-            authorId: new mongoose.Types.ObjectId(userId),
-            status: 'visible'
-        })
-        .populate('teacherId', 'name')
-        .select('body rating createdAt teacherId')
-        .sort({ createdAt: -1 })
-        .limit(limit);
+        try {
+            // Get user's announcements
+            announcements = await Announcement.find({
+                authorId: new mongoose.Types.ObjectId(userId),
+                status: 'published'
+            })
+            .select('title createdAt')
+            .sort({ createdAt: -1 })
+            .limit(limit);
+            console.log('Found announcements:', announcements.length);
+        } catch (error) {
+            console.error('Error fetching announcements:', error);
+        }
+
+        try {
+            // Get user's comments
+            comments = await Comment.find({
+                authorId: new mongoose.Types.ObjectId(userId),
+                status: 'visible'
+            })
+            .populate('announcementId', 'title')
+            .select('body createdAt announcementId')
+            .sort({ createdAt: -1 })
+            .limit(limit);
+            console.log('Found comments:', comments.length);
+        } catch (error) {
+            console.error('Error fetching comments:', error);
+        }
+
+        try {
+            // Get user's teacher reviews
+            const { TeacherComment: TeacherCommentModel } = await import('../models/TeacherComment.js');
+            reviews = await TeacherCommentModel.find({
+                authorId: new mongoose.Types.ObjectId(userId),
+                status: 'visible'
+            })
+            .populate('teacherId', 'name')
+            .select('body rating createdAt teacherId')
+            .sort({ createdAt: -1 })
+            .limit(limit);
+            console.log('Found reviews:', reviews.length);
+        } catch (error) {
+            console.error('Error fetching reviews:', error);
+        }
 
         // Combine and format activities
         const activities = [];
@@ -171,6 +193,9 @@ router.get('/activity', authRequired, async (req, res) => {
         // Sort by date (newest first) and limit
         activities.sort((a, b) => new Date(b.date) - new Date(a.date));
         const limitedActivities = activities.slice(0, limit);
+
+        console.log('Total activities found:', limitedActivities.length);
+        console.log('Activities:', limitedActivities);
 
         res.json(limitedActivities);
     } catch (error) {
