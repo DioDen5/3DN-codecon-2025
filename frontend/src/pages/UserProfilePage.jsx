@@ -285,7 +285,8 @@ const UserProfilePage = () => {
                                     >
                                         <Icon size={20} className={
                                             activeTab === tab.id && tab.id === 'settings' ? 'profile-icon-once' :
-                                            activeTab === tab.id && tab.id === 'activity' ? 'profile-activity-icon' : ''
+                                            activeTab === tab.id && tab.id === 'activity' ? 'profile-activity-icon' :
+                                            activeTab === tab.id && tab.id === 'profile' ? 'profile-profile-icon' : ''
                                         } />
                                         {tab.label}
                                     </button>
