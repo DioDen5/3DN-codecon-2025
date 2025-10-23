@@ -38,6 +38,10 @@ const UserProfilePage = () => {
         anonymousTeacherReviews: false,
         emailOnPostComments: false
     });
+    const [fieldAnimations, setFieldAnimations] = useState({
+        anonymousTeacherReviews: false,
+        emailOnPostComments: false
+    });
 
     // Функція для зміни вкладки з збереженням в localStorage
     const handleTabChange = (tabId) => {
@@ -238,7 +242,23 @@ const UserProfilePage = () => {
             [setting]: value
         }));
         
-        // Запускаємо анімацію
+        // Запускаємо анімацію тільки при зміні на активний стан
+        if (value) {
+            setFieldAnimations(prev => ({
+                ...prev,
+                [setting]: true
+            }));
+            
+            // Вимикаємо анімацію через час
+            setTimeout(() => {
+                setFieldAnimations(prev => ({
+                    ...prev,
+                    [setting]: false
+                }));
+            }, 600);
+        }
+        
+        // Запускаємо анімацію чекбокса
         setCheckboxAnimations(prev => ({
             ...prev,
             [setting]: true
@@ -815,11 +835,11 @@ const UserProfilePage = () => {
                         Приватність
                     </h3>
                 <div className="space-y-4">
-                    <div className={`rounded-xl p-4 border group/field privacy-field transition-all duration-300 ${
-                        privacySettings.anonymousTeacherReviews 
-                            ? 'bg-gradient-to-br from-blue-50/85 via-blue-100/70 to-blue-200/55 border-blue-200/85' 
-                            : 'bg-gradient-to-br from-blue-50/60 via-blue-100/45 to-blue-150/35 border-blue-200/60'
-                    }`}>
+                        <div className={`rounded-xl p-4 border group/field privacy-field transition-all duration-500 ease-in-out ${
+                            privacySettings.anonymousTeacherReviews 
+                                ? 'bg-gradient-to-br from-blue-50/85 via-blue-100/70 to-blue-200/55 border-blue-200/85' 
+                                : 'bg-gradient-to-br from-blue-50/60 via-blue-100/45 to-blue-150/35 border-blue-200/60'
+                        } ${fieldAnimations.anonymousTeacherReviews ? 'privacy-field-active-animation' : ''}`}>
                         <label className="flex items-center gap-3 cursor-pointer">
                             <div className="relative">
                                 <input 
@@ -841,21 +861,21 @@ const UserProfilePage = () => {
                                 </div>
                             </div>
                             <div className="flex-1">
-                                <span className={`text-sm font-medium transition-colors duration-200 ${
+                                <span className={`text-sm font-medium transition-colors duration-500 ease-in-out ${
                                     privacySettings.anonymousTeacherReviews ? 'text-gray-800' : 'text-gray-600'
                                 }`}>Анонімні відгуки про викладачів</span>
-                                <p className={`text-xs mt-1 transition-colors duration-200 ${
+                                <p className={`text-xs mt-1 transition-colors duration-500 ease-in-out ${
                                     privacySettings.anonymousTeacherReviews ? 'text-gray-600' : 'text-gray-500'
                                 }`}>Ваші відгуки про викладачів будуть опубліковані анонімно</p>
                             </div>
                         </label>
                     </div>
                     
-                    <div className={`rounded-xl p-4 border group/field privacy-field transition-all duration-300 ${
-                        privacySettings.emailOnPostComments 
-                            ? 'bg-gradient-to-br from-blue-50/85 via-blue-100/70 to-blue-200/55 border-blue-200/85' 
-                            : 'bg-gradient-to-br from-blue-50/60 via-blue-100/45 to-blue-150/35 border-blue-200/60'
-                    }`}>
+                        <div className={`rounded-xl p-4 border group/field privacy-field transition-all duration-500 ease-in-out ${
+                            privacySettings.emailOnPostComments 
+                                ? 'bg-gradient-to-br from-blue-50/85 via-blue-100/70 to-blue-200/55 border-blue-200/85' 
+                                : 'bg-gradient-to-br from-blue-50/60 via-blue-100/45 to-blue-150/35 border-blue-200/60'
+                        } ${fieldAnimations.emailOnPostComments ? 'privacy-field-active-animation' : ''}`}>
                         <label className="flex items-center gap-3 cursor-pointer">
                             <div className="relative">
                                 <input 
@@ -877,10 +897,10 @@ const UserProfilePage = () => {
                                 </div>
                             </div>
                             <div className="flex-1">
-                                <span className={`text-sm font-medium transition-colors duration-200 ${
+                                <span className={`text-sm font-medium transition-colors duration-500 ease-in-out ${
                                     privacySettings.emailOnPostComments ? 'text-gray-800' : 'text-gray-600'
                                 }`}>Email сповіщення про коментарі</span>
-                                <p className={`text-xs mt-1 transition-colors duration-200 ${
+                                <p className={`text-xs mt-1 transition-colors duration-500 ease-in-out ${
                                     privacySettings.emailOnPostComments ? 'text-gray-600' : 'text-gray-500'
                                 }`}>Отримувати повідомлення на пошту про нові коментарі до ваших постів</p>
                             </div>

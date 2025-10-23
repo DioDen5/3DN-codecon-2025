@@ -977,6 +977,22 @@
     animation: checkmarkShake 0.3s ease-in-out;
 }
 
+/* Smooth opacity animation for active state */
+@keyframes fadeInActive {
+    0% {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.privacy-field-active-animation {
+    animation: fadeInActive 0.6s ease-out;
+}
+
 @keyframes comboBounce {
     0%, 20%, 50%, 80%, 100% {
         transform: translateY(0) scale(1);
