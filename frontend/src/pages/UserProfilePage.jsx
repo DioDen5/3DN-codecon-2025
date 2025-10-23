@@ -283,7 +283,10 @@ const UserProfilePage = () => {
                                                 : 'text-gray-600 hover:text-gray-800 hover:bg-gray-300'
                                         }`}
                                     >
-                                        <Icon size={20} className={activeTab === tab.id && tab.id === 'settings' ? 'profile-icon-once' : ''} />
+                                        <Icon size={20} className={
+                                            activeTab === tab.id && tab.id === 'settings' ? 'profile-icon-once' :
+                                            activeTab === tab.id && tab.id === 'activity' ? 'profile-activity-icon' : ''
+                                        } />
                                         {tab.label}
                                     </button>
                                 );
