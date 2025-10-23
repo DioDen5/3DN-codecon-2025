@@ -63,30 +63,24 @@ const UserProfilePage = () => {
     const renderProfileTab = () => (
         <div className="space-y-8">
             {/* Заголовок профілю */}
-            <div className="profile-card p-8 text-white relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 to-blue-600/20"></div>
-                <div className="relative z-10 flex items-center space-x-8">
-                    <div className="profile-avatar w-24 h-24 rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-2xl">
+            <div className="bg-white text-black rounded-xl p-6 shadow-md mb-8">
+                <div className="flex items-center space-x-6">
+                    <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-pink-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
                         {getUserDisplayName().charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1">
-                        <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
-                            {getUserDisplayName()}
-                        </h1>
-                        <p className="text-blue-100 flex items-center gap-3 text-lg mb-2">
-                            <Mail size={20} className="profile-icon" />
+                        <h1 className="text-2xl font-bold text-gray-900">{getUserDisplayName()}</h1>
+                        <p className="text-gray-600 flex items-center gap-2">
+                            <Mail size={16} />
                             {getUserEmail()}
                         </p>
-                        <p className="text-blue-200 flex items-center gap-3 text-lg mb-4">
-                            <Calendar size={20} className="profile-icon" />
+                        <p className="text-gray-500 flex items-center gap-2 mt-1">
+                            <Calendar size={16} />
                             Зареєстрований {getRegistrationDate()}
                         </p>
-                        <div className="flex items-center gap-3">
-                            <span className="profile-badge">
+                        <div className="flex items-center gap-2 mt-2">
+                            <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
                                 ✅ Верифікований студент
-                            </span>
-                            <span className="profile-badge">
-                                🌟 Активний учасник
                             </span>
                         </div>
                     </div>
@@ -94,81 +88,65 @@ const UserProfilePage = () => {
             </div>
 
             {/* Статистика */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
-                <div className="profile-stats-card p-6 text-center group cursor-pointer">
-                    <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                        <MessageCircle className="w-8 h-8 text-white" />
-                    </div>
-                    <div className="text-3xl font-bold text-white mb-1">{stats.discussions}</div>
-                    <div className="text-sm text-gray-300 font-medium">Обговорень</div>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <div className="bg-white text-black rounded-xl p-4 shadow-sm text-center">
+                    <MessageCircle className="w-8 h-8 text-blue-500 mx-auto mb-2" />
+                    <div className="text-2xl font-bold text-gray-900">{stats.discussions}</div>
+                    <div className="text-sm text-gray-600">Обговорень</div>
                 </div>
-                <div className="profile-stats-card p-6 text-center group cursor-pointer">
-                    <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                        <MessageCircle className="w-8 h-8 text-white" />
-                    </div>
-                    <div className="text-3xl font-bold text-white mb-1">{stats.comments}</div>
-                    <div className="text-sm text-gray-300 font-medium">Коментарів</div>
+                <div className="bg-white text-black rounded-xl p-4 shadow-sm text-center">
+                    <MessageCircle className="w-8 h-8 text-green-500 mx-auto mb-2" />
+                    <div className="text-2xl font-bold text-gray-900">{stats.comments}</div>
+                    <div className="text-sm text-gray-600">Коментарів</div>
                 </div>
-                <div className="profile-stats-card p-6 text-center group cursor-pointer">
-                    <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                        <Star className="w-8 h-8 text-white" />
-                    </div>
-                    <div className="text-3xl font-bold text-white mb-1">{stats.reviews}</div>
-                    <div className="text-sm text-gray-300 font-medium">Відгуків</div>
+                <div className="bg-white text-black rounded-xl p-4 shadow-sm text-center">
+                    <Star className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
+                    <div className="text-2xl font-bold text-gray-900">{stats.reviews}</div>
+                    <div className="text-sm text-gray-600">Відгуків</div>
                 </div>
-                <div className="profile-stats-card p-6 text-center group cursor-pointer">
-                    <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                        <ThumbsUp className="w-8 h-8 text-white" />
-                    </div>
-                    <div className="text-3xl font-bold text-white mb-1">{stats.totalLikes}</div>
-                    <div className="text-sm text-gray-300 font-medium">Лайків</div>
+                <div className="bg-white text-black rounded-xl p-4 shadow-sm text-center">
+                    <ThumbsUp className="w-8 h-8 text-purple-500 mx-auto mb-2" />
+                    <div className="text-2xl font-bold text-gray-900">{stats.totalLikes}</div>
+                    <div className="text-sm text-gray-600">Лайків</div>
                 </div>
-                <div className="profile-stats-card p-6 text-center group cursor-pointer">
-                    <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                        <Award className="w-8 h-8 text-white" />
-                    </div>
-                    <div className="text-3xl font-bold text-white mb-1">{stats.rating}</div>
-                    <div className="text-sm text-gray-300 font-medium">Рейтинг</div>
+                <div className="bg-white text-black rounded-xl p-4 shadow-sm text-center">
+                    <Award className="w-8 h-8 text-orange-500 mx-auto mb-2" />
+                    <div className="text-2xl font-bold text-gray-900">{stats.rating}</div>
+                    <div className="text-sm text-gray-600">Рейтинг</div>
                 </div>
             </div>
 
             {/* Досягнення */}
-            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-xl border border-white/20">
-                <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-                    <Award className="w-6 h-6 text-yellow-500" />
-                    Досягнення
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {achievements.map((achievement, index) => (
+            <div className="bg-white text-black rounded-xl p-6 shadow-sm">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Досягнення</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {achievements.map((achievement) => (
                         <div
                             key={achievement.id}
-                            className={`profile-achievement p-6 cursor-pointer ${
+                            className={`p-4 rounded-lg border-2 ${
                                 achievement.earned
-                                    ? 'opacity-100'
-                                    : 'opacity-60'
+                                    ? 'border-green-200 bg-green-50'
+                                    : 'border-gray-200 bg-gray-50'
                             }`}
-                            style={{ animationDelay: `${index * 0.1}s` }}
                         >
-                            <div className="flex items-center gap-4">
-                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg ${
-                                    achievement.earned 
-                                        ? 'bg-gradient-to-br from-green-400 to-green-600' 
-                                        : 'bg-gradient-to-br from-gray-400 to-gray-600'
+                            <div className="flex items-center gap-3">
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                                    achievement.earned ? 'bg-green-500' : 'bg-gray-400'
                                 }`}>
                                     {achievement.earned ? (
-                                        <span className="text-white text-xl font-bold">✓</span>
+                                        <span className="text-white text-sm">✓</span>
                                     ) : (
-                                        <span className="text-white text-xl font-bold">○</span>
+                                        <span className="text-white text-sm">○</span>
                                     )}
                                 </div>
-                                <div className="flex-1">
-                                    <h4 className={`font-bold text-lg ${
-                                        achievement.earned ? 'text-white' : 'text-gray-300'
+                                <div>
+                                    <h4 className={`font-medium ${
+                                        achievement.earned ? 'text-green-800' : 'text-gray-600'
                                     }`}>
                                         {achievement.name}
                                     </h4>
                                     <p className={`text-sm ${
-                                        achievement.earned ? 'text-white/80' : 'text-gray-400'
+                                        achievement.earned ? 'text-green-600' : 'text-gray-500'
                                     }`}>
                                         {achievement.description}
                                     </p>
@@ -182,43 +160,33 @@ const UserProfilePage = () => {
     );
 
     const renderActivityTab = () => (
-        <div className="space-y-8">
-            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-xl border border-white/20">
-                <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-                    <Activity className="w-6 h-6 text-blue-500" />
-                    Остання активність
-                </h3>
+        <div className="space-y-6">
+            <div className="bg-white text-black rounded-xl p-6 shadow-sm">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Остання активність</h3>
                 <div className="space-y-4">
                     {recentActivity.map((activity, index) => (
-                        <div 
-                            key={index} 
-                            className="profile-activity-item p-6 cursor-pointer"
-                            style={{ animationDelay: `${index * 0.1}s` }}
-                        >
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-4">
-                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg ${
-                                        activity.type === 'discussion' ? 'bg-gradient-to-br from-blue-500 to-blue-600' :
-                                        activity.type === 'comment' ? 'bg-gradient-to-br from-green-500 to-green-600' : 
-                                        'bg-gradient-to-br from-yellow-500 to-yellow-600'
-                                    }`}>
-                                        {activity.type === 'discussion' ? (
-                                            <MessageCircle className="w-6 h-6 text-white" />
-                                        ) : activity.type === 'comment' ? (
-                                            <MessageCircle className="w-6 h-6 text-white" />
-                                        ) : (
-                                            <Star className="w-6 h-6 text-white" />
-                                        )}
-                                    </div>
-                                    <div>
-                                        <h4 className="font-bold text-white text-lg">{activity.title}</h4>
-                                        <p className="text-sm text-gray-300">{activity.date}</p>
-                                    </div>
+                        <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <div className="flex items-center gap-3">
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                                    activity.type === 'discussion' ? 'bg-blue-500' :
+                                    activity.type === 'comment' ? 'bg-green-500' : 'bg-yellow-500'
+                                }`}>
+                                    {activity.type === 'discussion' ? (
+                                        <MessageCircle className="w-4 h-4 text-white" />
+                                    ) : activity.type === 'comment' ? (
+                                        <MessageCircle className="w-4 h-4 text-white" />
+                                    ) : (
+                                        <Star className="w-4 h-4 text-white" />
+                                    )}
                                 </div>
-                                <div className="flex items-center gap-2 bg-gradient-to-r from-purple-100 to-pink-100 px-4 py-2 rounded-full">
-                                    <ThumbsUp className="w-4 h-4 text-purple-600" />
-                                    <span className="text-sm font-bold text-purple-600">{activity.likes}</span>
+                                <div>
+                                    <h4 className="font-medium text-gray-900">{activity.title}</h4>
+                                    <p className="text-sm text-gray-500">{activity.date}</p>
                                 </div>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                                <ThumbsUp className="w-4 h-4" />
+                                {activity.likes}
                             </div>
                         </div>
                     ))}
@@ -228,61 +196,52 @@ const UserProfilePage = () => {
     );
 
     const renderSettingsTab = () => (
-        <div className="space-y-8">
-            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-xl border border-white/20">
-                <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-                    <Settings className="w-6 h-6 text-purple-500" />
-                    Налаштування профілю
-                </h3>
-                <div className="space-y-6">
+        <div className="space-y-6">
+            <div className="bg-white text-black rounded-xl p-6 shadow-sm">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Налаштування профілю</h3>
+                <div className="space-y-4">
                     <div>
-                        <label className="block text-sm font-bold text-white mb-3">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
                             Ім'я та прізвище
                         </label>
                         <input
                             type="text"
                             defaultValue={getUserDisplayName()}
-                            className="profile-input w-full px-4 py-3 text-lg"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-bold text-white mb-3">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
                             Email
                         </label>
                         <input
                             type="email"
                             value={getUserEmail()}
                             disabled
-                            className="w-full px-4 py-3 rounded-xl bg-gray-100 text-gray-500 text-lg"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
                         />
-                        <p className="text-sm text-gray-500 mt-2">Email не можна змінити</p>
+                        <p className="text-xs text-gray-500 mt-1">Email не можна змінити</p>
                     </div>
                 </div>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-xl border border-white/20">
-                <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-                    <Award className="w-6 h-6 text-red-500" />
-                    Безпека
-                </h3>
-                <button className="profile-button w-full px-6 py-4 text-lg font-bold">
+            <div className="bg-white text-black rounded-xl p-6 shadow-sm">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Безпека</h3>
+                <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                     Змінити пароль
                 </button>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-xl border border-white/20">
-                <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-                    <User className="w-6 h-6 text-green-500" />
-                    Приватність
-                </h3>
-                <div className="space-y-4">
-                    <label className="flex items-center gap-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl cursor-pointer hover:shadow-md transition-all">
-                        <input type="checkbox" defaultChecked className="w-5 h-5 rounded text-blue-600" />
-                        <span className="text-lg font-medium text-white">Дозволити іншим бачити мій профіль</span>
+            <div className="bg-white text-black rounded-xl p-6 shadow-sm">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Приватність</h3>
+                <div className="space-y-3">
+                    <label className="flex items-center gap-3">
+                        <input type="checkbox" defaultChecked className="rounded" />
+                        <span className="text-sm text-gray-700">Дозволити іншим бачити мій профіль</span>
                     </label>
-                    <label className="flex items-center gap-4 p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl cursor-pointer hover:shadow-md transition-all">
-                        <input type="checkbox" defaultChecked className="w-5 h-5 rounded text-green-600" />
-                        <span className="text-lg font-medium text-white">Отримувати сповіщення про нові коментарі</span>
+                    <label className="flex items-center gap-3">
+                        <input type="checkbox" defaultChecked className="rounded" />
+                        <span className="text-sm text-gray-700">Отримувати сповіщення про нові коментарі</span>
                     </label>
                 </div>
             </div>
@@ -301,32 +260,25 @@ const UserProfilePage = () => {
     }
 
     return (
-        <div className="min-h-screen bg-black relative overflow-hidden">
-            {/* Анімовані фонові елементи */}
-            <div className="absolute inset-0 overflow-hidden">
-                <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-purple-500/30 to-blue-500/30 rounded-full animate-pulse"></div>
-                <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-blue-500/30 to-purple-500/30 rounded-full animate-pulse" style={{animationDelay: '2s'}}></div>
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-gradient-to-r from-purple-400/20 to-blue-400/20 rounded-full animate-spin" style={{animationDuration: '20s'}}></div>
-            </div>
-            
-            <div className="relative z-10 max-w-5xl mx-auto px-4 py-8">
+        <div className="min-h-[calc(100vh-68px)] bg-gradient-to-b from-black to-gray-900 text-white">
+            <div className="max-w-4xl mx-auto px-6 py-10">
                 {/* Таби */}
-                <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 mb-8 overflow-hidden">
-                    <div className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 p-2">
-                        <nav className="flex space-x-2">
+                <div className="bg-white rounded-xl shadow-sm mb-6">
+                    <div className="border-b border-gray-200">
+                        <nav className="flex space-x-8 px-6">
                             {tabs.map((tab) => {
                                 const Icon = tab.icon;
                                 return (
                                     <button
                                         key={tab.id}
                                         onClick={() => setActiveTab(tab.id)}
-                                        className={`profile-tab flex items-center gap-3 py-4 px-6 rounded-xl font-bold text-lg transition-all duration-300 ${
+                                        className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                                             activeTab === tab.id
-                                                ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg transform scale-105'
-                                                : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
+                                                ? 'border-blue-500 text-blue-600'
+                                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                         }`}
                                     >
-                                        <Icon size={20} className={activeTab === tab.id ? 'profile-icon' : ''} />
+                                        <Icon size={18} />
                                         {tab.label}
                                     </button>
                                 );

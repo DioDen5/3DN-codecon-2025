@@ -1224,7 +1224,7 @@
 }
 
 .profile-button {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #2563eb 0%, #ec4899 100%);
     border: none;
     border-radius: 12px;
     color: white;
@@ -1251,7 +1251,7 @@
 
 .profile-button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4);
 }
 
 .profile-input {
@@ -1263,13 +1263,13 @@
 }
 
 .profile-input:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+    border-color: #2563eb;
+    box-shadow: 0 0 20px rgba(37, 99, 235, 0.3);
     transform: scale(1.02);
 }
 
 .profile-badge {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #2563eb 0%, #ec4899 100%);
     color: white;
     border-radius: 20px;
     padding: 4px 12px;
