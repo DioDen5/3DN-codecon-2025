@@ -83,13 +83,80 @@ const UserProfilePage = () => {
         }
     };
 
-    const achievements = [
-        { id: 'first_post', name: 'Перший пост', description: 'Створив перше обговорення', earned: true },
-        { id: 'active_commenter', name: 'Активний коментатор', description: '10+ коментарів', earned: true },
-        { id: 'critic', name: 'Критик', description: '5+ відгуків про викладачів', earned: true },
-        { id: 'popular', name: 'Популярний', description: '50+ лайків', earned: false },
-        { id: 'veteran', name: 'Ветеран', description: 'На сайті 6+ місяців', earned: false }
-    ];
+    // Динамічні досягнення на основі реальних даних
+    const getAchievements = () => {
+        const userJoinDate = user?.createdAt ? new Date(user.createdAt) : null;
+        const monthsOnSite = userJoinDate ? Math.floor((new Date() - userJoinDate) / (1000 * 60 * 60 * 24 * 30)) : 0;
+
+        return [
+            { 
+                id: 'first_post', 
+                name: 'Перший пост', 
+                description: 'Створив перше обговорення', 
+                earned: stats.discussions >= 1,
+                progress: Math.min(stats.discussions, 1),
+                target: 1
+            },
+            { 
+                id: 'active_commenter', 
+                name: 'Активний коментатор', 
+                description: '10+ коментарів', 
+                earned: stats.comments >= 10,
+                progress: Math.min(stats.comments, 10),
+                target: 10
+            },
+            { 
+                id: 'critic', 
+                name: 'Критик', 
+                description: '5+ відгуків про викладачів', 
+                earned: stats.reviews >= 5,
+                progress: Math.min(stats.reviews, 5),
+                target: 5
+            },
+            { 
+                id: 'popular', 
+                name: 'Популярний', 
+                description: '50+ лайків', 
+                earned: stats.totalLikes >= 50,
+                progress: Math.min(stats.totalLikes, 50),
+                target: 50
+            },
+            { 
+                id: 'veteran', 
+                name: 'Ветеран', 
+                description: 'На сайті 6+ місяців', 
+                earned: monthsOnSite >= 6,
+                progress: Math.min(monthsOnSite, 6),
+                target: 6
+            },
+            { 
+                id: 'discussion_master', 
+                name: 'Майстер обговорень', 
+                description: '20+ обговорень', 
+                earned: stats.discussions >= 20,
+                progress: Math.min(stats.discussions, 20),
+                target: 20
+            },
+            { 
+                id: 'comment_king', 
+                name: 'Король коментарів', 
+                description: '50+ коментарів', 
+                earned: stats.comments >= 50,
+                progress: Math.min(stats.comments, 50),
+                target: 50
+            },
+            { 
+                id: 'superstar', 
+                name: 'Суперзірка', 
+                description: '100+ лайків', 
+                earned: stats.totalLikes >= 100,
+                progress: Math.min(stats.totalLikes, 100),
+                target: 100
+            }
+        ];
+    };
+
+    const achievements = getAchievements();
 
     const recentActivity = [
         { type: 'discussion', title: 'Питання про математику', date: '2 години тому', likes: 5 },
@@ -155,7 +222,7 @@ const UserProfilePage = () => {
             {/* Досягнення */}
             <div className="bg-white text-black rounded-xl p-4 md:p-6 shadow-sm">
                 <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-3 md:mb-4">Досягнення</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
                     {achievements.map((achievement, index) => (
                         <div
                             key={achievement.id}
@@ -187,6 +254,20 @@ const UserProfilePage = () => {
                                     }`}>
                                         {achievement.description}
                                     </p>
+                                    {!achievement.earned && (
+                                        <div className="mt-2">
+                                            <div className="flex justify-between text-xs text-gray-500 mb-1">
+                                                <span>{achievement.progress}/{achievement.target}</span>
+                                                <span>{Math.round((achievement.progress / achievement.target) * 100)}%</span>
+                                            </div>
+                                            <div className="w-full bg-gray-200 rounded-full h-1.5">
+                                                <div 
+                                                    className="bg-blue-500 h-1.5 rounded-full transition-all duration-300"
+                                                    style={{ width: `${(achievement.progress / achievement.target) * 100}%` }}
+                                                ></div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
