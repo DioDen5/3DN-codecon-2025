@@ -977,6 +977,66 @@
     animation: checkmarkShake 0.3s ease-in-out;
 }
 
+/* Teacher profile animations */
+@keyframes teacherCardFloat {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+@keyframes teacherStatsPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+    }
+}
+
+.teacher-card-float {
+    animation: teacherCardFloat 3s ease-in-out infinite;
+}
+
+.teacher-stats-pulse {
+    animation: teacherStatsPulse 2s ease-out;
+}
+
+/* Review card animations */
+@keyframes reviewSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.review-card {
+    animation: reviewSlideIn 0.5s ease-out;
+}
+
+/* Profile settings animations */
+@keyframes profileSettingsGlow {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(59, 130, 246, 0.5);
+    }
+}
+
+.profile-settings-card:hover {
+    animation: profileSettingsGlow 2s ease-in-out infinite;
+}
+
 /* Smooth opacity animation for active state */
 @keyframes fadeInActive {
     0% {
@@ -1480,6 +1540,11 @@
 }
 
 .profile-profile-icon {
+    animation: profilePulse 0.6s ease-out;
+}
+
+/* Teacher profile specific animations */
+.profile-reviews-icon {
     animation: profilePulse 0.6s ease-out;
 }
 

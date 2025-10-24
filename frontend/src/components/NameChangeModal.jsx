@@ -7,6 +7,7 @@ const NameChangeModal = ({ isOpen, onClose, currentName }) => {
     const [formData, setFormData] = useState({
         newFirstName: '',
         newLastName: '',
+        newMiddleName: '',
         reason: ''
     });
     const [loading, setLoading] = useState(false);
@@ -64,11 +65,12 @@ const NameChangeModal = ({ isOpen, onClose, currentName }) => {
         try {
             const response = await requestNameChange(formData);
             setSuccess('✅ Запит на зміну імені створено успішно!\n\n📋 Ваш запит буде розглянуто модераторами протягом 1-3 робочих днів.\n\n📧 Ви отримаєте сповіщення про результат на email.');
-            setFormData({
-                newFirstName: '',
-                newLastName: '',
-                reason: ''
-            });
+                setFormData({
+                    newFirstName: '',
+                    newLastName: '',
+                    newMiddleName: '',
+                    reason: ''
+                });
             await loadExistingRequest();
         } catch (error) {
             if (error.response?.data?.error) {
@@ -192,7 +194,7 @@ const NameChangeModal = ({ isOpen, onClose, currentName }) => {
                                 </span>
                             </div>
                             <div className="text-sm space-y-1">
-                                <p><strong>Нове ім'я:</strong> {existingRequest.newFirstName} {existingRequest.newLastName}</p>
+                                <p><strong>Нове ім'я:</strong> {existingRequest.newFirstName} {existingRequest.newMiddleName ? existingRequest.newMiddleName + ' ' : ''}{existingRequest.newLastName}</p>
                                 <p><strong>Відображуване ім'я:</strong> {existingRequest.newDisplayName}</p>
                                 {existingRequest.reason && (
                                     <p><strong>Причина:</strong> {existingRequest.reason}</p>
@@ -252,6 +254,21 @@ const NameChangeModal = ({ isOpen, onClose, currentName }) => {
                                         placeholder="Введіть нове прізвище"
                                     />
                                 </div>
+                            </div>
+
+                            {/* По батькові */}
+                            <div>
+                                <label className="name-change-label">
+                                    По батькові:
+                                </label>
+                                <input
+                                    type="text"
+                                    name="newMiddleName"
+                                    value={formData.newMiddleName}
+                                    onChange={handleInputChange}
+                                    className="name-change-input"
+                                    placeholder="Введіть по батькові"
+                                />
                             </div>
 
 

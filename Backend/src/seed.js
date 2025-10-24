@@ -24,15 +24,30 @@ async function main() {
         email: 'admin@lpnu.ua',
         passwordHash: await bcrypt.hash('password123', 10),
         displayName: 'Admin',
+        firstName: 'Адміністратор',
+        lastName: 'Системи',
         role: 'admin',
         status: 'verified',
     }]);
 
     const student = await User.create({
-        email: 'student@lnu.edu.ua',
-        passwordHash: pass,
+        email: 'student11@lnu.edu.ua',
+        passwordHash: await bcrypt.hash('12345678', 10),
         displayName: 'Student',
+        firstName: 'Іван',
+        lastName: 'Петренко',
         role: 'student',
+        status: 'verified'
+    });
+
+    const teacher = await User.create({
+        email: 'teacher@lnu.edu.ua',
+        passwordHash: pass,
+        displayName: 'Доктор Олександр Петренко',
+        firstName: 'Олександр',
+        lastName: 'Петренко',
+        middleName: 'Володимирович',
+        role: 'teacher',
         status: 'verified'
     });
 

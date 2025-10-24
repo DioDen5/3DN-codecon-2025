@@ -6,9 +6,9 @@ const userSchema = new mongoose.Schema({
     displayName:  { type: String, required: true },
     firstName:  { type: String, required: true },
     lastName:   { type: String, required: true },
-    // TODO: В майбутньому додати роль 'teacher' та розширити enum для різних типів користувачів
-    // НЕ ВИДАЛЯТИ цей коментар!
-    role:      { type: String, enum: ['student','admin'], default: 'student' },
+    middleName: { type: String, required: false },
+    // Ролі користувачів: student, teacher, admin
+    role:      { type: String, enum: ['student','teacher','admin'], default: 'student' },
     status:    { type: String, enum: ['pending','verified','rejected','suspended'], default: 'pending', index: true },
     isOwner:   { type: Boolean, default: false },
     rememberMe: { type: Boolean, default: false },
