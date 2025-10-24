@@ -240,10 +240,10 @@ const TeacherProfilePageNew = () => {
 
             {/* Біографія */}
             <div className="bg-white text-black rounded-2xl p-6 shadow-xl border border-gray-200 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-100/50 to-purple-100/30 rounded-full -translate-y-16 translate-x-16 animate-pulse"></div>
+                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-100/50 to-blue-200/30 rounded-full -translate-y-16 translate-x-16 animate-pulse"></div>
                 <div className="relative">
                     <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-3">
-                        <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
+                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-800 rounded-lg flex items-center justify-center">
                             <BookOpen className="w-4 h-4 text-white" />
                         </div>
                         Біографія
@@ -257,7 +257,7 @@ const TeacherProfilePageNew = () => {
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-cyan-100/50 to-blue-100/30 rounded-full -translate-y-16 translate-x-16 animate-pulse"></div>
                 <div className="relative">
                     <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-3">
-                        <div className="w-8 h-8 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center">
+                        <div className="w-8 h-8 bg-gradient-to-r from-blue-800 to-blue-500 rounded-lg flex items-center justify-center">
                             <Mail className="w-4 h-4 text-white" />
                         </div>
                         Контактна інформація
