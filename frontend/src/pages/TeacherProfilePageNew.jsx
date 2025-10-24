@@ -220,7 +220,7 @@ const TeacherProfilePageNew = () => {
                 </div>
                 
                 <div className="bg-white text-black rounded-xl p-3 md:p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
-                    <MessageCircle className="w-6 h-6 md:w-8 md:h-8 text-blue-500 mx-auto mb-2" />
+                    <MessageSquare className="w-6 h-6 md:w-8 md:h-8 text-orange-500 mx-auto mb-2" />
                     <div className="text-lg md:text-2xl font-bold text-gray-900">{stats.reviews}</div>
                     <div className="text-xs md:text-sm text-gray-600">Відгуків</div>
                 </div>
@@ -281,10 +281,10 @@ const TeacherProfilePageNew = () => {
         <div className="space-y-6">
             {/* Статистика відгуків */}
             <div className="bg-white text-black rounded-2xl p-6 shadow-xl border border-gray-200 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-yellow-100/50 to-orange-100/30 rounded-full -translate-y-16 translate-x-16 animate-pulse"></div>
+                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-100/50 to-blue-200/30 rounded-full -translate-y-16 translate-x-16 animate-pulse"></div>
                 <div className="relative">
                     <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-3">
-                        <div className="w-8 h-8 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-lg flex items-center justify-center">
+                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
                             <Star className="w-4 h-4 text-white" />
                         </div>
                         Статистика відгуків
