@@ -31,7 +31,7 @@ import { useAuthState } from '../api/useAuthState';
 import { getAdminStats, getAdminUsers, getAdminReports, getAdminNameChangeRequests } from '../api/admin-stats';
 
 const AdminProfilePage = () => {
-    const { user } = useAuthState();
+    const { user, token } = useAuthState();
     
     const [activeTab, setActiveTab] = useState(() => {
         return localStorage.getItem('adminProfileActiveTab') || 'dashboard';
@@ -67,21 +67,33 @@ const AdminProfilePage = () => {
         const loadAdminData = async () => {
             try {
                 setLoading(true);
-                
+                console.log('Loading admin data...');
+                console.log('Current user:', user);
+                console.log('User role:', user?.role);
+                console.log('Token exists:', !!token);
+
                 // Завантажуємо статистику
+                console.log('Fetching admin stats...');
                 const statsData = await getAdminStats();
+                console.log('Admin stats received:', statsData);
                 setStats(statsData);
-                
+
                 // Завантажуємо користувачів
+                console.log('Fetching admin users...');
                 const usersData = await getAdminUsers();
+                console.log('Admin users received:', usersData);
                 setUsers(usersData);
-                
+
                 // Завантажуємо скарги
+                console.log('Fetching admin reports...');
                 const reportsData = await getAdminReports();
+                console.log('Admin reports received:', reportsData);
                 setPendingReports(reportsData);
-                
+
                 // Завантажуємо запити на зміну імені
+                console.log('Fetching name change requests...');
                 const nameChangeData = await getAdminNameChangeRequests();
+                console.log('Name change requests received:', nameChangeData);
                 setNameChangeRequests(nameChangeData);
                 
                 // Мок дані для активності (поки що)

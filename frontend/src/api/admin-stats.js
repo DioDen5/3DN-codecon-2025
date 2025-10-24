@@ -2,17 +2,20 @@ import { http } from './httpClient.js';
 
 export const getAdminStats = async () => {
     try {
-        const response = await http.get('/api/admin/stats');
+        console.log('Making request to /admin/stats...');
+        const response = await http.get('/admin/stats');
+        console.log('Admin stats response:', response.data);
         return response.data;
     } catch (error) {
         console.error('Error getting admin stats:', error);
+        console.error('Error details:', error.response?.data);
         throw error;
     }
 };
 
 export const getAdminUsers = async () => {
     try {
-        const response = await http.get('/api/admin/users');
+        const response = await http.get('/admin/users');
         return response.data;
     } catch (error) {
         console.error('Error getting admin users:', error);
@@ -22,7 +25,7 @@ export const getAdminUsers = async () => {
 
 export const getAdminReports = async () => {
     try {
-        const response = await http.get('/api/admin/reports');
+        const response = await http.get('/admin/reports');
         return response.data;
     } catch (error) {
         console.error('Error getting admin reports:', error);
@@ -32,7 +35,7 @@ export const getAdminReports = async () => {
 
 export const getAdminNameChangeRequests = async () => {
     try {
-        const response = await http.get('/api/admin/name-change-requests');
+        const response = await http.get('/admin/name-change-requests');
         return response.data;
     } catch (error) {
         console.error('Error getting admin name change requests:', error);
