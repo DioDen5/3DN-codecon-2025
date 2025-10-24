@@ -30,7 +30,7 @@ router.get('/stats', authRequired, requireAdmin, async (req, res) => {
             status: 'published' 
         });
 
-        // Підрахунок коментарів
+        // Підрахунок коментарів (тільки до оголошень, не відгуки до викладачів)
         const totalComments = await Comment.countDocuments();
 
         // Підрахунок скарг на розгляді

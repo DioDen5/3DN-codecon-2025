@@ -71,7 +71,7 @@ router.get('/announcements/:id/comments', auth, requireVerified, async (req, res
             return res.status(403).json({ error: 'Comments allowed only for published announcements with students visibility' });
         }
 
-        const limit = Math.min(parseInt(req.query.limit || '20', 10), 100);
+        const limit = Math.min(parseInt(req.query.limit || '100', 10), 1000);
         const showAll = req.query.all === '1' && isAdmin(req.user);
 
         const query = { announcementId };
