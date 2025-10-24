@@ -64,6 +64,16 @@ const AdminProfilePage = () => {
     // Report review modal state
     const [showReportModal, setShowReportModal] = useState(false);
     const [selectedReport, setSelectedReport] = useState(null);
+    
+    // Модерація стани
+    const [moderationFilter, setModerationFilter] = useState('all');
+    const [moderationSearch, setModerationSearch] = useState('');
+    const [selectedItems, setSelectedItems] = useState([]);
+    const [moderationData, setModerationData] = useState({
+        announcements: [],
+        comments: [],
+        reviews: []
+    });
     const [nameChangeRequests, setNameChangeRequests] = useState([]);
     const [users, setUsers] = useState([]);
     const [announcements, setAnnouncements] = useState([]);
@@ -451,14 +461,270 @@ const AdminProfilePage = () => {
         </div>
     );
 
-    const renderModerationTab = () => (
-        <div className="space-y-6">
-            <div className="bg-white text-black rounded-2xl p-6 shadow-xl border border-gray-200">
-                <h3 className="text-xl font-bold text-gray-900 mb-4">Модерація контенту</h3>
-                <p className="text-gray-600">Тут буде інтерфейс для модерації оголошень та коментарів</p>
+    const renderModerationTab = () => {
+
+        const moderationFilters = [
+            { id: 'all', label: 'Весь контент', icon: FileText },
+            { id: 'announcements', label: 'Оголошення', icon: MessageSquare },
+            { id: 'comments', label: 'Коментарі', icon: MessageCircle },
+            { id: 'reviews', label: 'Відгуки', icon: Star }
+        ];
+
+        const handleBulkDelete = async (type) => {
+            try {
+                console.log(`Bulk delete ${type}:`, selectedItems);
+                // Тут буде логіка масового видалення
+                alert(`Функція масового видалення ${type} буде реалізована`);
+                setSelectedItems([]);
+            } catch (error) {
+                console.error('Error in bulk delete:', error);
+            }
+        };
+
+        const handleDeleteItem = async (id, type) => {
+            try {
+                console.log(`Delete ${type}:`, id);
+                // Тут буде логіка видалення окремого елемента
+                alert(`Функція видалення ${type} буде реалізована`);
+            } catch (error) {
+                console.error('Error deleting item:', error);
+            }
+        };
+
+        return (
+            <div className="space-y-6">
+                {/* Заголовок та статистика */}
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200 moderation-slide-in">
+                    <div className="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 className="text-2xl font-bold text-gray-900 mb-2">Модерація контенту</h3>
+                            <p className="text-gray-600">Управління якістю контенту на платформі</p>
+                        </div>
+                        <div className="flex gap-4">
+                            <div className="text-center">
+                                <div className="text-2xl font-bold text-blue-600">0</div>
+                                <div className="text-sm text-gray-600">Оголошень</div>
+                            </div>
+                            <div className="text-center">
+                                <div className="text-2xl font-bold text-green-600">0</div>
+                                <div className="text-sm text-gray-600">Коментарів</div>
+                            </div>
+                            <div className="text-center">
+                                <div className="text-2xl font-bold text-purple-600">0</div>
+                                <div className="text-sm text-gray-600">Відгуків</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Фільтри та пошук */}
+                <div className="bg-white rounded-2xl p-6 shadow-xl border border-gray-200 moderation-slide-in" style={{ animationDelay: '0.1s' }}>
+                    <div className="flex flex-col lg:flex-row gap-4 mb-6">
+                        {/* Фільтри */}
+                        <div className="flex flex-wrap gap-2">
+                            {moderationFilters.map((filter) => {
+                                const Icon = filter.icon;
+                                return (
+                                    <button
+                                        key={filter.id}
+                                        onClick={() => setModerationFilter(filter.id)}
+                                        className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 ${
+                                            moderationFilter === filter.id
+                                                ? 'bg-blue-500 text-white shadow-lg transform scale-105'
+                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-105'
+                                        }`}
+                                    >
+                                        <Icon size={16} />
+                                        <span className="font-medium">{filter.label}</span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        {/* Пошук */}
+                        <div className="flex-1">
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    placeholder="Пошук по тексту..."
+                                    value={moderationSearch}
+                                    onChange={(e) => setModerationSearch(e.target.value)}
+                                    className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+                                />
+                                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Масові дії */}
+                    {selectedItems.length > 0 && (
+                        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6 moderation-pulse">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                                        {selectedItems.length}
+                                    </div>
+                                    <span className="font-medium text-yellow-800">
+                                        Вибрано {selectedItems.length} елементів
+                                    </span>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => handleBulkDelete(moderationFilter)}
+                                        className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors cursor-pointer"
+                                    >
+                                        Видалити вибрані
+                                    </button>
+                                    <button
+                                        onClick={() => setSelectedItems([])}
+                                        className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors cursor-pointer"
+                                    >
+                                        Скасувати
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Контент за фільтром */}
+                    <div className="space-y-4">
+                        {moderationFilter === 'all' && (
+                            <div className="text-center py-12">
+                                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <FileText className="w-8 h-8 text-blue-600" />
+                                </div>
+                                <h4 className="text-lg font-semibold text-gray-900 mb-2">Весь контент</h4>
+                                <p className="text-gray-600">Тут буде відображатися весь контент для модерації</p>
+                            </div>
+                        )}
+
+                        {moderationFilter === 'announcements' && (
+                            <div className="space-y-3">
+                                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 moderation-slide-in hover:moderation-glow transition-all duration-300">
+                                    <div className="flex items-start justify-between">
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                                                    A
+                                                </div>
+                                                <div>
+                                                    <div className="font-medium text-gray-900">Приклад оголошення</div>
+                                                    <div className="text-sm text-gray-600">Автор: Студент • 2 години тому</div>
+                                                </div>
+                                            </div>
+                                            <p className="text-gray-700 mb-3">Тут буде текст оголошення для модерації...</p>
+                                            <div className="flex gap-2">
+                                                <button className="px-3 py-1 bg-green-100 text-green-700 rounded-lg text-sm hover:bg-green-200 transition-colors cursor-pointer">
+                                                    Схваліти
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleDeleteItem('1', 'announcement')}
+                                                    className="px-3 py-1 bg-red-100 text-red-700 rounded-lg text-sm hover:bg-red-200 transition-colors cursor-pointer"
+                                                >
+                                                    Видалити
+                                                </button>
+                                                <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm hover:bg-blue-200 transition-colors cursor-pointer">
+                                                    Переглянути
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <input
+                                            type="checkbox"
+                                            className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {moderationFilter === 'comments' && (
+                            <div className="space-y-3">
+                                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 moderation-slide-in hover:moderation-glow transition-all duration-300">
+                                    <div className="flex items-start justify-between">
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                                                    C
+                                                </div>
+                                                <div>
+                                                    <div className="font-medium text-gray-900">Приклад коментаря</div>
+                                                    <div className="text-sm text-gray-600">Автор: Студент • 1 година тому</div>
+                                                </div>
+                                            </div>
+                                            <p className="text-gray-700 mb-3">Тут буде текст коментаря для модерації...</p>
+                                            <div className="flex gap-2">
+                                                <button 
+                                                    onClick={() => handleDeleteItem('1', 'comment')}
+                                                    className="px-3 py-1 bg-red-100 text-red-700 rounded-lg text-sm hover:bg-red-200 transition-colors cursor-pointer"
+                                                >
+                                                    Видалити
+                                                </button>
+                                                <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm hover:bg-blue-200 transition-colors cursor-pointer">
+                                                    Переглянути
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <input
+                                            type="checkbox"
+                                            className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {moderationFilter === 'reviews' && (
+                            <div className="space-y-3">
+                                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 moderation-slide-in hover:moderation-glow transition-all duration-300">
+                                    <div className="flex items-start justify-between">
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                                                    R
+                                                </div>
+                                                <div>
+                                                    <div className="font-medium text-gray-900">Приклад відгуку</div>
+                                                    <div className="text-sm text-gray-600">Автор: Студент • 3 години тому</div>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <div className="flex">
+                                                    {[1,2,3,4,5].map((star) => (
+                                                        <Star key={star} className="w-4 h-4 text-yellow-400 fill-current" />
+                                                    ))}
+                                                </div>
+                                                <span className="text-sm text-gray-600">5/5</span>
+                                            </div>
+                                            <p className="text-gray-700 mb-3">Тут буде текст відгуку для модерації...</p>
+                                            <div className="flex gap-2">
+                                                <button 
+                                                    onClick={() => handleDeleteItem('1', 'review')}
+                                                    className="px-3 py-1 bg-red-100 text-red-700 rounded-lg text-sm hover:bg-red-200 transition-colors cursor-pointer"
+                                                >
+                                                    Видалити
+                                                </button>
+                                                <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm hover:bg-blue-200 transition-colors cursor-pointer">
+                                                    Переглянути
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <input
+                                            type="checkbox"
+                                            className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
-        </div>
-    );
+        );
+    };
 
     const renderUsersTab = () => (
         <div className="space-y-6">
