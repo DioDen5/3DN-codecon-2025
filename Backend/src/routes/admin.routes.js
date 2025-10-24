@@ -431,20 +431,15 @@ router.get('/moderation/reviews', authRequired, requireAdmin, async (req, res) =
         const limit = parseInt(req.query.limit) || 10;
         const skip = (page - 1) * limit;
         
-        let reviews = [];
-        try {
-            const { TeacherComment } = await import('../models/TeacherComment.js');
-            reviews = await TeacherComment.find()
-                .populate('authorId', 'displayName email')
-                .sort({ createdAt: -1 })
-                .skip(skip)
-                .limit(limit);
-        } catch (reviewError) {
-            console.error('Error fetching reviews:', reviewError);
-            reviews = [];
-        }
+        const { TeacherComment } = await import('../models/TeacherComment.js');
+        
+        const reviews = await TeacherComment.find()
+            .populate('authorId', 'displayName email')
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
 
-        const totalItems = reviews.length > 0 ? await TeacherComment.countDocuments() : 0;
+        const totalItems = await TeacherComment.countDocuments();
         const totalPages = Math.ceil(totalItems / limit);
 
         res.json({

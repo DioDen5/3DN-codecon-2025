@@ -74,7 +74,6 @@ export const useAdminData = () => {
             setLoading(true);
             setError(null);
 
-            // Завантаження основних даних
             const [stats, users, reports, nameChanges, activity] = await Promise.all([
                 getAdminStats(),
                 getAdminUsers(),
@@ -123,7 +122,6 @@ export const useAdminData = () => {
                 setAllModerationContent([]);
             }
 
-            // Завантаження обговорень для модерації
             try {
                 const announcementsData = await getModerationAnnouncements(1, 5);
                 setAnnouncementsContent(announcementsData.content || []);
@@ -183,7 +181,7 @@ export const useAdminData = () => {
 
     const loadReviews = async (page = 1) => {
         try {
-            const data = await getModerationReviews(page, 10);
+            const data = await getModerationReviews(page, 5);
             setReviewsContent(data.content || []);
             setReviewsPagination({
                 currentPage: data.pagination?.currentPage || 1,
@@ -249,7 +247,6 @@ export const useAdminData = () => {
         }));
     };
 
-    // Пагінація для модерації
     const handleModerationPrevPage = async () => {
         if (moderationPagination.hasPrevPage) {
             const newPage = moderationPagination.currentPage - 1;
@@ -416,6 +413,60 @@ export const useAdminData = () => {
         }
     };
 
+    const handleReviewsPrevPage = async () => {
+        if (reviewsPagination.hasPrevPage) {
+            const newPage = reviewsPagination.currentPage - 1;
+            try {
+                const data = await getModerationReviews(newPage, 5);
+                setReviewsContent(data.content || []);
+                setReviewsPagination({
+                    currentPage: data.pagination?.currentPage || newPage,
+                    totalPages: data.pagination?.totalPages || 1,
+                    hasNextPage: data.pagination?.hasNextPage || false,
+                    hasPrevPage: data.pagination?.hasPrevPage || false,
+                    totalItems: data.pagination?.totalItems || 0
+                });
+            } catch (error) {
+                console.error('Error loading reviews:', error);
+            }
+        }
+    };
+
+    const handleReviewsNextPage = async () => {
+        if (reviewsPagination.hasNextPage) {
+            const newPage = reviewsPagination.currentPage + 1;
+            try {
+                const data = await getModerationReviews(newPage, 5);
+                setReviewsContent(data.content || []);
+                setReviewsPagination({
+                    currentPage: data.pagination?.currentPage || newPage,
+                    totalPages: data.pagination?.totalPages || 1,
+                    hasNextPage: data.pagination?.hasNextPage || false,
+                    hasPrevPage: data.pagination?.hasPrevPage || false,
+                    totalItems: data.pagination?.totalItems || 0
+                });
+            } catch (error) {
+                console.error('Error loading reviews:', error);
+            }
+        }
+    };
+
+    const handleReviewsPageClick = async (page) => {
+        try {
+            const data = await getModerationReviews(page, 5);
+            setReviewsContent(data.content || []);
+            setReviewsPagination(data.pagination || {
+                currentPage: page,
+                totalPages: 1,
+                hasNextPage: false,
+                hasPrevPage: page > 1,
+                totalItems: 0
+            });
+        } catch (error) {
+            console.error('Error loading reviews page:', error);
+        }
+    };
+
     return {
         loading,
         error,
@@ -451,6 +502,9 @@ export const useAdminData = () => {
         handleAnnouncementsPageClick,
         handleCommentsPrevPage,
         handleCommentsNextPage,
-        handleCommentsPageClick
+        handleCommentsPageClick,
+        handleReviewsPrevPage,
+        handleReviewsNextPage,
+        handleReviewsPageClick
     };
 };
