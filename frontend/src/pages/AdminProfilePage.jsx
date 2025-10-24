@@ -70,9 +70,8 @@ const AdminProfilePage = () => {
         settings: false
     });
 
-    // Завантаження реальних даних
-    useEffect(() => {
-        const loadAdminData = async () => {
+    // Функція завантаження даних
+    const loadAdminData = async () => {
             try {
                 setLoading(true);
                 console.log('Loading admin data...');
@@ -129,7 +128,9 @@ const AdminProfilePage = () => {
                 setLoading(false);
             }
         };
-        
+
+    // Завантаження реальних даних
+    useEffect(() => {
         loadAdminData();
     }, []);
 
