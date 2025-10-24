@@ -5,6 +5,7 @@ import { getUserStats, getUserActivity } from '../api/user-stats';
 import { getNameChangeStatus } from '../api/name-change';
 import NameChangeModal from '../components/NameChangeModal';
 import TeacherProfilePageNew from './TeacherProfilePageNew';
+import AdminProfilePage from './AdminProfilePage';
 
 const UserProfilePage = () => {
     const { user } = useAuthState();
@@ -14,8 +15,9 @@ const UserProfilePage = () => {
         return <TeacherProfilePageNew />;
     }
     
-    // Для адміністратора поки що показуємо студентський профіль
-    // В майбутньому можна створити окремий AdminProfilePage
+    if (user?.role === 'admin') {
+        return <AdminProfilePage />;
+    }
     const [activeTab, setActiveTab] = useState(() => {
         // Відновлюємо вибрану вкладку з localStorage або використовуємо 'profile' за замовчуванням
         return localStorage.getItem('userProfileActiveTab') || 'profile';
