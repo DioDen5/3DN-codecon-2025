@@ -494,23 +494,27 @@ const AdminProfilePage = () => {
 
     const handleResolveReport = async (reportId) => {
         try {
+            console.log('Resolving report with ID:', reportId);
             await resolveReport(reportId);
             // Перезавантажуємо дані
             await loadAdminData();
         } catch (error) {
             console.error('Error resolving report:', error);
-            alert('Помилка при розгляді скарги');
+            console.error('Error details:', error.response?.data);
+            alert(`Помилка при розгляді скарги: ${error.response?.data?.error || error.message}`);
         }
     };
 
     const handleRejectReport = async (reportId) => {
         try {
+            console.log('Rejecting report with ID:', reportId);
             await rejectReport(reportId);
             // Перезавантажуємо дані
             await loadAdminData();
         } catch (error) {
             console.error('Error rejecting report:', error);
-            alert('Помилка при відхиленні скарги');
+            console.error('Error details:', error.response?.data);
+            alert(`Помилка при відхиленні скарги: ${error.response?.data?.error || error.message}`);
         }
     };
 
