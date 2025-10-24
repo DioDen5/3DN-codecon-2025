@@ -1,7 +1,40 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { AlertTriangle, User, FileText, MessageCircle, Star, Clock, Eye, Flag, Hash, Users, Zap, Shield, Target, BookOpen, AlertCircle, AlertOctagon, Bug, Ban } from 'lucide-react';
+import ReportReviewModal from '../ReportReviewModal';
 
-const AdminReports = ({ reportsData, handleOpenReportModal }) => {
+const AdminReports = ({ reportsData, handleOpenReportModal, handleResolveReport, handleRejectReport }) => {
+    const [showModal, setShowModal] = useState(false);
+    const [selectedReport, setSelectedReport] = useState(null);
+
+    const handleOpenModal = (report) => {
+        setSelectedReport(report);
+        setShowModal(true);
+    };
+
+    const handleCloseModal = () => {
+        setShowModal(false);
+        setSelectedReport(null);
+    };
+
+    const handleResolve = async (reportId) => {
+        if (handleResolveReport) {
+            await handleResolveReport(reportId);
+        }
+    };
+
+    const handleReject = async (reportId) => {
+        if (handleRejectReport) {
+            await handleRejectReport(reportId);
+        }
+    };
+
+    const handleDeleteContent = async (targetId, targetType) => {
+        console.log('Delete content:', targetId, targetType);
+    };
+
+    const handleEditContent = async (targetId, targetType) => {
+        console.log('Edit content:', targetId, targetType);
+    };
     const getTargetIcon = (targetType) => {
         switch (targetType) {
             case 'announcement':
@@ -108,7 +141,7 @@ const AdminReports = ({ reportsData, handleOpenReportModal }) => {
                                         
                                         <div className="flex items-center gap-2 ml-4">
                                             <button
-                                                onClick={() => handleOpenReportModal(report)}
+                                                onClick={() => handleOpenModal(report)}
                                                 className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-blue-700 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300 cursor-pointer"
                                             >
                                                 <Eye className="w-4 h-4" />
@@ -122,6 +155,16 @@ const AdminReports = ({ reportsData, handleOpenReportModal }) => {
                     )}
                 </div>
             </div>
+
+            <ReportReviewModal
+                isOpen={showModal}
+                onClose={handleCloseModal}
+                report={selectedReport}
+                onResolve={handleResolve}
+                onReject={handleReject}
+                onDeleteContent={handleDeleteContent}
+                onEditContent={handleEditContent}
+            />
         </div>
     );
 };
