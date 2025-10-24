@@ -126,6 +126,24 @@ export const useAdminData = () => {
                 setAllModerationContent([]);
             }
 
+            // Завантаження обговорень для модерації
+            try {
+                console.log('Loading announcements for moderation...');
+                const announcementsData = await getModerationAnnouncements(1, 10);
+                console.log('Announcements data received:', announcementsData);
+                setAnnouncementsContent(announcementsData.content || []);
+                setAnnouncementsPagination({
+                    currentPage: announcementsData.pagination?.currentPage || 1,
+                    totalPages: announcementsData.pagination?.totalPages || 1,
+                    hasNextPage: announcementsData.pagination?.hasNextPage || false,
+                    hasPrevPage: announcementsData.pagination?.hasPrevPage || false,
+                    totalItems: announcementsData.pagination?.totalItems || 0
+                });
+            } catch (error) {
+                console.error('Error loading announcements:', error);
+                setAnnouncementsContent([]);
+            }
+
         } catch (error) {
             console.error('Error loading admin data:', error);
             setError(error.message);
@@ -137,7 +155,9 @@ export const useAdminData = () => {
     // Функції для завантаження окремих типів контенту
     const loadAnnouncements = async (page = 1) => {
         try {
+            console.log('Loading announcements page:', page);
             const data = await getModerationAnnouncements(page, 10);
+            console.log('Announcements loaded:', data);
             setAnnouncementsContent(data.content || []);
             setAnnouncementsPagination({
                 currentPage: data.pagination?.currentPage || 1,

@@ -341,6 +341,7 @@ const AdminModeration = ({
 
                 {moderationFilter === 'announcements' && (
                     <div className="space-y-3">
+                        {console.log('Announcements content:', announcementsContent)}
                         {announcementsContent && announcementsContent.length > 0 ? (
                             announcementsContent.map((announcement, index) => (
                                 <div key={announcement._id} className="bg-gray-50 rounded-xl p-4 border border-gray-200 moderation-slide-in hover:moderation-glow transition-all duration-300" style={{ animationDelay: `${index * 0.1}s` }}>
