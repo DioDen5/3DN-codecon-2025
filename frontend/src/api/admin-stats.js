@@ -87,3 +87,15 @@ export const getModerationData = async () => {
         throw error;
     }
 };
+
+export const getAllModerationContent = async () => {
+    try {
+        console.log('Making request to /admin/moderation/all...');
+        const response = await http.get('/admin/moderation/all');
+        console.log('All moderation content response:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Error getting all moderation content:', error);
+        throw error;
+    }
+};

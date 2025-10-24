@@ -266,4 +266,63 @@ router.get('/activity', authRequired, requireAdmin, async (req, res) => {
     }
 });
 
+// Отримання всього контенту для модерації
+router.get('/moderation/all', authRequired, requireAdmin, async (req, res) => {
+    try {
+        console.log('Getting all moderation content...');
+        
+        // Отримуємо останні оголошення
+        const announcements = await Announcement.find()
+            .populate('authorId', 'displayName email')
+            .sort({ createdAt: -1 })
+            .limit(10);
+
+        // Отримуємо останні коментарі
+        const comments = await Comment.find()
+            .populate('authorId', 'displayName email')
+            .sort({ createdAt: -1 })
+            .limit(10);
+
+        // Отримуємо останні відгуки про викладачів
+        let reviews = [];
+        try {
+            const { TeacherComment } = await import('../models/TeacherComment.js');
+            reviews = await TeacherComment.find()
+                .populate('authorId', 'displayName email')
+                .sort({ createdAt: -1 })
+                .limit(10);
+        } catch (reviewError) {
+            console.error('Error fetching reviews:', reviewError);
+            reviews = [];
+        }
+
+        // Об'єднуємо весь контент в один масив з типом
+        const allContent = [
+            ...announcements.map(item => ({ ...item.toObject(), contentType: 'announcement' })),
+            ...comments.map(item => ({ ...item.toObject(), contentType: 'comment' })),
+            ...reviews.map(item => ({ ...item.toObject(), contentType: 'review' }))
+        ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+        console.log('All content prepared:', {
+            announcements: announcements.length,
+            comments: comments.length,
+            reviews: reviews.length,
+            total: allContent.length
+        });
+
+        res.json({
+            content: allContent,
+            statistics: {
+                announcements: announcements.length,
+                comments: comments.length,
+                reviews: reviews.length,
+                total: allContent.length
+            }
+        });
+    } catch (error) {
+        console.error('Error getting all moderation content:', error);
+        res.status(500).json({ error: 'Internal server error', details: error.message });
+    }
+});
+
 export default router;
