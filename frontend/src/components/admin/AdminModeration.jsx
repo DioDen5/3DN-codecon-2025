@@ -15,7 +15,12 @@ const AdminModeration = ({
     handleModerationNextPage,
     handleModerationPageClick,
     handleBulkDelete,
-    handleDeleteItem
+    handleDeleteItem,
+    announcementsContent,
+    announcementsPagination,
+    handleAnnouncementsPrevPage,
+    handleAnnouncementsNextPage,
+    handleAnnouncementsPageClick
 }) => {
     const moderationFilters = [
         { id: 'all', label: 'Весь контент', icon: FileText },
@@ -26,7 +31,6 @@ const AdminModeration = ({
 
     return (
         <div className="space-y-6">
-            {/* Заголовок та статистика */}
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200 moderation-slide-in">
                 <div className="flex items-center justify-between mb-4">
                     <div>
@@ -50,10 +54,8 @@ const AdminModeration = ({
                 </div>
             </div>
 
-            {/* Фільтри та пошук */}
             <div className="bg-white rounded-2xl p-6 shadow-xl border border-gray-200 moderation-slide-in" style={{ animationDelay: '0.1s' }}>
                 <div className="flex flex-col lg:flex-row gap-4 mb-6">
-                    {/* Фільтри */}
                     <div className="flex flex-wrap gap-2">
                         {moderationFilters.map((filter) => {
                             const Icon = filter.icon;
@@ -82,7 +84,6 @@ const AdminModeration = ({
                         })}
                     </div>
 
-                    {/* Пошук */}
                     <div className="flex-1">
                         <div className="relative">
                             <input
@@ -99,7 +100,6 @@ const AdminModeration = ({
                     </div>
                 </div>
 
-                {/* Масові дії */}
                 {selectedItems.length > 0 && (
                     <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6 moderation-pulse">
                         <div className="flex items-center justify-between">
@@ -327,6 +327,198 @@ const AdminModeration = ({
                             disabled={!moderationPagination?.hasNextPage}
                             className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-sm transition-all duration-300 transform cursor-pointer ${
                                 moderationPagination?.hasNextPage
+                                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:scale-105 hover:shadow-lg hover:shadow-blue-500/30'
+                                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            }`}
+                        >
+                            Наступна
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                    </div>
+                )}
+
+                {moderationFilter === 'announcements' && (
+                    <div className="space-y-3">
+                        {announcementsContent && announcementsContent.length > 0 ? (
+                            announcementsContent.map((announcement, index) => (
+                                <div key={announcement._id} className="bg-gray-50 rounded-xl p-4 border border-gray-200 moderation-slide-in hover:moderation-glow transition-all duration-300" style={{ animationDelay: `${index * 0.1}s` }}>
+                                    <div className="flex items-start justify-between">
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                                                    {announcement.authorId?.displayName?.charAt(0) || 'A'}
+                                                </div>
+                                                <div>
+                                                    <div className="font-medium text-gray-900">{announcement.title}</div>
+                                                    <div className="text-sm text-gray-600">
+                                                        Автор: {announcement.authorId?.displayName || 'Невідомий'} • {new Date(announcement.createdAt).toLocaleDateString('uk-UA')}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <p className="text-gray-700 mb-3">{announcement.body?.substring(0, 100)}...</p>
+                                            <div className="flex items-center gap-2 mb-3">
+                                                <span className={`px-2 py-1 rounded text-xs ${
+                                                    announcement.status === 'published' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                                                }`}>
+                                                    {announcement.status === 'published' ? 'Опубліковано' : 'Чернетка'}
+                                                </span>
+                                                <span className={`px-2 py-1 rounded text-xs ${
+                                                    announcement.visibility === 'students' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
+                                                }`}>
+                                                    {announcement.visibility === 'students' ? 'Студентам' : 'Всім'}
+                                                </span>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <button className="px-3 py-1 bg-green-100 text-green-700 rounded-lg text-sm hover:bg-green-200 transition-colors cursor-pointer">
+                                                    Схваліти
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleDeleteItem(announcement._id, 'announcement')}
+                                                    className="px-3 py-1 bg-red-100 text-red-700 rounded-lg text-sm hover:bg-red-200 transition-colors cursor-pointer"
+                                                >
+                                                    Видалити
+                                                </button>
+                                                <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm hover:bg-blue-200 transition-colors cursor-pointer">
+                                                    Переглянути
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <input
+                                            type="checkbox"
+                                            className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
+                                        />
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="text-center py-12">
+                                <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center mx-auto mb-4 discussion-icon-glow discussion-icon-pulse discussion-icon-rotate relative overflow-hidden">
+                                    <div className="absolute inset-0 discussion-icon-shimmer opacity-30"></div>
+                                    <MessageSquare className="w-10 h-10 text-white relative z-10 drop-shadow-lg" />
+                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-50"></div>
+                                </div>
+                                <h4 className="text-lg font-semibold text-gray-900 mb-2">Обговорення</h4>
+                                <p className="text-gray-600">Немає обговорень для модерації</p>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {moderationFilter === 'announcements' && announcementsContent && announcementsContent.length > 0 && announcementsPagination && announcementsPagination.totalPages > 1 && (
+                    <div className="flex items-center justify-center gap-4 mt-8">
+                        <button
+                            onClick={handleAnnouncementsPrevPage}
+                            disabled={!announcementsPagination.hasPrevPage}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-sm transition-all duration-300 transform cursor-pointer ${
+                                announcementsPagination.hasPrevPage
+                                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:scale-105 hover:shadow-lg hover:shadow-blue-500/30'
+                                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            }`}
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
+                            Попередня
+                        </button>
+
+                        <div className="flex items-center gap-2">
+                            {(() => {
+                                const currentPage = announcementsPagination.currentPage;
+                                const totalPages = announcementsPagination.totalPages;
+                                const maxVisible = 5;
+                                
+                                let startPage, endPage;
+                                
+                                if (totalPages <= maxVisible) {
+                                    startPage = 1;
+                                    endPage = totalPages;
+                                } else {
+                                    const halfVisible = Math.floor(maxVisible / 2);
+                                    
+                                    if (currentPage <= halfVisible) {
+                                        startPage = 1;
+                                        endPage = maxVisible;
+                                    } else if (currentPage + halfVisible >= totalPages) {
+                                        startPage = totalPages - maxVisible + 1;
+                                        endPage = totalPages;
+                                    } else {
+                                        startPage = currentPage - halfVisible;
+                                        endPage = currentPage + halfVisible;
+                                    }
+                                }
+                                
+                                const pages = [];
+                                
+                                if (startPage > 1) {
+                                    pages.push(
+                                        <button
+                                            key={1}
+                                            onClick={() => handleAnnouncementsPageClick(1)}
+                                            className="w-10 h-10 rounded-xl font-semibold text-sm bg-gray-100 text-gray-600 hover:bg-gradient-to-r hover:from-blue-100 hover:to-blue-200 hover:scale-105 hover:shadow-md hover:shadow-blue-200/50 transition-all duration-500 cursor-pointer"
+                                        >
+                                            1
+                                        </button>
+                                    );
+                                    
+                                    if (startPage > 2) {
+                                        pages.push(
+                                            <span key="ellipsis1" className="text-gray-400 font-medium">⋯</span>
+                                        );
+                                    }
+                                }
+                                
+                                for (let i = startPage; i <= endPage; i++) {
+                                    const isActive = i === currentPage;
+                                    pages.push(
+                                        <button
+                                            key={i}
+                                            onClick={() => handleAnnouncementsPageClick(i)}
+                                            className={`relative w-10 h-10 rounded-xl font-semibold text-sm transition-all duration-500 transform cursor-pointer ${
+                                                isActive
+                                                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white scale-110 shadow-lg shadow-blue-500/30'
+                                                    : 'bg-gray-100 text-gray-600 hover:bg-gradient-to-r hover:from-blue-100 hover:to-blue-200 hover:scale-105 hover:shadow-md hover:shadow-blue-200/50'
+                                            }`}
+                                        >
+                                            {isActive && (
+                                                <>
+                                                    <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-blue-500 rounded-xl animate-pulse opacity-30"></div>
+                                                    <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full animate-bounce"></div>
+                                                </>
+                                            )}
+                                            <span className="relative z-10">{i}</span>
+                                        </button>
+                                    );
+                                }
+                                
+                                if (endPage < totalPages) {
+                                    if (endPage < totalPages - 1) {
+                                        pages.push(
+                                            <span key="ellipsis2" className="text-gray-400 font-medium">⋯</span>
+                                        );
+                                    }
+                                    
+                                    pages.push(
+                                        <button
+                                            key={totalPages}
+                                            onClick={() => handleAnnouncementsPageClick(totalPages)}
+                                            className="w-10 h-10 rounded-xl font-semibold text-sm bg-gray-100 text-gray-600 hover:bg-gradient-to-r hover:from-blue-100 hover:to-blue-200 hover:scale-105 hover:shadow-md hover:shadow-blue-200/50 transition-all duration-500 cursor-pointer"
+                                        >
+                                            {totalPages}
+                                        </button>
+                                    );
+                                }
+                                
+                                return pages;
+                            })()}
+                        </div>
+
+                        <button
+                            onClick={handleAnnouncementsNextPage}
+                            disabled={!announcementsPagination.hasNextPage}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-sm transition-all duration-300 transform cursor-pointer ${
+                                announcementsPagination.hasNextPage
                                     ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:scale-105 hover:shadow-lg hover:shadow-blue-500/30'
                                     : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                             }`}

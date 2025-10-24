@@ -39,9 +39,7 @@ const TeacherProfilePageNew = () => {
     const [nameChangeRequest, setNameChangeRequest] = useState(null);
     const [showNameChangeModal, setShowNameChangeModal] = useState(false);
 
-    // Мок дані для демонстрації
     useEffect(() => {
-        // Симуляція завантаження
         setTimeout(() => {
             setTeacher({
                 _id: user?.id || id,

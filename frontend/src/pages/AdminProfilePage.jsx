@@ -23,7 +23,6 @@ const AdminProfilePageRefactored = () => {
     const [showReportModal, setShowReportModal] = useState(false);
     const [selectedReport, setSelectedReport] = useState(null);
     
-    // Модерація стани
     const [moderationFilter, setModerationFilter] = useState('all');
     const [moderationSearch, setModerationSearch] = useState('');
     const [selectedItems, setSelectedItems] = useState([]);
@@ -50,7 +49,12 @@ const AdminProfilePageRefactored = () => {
         handlePageClick,
         handleModerationPrevPage,
         handleModerationNextPage,
-        handleModerationPageClick
+        handleModerationPageClick,
+        announcementsContent,
+        announcementsPagination,
+        handleAnnouncementsPrevPage,
+        handleAnnouncementsNextPage,
+        handleAnnouncementsPageClick
     } = useAdminData();
 
     const tabs = [
@@ -68,7 +72,6 @@ const AdminProfilePageRefactored = () => {
         
         setActiveTab(tabId);
         
-        // Завантаження даних при зміні фільтра модерації
         if (tabId === 'moderation') {
             if (moderationFilter === 'announcements') {
                 loadAnnouncements();
@@ -93,7 +96,6 @@ const AdminProfilePageRefactored = () => {
     const handleBulkDelete = async (type) => {
         try {
             console.log('Bulk delete:', type, selectedItems);
-            // Тут має бути логіка масового видалення
             alert(`Функція масового видалення ${type} буде реалізована`);
             setSelectedItems([]);
         } catch (error) {
@@ -105,7 +107,6 @@ const AdminProfilePageRefactored = () => {
     const handleDeleteItem = async (itemId, itemType) => {
         try {
             console.log('Deleting item:', itemId, itemType);
-            // Тут має бути логіка видалення елемента
             alert(`Функція видалення ${itemType} буде реалізована`);
         } catch (error) {
             console.error('Error deleting item:', error);
@@ -167,7 +168,6 @@ const AdminProfilePageRefactored = () => {
     return (
         <div className="min-h-[calc(100vh-68px)] bg-gradient-to-b from-black to-gray-900 text-white hide-scrollbar">
             <div className="max-w-6xl mx-auto px-3 md:px-6 py-6 md:py-10">
-                {/* Заголовок */}
                 <div className="mb-6 md:mb-8">
                     <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">
                         Панель адміністратора
@@ -177,7 +177,6 @@ const AdminProfilePageRefactored = () => {
                     </p>
                 </div>
 
-                {/* Таби */}
                 <div className="bg-gray-100 rounded-2xl shadow-xl border border-gray-200 mb-6 md:mb-8 overflow-hidden">
                     <div className="bg-gray-200 p-1 md:p-2">
                         <nav className="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-4 justify-center">
@@ -213,7 +212,6 @@ const AdminProfilePageRefactored = () => {
                     </div>
                 </div>
 
-                {/* Контент */}
                 <div className="hide-scrollbar">
                     {activeTab === 'dashboard' && (
                         <AdminDashboard
@@ -253,6 +251,11 @@ const AdminProfilePageRefactored = () => {
                             handleModerationPageClick={handleModerationPageClick}
                             handleBulkDelete={handleBulkDelete}
                             handleDeleteItem={handleDeleteItem}
+                            announcementsContent={announcementsContent}
+                            announcementsPagination={announcementsPagination}
+                            handleAnnouncementsPrevPage={handleAnnouncementsPrevPage}
+                            handleAnnouncementsNextPage={handleAnnouncementsNextPage}
+                            handleAnnouncementsPageClick={handleAnnouncementsPageClick}
                         />
                     )}
 
@@ -261,7 +264,6 @@ const AdminProfilePageRefactored = () => {
                     )}
                 </div>
 
-                {/* Модальне вікно для розгляду скарг */}
                 {showReportModal && selectedReport && (
                     <ReportReviewModal
                         report={selectedReport}

@@ -17,21 +17,18 @@ export const useAdminData = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     
-    // Основні дані
     const [statsData, setStatsData] = useState(null);
     const [usersData, setUsersData] = useState([]);
     const [reportsData, setReportsData] = useState([]);
     const [nameChangeRequests, setNameChangeRequests] = useState([]);
     const [activityData, setActivityData] = useState([]);
     
-    // Модерація
     const [moderationData, setModerationData] = useState(null);
     const [allModerationContent, setAllModerationContent] = useState([]);
     const [announcementsContent, setAnnouncementsContent] = useState([]);
     const [commentsContent, setCommentsContent] = useState([]);
     const [reviewsContent, setReviewsContent] = useState([]);
     
-    // Пагінація
     const [activityPagination, setActivityPagination] = useState({
         currentPage: 1,
         totalPages: 1,
@@ -278,12 +275,47 @@ export const useAdminData = () => {
         loadAdminData();
     }, [loadAdminData]);
 
+    const handleAnnouncementsPrevPage = () => {
+        if (announcementsPagination.hasPrevPage) {
+            setAnnouncementsPagination(prev => ({
+                ...prev,
+                currentPage: prev.currentPage - 1,
+                hasNextPage: true,
+                hasPrevPage: prev.currentPage - 1 > 1
+            }));
+        }
+    };
+
+    const handleAnnouncementsNextPage = () => {
+        if (announcementsPagination.hasNextPage) {
+            setAnnouncementsPagination(prev => ({
+                ...prev,
+                currentPage: prev.currentPage + 1,
+                hasNextPage: prev.currentPage + 1 < prev.totalPages,
+                hasPrevPage: true
+            }));
+        }
+    };
+
+    const handleAnnouncementsPageClick = async (page) => {
+        try {
+            const data = await getModerationAnnouncements(page, 10);
+            setAnnouncementsContent(data.content || []);
+            setAnnouncementsPagination(data.pagination || {
+                currentPage: page,
+                totalPages: 1,
+                hasNextPage: false,
+                hasPrevPage: page > 1,
+                totalItems: 0
+            });
+        } catch (error) {
+            console.error('Error loading announcements page:', error);
+        }
+    };
+
     return {
-        // Стан
         loading,
         error,
-        
-        // Дані
         statsData,
         usersData,
         reportsData,
@@ -294,15 +326,11 @@ export const useAdminData = () => {
         announcementsContent,
         commentsContent,
         reviewsContent,
-        
-        // Пагінація
         activityPagination,
         moderationPagination,
         announcementsPagination,
         commentsPagination,
         reviewsPagination,
-        
-        // Функції
         loadAdminData,
         loadAnnouncements,
         loadComments,
@@ -314,6 +342,9 @@ export const useAdminData = () => {
         handlePageClick,
         handleModerationPrevPage,
         handleModerationNextPage,
-        handleModerationPageClick
+        handleModerationPageClick,
+        handleAnnouncementsPrevPage,
+        handleAnnouncementsNextPage,
+        handleAnnouncementsPageClick
     };
 };

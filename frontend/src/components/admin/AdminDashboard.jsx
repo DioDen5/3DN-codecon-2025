@@ -6,7 +6,6 @@ const AdminDashboard = ({ statsData, activityData, activityPagination, handlePre
 
     return (
         <div className="space-y-6">
-            {/* Статистика */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                 <div className="bg-white text-black rounded-xl p-3 md:p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
                     <Users className="w-6 h-6 md:w-8 md:h-8 text-blue-500 mx-auto mb-2" />
@@ -33,7 +32,6 @@ const AdminDashboard = ({ statsData, activityData, activityPagination, handlePre
                 </div>
             </div>
 
-            {/* Розподіл користувачів */}
             <div className="bg-white text-black rounded-2xl p-6 shadow-xl border border-gray-200 relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-100/50 to-blue-200/30 rounded-full -translate-y-16 translate-x-16 animate-pulse"></div>
                 <div className="relative">
@@ -60,7 +58,6 @@ const AdminDashboard = ({ statsData, activityData, activityPagination, handlePre
                 </div>
             </div>
 
-            {/* Остання активність */}
             <div className="bg-white text-black rounded-2xl p-6 shadow-xl border border-gray-200 relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-100/50 to-blue-200/30 rounded-full -translate-y-16 translate-x-16 animate-pulse"></div>
                 <div className="relative">
@@ -95,7 +92,6 @@ const AdminDashboard = ({ statsData, activityData, activityPagination, handlePre
                         ))}
                     </div>
 
-                    {/* Пагінація */}
                     {activityPagination && activityPagination.totalPages > 1 && (
                         <div className="flex items-center justify-center gap-4 mt-8">
                             <button

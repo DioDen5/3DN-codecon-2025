@@ -243,6 +243,67 @@
         animation: commentShimmer 2s linear infinite;
     }
 
+    /* Анімації для обговорень */
+    @keyframes discussionGlow {
+        0%, 100% {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+        }
+        50% {
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.8);
+        }
+    }
+
+    @keyframes discussionPulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+    }
+
+    @keyframes discussionRotate {
+        0% {
+            transform: rotate(0deg);
+        }
+        25% {
+            transform: rotate(5deg);
+        }
+        75% {
+            transform: rotate(-5deg);
+        }
+        100% {
+            transform: rotate(0deg);
+        }
+    }
+
+    @keyframes discussionShimmer {
+        0% {
+            background-position: -200% 0;
+        }
+        100% {
+            background-position: 200% 0;
+        }
+    }
+
+    .discussion-icon-glow {
+        animation: discussionGlow 3s ease-in-out infinite;
+    }
+
+    .discussion-icon-pulse {
+        animation: discussionPulse 2s ease-in-out infinite;
+    }
+
+    .discussion-icon-rotate {
+        animation: discussionRotate 4s ease-in-out infinite;
+    }
+
+    .discussion-icon-shimmer {
+        background: linear-gradient(90deg, #3b82f6, #1d4ed8, #3b82f6);
+        background-size: 200% 100%;
+        animation: discussionShimmer 2s linear infinite;
+    }
+
 
     /* Анімації для відгуків */
     @keyframes reviewGlow {
