@@ -294,10 +294,10 @@ const AdminProfilePage = () => {
                                     <div className="text-sm text-gray-600">Причина: {report.reason}</div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <button className="px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600">
+                                    <button className="px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600 cursor-pointer">
                                         Розглянути
                                     </button>
-                                    <button className="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600">
+                                    <button className="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600 cursor-pointer">
                                         Відхилити
                                     </button>
                                 </div>
@@ -349,16 +349,16 @@ const AdminProfilePage = () => {
                             {tabs.map((tab) => {
                                 const Icon = tab.icon;
                                 return (
-                                    <button
-                                        key={tab.id}
-                                        onClick={() => handleTabChange(tab.id)}
-                                        className={`profile-tab flex items-center justify-center gap-2 md:gap-3 py-3 md:py-4 px-3 md:px-6 rounded-xl font-bold text-sm md:text-lg transition-all duration-300 flex-1 ${
-                                            tab.id === 'dashboard' ? 'ml-2' : tab.id === 'settings' ? 'mr-2' : ''
-                                        } ${
-                                            activeTab === tab.id
-                                                ? 'bg-blue-600 text-white shadow-lg transform scale-105'
-                                                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-300'
-                                        }`}
+                                        <button
+                                            key={tab.id}
+                                            onClick={() => handleTabChange(tab.id)}
+                                            className={`profile-tab flex items-center justify-center gap-2 md:gap-3 py-3 md:py-4 px-3 md:px-6 rounded-xl font-bold text-sm md:text-lg transition-all duration-300 flex-1 cursor-pointer ${
+                                                tab.id === 'dashboard' ? 'ml-2' : tab.id === 'settings' ? 'mr-2' : ''
+                                            } ${
+                                                activeTab === tab.id
+                                                    ? 'bg-blue-600 text-white shadow-lg transform scale-105'
+                                                    : 'text-gray-600 hover:text-gray-800 hover:bg-gray-300'
+                                            }`}
                                     >
                                         <Icon 
                                             size={18} 
