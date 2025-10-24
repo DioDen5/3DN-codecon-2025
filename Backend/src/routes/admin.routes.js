@@ -271,26 +271,27 @@ router.get('/moderation/all', authRequired, requireAdmin, async (req, res) => {
     try {
         console.log('Getting all moderation content...');
         
-        // Отримуємо останні оголошення
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 5;
+        const skip = (page - 1) * limit;
+        
+        // Отримуємо всі оголошення
         const announcements = await Announcement.find()
             .populate('authorId', 'displayName email')
-            .sort({ createdAt: -1 })
-            .limit(10);
+            .sort({ createdAt: -1 });
 
-        // Отримуємо останні коментарі
+        // Отримуємо всі коментарі
         const comments = await Comment.find()
             .populate('authorId', 'displayName email')
-            .sort({ createdAt: -1 })
-            .limit(10);
+            .sort({ createdAt: -1 });
 
-        // Отримуємо останні відгуки про викладачів
+        // Отримуємо всі відгуки про викладачів
         let reviews = [];
         try {
             const { TeacherComment } = await import('../models/TeacherComment.js');
             reviews = await TeacherComment.find()
                 .populate('authorId', 'displayName email')
-                .sort({ createdAt: -1 })
-                .limit(10);
+                .sort({ createdAt: -1 });
         } catch (reviewError) {
             console.error('Error fetching reviews:', reviewError);
             reviews = [];
@@ -303,20 +304,46 @@ router.get('/moderation/all', authRequired, requireAdmin, async (req, res) => {
             ...reviews.map(item => ({ ...item.toObject(), contentType: 'review' }))
         ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
+        // Застосовуємо пагінацію
+        const totalItems = allContent.length;
+        const totalPages = Math.ceil(totalItems / limit);
+        const paginatedContent = allContent.slice(skip, skip + limit);
+
         console.log('All content prepared:', {
             announcements: announcements.length,
             comments: comments.length,
             reviews: reviews.length,
-            total: allContent.length
+            total: totalItems,
+            page,
+            limit,
+            totalPages
         });
 
+        // Логування для відгуків
+        if (reviews.length > 0) {
+            console.log('Sample review data:', {
+                authorId: reviews[0].authorId,
+                body: reviews[0].body,
+                rating: reviews[0].rating,
+                createdAt: reviews[0].createdAt
+            });
+        }
+
         res.json({
-            content: allContent,
+            content: paginatedContent,
+            pagination: {
+                currentPage: page,
+                totalPages,
+                totalItems,
+                hasNextPage: page < totalPages,
+                hasPrevPage: page > 1,
+                limit
+            },
             statistics: {
                 announcements: announcements.length,
                 comments: comments.length,
                 reviews: reviews.length,
-                total: allContent.length
+                total: totalItems
             }
         });
     } catch (error) {

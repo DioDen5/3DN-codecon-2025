@@ -88,10 +88,10 @@ export const getModerationData = async () => {
     }
 };
 
-export const getAllModerationContent = async () => {
+export const getAllModerationContent = async (page = 1, limit = 20) => {
     try {
-        console.log('Making request to /admin/moderation/all...');
-        const response = await http.get('/admin/moderation/all');
+        console.log(`Making request to /admin/moderation/all?page=${page}&limit=${limit}...`);
+        const response = await http.get(`/admin/moderation/all?page=${page}&limit=${limit}`);
         console.log('All moderation content response:', response.data);
         return response.data;
     } catch (error) {

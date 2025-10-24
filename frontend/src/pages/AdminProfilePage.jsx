@@ -25,7 +25,9 @@ import {
     MessageCircle,
     Edit3,
     Trash2,
-    RefreshCw
+    RefreshCw,
+    ChevronLeft,
+    ChevronRight
 } from 'lucide-react';
 import { useAuthState } from '../api/useAuthState';
 import { getAdminStats, getAdminUsers, getAdminReports, getAdminNameChangeRequests, getAdminActivity, resolveReport, rejectReport, getModerationData, getAllModerationContent } from '../api/admin-stats';
@@ -70,6 +72,13 @@ const AdminProfilePage = () => {
     const [moderationSearch, setModerationSearch] = useState('');
     const [selectedItems, setSelectedItems] = useState([]);
     const [allModerationContent, setAllModerationContent] = useState([]);
+    const [moderationPagination, setModerationPagination] = useState({
+        currentPage: 1,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPrevPage: false,
+        totalItems: 0
+    });
     const [moderationData, setModerationData] = useState({
         statistics: {
             announcements: { total: 0, published: 0, draft: 0 },
@@ -165,14 +174,21 @@ const AdminProfilePage = () => {
             setRecentActivity(activityData); // Встановлюємо для відображення
             
             // Завантажуємо весь контент для модерації
-            try {
-                const allContentData = await getAllModerationContent();
-                console.log('All moderation content loaded:', allContentData);
-                setAllModerationContent(allContentData.content || []);
-            } catch (error) {
-                console.error('Error loading all moderation content:', error);
-                setAllModerationContent([]);
-            }
+                    try {
+                        const allContentData = await getAllModerationContent(moderationPagination.currentPage, 5);
+                        console.log('All moderation content loaded:', allContentData);
+                        setAllModerationContent(allContentData.content || []);
+                        setModerationPagination({
+                            currentPage: allContentData.pagination?.currentPage || 1,
+                            totalPages: allContentData.pagination?.totalPages || 1,
+                            hasNextPage: allContentData.pagination?.hasNextPage || false,
+                            hasPrevPage: allContentData.pagination?.hasPrevPage || false,
+                            totalItems: allContentData.pagination?.totalItems || 0
+                        });
+                    } catch (error) {
+                        console.error('Error loading all moderation content:', error);
+                        setAllModerationContent([]);
+                    }
                 
                 // Розраховуємо пагінацію (4 записи на сторінку)
                 const itemsPerPage = 4;
@@ -540,6 +556,35 @@ const AdminProfilePage = () => {
             }
         };
 
+        // Функції пагінації для модерації
+        const handleModerationPageClick = async (page) => {
+            try {
+                const allContentData = await getAllModerationContent(page, 5);
+                setAllModerationContent(allContentData.content || []);
+                setModerationPagination({
+                    currentPage: allContentData.pagination?.currentPage || 1,
+                    totalPages: allContentData.pagination?.totalPages || 1,
+                    hasNextPage: allContentData.pagination?.hasNextPage || false,
+                    hasPrevPage: allContentData.pagination?.hasPrevPage || false,
+                    totalItems: allContentData.pagination?.totalItems || 0
+                });
+            } catch (error) {
+                console.error('Error loading moderation page:', error);
+            }
+        };
+
+        const handleModerationPrevPage = async () => {
+            if (moderationPagination.hasPrevPage) {
+                await handleModerationPageClick(moderationPagination.currentPage - 1);
+            }
+        };
+
+        const handleModerationNextPage = async () => {
+            if (moderationPagination.hasNextPage) {
+                await handleModerationPageClick(moderationPagination.currentPage + 1);
+            }
+        };
+
         return (
             <div className="space-y-6">
                 {/* Заголовок та статистика */}
@@ -678,7 +723,7 @@ const AdminProfilePage = () => {
                                                     <p className="text-gray-700 mb-3">
                                                         {item.contentType === 'announcement' ? item.body?.substring(0, 100) + '...' :
                                                          item.contentType === 'comment' ? item.body?.substring(0, 150) + '...' :
-                                                         item.comment?.substring(0, 150) + '...'}
+                                                         item.body?.substring(0, 150) + '...'}
                                                     </p>
                                                     {item.contentType === 'review' && (
                                                         <div className="flex items-center gap-2 mb-2">
@@ -724,6 +769,139 @@ const AdminProfilePage = () => {
                                         <p className="text-gray-600">Немає контенту для модерації</p>
                                     </div>
                                 )}
+                            </div>
+                        )}
+
+                        {/* Пагінація для "Весь контент" */}
+                        {moderationFilter === 'all' && allModerationContent.length > 0 && (
+                            <div className="flex items-center justify-center gap-4 mt-8">
+                                {/* Кнопка "Попередня" */}
+                                <button
+                                    onClick={handleModerationPrevPage}
+                                    disabled={!moderationPagination.hasPrevPage}
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-sm transition-all duration-300 transform cursor-pointer ${
+                                        moderationPagination.hasPrevPage
+                                            ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:scale-105 hover:shadow-lg hover:shadow-blue-500/30'
+                                            : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                    }`}
+                                >
+                                    <ChevronLeft className="w-4 h-4" />
+                                    Попередня
+                                </button>
+
+                                {/* Номери сторінок */}
+                                <div className="flex items-center gap-2">
+                                    {(() => {
+                                        const currentPage = moderationPagination.currentPage;
+                                        const totalPages = moderationPagination.totalPages;
+                                        const maxVisible = 5;
+                                        
+                                        let startPage, endPage;
+                                        
+                                        if (totalPages <= maxVisible) {
+                                            // Якщо загальна кількість сторінок менше або дорівнює максимальній видимій
+                                            startPage = 1;
+                                            endPage = totalPages;
+                                        } else {
+                                            // Розраховуємо діапазон навколо поточної сторінки
+                                            const halfVisible = Math.floor(maxVisible / 2);
+                                            
+                                            if (currentPage <= halfVisible) {
+                                                // Якщо поточна сторінка близько до початку
+                                                startPage = 1;
+                                                endPage = maxVisible;
+                                            } else if (currentPage + halfVisible >= totalPages) {
+                                                // Якщо поточна сторінка близько до кінця
+                                                startPage = totalPages - maxVisible + 1;
+                                                endPage = totalPages;
+                                            } else {
+                                                // Якщо поточна сторінка в середині
+                                                startPage = currentPage - halfVisible;
+                                                endPage = currentPage + halfVisible;
+                                            }
+                                        }
+                                        
+                                        const pages = [];
+                                        
+                                        // Додаємо першу сторінку, якщо потрібно
+                                        if (startPage > 1) {
+                                            pages.push(
+                                                <button
+                                                    key={1}
+                                                    onClick={() => handleModerationPageClick(1)}
+                                                    className="w-10 h-10 rounded-xl font-semibold text-sm bg-gray-100 text-gray-600 hover:bg-gradient-to-r hover:from-blue-100 hover:to-blue-200 hover:scale-105 hover:shadow-md hover:shadow-blue-200/50 transition-all duration-500 cursor-pointer"
+                                                >
+                                                    1
+                                                </button>
+                                            );
+                                            
+                                            if (startPage > 2) {
+                                                pages.push(
+                                                    <span key="ellipsis1" className="text-gray-400 font-medium">⋯</span>
+                                                );
+                                            }
+                                        }
+                                        
+                                        // Додаємо видимі сторінки
+                                        for (let i = startPage; i <= endPage; i++) {
+                                            const isActive = i === currentPage;
+                                            pages.push(
+                                                <button
+                                                    key={i}
+                                                    onClick={() => handleModerationPageClick(i)}
+                                                    className={`relative w-10 h-10 rounded-xl font-semibold text-sm transition-all duration-500 transform cursor-pointer ${
+                                                        isActive
+                                                            ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white scale-110 shadow-lg shadow-blue-500/30'
+                                                            : 'bg-gray-100 text-gray-600 hover:bg-gradient-to-r hover:from-blue-100 hover:to-blue-200 hover:scale-105 hover:shadow-md hover:shadow-blue-200/50'
+                                                    }`}
+                                                >
+                                                    {isActive && (
+                                                        <>
+                                                            <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-blue-500 rounded-xl animate-pulse opacity-30"></div>
+                                                            <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full animate-bounce"></div>
+                                                        </>
+                                                    )}
+                                                    <span className="relative z-10">{i}</span>
+                                                </button>
+                                            );
+                                        }
+                                        
+                                        // Додаємо останню сторінку, якщо потрібно
+                                        if (endPage < totalPages) {
+                                            if (endPage < totalPages - 1) {
+                                                pages.push(
+                                                    <span key="ellipsis2" className="text-gray-400 font-medium">⋯</span>
+                                                );
+                                            }
+                                            
+                                            pages.push(
+                                                <button
+                                                    key={totalPages}
+                                                    onClick={() => handleModerationPageClick(totalPages)}
+                                                    className="w-10 h-10 rounded-xl font-semibold text-sm bg-gray-100 text-gray-600 hover:bg-gradient-to-r hover:from-blue-100 hover:to-blue-200 hover:scale-105 hover:shadow-md hover:shadow-blue-200/50 transition-all duration-500 cursor-pointer"
+                                                >
+                                                    {totalPages}
+                                                </button>
+                                            );
+                                        }
+                                        
+                                        return pages;
+                                    })()}
+                                </div>
+
+                                {/* Кнопка "Наступна" */}
+                                <button
+                                    onClick={handleModerationNextPage}
+                                    disabled={!moderationPagination.hasNextPage}
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-sm transition-all duration-300 transform cursor-pointer ${
+                                        moderationPagination.hasNextPage
+                                            ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:scale-105 hover:shadow-lg hover:shadow-blue-500/30'
+                                            : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                    }`}
+                                >
+                                    Наступна
+                                    <ChevronRight className="w-4 h-4" />
+                                </button>
                             </div>
                         )}
 
