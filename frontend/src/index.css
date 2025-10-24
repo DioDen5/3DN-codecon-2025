@@ -11,25 +11,25 @@
 }
 
 /* Прикольне підсвічування для іконки "Весь контент" */
-@keyframes contentGlow {
-    0%, 100% {
-        box-shadow: 0 0 20px rgba(59, 130, 246, 0.4), 0 0 40px rgba(59, 130, 246, 0.2);
-        transform: scale(1);
+    @keyframes contentGlow {
+        0%, 100% {
+            box-shadow: 0 0 20px rgba(30, 64, 175, 0.4), 0 0 40px rgba(30, 64, 175, 0.2);
+            transform: scale(1);
+        }
+        50% {
+            box-shadow: 0 0 30px rgba(30, 64, 175, 0.6), 0 0 60px rgba(30, 64, 175, 0.4), 0 0 80px rgba(30, 64, 175, 0.2);
+            transform: scale(1.05);
+        }
     }
-    50% {
-        box-shadow: 0 0 30px rgba(59, 130, 246, 0.6), 0 0 60px rgba(59, 130, 246, 0.4), 0 0 80px rgba(59, 130, 246, 0.2);
-        transform: scale(1.05);
-    }
-}
 
-@keyframes contentPulse {
-    0%, 100% {
-        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    @keyframes contentPulse {
+        0%, 100% {
+            background: linear-gradient(135deg, #1e40af, #1e3a8a);
+        }
+        50% {
+            background: linear-gradient(135deg, #1e3a8a, #1e3a8a);
+        }
     }
-    50% {
-        background: linear-gradient(135deg, #1d4ed8, #1e40af);
-    }
-}
 
 @keyframes contentRotate {
     0% {
@@ -67,11 +67,11 @@
     animation: contentRotate 4s ease-in-out infinite;
 }
 
-.content-icon-shimmer {
-    background: linear-gradient(90deg, #3b82f6, #1d4ed8, #3b82f6);
-    background-size: 200% 100%;
-    animation: contentShimmer 2s linear infinite;
-}
+    .content-icon-shimmer {
+        background: linear-gradient(90deg, #1e40af, #1e3a8a, #1e40af);
+        background-size: 200% 100%;
+        animation: contentShimmer 2s linear infinite;
+    }
 
 @keyframes contentParticles {
     0% {
@@ -87,24 +87,240 @@
     }
 }
 
-.content-icon-particles::before,
-.content-icon-particles::after {
-    content: '';
-    position: absolute;
-    width: 4px;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.8);
-    border-radius: 50%;
-    animation: contentParticles 3s linear infinite;
-}
 
-.content-icon-particles::before {
-    animation-delay: 0s;
-}
+    /* Анімації для обговорень */
+    @keyframes discussionGlow {
+        0%, 100% {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4), 0 0 40px rgba(59, 130, 246, 0.2);
+            transform: scale(1);
+        }
+        50% {
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.6), 0 0 60px rgba(59, 130, 246, 0.4), 0 0 80px rgba(59, 130, 246, 0.2);
+            transform: scale(1.05);
+        }
+    }
 
-.content-icon-particles::after {
-    animation-delay: 1.5s;
-}
+    @keyframes discussionPulse {
+        0%, 100% {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        }
+        50% {
+            background: linear-gradient(135deg, #1d4ed8, #1e40af);
+        }
+    }
+
+    @keyframes discussionRotate {
+        0% {
+            transform: rotate(0deg);
+        }
+        25% {
+            transform: rotate(3deg);
+        }
+        75% {
+            transform: rotate(-3deg);
+        }
+        100% {
+            transform: rotate(0deg);
+        }
+    }
+
+    @keyframes discussionShimmer {
+        0% {
+            background-position: -200% 0;
+        }
+        100% {
+            background-position: 200% 0;
+        }
+    }
+
+    @keyframes discussionParticles {
+        0% {
+            transform: rotate(0deg) translateX(30px) rotate(0deg);
+            opacity: 0;
+        }
+        50% {
+            opacity: 1;
+        }
+        100% {
+            transform: rotate(360deg) translateX(30px) rotate(-360deg);
+            opacity: 0;
+        }
+    }
+
+    .discussion-icon-glow {
+        animation: discussionGlow 3s ease-in-out infinite;
+    }
+
+    .discussion-icon-pulse {
+        animation: discussionPulse 2s ease-in-out infinite;
+    }
+
+    .discussion-icon-rotate {
+        animation: discussionRotate 4s ease-in-out infinite;
+    }
+
+    .discussion-icon-shimmer {
+        background: linear-gradient(90deg, #3b82f6, #1d4ed8, #3b82f6);
+        background-size: 200% 100%;
+        animation: discussionShimmer 2s linear infinite;
+    }
+
+
+    /* Анімації для коментарів */
+    @keyframes commentGlow {
+        0%, 100% {
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.4), 0 0 40px rgba(34, 197, 94, 0.2);
+            transform: scale(1);
+        }
+        50% {
+            box-shadow: 0 0 30px rgba(34, 197, 94, 0.6), 0 0 60px rgba(34, 197, 94, 0.4), 0 0 80px rgba(34, 197, 94, 0.2);
+            transform: scale(1.05);
+        }
+    }
+
+    @keyframes commentPulse {
+        0%, 100% {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+        }
+        50% {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+        }
+    }
+
+    @keyframes commentRotate {
+        0% {
+            transform: rotate(0deg);
+        }
+        25% {
+            transform: rotate(5deg);
+        }
+        75% {
+            transform: rotate(-5deg);
+        }
+        100% {
+            transform: rotate(0deg);
+        }
+    }
+
+    @keyframes commentShimmer {
+        0% {
+            background-position: -200% 0;
+        }
+        100% {
+            background-position: 200% 0;
+        }
+    }
+
+    @keyframes commentParticles {
+        0% {
+            transform: rotate(0deg) translateX(30px) rotate(0deg);
+            opacity: 0;
+        }
+        50% {
+            opacity: 1;
+        }
+        100% {
+            transform: rotate(360deg) translateX(30px) rotate(-360deg);
+            opacity: 0;
+        }
+    }
+
+    .comment-icon-glow {
+        animation: commentGlow 3s ease-in-out infinite;
+    }
+
+    .comment-icon-pulse {
+        animation: commentPulse 2s ease-in-out infinite;
+    }
+
+    .comment-icon-rotate {
+        animation: commentRotate 4s ease-in-out infinite;
+    }
+
+    .comment-icon-shimmer {
+        background: linear-gradient(90deg, #22c55e, #16a34a, #22c55e);
+        background-size: 200% 100%;
+        animation: commentShimmer 2s linear infinite;
+    }
+
+
+    /* Анімації для відгуків */
+    @keyframes reviewGlow {
+        0%, 100% {
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.4), 0 0 40px rgba(168, 85, 247, 0.2);
+            transform: scale(1);
+        }
+        50% {
+            box-shadow: 0 0 30px rgba(168, 85, 247, 0.6), 0 0 60px rgba(168, 85, 247, 0.4), 0 0 80px rgba(168, 85, 247, 0.2);
+            transform: scale(1.05);
+        }
+    }
+
+    @keyframes reviewPulse {
+        0%, 100% {
+            background: linear-gradient(135deg, #a855f7, #9333ea);
+        }
+        50% {
+            background: linear-gradient(135deg, #9333ea, #7c3aed);
+        }
+    }
+
+    @keyframes reviewRotate {
+        0% {
+            transform: rotate(0deg);
+        }
+        25% {
+            transform: rotate(4deg);
+        }
+        75% {
+            transform: rotate(-4deg);
+        }
+        100% {
+            transform: rotate(0deg);
+        }
+    }
+
+    @keyframes reviewShimmer {
+        0% {
+            background-position: -200% 0;
+        }
+        100% {
+            background-position: 200% 0;
+        }
+    }
+
+    @keyframes reviewParticles {
+        0% {
+            transform: rotate(0deg) translateX(30px) rotate(0deg);
+            opacity: 0;
+        }
+        50% {
+            opacity: 1;
+        }
+        100% {
+            transform: rotate(360deg) translateX(30px) rotate(-360deg);
+            opacity: 0;
+        }
+    }
+
+    .review-icon-glow {
+        animation: reviewGlow 3s ease-in-out infinite;
+    }
+
+    .review-icon-pulse {
+        animation: reviewPulse 2s ease-in-out infinite;
+    }
+
+    .review-icon-rotate {
+        animation: reviewRotate 4s ease-in-out infinite;
+    }
+
+    .review-icon-shimmer {
+        background: linear-gradient(90deg, #a855f7, #9333ea, #a855f7);
+        background-size: 200% 100%;
+        animation: reviewShimmer 2s linear infinite;
+    }
+
 
 .btn-glow {
     @apply flex items-center justify-center  border border-white/20 rounded cursor-pointer
