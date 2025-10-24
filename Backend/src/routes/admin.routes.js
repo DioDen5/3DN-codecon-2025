@@ -93,6 +93,52 @@ router.get('/reports', authRequired, requireAdmin, async (req, res) => {
     }
 });
 
+// Розгляд скарги (resolve)
+router.patch('/reports/:reportId/resolve', authRequired, requireAdmin, async (req, res) => {
+    try {
+        const { reportId } = req.params;
+        const adminId = req.user.id;
+
+        const report = await Report.findById(reportId);
+        if (!report) {
+            return res.status(404).json({ error: 'Report not found' });
+        }
+
+        report.status = 'resolved';
+        report.handledBy = adminId;
+        report.handledAt = new Date();
+        await report.save();
+
+        res.json({ message: 'Report resolved successfully', report });
+    } catch (error) {
+        console.error('Error resolving report:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Відхилення скарги (reject)
+router.patch('/reports/:reportId/reject', authRequired, requireAdmin, async (req, res) => {
+    try {
+        const { reportId } = req.params;
+        const adminId = req.user.id;
+
+        const report = await Report.findById(reportId);
+        if (!report) {
+            return res.status(404).json({ error: 'Report not found' });
+        }
+
+        report.status = 'rejected';
+        report.handledBy = adminId;
+        report.handledAt = new Date();
+        await report.save();
+
+        res.json({ message: 'Report rejected successfully', report });
+    } catch (error) {
+        console.error('Error rejecting report:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 // Отримання запитів на зміну імені
 router.get('/name-change-requests', authRequired, requireAdmin, async (req, res) => {
     try {

@@ -55,3 +55,23 @@ export const getAdminActivity = async () => {
         throw error;
     }
 };
+
+export const resolveReport = async (reportId) => {
+    try {
+        const response = await http.patch(`/admin/reports/${reportId}/resolve`);
+        return response.data;
+    } catch (error) {
+        console.error('Error resolving report:', error);
+        throw error;
+    }
+};
+
+export const rejectReport = async (reportId) => {
+    try {
+        const response = await http.patch(`/admin/reports/${reportId}/reject`);
+        return response.data;
+    } catch (error) {
+        console.error('Error rejecting report:', error);
+        throw error;
+    }
+};
