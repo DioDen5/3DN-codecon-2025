@@ -93,6 +93,13 @@ const AdminProfilePageRefactored = () => {
         }
     };
 
+    const handleNavigateToTab = (tabId, filter = null) => {
+        if (filter) {
+            setModerationFilter(filter);
+        }
+        handleTabChange(tabId);
+    };
+
     useEffect(() => {
         if (activeTab === 'moderation') {
             if (moderationFilter === 'announcements') {
@@ -243,6 +250,7 @@ const AdminProfilePageRefactored = () => {
                             handlePrevPage={handlePrevPage}
                             handleNextPage={handleNextPage}
                             handlePageClick={handlePageClick}
+                            onNavigateToTab={handleNavigateToTab}
                         />
                     )}
 

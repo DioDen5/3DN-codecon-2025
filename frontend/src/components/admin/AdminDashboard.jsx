@@ -1,31 +1,43 @@
 import React from 'react';
 import { Users, MessageSquare, Star, Activity, AlertTriangle } from 'lucide-react';
 
-const AdminDashboard = ({ statsData, activityData, activityPagination, handlePrevPage, handleNextPage, handlePageClick }) => {
+const AdminDashboard = ({ statsData, activityData, activityPagination, handlePrevPage, handleNextPage, handlePageClick, onNavigateToTab }) => {
     const stats = statsData || {};
 
     return (
         <div className="space-y-6">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-                <div className="bg-white text-black rounded-xl p-3 md:p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
+                <div 
+                    onClick={() => onNavigateToTab('users')}
+                    className="bg-white text-black rounded-xl p-3 md:p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300"
+                >
                     <Users className="w-6 h-6 md:w-8 md:h-8 text-blue-500 mx-auto mb-2" />
                     <div className="text-lg md:text-2xl font-bold text-gray-900">{stats.totalUsers}</div>
                     <div className="text-xs md:text-sm text-gray-600">Всього користувачів</div>
                 </div>
                 
-                <div className="bg-white text-black rounded-xl p-3 md:p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
+                <div 
+                    onClick={() => onNavigateToTab('moderation', 'announcements')}
+                    className="bg-white text-black rounded-xl p-3 md:p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300"
+                >
                     <MessageSquare className="w-6 h-6 md:w-8 md:h-8 text-blue-500 mx-auto mb-2" />
                     <div className="text-lg md:text-2xl font-bold text-gray-900">{stats.activeAnnouncements}</div>
                     <div className="text-xs md:text-sm text-gray-600">Активних обговорень</div>
                 </div>
                 
-                <div className="bg-white text-black rounded-xl p-3 md:p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
+                <div 
+                    onClick={() => onNavigateToTab('moderation', 'comments')}
+                    className="bg-white text-black rounded-xl p-3 md:p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300"
+                >
                     <MessageSquare className="w-6 h-6 md:w-8 md:h-8 text-purple-500 mx-auto mb-2" />
                     <div className="text-lg md:text-2xl font-bold text-gray-900">{stats.totalComments}</div>
                     <div className="text-xs md:text-sm text-gray-600">Коментарів</div>
                 </div>
                 
-                <div className="bg-white text-black rounded-xl p-3 md:p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
+                <div 
+                    onClick={() => onNavigateToTab('reports')}
+                    className="bg-white text-black rounded-xl p-3 md:p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300"
+                >
                     <AlertTriangle className="w-6 h-6 md:w-8 md:h-8 text-orange-500 mx-auto mb-2" />
                     <div className="text-lg md:text-2xl font-bold text-gray-900">{stats.pendingReports}</div>
                     <div className="text-xs md:text-sm text-gray-600">Скарг на розгляді</div>
