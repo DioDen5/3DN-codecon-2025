@@ -31,8 +31,8 @@ async function main() {
     }]);
 
     const student = await User.create({
-        email: 'student@lnu.edu.ua',
-        passwordHash: pass,
+        email: 'student11@lnu.edu.ua',
+        passwordHash: await bcrypt.hash('12345678', 10),
         displayName: 'Student',
         firstName: 'Іван',
         lastName: 'Петренко',

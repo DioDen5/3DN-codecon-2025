@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, User, Activity, Settings, Mail, Calendar, Award, MessageCircle, MessageSquare, ThumbsUp, Star, GraduationCap, BookOpen, Shield, Lock, Key, Power, ToggleRight, Play, Smartphone, ShieldCheck, Eye, EyeOff, Edit3, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import { useAuthState } from '../api/useAuthState';
+import { getNameChangeStatus } from '../api/name-change';
 import StarRating from '../components/StarRating';
+import NameChangeModal from '../components/NameChangeModal';
 
 const TeacherProfilePageNew = () => {
     const { id } = useParams();
@@ -34,6 +36,8 @@ const TeacherProfilePageNew = () => {
         showContactInfo: false,
         emailOnNewReviews: false
     });
+    const [nameChangeRequest, setNameChangeRequest] = useState(null);
+    const [showNameChangeModal, setShowNameChangeModal] = useState(false);
 
     // Мок дані для демонстрації
     useEffect(() => {
@@ -46,7 +50,7 @@ const TeacherProfilePageNew = () => {
                 department: 'Кафедра комп\'ютерних наук',
                 position: 'Професор',
                 academicDegree: 'Доктор технічних наук',
-                bio: 'Досвідчений викладач з 15-річним стажем роботи в галузі штучного інтелекту та машинного навчання. Автор понад 50 наукових публікацій та 3 монографій.',
+                bio: 'Спеціаліст з штучного інтелекту та машинного навчання. Автор понад 50 наукових публікацій та 3 монографій. Досвідчений викладач з глибокими знаннями в галузі AI/ML.',
                 image: '/api/placeholder/300/400',
                 email: user?.email || 'o.petrenko@university.edu.ua',
                 phone: '+380 44 123 45 67',
@@ -86,9 +90,46 @@ const TeacherProfilePageNew = () => {
         }, 1000);
     }, [id, user]);
 
+    // Завантаження статусу запиту на зміну імені
+    useEffect(() => {
+        if (user) {
+            loadNameChangeStatus();
+        }
+    }, [user]);
+
     const handleTabChange = (tabId) => {
         setActiveTab(tabId);
         localStorage.setItem('teacherProfileActiveTab', tabId);
+    };
+
+    // Функції для роботи з модальним вікном зміни імені
+    const loadNameChangeStatus = async () => {
+        try {
+            const response = await getNameChangeStatus();
+            if (response.hasRequest) {
+                setNameChangeRequest(response.request);
+            } else {
+                setNameChangeRequest(null);
+            }
+        } catch (error) {
+            console.error('Error loading name change status:', error);
+            setNameChangeRequest(null);
+        }
+    };
+
+    const handleOpenNameChangeModal = () => {
+        setShowNameChangeModal(true);
+    };
+
+    const handleCloseNameChangeModal = () => {
+        setShowNameChangeModal(false);
+        // Перезавантажуємо статус після закриття модального вікна
+        loadNameChangeStatus();
+    };
+
+    // Функція для отримання поточного імені
+    const getCurrentDisplayName = () => {
+        return user?.displayName || teacher?.name || 'Викладач';
     };
 
     const handlePrivacySettingChange = (setting, value) => {
@@ -218,15 +259,15 @@ const TeacherProfilePageNew = () => {
                 </div>
 
                 <div className="bg-white text-black rounded-xl p-4 shadow-lg border border-gray-200 relative overflow-hidden group stats-card">
-                    <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-orange-100/50 to-red-100/30 rounded-full -translate-y-8 translate-x-8 animate-pulse"></div>
+                    <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-purple-100/50 to-pink-100/30 rounded-full -translate-y-8 translate-x-8 animate-pulse"></div>
                     <div className="relative">
                         <div className="flex items-center gap-3 mb-2">
-                            <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-600 rounded-lg flex items-center justify-center">
-                                <Award className="w-5 h-5 text-white" />
+                            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-600 rounded-lg flex items-center justify-center">
+                                <GraduationCap className="w-5 h-5 text-white" />
                             </div>
                             <div>
-                                <p className="text-sm text-gray-600">Досвід</p>
-                                <p className="text-xl font-bold text-gray-900">15 років</p>
+                                <p className="text-sm text-gray-600">Спеціалізація</p>
+                                <p className="text-xl font-bold text-gray-900">AI/ML</p>
                             </div>
                         </div>
                     </div>
@@ -345,7 +386,10 @@ const TeacherProfilePageNew = () => {
                                     <User className="w-4 h-4 text-gray-400" />
                                     <span className="text-sm font-medium">{teacher?.name}</span>
                                 </div>
-                                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 hover:scale-105 flex items-center gap-2">
+                                <button 
+                                    onClick={handleOpenNameChangeModal}
+                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 hover:scale-105 flex items-center gap-2"
+                                >
                                     <Edit3 size={16} />
                                     Редагувати
                                 </button>
@@ -362,6 +406,41 @@ const TeacherProfilePageNew = () => {
                             </div>
                         </div>
                     </div>
+                    
+                    {/* Статус запиту на зміну імені */}
+                    {nameChangeRequest && (
+                        <div className="mt-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                            <div className="flex items-center gap-3 mb-3">
+                                {nameChangeRequest.status === 'pending' && <Clock className="w-5 h-5 text-yellow-500" />}
+                                {nameChangeRequest.status === 'approved' && <CheckCircle className="w-5 h-5 text-green-500" />}
+                                {nameChangeRequest.status === 'rejected' && <AlertCircle className="w-5 h-5 text-red-500" />}
+                                <h4 className="font-semibold text-gray-900">
+                                    {nameChangeRequest.status === 'pending' && 'Запит на зміну імені очікує розгляду'}
+                                    {nameChangeRequest.status === 'approved' && 'Запит на зміну імені схвалено'}
+                                    {nameChangeRequest.status === 'rejected' && 'Запит на зміну імені відхилено'}
+                                </h4>
+                            </div>
+                            <div className="text-sm text-gray-600 space-y-1">
+                                <p><strong>Нове ім'я:</strong> {nameChangeRequest.newFirstName} {nameChangeRequest.newMiddleName ? nameChangeRequest.newMiddleName + ' ' : ''}{nameChangeRequest.newLastName}</p>
+                                <p><strong>Відображуване ім'я:</strong> {nameChangeRequest.newDisplayName}</p>
+                                {nameChangeRequest.reason && (
+                                    <p><strong>Причина:</strong> {nameChangeRequest.reason}</p>
+                                )}
+                                <p><strong>Дата створення:</strong> {new Date(nameChangeRequest.createdAt).toLocaleDateString('uk-UA')}</p>
+                                {nameChangeRequest.reviewComment && (
+                                    <p><strong>Коментар модератора:</strong> {nameChangeRequest.reviewComment}</p>
+                                )}
+                            </div>
+                            {nameChangeRequest.status === 'pending' && (
+                                <button
+                                    onClick={handleOpenNameChangeModal}
+                                    className="mt-3 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm"
+                                >
+                                    Переглянути деталі
+                                </button>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -530,6 +609,13 @@ const TeacherProfilePageNew = () => {
                 {activeTab === 'reviews' && renderReviewsTab()}
                 {activeTab === 'settings' && renderSettingsTab()}
             </div>
+
+            {/* Модальне вікно для зміни імені */}
+            <NameChangeModal
+                isOpen={showNameChangeModal}
+                onClose={handleCloseNameChangeModal}
+                currentName={getCurrentDisplayName()}
+            />
         </div>
     );
 };
