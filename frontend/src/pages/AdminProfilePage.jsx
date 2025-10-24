@@ -248,13 +248,13 @@ const AdminProfilePage = () => {
                 <h3 className="text-xl font-bold text-gray-900 mb-4">Управління користувачами</h3>
                 <div className="space-y-3">
                     {users.map((user) => (
-                        <div key={user.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                        <div key={user._id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
-                                    {user.name.charAt(0)}
+                                    {(user.displayName || user.email || 'U').charAt(0).toUpperCase()}
                                 </div>
                                 <div>
-                                    <div className="font-medium text-gray-900">{user.name}</div>
+                                    <div className="font-medium text-gray-900">{user.displayName || user.email || 'Невідомий'}</div>
                                     <div className="text-sm text-gray-600">{user.email}</div>
                                 </div>
                             </div>

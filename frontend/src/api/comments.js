@@ -1,6 +1,6 @@
 import { http } from './httpClient';
 
-export async function list(announcementId, { limit = 50, before } = {}) {
+export async function list(announcementId, { limit = 1000, before } = {}) {
     const params = { limit };
     if (before) params.before = before;
     const { data } = await http.get(`/announcements/${announcementId}/comments`, { params });
