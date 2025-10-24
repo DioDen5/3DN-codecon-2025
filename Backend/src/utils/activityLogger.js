@@ -81,3 +81,48 @@ export const logNameChangeRejected = async (userId, newName) => {
         { newName }
     );
 };
+
+export const logTeacherReviewCreated = async (userId, teacherName, rating) => {
+    await logActivity(
+        userId,
+        'teacher_review_created',
+        `Створено відгук про викладача: ${teacherName} (${rating}/5)`,
+        { teacherName, rating }
+    );
+};
+
+export const logTeacherReviewDeleted = async (userId, teacherName) => {
+    await logActivity(
+        userId,
+        'teacher_review_deleted',
+        `Видалено відгук про викладача: ${teacherName}`,
+        { teacherName }
+    );
+};
+
+export const logAnnouncementDeleted = async (userId, announcementTitle) => {
+    await logActivity(
+        userId,
+        'announcement_deleted',
+        `Видалено обговорення: ${announcementTitle}`,
+        { title: announcementTitle }
+    );
+};
+
+export const logReportCreated = async (userId, reportType, targetId) => {
+    await logActivity(
+        userId,
+        'report_created',
+        `Створено скаргу: ${reportType}`,
+        { reportType, targetId }
+    );
+};
+
+export const logNicknameChangeRequest = async (userId, oldNickname, newNickname) => {
+    await logActivity(
+        userId,
+        'nickname_change_requested',
+        `Запит на зміну нікнейму: ${oldNickname} → ${newNickname}`,
+        { oldNickname, newNickname }
+    );
+};

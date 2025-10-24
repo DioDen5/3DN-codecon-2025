@@ -4,6 +4,7 @@ import { TeacherComment } from '../models/TeacherComment.js';
 import { Teacher } from '../models/Teacher.js';
 import { authRequired } from '../middleware/auth.js';
 import { requireVerified } from '../middleware/requireVerified.js';
+import { logTeacherReviewCreated, logTeacherReviewDeleted } from '../utils/activityLogger.js';
 
 const router = express.Router();
 
@@ -87,9 +88,13 @@ router.post('/:teacherId', authRequired, async (req, res) => {
         await comment.save();
         await comment.populate('authorId', 'displayName email');
         
-
         // Оновлюємо лічильники викладача
         const teacher = await Teacher.findById(teacherId);
+        
+        // Логуємо створення відгуку
+        if (teacher) {
+            await logTeacherReviewCreated(userId, teacher.name, rating);
+        }
         
         if (teacher) {
             
@@ -224,6 +229,11 @@ router.delete('/:commentId', authRequired, async (req, res) => {
             }
             
             await teacher.save();
+        }
+
+        // Логуємо видалення відгуку
+        if (teacher) {
+            await logTeacherReviewDeleted(userId, teacher.name);
         }
 
         // Видаляємо коментар

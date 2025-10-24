@@ -5,7 +5,7 @@ import { requireVerified } from '../middleware/requireVerified.js';
 import { Announcement } from '../models/Announcement.js';
 import { Reaction } from '../models/Reaction.js';
 import { Comment } from '../models/Comment.js';
-import { logAnnouncementCreated } from '../utils/activityLogger.js';
+import { logAnnouncementCreated, logAnnouncementDeleted } from '../utils/activityLogger.js';
 
 const router = express.Router();
 
@@ -177,6 +177,9 @@ router.delete('/:id', authRequired, async (req, res) => {
         
         // Delete all related reactions
         await Reaction.deleteMany({ targetType: 'announcement', targetId: new mongoose.Types.ObjectId(id) });
+
+        // Логуємо видалення обговорення
+        await logAnnouncementDeleted(userId, announcement.title);
 
         // Delete the announcement
         await Announcement.findByIdAndDelete(id);
