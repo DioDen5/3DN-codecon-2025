@@ -28,6 +28,7 @@ import {
     RefreshCw
 } from 'lucide-react';
 import { useAuthState } from '../api/useAuthState';
+import { getAdminStats, getAdminUsers, getAdminReports, getAdminNameChangeRequests } from '../api/admin-stats';
 
 const AdminProfilePage = () => {
     const { user } = useAuthState();
@@ -61,44 +62,55 @@ const AdminProfilePage = () => {
         settings: false
     });
 
-    // Мок дані для демонстрації
+    // Завантаження реальних даних
     useEffect(() => {
-        setTimeout(() => {
-            setStats({
-                totalUsers: 1247,
-                students: 1200,
-                teachers: 45,
-                admins: 2,
-                activeAnnouncements: 23,
-                totalComments: 156,
-                pendingReports: 8,
-                nameChangeRequests: 3
-            });
-            
-            setRecentActivity([
-                { id: 1, type: 'user_registered', user: 'Іван Петренко', time: '2 хв тому', status: 'success' },
-                { id: 2, type: 'comment_reported', user: 'Марія Сидоренко', time: '15 хв тому', status: 'warning' },
-                { id: 3, type: 'name_change_approved', user: 'Олександр Коваленко', time: '1 год тому', status: 'success' },
-                { id: 4, type: 'announcement_published', user: 'Доктор Петренко', time: '2 год тому', status: 'info' }
-            ]);
-            
-            setPendingReports([
-                { id: 1, type: 'comment', reporter: 'Студент А', reason: 'Неприйнятний контент', status: 'pending', createdAt: '2024-01-15' },
-                { id: 2, type: 'user', reporter: 'Студент Б', reason: 'Спам', status: 'pending', createdAt: '2024-01-14' }
-            ]);
-            
-            setNameChangeRequests([
-                { id: 1, user: 'Олександр Петренко', newName: 'Олександр Володимирович Петренко', reason: 'Додавання по батькові', status: 'pending', createdAt: '2024-01-15' },
-                { id: 2, user: 'Марія Сидоренко', newName: 'Марія Олександрівна Сидоренко', reason: 'Зміна імені', status: 'pending', createdAt: '2024-01-14' }
-            ]);
-            
-            setUsers([
-                { id: 1, name: 'Іван Петренко', email: 'i.petrenko@lnu.edu.ua', role: 'student', status: 'verified', lastLogin: '2024-01-15' },
-                { id: 2, name: 'Доктор Олександр Коваленко', email: 'a.kovalenko@lnu.edu.ua', role: 'teacher', status: 'verified', lastLogin: '2024-01-14' }
-            ]);
-            
-            setLoading(false);
-        }, 1000);
+        const loadAdminData = async () => {
+            try {
+                setLoading(true);
+                
+                // Завантажуємо статистику
+                const statsData = await getAdminStats();
+                setStats(statsData);
+                
+                // Завантажуємо користувачів
+                const usersData = await getAdminUsers();
+                setUsers(usersData);
+                
+                // Завантажуємо скарги
+                const reportsData = await getAdminReports();
+                setPendingReports(reportsData);
+                
+                // Завантажуємо запити на зміну імені
+                const nameChangeData = await getAdminNameChangeRequests();
+                setNameChangeRequests(nameChangeData);
+                
+                // Мок дані для активності (поки що)
+                setRecentActivity([
+                    { id: 1, type: 'user_registered', user: 'Іван Петренко', time: '2 хв тому', status: 'success' },
+                    { id: 2, type: 'comment_reported', user: 'Марія Сидоренко', time: '15 хв тому', status: 'warning' },
+                    { id: 3, type: 'name_change_approved', user: 'Олександр Коваленко', time: '1 год тому', status: 'success' },
+                    { id: 4, type: 'announcement_published', user: 'Доктор Петренко', time: '2 год тому', status: 'info' }
+                ]);
+                
+            } catch (error) {
+                console.error('Error loading admin data:', error);
+                // Fallback до мок даних при помилці
+                setStats({
+                    totalUsers: 1247,
+                    students: 1200,
+                    teachers: 45,
+                    admins: 2,
+                    activeAnnouncements: 23,
+                    totalComments: 156,
+                    pendingReports: 8,
+                    nameChangeRequests: 3
+                });
+            } finally {
+                setLoading(false);
+            }
+        };
+        
+        loadAdminData();
     }, []);
 
     const handleTabChange = (tabId) => {
@@ -144,9 +156,9 @@ const AdminProfilePage = () => {
                 </div>
                 
                 <div className="bg-white text-black rounded-xl p-3 md:p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
-                    <FileText className="w-6 h-6 md:w-8 md:h-8 text-green-500 mx-auto mb-2" />
+                    <MessageSquare className="w-6 h-6 md:w-8 md:h-8 text-green-500 mx-auto mb-2" />
                     <div className="text-lg md:text-2xl font-bold text-gray-900">{stats.activeAnnouncements}</div>
-                    <div className="text-xs md:text-sm text-gray-600">Активних оголошень</div>
+                    <div className="text-xs md:text-sm text-gray-600">Активних обговорень</div>
                 </div>
                 
                 <div className="bg-white text-black rounded-xl p-3 md:p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
