@@ -5,6 +5,7 @@ import { Comment } from '../models/Comment.js';
 import { User } from '../models/User.js';
 import { authRequired as auth } from '../middleware/auth.js';
 import { requireVerified } from '../middleware/requireVerified.js';
+import { logCommentCreated } from '../utils/activityLogger.js';
 
 const router = express.Router();
 const isAdmin = (u) => !!u && u.role === 'admin';
@@ -37,6 +38,9 @@ router.post('/announcements/:id/comments', auth, requireVerified, async (req, re
 
         const doc = await Comment.create({ announcementId, authorId: uid, body: body.trim() });
         await Announcement.updateOne({ _id: announcementId }, { $inc: { 'metrics.comments': 1 } });
+
+        // Логуємо створення коментаря
+        await logCommentCreated(uid, body.trim());
 
         console.log('Looking for user with ID:', uid);
         const user = await User.findById(uid).select('email displayName');

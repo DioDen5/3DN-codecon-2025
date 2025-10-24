@@ -5,6 +5,7 @@ import { requireVerified } from '../middleware/requireVerified.js';
 import { Announcement } from '../models/Announcement.js';
 import { Reaction } from '../models/Reaction.js';
 import { Comment } from '../models/Comment.js';
+import { logAnnouncementCreated } from '../utils/activityLogger.js';
 
 const router = express.Router();
 
@@ -135,6 +136,11 @@ router.post('/', authRequired, requireVerified, async (req, res) => {
     });
     
     console.log('Created announcement:', { id: doc._id, status: doc.status, visibility: doc.visibility });
+    
+    // Логуємо створення оголошення
+    if (status === 'published') {
+        await logAnnouncementCreated(req.user.id, title);
+    }
     
     res.status(201).json(doc);
 });
