@@ -72,8 +72,8 @@ const AdminDashboard = ({ statsData, activityData, activityPagination, handlePre
                         {activityData?.slice(0, 4).map((activity, index) => (
                             <div
                                 key={activity._id || index}
-                                className="bg-gray-300/40 rounded-xl p-4 hover:bg-gray-200/60 transition-all duration-300 cursor-pointer fade-in-up"
-                                style={{ animationDelay: `${index * 0.1}s` }}
+                                className="bg-gray-300/40 rounded-xl p-4 hover:bg-gray-200/60 transition-all duration-300 cursor-pointer"
+                                style={{ animation: 'slideInFromLeft 0.6s ease-out both' }}
                             >
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3">

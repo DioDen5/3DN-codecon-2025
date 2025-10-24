@@ -128,9 +128,7 @@ export const useAdminData = () => {
 
             // Завантаження обговорень для модерації
             try {
-                console.log('Loading announcements for moderation...');
-                const announcementsData = await getModerationAnnouncements(1, 10);
-                console.log('Announcements data received:', announcementsData);
+                const announcementsData = await getModerationAnnouncements(1, 5);
                 setAnnouncementsContent(announcementsData.content || []);
                 setAnnouncementsPagination({
                     currentPage: announcementsData.pagination?.currentPage || 1,
@@ -155,9 +153,7 @@ export const useAdminData = () => {
     // Функції для завантаження окремих типів контенту
     const loadAnnouncements = async (page = 1) => {
         try {
-            console.log('Loading announcements page:', page);
-            const data = await getModerationAnnouncements(page, 10);
-            console.log('Announcements loaded:', data);
+            const data = await getModerationAnnouncements(page, 5);
             setAnnouncementsContent(data.content || []);
             setAnnouncementsPagination({
                 currentPage: data.pagination?.currentPage || 1,
@@ -260,66 +256,105 @@ export const useAdminData = () => {
     };
 
     // Пагінація для модерації
-    const handleModerationPrevPage = () => {
+    const handleModerationPrevPage = async () => {
         if (moderationPagination.hasPrevPage) {
-            setModerationPagination(prev => ({
-                ...prev,
-                currentPage: prev.currentPage - 1,
-                hasNextPage: true,
-                hasPrevPage: prev.currentPage - 1 > 1
-            }));
+            const newPage = moderationPagination.currentPage - 1;
+            try {
+                const data = await getAllModerationContent(newPage, 5);
+                setAllModerationContent(data.content || []);
+                setModerationPagination({
+                    currentPage: data.pagination?.currentPage || newPage,
+                    totalPages: data.pagination?.totalPages || 1,
+                    hasNextPage: data.pagination?.hasNextPage || false,
+                    hasPrevPage: data.pagination?.hasPrevPage || false,
+                    totalItems: data.pagination?.totalItems || 0
+                });
+            } catch (error) {
+                console.error('Error loading moderation content:', error);
+            }
         }
     };
 
-    const handleModerationNextPage = () => {
+    const handleModerationNextPage = async () => {
         if (moderationPagination.hasNextPage) {
-            setModerationPagination(prev => ({
-                ...prev,
-                currentPage: prev.currentPage + 1,
-                hasNextPage: prev.currentPage + 1 < prev.totalPages,
-                hasPrevPage: true
-            }));
+            const newPage = moderationPagination.currentPage + 1;
+            try {
+                const data = await getAllModerationContent(newPage, 5);
+                setAllModerationContent(data.content || []);
+                setModerationPagination({
+                    currentPage: data.pagination?.currentPage || newPage,
+                    totalPages: data.pagination?.totalPages || 1,
+                    hasNextPage: data.pagination?.hasNextPage || false,
+                    hasPrevPage: data.pagination?.hasPrevPage || false,
+                    totalItems: data.pagination?.totalItems || 0
+                });
+            } catch (error) {
+                console.error('Error loading moderation content:', error);
+            }
         }
     };
 
-    const handleModerationPageClick = (page) => {
-        setModerationPagination(prev => ({
-            ...prev,
-            currentPage: page,
-            hasNextPage: page < prev.totalPages,
-            hasPrevPage: page > 1
-        }));
+    const handleModerationPageClick = async (page) => {
+        try {
+            const data = await getAllModerationContent(page, 5);
+            setAllModerationContent(data.content || []);
+            setModerationPagination({
+                currentPage: data.pagination?.currentPage || page,
+                totalPages: data.pagination?.totalPages || 1,
+                hasNextPage: data.pagination?.hasNextPage || false,
+                hasPrevPage: data.pagination?.hasPrevPage || false,
+                totalItems: data.pagination?.totalItems || 0
+            });
+        } catch (error) {
+            console.error('Error loading moderation content:', error);
+        }
     };
 
     useEffect(() => {
         loadAdminData();
     }, [loadAdminData]);
 
-    const handleAnnouncementsPrevPage = () => {
+    const handleAnnouncementsPrevPage = async () => {
         if (announcementsPagination.hasPrevPage) {
-            setAnnouncementsPagination(prev => ({
-                ...prev,
-                currentPage: prev.currentPage - 1,
-                hasNextPage: true,
-                hasPrevPage: prev.currentPage - 1 > 1
-            }));
+            const newPage = announcementsPagination.currentPage - 1;
+            try {
+                const data = await getModerationAnnouncements(newPage, 5);
+                setAnnouncementsContent(data.content || []);
+                setAnnouncementsPagination({
+                    currentPage: data.pagination?.currentPage || newPage,
+                    totalPages: data.pagination?.totalPages || 1,
+                    hasNextPage: data.pagination?.hasNextPage || false,
+                    hasPrevPage: data.pagination?.hasPrevPage || false,
+                    totalItems: data.pagination?.totalItems || 0
+                });
+            } catch (error) {
+                console.error('Error loading announcements:', error);
+            }
         }
     };
 
-    const handleAnnouncementsNextPage = () => {
+    const handleAnnouncementsNextPage = async () => {
         if (announcementsPagination.hasNextPage) {
-            setAnnouncementsPagination(prev => ({
-                ...prev,
-                currentPage: prev.currentPage + 1,
-                hasNextPage: prev.currentPage + 1 < prev.totalPages,
-                hasPrevPage: true
-            }));
+            const newPage = announcementsPagination.currentPage + 1;
+            try {
+                const data = await getModerationAnnouncements(newPage, 5);
+                setAnnouncementsContent(data.content || []);
+                setAnnouncementsPagination({
+                    currentPage: data.pagination?.currentPage || newPage,
+                    totalPages: data.pagination?.totalPages || 1,
+                    hasNextPage: data.pagination?.hasNextPage || false,
+                    hasPrevPage: data.pagination?.hasPrevPage || false,
+                    totalItems: data.pagination?.totalItems || 0
+                });
+            } catch (error) {
+                console.error('Error loading announcements:', error);
+            }
         }
     };
 
     const handleAnnouncementsPageClick = async (page) => {
         try {
-            const data = await getModerationAnnouncements(page, 10);
+            const data = await getModerationAnnouncements(page, 5);
             setAnnouncementsContent(data.content || []);
             setAnnouncementsPagination(data.pagination || {
                 currentPage: page,
