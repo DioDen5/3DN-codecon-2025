@@ -53,6 +53,13 @@ const AdminProfilePage = () => {
     const [nameChangeRequests, setNameChangeRequests] = useState([]);
     const [users, setUsers] = useState([]);
     const [announcements, setAnnouncements] = useState([]);
+    const [iconAnimations, setIconAnimations] = useState({
+        dashboard: false,
+        moderation: false,
+        users: false,
+        reports: false,
+        settings: false
+    });
 
     // Мок дані для демонстрації
     useEffect(() => {
@@ -95,8 +102,27 @@ const AdminProfilePage = () => {
     }, []);
 
     const handleTabChange = (tabId) => {
+        // Перевіряємо, чи таб вже активний
+        if (activeTab === tabId) {
+            return; // Не запускаємо анімацію, якщо таб вже активний
+        }
+        
         setActiveTab(tabId);
         localStorage.setItem('adminProfileActiveTab', tabId);
+        
+        // Запускаємо анімацію для іконки
+        setIconAnimations(prev => ({
+            ...prev,
+            [tabId]: true
+        }));
+        
+        // Вимикаємо анімацію через час
+        setTimeout(() => {
+            setIconAnimations(prev => ({
+                ...prev,
+                [tabId]: false
+            }));
+        }, 800);
     };
 
     const tabs = [
@@ -320,7 +346,18 @@ const AdminProfilePage = () => {
                                                 : 'text-gray-600 hover:text-gray-800 hover:bg-gray-300'
                                         }`}
                                     >
-                                        <Icon size={18} />
+                                        <Icon 
+                                            size={18} 
+                                            className={
+                                                iconAnimations[tab.id] ? 
+                                                    tab.id === 'dashboard' ? 'admin-icon-bounce' :
+                                                    tab.id === 'moderation' ? 'admin-icon-pulse' :
+                                                    tab.id === 'users' ? 'admin-icon-shake' :
+                                                    tab.id === 'reports' ? 'admin-icon-bounce' :
+                                                    tab.id === 'settings' ? 'admin-icon-rotate' : ''
+                                                : ''
+                                            }
+                                        />
                                         <span>{tab.label}</span>
                                     </button>
                                 );
