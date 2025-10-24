@@ -30,7 +30,7 @@ import {
     ChevronRight
 } from 'lucide-react';
 import { useAuthState } from '../api/useAuthState';
-import { getAdminStats, getAdminUsers, getAdminReports, getAdminNameChangeRequests, getAdminActivity, resolveReport, rejectReport, getModerationData, getAllModerationContent } from '../api/admin-stats';
+import { getAdminStats, getAdminUsers, getAdminReports, getAdminNameChangeRequests, getAdminActivity, resolveReport, rejectReport, getModerationData, getAllModerationContent, getModerationAnnouncements, getModerationComments, getModerationReviews } from '../api/admin-stats';
 import ReportReviewModal from '../components/ReportReviewModal';
 
 const AdminProfilePage = () => {
@@ -91,6 +91,32 @@ const AdminProfilePage = () => {
             reviews: []
         }
     });
+    
+    // Separate content states for each filter
+    const [announcementsContent, setAnnouncementsContent] = useState([]);
+    const [commentsContent, setCommentsContent] = useState([]);
+    const [reviewsContent, setReviewsContent] = useState([]);
+    const [announcementsPagination, setAnnouncementsPagination] = useState({
+        currentPage: 1,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPrevPage: false,
+        totalItems: 0
+    });
+    const [commentsPagination, setCommentsPagination] = useState({
+        currentPage: 1,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPrevPage: false,
+        totalItems: 0
+    });
+    const [reviewsPagination, setReviewsPagination] = useState({
+        currentPage: 1,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPrevPage: false,
+        totalItems: 0
+    });
     const [nameChangeRequests, setNameChangeRequests] = useState([]);
     const [users, setUsers] = useState([]);
     const [announcements, setAnnouncements] = useState([]);
@@ -136,13 +162,11 @@ const AdminProfilePage = () => {
                 console.log('Name change requests received:', nameChangeData);
                 setNameChangeRequests(nameChangeData);
 
-                // Завантажуємо активність
                 console.log('Fetching admin activity...');
                 const activityData = await getAdminActivity();
                 console.log('Admin activity received:', activityData);
-                setAllActivityData(activityData); // Зберігаємо всі дані
+                setAllActivityData(activityData); 
 
-                // Завантажуємо дані модерації (використовуємо існуючі дані)
                 console.log('Preparing moderation data from existing stats...');
                 console.log('Stats data for moderation:', {
                     activeAnnouncements: statsData.activeAnnouncements,
@@ -171,9 +195,8 @@ const AdminProfilePage = () => {
                 };
             console.log('Moderation data prepared:', moderationData);
             setModerationData(moderationData);
-            setRecentActivity(activityData); // Встановлюємо для відображення
+            setRecentActivity(activityData);
             
-            // Завантажуємо весь контент для модерації
                     try {
                         const allContentData = await getAllModerationContent(moderationPagination.currentPage, 5);
                         console.log('All moderation content loaded:', allContentData);
@@ -190,7 +213,6 @@ const AdminProfilePage = () => {
                         setAllModerationContent([]);
                     }
                 
-                // Розраховуємо пагінацію (4 записи на сторінку)
                 const itemsPerPage = 4;
                 const totalPages = Math.ceil(activityData.length / itemsPerPage);
                 setActivityPagination({
@@ -203,7 +225,6 @@ const AdminProfilePage = () => {
                 
             } catch (error) {
                 console.error('Error loading admin data:', error);
-                // При помилці залишаємо значення за замовчуванням (0)
             } finally {
                 setLoading(false);
             }
@@ -214,22 +235,29 @@ const AdminProfilePage = () => {
         loadAdminData();
     }, []);
 
+    // Завантаження даних при зміні фільтра модерації
+    useEffect(() => {
+        if (moderationFilter === 'announcements') {
+            loadAnnouncements();
+        } else if (moderationFilter === 'comments') {
+            loadComments();
+        } else if (moderationFilter === 'reviews') {
+            loadReviews();
+        }
+    }, [moderationFilter]);
+
     const handleTabChange = (tabId) => {
-        // Перевіряємо, чи таб вже активний
         if (activeTab === tabId) {
-            return; // Не запускаємо анімацію, якщо таб вже активний
         }
         
         setActiveTab(tabId);
         localStorage.setItem('adminProfileActiveTab', tabId);
         
-        // Запускаємо анімацію для іконки
         setIconAnimations(prev => ({
             ...prev,
             [tabId]: true
         }));
         
-        // Вимикаємо анімацію через час
         setTimeout(() => {
             setIconAnimations(prev => ({
                 ...prev,
@@ -263,7 +291,6 @@ const AdminProfilePage = () => {
     };
 
     const handlePageClick = (page) => {
-        // Плавна анімація зміни контенту без перезавантаження
         setActivityPagination(prev => ({
             ...prev,
             currentPage: page,
@@ -282,7 +309,6 @@ const AdminProfilePage = () => {
 
     const renderDashboardTab = () => (
         <div className="space-y-6">
-            {/* Статистика */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                 <div className="bg-white text-black rounded-xl p-3 md:p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
                     <Users className="w-6 h-6 md:w-8 md:h-8 text-blue-500 mx-auto mb-2" />
@@ -309,7 +335,6 @@ const AdminProfilePage = () => {
                 </div>
             </div>
 
-            {/* Розподіл користувачів */}
             <div className="bg-white text-black rounded-2xl p-6 shadow-xl border border-gray-200 relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-100/50 to-blue-200/30 rounded-full -translate-y-16 translate-x-16 animate-pulse"></div>
                 <div className="relative">
@@ -336,7 +361,6 @@ const AdminProfilePage = () => {
                 </div>
             </div>
 
-            {/* Остання активність */}
             <div className="bg-white text-black rounded-2xl p-6 shadow-xl border border-gray-200 relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-100/50 to-blue-200/30 rounded-full -translate-y-16 translate-x-16 animate-pulse"></div>
                 <div className="relative">
@@ -374,7 +398,6 @@ const AdminProfilePage = () => {
                         ))}
                     </div>
                     
-                    {/* Пагінація - показується тільки при мінімум 4 записах */}
                     {recentActivity.length >= 4 && activityPagination.totalPages > 1 && (
                         <div className="mt-6 pt-4 border-t border-gray-200">
                             <div className="relative">
@@ -415,9 +438,7 @@ const AdminProfilePage = () => {
                                             )}
                                         </button>
 
-                                        {/* Центральна інформація */}
                                         <div className="flex items-center gap-4">
-                                            {/* Номери сторінок */}
                                             <div className="flex items-center gap-2">
                                                 {Array.from({ length: Math.min(activityPagination.totalPages, 4) }, (_, i) => {
                                                     const pageNum = i + 1;
@@ -456,7 +477,6 @@ const AdminProfilePage = () => {
                                                 )}
                                             </div>
 
-                                            {/* Індикатор прогресу */}
                                             <div className="flex items-center gap-3">
                                                 <div className="flex items-center gap-2">
                                                     <div className="w-2 h-2 bg-gradient-to-r from-blue-400 to-blue-500 rounded-full animate-pulse"></div>
@@ -465,7 +485,6 @@ const AdminProfilePage = () => {
                                                     </span>
                                                 </div>
                                                 
-                                                {/* Прогрес бар */}
                                                 <div className="w-20 h-2 bg-gray-200 rounded-full overflow-hidden relative">
                                                     <div 
                                                         className="h-full bg-gradient-to-r from-blue-400 to-blue-500 rounded-full relative overflow-hidden"
@@ -474,7 +493,6 @@ const AdminProfilePage = () => {
                                                             animation: 'waterFill 1.5s ease-out'
                                                         }}
                                                     >
-                                                        {/* Анімація "води" що заповнюється */}
                                                         <div 
                                                             className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
                                                             style={{ animation: 'waterWave 2s ease-in-out infinite' }}
@@ -526,6 +544,57 @@ const AdminProfilePage = () => {
         </div>
     );
 
+    const loadAnnouncements = async (page = 1) => {
+        try {
+            const data = await getModerationAnnouncements(page, 10);
+            setAnnouncementsContent(data.content || []);
+            setAnnouncementsPagination({
+                currentPage: data.pagination?.currentPage || 1,
+                totalPages: data.pagination?.totalPages || 1,
+                hasNextPage: data.pagination?.hasNextPage || false,
+                hasPrevPage: data.pagination?.hasPrevPage || false,
+                totalItems: data.pagination?.totalItems || 0
+            });
+        } catch (error) {
+            console.error('Error loading announcements:', error);
+            setAnnouncementsContent([]);
+        }
+    };
+
+    const loadComments = async (page = 1) => {
+        try {
+            const data = await getModerationComments(page, 10);
+            setCommentsContent(data.content || []);
+            setCommentsPagination({
+                currentPage: data.pagination?.currentPage || 1,
+                totalPages: data.pagination?.totalPages || 1,
+                hasNextPage: data.pagination?.hasNextPage || false,
+                hasPrevPage: data.pagination?.hasPrevPage || false,
+                totalItems: data.pagination?.totalItems || 0
+            });
+        } catch (error) {
+            console.error('Error loading comments:', error);
+            setCommentsContent([]);
+        }
+    };
+
+    const loadReviews = async (page = 1) => {
+        try {
+            const data = await getModerationReviews(page, 10);
+            setReviewsContent(data.content || []);
+            setReviewsPagination({
+                currentPage: data.pagination?.currentPage || 1,
+                totalPages: data.pagination?.totalPages || 1,
+                hasNextPage: data.pagination?.hasNextPage || false,
+                hasPrevPage: data.pagination?.hasPrevPage || false,
+                totalItems: data.pagination?.totalItems || 0
+            });
+        } catch (error) {
+            console.error('Error loading reviews:', error);
+            setReviewsContent([]);
+        }
+    };
+
     const renderModerationTab = () => {
 
         const moderationFilters = [
@@ -549,14 +618,12 @@ const AdminProfilePage = () => {
         const handleDeleteItem = async (id, type) => {
             try {
                 console.log(`Delete ${type}:`, id);
-                // Тут буде логіка видалення окремого елемента
                 alert(`Функція видалення ${type} буде реалізована`);
             } catch (error) {
                 console.error('Error deleting item:', error);
             }
         };
 
-        // Функції пагінації для модерації
         const handleModerationPageClick = async (page) => {
             try {
                 const allContentData = await getAllModerationContent(page, 5);
@@ -585,9 +652,9 @@ const AdminProfilePage = () => {
             }
         };
 
+
         return (
             <div className="space-y-6">
-                {/* Заголовок та статистика */}
                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200 moderation-slide-in">
                     <div className="flex items-center justify-between mb-4">
                         <div>
@@ -611,10 +678,8 @@ const AdminProfilePage = () => {
                     </div>
                 </div>
 
-                {/* Фільтри та пошук */}
                 <div className="bg-white rounded-2xl p-6 shadow-xl border border-gray-200 moderation-slide-in" style={{ animationDelay: '0.1s' }}>
                     <div className="flex flex-col lg:flex-row gap-4 mb-6">
-                        {/* Фільтри */}
                         <div className="flex flex-wrap gap-2">
                             {moderationFilters.map((filter) => {
                                 const Icon = filter.icon;
@@ -643,7 +708,6 @@ const AdminProfilePage = () => {
                             })}
                         </div>
 
-                        {/* Пошук */}
                         <div className="flex-1">
                             <div className="relative">
                                 <input
@@ -662,7 +726,6 @@ const AdminProfilePage = () => {
                         </div>
                     </div>
 
-                    {/* Масові дії */}
                     {selectedItems.length > 0 && (
                         <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6 moderation-pulse">
                             <div className="flex items-center justify-between">
@@ -692,7 +755,6 @@ const AdminProfilePage = () => {
                         </div>
                     )}
 
-                    {/* Контент за фільтром */}
                     <div className="space-y-4">
                         {moderationFilter === 'all' && (
                             <div className="space-y-3">
@@ -772,10 +834,8 @@ const AdminProfilePage = () => {
                             </div>
                         )}
 
-                        {/* Пагінація для "Весь контент" */}
                         {moderationFilter === 'all' && allModerationContent.length > 0 && (
                             <div className="flex items-center justify-center gap-4 mt-8">
-                                {/* Кнопка "Попередня" */}
                                 <button
                                     onClick={handleModerationPrevPage}
                                     disabled={!moderationPagination.hasPrevPage}
@@ -789,7 +849,6 @@ const AdminProfilePage = () => {
                                     Попередня
                                 </button>
 
-                                {/* Номери сторінок */}
                                 <div className="flex items-center gap-2">
                                     {(() => {
                                         const currentPage = moderationPagination.currentPage;
@@ -799,23 +858,18 @@ const AdminProfilePage = () => {
                                         let startPage, endPage;
                                         
                                         if (totalPages <= maxVisible) {
-                                            // Якщо загальна кількість сторінок менше або дорівнює максимальній видимій
                                             startPage = 1;
                                             endPage = totalPages;
                                         } else {
-                                            // Розраховуємо діапазон навколо поточної сторінки
                                             const halfVisible = Math.floor(maxVisible / 2);
                                             
                                             if (currentPage <= halfVisible) {
-                                                // Якщо поточна сторінка близько до початку
                                                 startPage = 1;
                                                 endPage = maxVisible;
                                             } else if (currentPage + halfVisible >= totalPages) {
-                                                // Якщо поточна сторінка близько до кінця
                                                 startPage = totalPages - maxVisible + 1;
                                                 endPage = totalPages;
                                             } else {
-                                                // Якщо поточна сторінка в середині
                                                 startPage = currentPage - halfVisible;
                                                 endPage = currentPage + halfVisible;
                                             }
@@ -823,7 +877,6 @@ const AdminProfilePage = () => {
                                         
                                         const pages = [];
                                         
-                                        // Додаємо першу сторінку, якщо потрібно
                                         if (startPage > 1) {
                                             pages.push(
                                                 <button
@@ -842,7 +895,6 @@ const AdminProfilePage = () => {
                                             }
                                         }
                                         
-                                        // Додаємо видимі сторінки
                                         for (let i = startPage; i <= endPage; i++) {
                                             const isActive = i === currentPage;
                                             pages.push(
@@ -866,7 +918,6 @@ const AdminProfilePage = () => {
                                             );
                                         }
                                         
-                                        // Додаємо останню сторінку, якщо потрібно
                                         if (endPage < totalPages) {
                                             if (endPage < totalPages - 1) {
                                                 pages.push(
@@ -889,7 +940,6 @@ const AdminProfilePage = () => {
                                     })()}
                                 </div>
 
-                                {/* Кнопка "Наступна" */}
                                 <button
                                     onClick={handleModerationNextPage}
                                     disabled={!moderationPagination.hasNextPage}
@@ -907,8 +957,8 @@ const AdminProfilePage = () => {
 
                         {moderationFilter === 'announcements' && (
                             <div className="space-y-3">
-                                {moderationData.recentContent.announcements.length > 0 ? (
-                                    moderationData.recentContent.announcements.map((announcement, index) => (
+                                {announcementsContent.length > 0 ? (
+                                    announcementsContent.map((announcement, index) => (
                                         <div key={announcement._id} className="bg-gray-50 rounded-xl p-4 border border-gray-200 moderation-slide-in hover:moderation-glow transition-all duration-300" style={{ animationDelay: `${index * 0.1}s` }}>
                                             <div className="flex items-start justify-between">
                                                 <div className="flex-1">
@@ -974,8 +1024,8 @@ const AdminProfilePage = () => {
 
                         {moderationFilter === 'comments' && (
                             <div className="space-y-3">
-                                {moderationData.recentContent.comments.length > 0 ? (
-                                    moderationData.recentContent.comments.map((comment, index) => (
+                                {commentsContent.length > 0 ? (
+                                    commentsContent.map((comment, index) => (
                                         <div key={comment._id} className="bg-gray-50 rounded-xl p-4 border border-gray-200 moderation-slide-in hover:moderation-glow transition-all duration-300" style={{ animationDelay: `${index * 0.1}s` }}>
                                             <div className="flex items-start justify-between">
                                                 <div className="flex-1">
@@ -1026,8 +1076,8 @@ const AdminProfilePage = () => {
 
                         {moderationFilter === 'reviews' && (
                             <div className="space-y-3">
-                                {moderationData.recentContent.reviews.length > 0 ? (
-                                    moderationData.recentContent.reviews.map((review, index) => (
+                                {reviewsContent.length > 0 ? (
+                                    reviewsContent.map((review, index) => (
                                         <div key={review._id} className="bg-gray-50 rounded-xl p-4 border border-gray-200 moderation-slide-in hover:moderation-glow transition-all duration-300" style={{ animationDelay: `${index * 0.1}s` }}>
                                             <div className="flex items-start justify-between">
                                                 <div className="flex-1">

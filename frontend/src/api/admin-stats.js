@@ -99,3 +99,39 @@ export const getAllModerationContent = async (page = 1, limit = 20) => {
         throw error;
     }
 };
+
+export const getModerationAnnouncements = async (page = 1, limit = 10) => {
+    try {
+        console.log(`Making request to /admin/moderation/announcements?page=${page}&limit=${limit}...`);
+        const response = await http.get(`/admin/moderation/announcements?page=${page}&limit=${limit}`);
+        console.log('Moderation announcements response:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Error getting moderation announcements:', error);
+        throw error;
+    }
+};
+
+export const getModerationComments = async (page = 1, limit = 10) => {
+    try {
+        console.log(`Making request to /admin/moderation/comments?page=${page}&limit=${limit}...`);
+        const response = await http.get(`/admin/moderation/comments?page=${page}&limit=${limit}`);
+        console.log('Moderation comments response:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Error getting moderation comments:', error);
+        throw error;
+    }
+};
+
+export const getModerationReviews = async (page = 1, limit = 10) => {
+    try {
+        console.log(`Making request to /admin/moderation/reviews?page=${page}&limit=${limit}...`);
+        const response = await http.get(`/admin/moderation/reviews?page=${page}&limit=${limit}`);
+        console.log('Moderation reviews response:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Error getting moderation reviews:', error);
+        throw error;
+    }
+};

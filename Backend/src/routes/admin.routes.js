@@ -352,4 +352,116 @@ router.get('/moderation/all', authRequired, requireAdmin, async (req, res) => {
     }
 });
 
+// Отримання оголошень для модерації
+router.get('/moderation/announcements', authRequired, requireAdmin, async (req, res) => {
+    try {
+        console.log('Getting moderation announcements...');
+        
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+        
+        const announcements = await Announcement.find()
+            .populate('authorId', 'displayName email')
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        const totalItems = await Announcement.countDocuments();
+        const totalPages = Math.ceil(totalItems / limit);
+
+        res.json({
+            content: announcements,
+            pagination: {
+                currentPage: page,
+                totalPages,
+                totalItems,
+                hasNextPage: page < totalPages,
+                hasPrevPage: page > 1,
+                limit
+            }
+        });
+    } catch (error) {
+        console.error('Error getting moderation announcements:', error);
+        res.status(500).json({ error: 'Internal server error', details: error.message });
+    }
+});
+
+// Отримання коментарів для модерації
+router.get('/moderation/comments', authRequired, requireAdmin, async (req, res) => {
+    try {
+        console.log('Getting moderation comments...');
+        
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+        
+        const comments = await Comment.find()
+            .populate('authorId', 'displayName email')
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        const totalItems = await Comment.countDocuments();
+        const totalPages = Math.ceil(totalItems / limit);
+
+        res.json({
+            content: comments,
+            pagination: {
+                currentPage: page,
+                totalPages,
+                totalItems,
+                hasNextPage: page < totalPages,
+                hasPrevPage: page > 1,
+                limit
+            }
+        });
+    } catch (error) {
+        console.error('Error getting moderation comments:', error);
+        res.status(500).json({ error: 'Internal server error', details: error.message });
+    }
+});
+
+// Отримання відгуків для модерації
+router.get('/moderation/reviews', authRequired, requireAdmin, async (req, res) => {
+    try {
+        console.log('Getting moderation reviews...');
+        
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+        
+        let reviews = [];
+        try {
+            const { TeacherComment } = await import('../models/TeacherComment.js');
+            reviews = await TeacherComment.find()
+                .populate('authorId', 'displayName email')
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit);
+        } catch (reviewError) {
+            console.error('Error fetching reviews:', reviewError);
+            reviews = [];
+        }
+
+        const totalItems = reviews.length > 0 ? await TeacherComment.countDocuments() : 0;
+        const totalPages = Math.ceil(totalItems / limit);
+
+        res.json({
+            content: reviews,
+            pagination: {
+                currentPage: page,
+                totalPages,
+                totalItems,
+                hasNextPage: page < totalPages,
+                hasPrevPage: page > 1,
+                limit
+            }
+        });
+    } catch (error) {
+        console.error('Error getting moderation reviews:', error);
+        res.status(500).json({ error: 'Internal server error', details: error.message });
+    }
+});
+
 export default router;
