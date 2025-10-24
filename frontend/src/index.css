@@ -10,6 +10,102 @@
   display: none; /* Safari and Chrome */
 }
 
+/* Прикольне підсвічування для іконки "Весь контент" */
+@keyframes contentGlow {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.4), 0 0 40px rgba(59, 130, 246, 0.2);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(59, 130, 246, 0.6), 0 0 60px rgba(59, 130, 246, 0.4), 0 0 80px rgba(59, 130, 246, 0.2);
+        transform: scale(1.05);
+    }
+}
+
+@keyframes contentPulse {
+    0%, 100% {
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    }
+    50% {
+        background: linear-gradient(135deg, #1d4ed8, #1e40af);
+    }
+}
+
+@keyframes contentRotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    25% {
+        transform: rotate(5deg);
+    }
+    75% {
+        transform: rotate(-5deg);
+    }
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
+@keyframes contentShimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.content-icon-glow {
+    animation: contentGlow 3s ease-in-out infinite;
+}
+
+.content-icon-pulse {
+    animation: contentPulse 2s ease-in-out infinite;
+}
+
+.content-icon-rotate {
+    animation: contentRotate 4s ease-in-out infinite;
+}
+
+.content-icon-shimmer {
+    background: linear-gradient(90deg, #3b82f6, #1d4ed8, #3b82f6);
+    background-size: 200% 100%;
+    animation: contentShimmer 2s linear infinite;
+}
+
+@keyframes contentParticles {
+    0% {
+        transform: rotate(0deg) translateX(30px) rotate(0deg);
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        transform: rotate(360deg) translateX(30px) rotate(-360deg);
+        opacity: 0;
+    }
+}
+
+.content-icon-particles::before,
+.content-icon-particles::after {
+    content: '';
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    animation: contentParticles 3s linear infinite;
+}
+
+.content-icon-particles::before {
+    animation-delay: 0s;
+}
+
+.content-icon-particles::after {
+    animation-delay: 1.5s;
+}
+
 .btn-glow {
     @apply flex items-center justify-center  border border-white/20 rounded cursor-pointer
     transition-all duration-500 ease-in-out;
