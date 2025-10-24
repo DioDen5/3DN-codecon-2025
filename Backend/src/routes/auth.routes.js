@@ -6,6 +6,7 @@ import { PasswordResetToken } from '../models/PasswordResetToken.js';
 import allowed from '../config/allowed-edu-domains.json' with { type: 'json' };
 import { signJwt, verifyJwt } from '../middleware/auth.js';
 import { sendPasswordResetEmail } from '../utils/emailService.js';
+import { logUserRegistration, logUserVerification } from '../utils/activityLogger.js';
 
 const router = express.Router();
 
@@ -75,6 +76,9 @@ router.post('/register', async (req, res) => {
     const refresh = signJwt({ id: user._id }, 'refresh');
 
     setRefreshCookie(res, refresh);
+
+    // Логуємо реєстрацію користувача
+    await logUserRegistration(user._id, email);
 
     return res.status(201).json({
         token: access,

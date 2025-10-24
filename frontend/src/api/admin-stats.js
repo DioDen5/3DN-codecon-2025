@@ -42,3 +42,16 @@ export const getAdminNameChangeRequests = async () => {
         throw error;
     }
 };
+
+export const getAdminActivity = async () => {
+    try {
+        console.log('Making request to /admin/activity...');
+        const response = await http.get('/admin/activity');
+        console.log('Admin activity response:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Error getting admin activity:', error);
+        console.error('Error details:', error.response?.data);
+        throw error;
+    }
+};

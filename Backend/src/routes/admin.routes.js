@@ -4,6 +4,7 @@ import { Announcement } from '../models/Announcement.js';
 import { Comment } from '../models/Comment.js';
 import { Report } from '../models/Report.js';
 import { NameChangeRequest } from '../models/NameChangeRequest.js';
+import { ActivityLog } from '../models/ActivityLog.js';
 import { authRequired } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -102,6 +103,48 @@ router.get('/name-change-requests', authRequired, requireAdmin, async (req, res)
         res.json(requests);
     } catch (error) {
         console.error('Error getting name change requests:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Отримання останньої активності
+router.get('/activity', authRequired, requireAdmin, async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 10;
+        
+        const activities = await ActivityLog.find({})
+            .populate('userId', 'displayName email')
+            .sort({ createdAt: -1 })
+            .limit(limit);
+
+        // Форматуємо дані для frontend
+        const formattedActivities = activities.map(activity => {
+            const user = activity.userId;
+            const userName = user?.displayName || user?.email?.split('@')[0] || 'Невідомий';
+            
+            // Визначаємо статус на основі типу дії
+            let status = 'info';
+            if (activity.action.includes('approved') || activity.action.includes('verified')) {
+                status = 'success';
+            } else if (activity.action.includes('reported') || activity.action.includes('blocked')) {
+                status = 'warning';
+            } else if (activity.action.includes('rejected')) {
+                status = 'error';
+            }
+
+            return {
+                id: activity._id,
+                type: activity.action,
+                user: userName,
+                time: activity.timeAgo,
+                status: status,
+                description: activity.description
+            };
+        });
+
+        res.json(formattedActivities);
+    } catch (error) {
+        console.error('Error getting activity:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });

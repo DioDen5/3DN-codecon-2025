@@ -28,7 +28,7 @@ import {
     RefreshCw
 } from 'lucide-react';
 import { useAuthState } from '../api/useAuthState';
-import { getAdminStats, getAdminUsers, getAdminReports, getAdminNameChangeRequests } from '../api/admin-stats';
+import { getAdminStats, getAdminUsers, getAdminReports, getAdminNameChangeRequests, getAdminActivity } from '../api/admin-stats';
 
 const AdminProfilePage = () => {
     const { user, token } = useAuthState();
@@ -50,6 +50,14 @@ const AdminProfilePage = () => {
     });
     
     const [recentActivity, setRecentActivity] = useState([]);
+    const [allActivityData, setAllActivityData] = useState([]); // Зберігаємо всі дані
+    const [activityPagination, setActivityPagination] = useState({
+        currentPage: 1,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPrevPage: false,
+        totalActivities: 0
+    });
     const [pendingReports, setPendingReports] = useState([]);
     const [nameChangeRequests, setNameChangeRequests] = useState([]);
     const [users, setUsers] = useState([]);
@@ -95,14 +103,24 @@ const AdminProfilePage = () => {
                 const nameChangeData = await getAdminNameChangeRequests();
                 console.log('Name change requests received:', nameChangeData);
                 setNameChangeRequests(nameChangeData);
+
+                // Завантажуємо активність
+                console.log('Fetching admin activity...');
+                const activityData = await getAdminActivity();
+                console.log('Admin activity received:', activityData);
+                setAllActivityData(activityData); // Зберігаємо всі дані
+                setRecentActivity(activityData); // Встановлюємо для відображення
                 
-                // Мок дані для активності (поки що)
-                setRecentActivity([
-                    { id: 1, type: 'user_registered', user: 'Іван Петренко', time: '2 хв тому', status: 'success' },
-                    { id: 2, type: 'comment_reported', user: 'Марія Сидоренко', time: '15 хв тому', status: 'warning' },
-                    { id: 3, type: 'name_change_approved', user: 'Олександр Коваленко', time: '1 год тому', status: 'success' },
-                    { id: 4, type: 'announcement_published', user: 'Доктор Петренко', time: '2 год тому', status: 'info' }
-                ]);
+                // Розраховуємо пагінацію (4 записи на сторінку)
+                const itemsPerPage = 4;
+                const totalPages = Math.ceil(activityData.length / itemsPerPage);
+                setActivityPagination({
+                    currentPage: 1,
+                    totalPages: totalPages,
+                    hasNextPage: totalPages > 1,
+                    hasPrevPage: false,
+                    totalActivities: activityData.length
+                });
                 
             } catch (error) {
                 console.error('Error loading admin data:', error);
@@ -139,6 +157,40 @@ const AdminProfilePage = () => {
         }, 800);
     };
 
+    const handlePrevPage = () => {
+        if (activityPagination.hasPrevPage) {
+            const newPage = activityPagination.currentPage - 1;
+            setActivityPagination(prev => ({
+                ...prev,
+                currentPage: newPage,
+                hasNextPage: newPage < prev.totalPages,
+                hasPrevPage: newPage > 1
+            }));
+        }
+    };
+
+    const handleNextPage = () => {
+        if (activityPagination.hasNextPage) {
+            const newPage = activityPagination.currentPage + 1;
+            setActivityPagination(prev => ({
+                ...prev,
+                currentPage: newPage,
+                hasNextPage: newPage < prev.totalPages,
+                hasPrevPage: newPage > 1
+            }));
+        }
+    };
+
+    const handlePageClick = (page) => {
+        // Плавна анімація зміни контенту без перезавантаження
+        setActivityPagination(prev => ({
+            ...prev,
+            currentPage: page,
+            hasNextPage: page < prev.totalPages,
+            hasPrevPage: page > 1
+        }));
+    };
+
     const tabs = [
         { id: 'dashboard', label: 'Панель управління', icon: BarChart3 },
         { id: 'moderation', label: 'Модерація', icon: Shield },
@@ -158,7 +210,7 @@ const AdminProfilePage = () => {
                 </div>
                 
                 <div className="bg-white text-black rounded-xl p-3 md:p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
-                    <MessageSquare className="w-6 h-6 md:w-8 md:h-8 text-green-500 mx-auto mb-2" />
+                    <MessageSquare className="w-6 h-6 md:w-8 md:h-8 text-blue-500 mx-auto mb-2" />
                     <div className="text-lg md:text-2xl font-bold text-gray-900">{stats.activeAnnouncements}</div>
                     <div className="text-xs md:text-sm text-gray-600">Активних обговорень</div>
                 </div>
@@ -205,29 +257,189 @@ const AdminProfilePage = () => {
 
             {/* Остання активність */}
             <div className="bg-white text-black rounded-2xl p-6 shadow-xl border border-gray-200 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-100/50 to-green-200/30 rounded-full -translate-y-16 translate-x-16 animate-pulse"></div>
+                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-100/50 to-blue-200/30 rounded-full -translate-y-16 translate-x-16 animate-pulse"></div>
                 <div className="relative">
                     <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-3">
-                        <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center">
+                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
                             <Activity className="w-4 h-4 text-white" />
                         </div>
                         Остання активність
                     </h3>
-                    <div className="space-y-3">
-                        {recentActivity.map((activity) => (
-                            <div key={activity.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <div className="space-y-3 transition-all duration-500 ease-in-out">
+                        {recentActivity
+                            .slice((activityPagination.currentPage - 1) * 4, activityPagination.currentPage * 4)
+                            .map((activity, index) => (
+                            <div 
+                                key={activity.id} 
+                                className="flex items-center gap-3 p-3 bg-gray-300/40 rounded-lg transition-all duration-500 ease-in-out hover:bg-gray-200/60 hover:shadow-sm transform hover:scale-[1.02]"
+                                style={{
+                                    animationDelay: `${index * 100}ms`,
+                                    animation: 'fadeInUp 0.5s ease-out forwards'
+                                }}
+                            >
                                 <div className={`w-2 h-2 rounded-full ${
                                     activity.status === 'success' ? 'bg-green-500' :
                                     activity.status === 'warning' ? 'bg-yellow-500' :
                                     activity.status === 'info' ? 'bg-blue-500' : 'bg-gray-500'
                                 }`}></div>
                                 <div className="flex-1">
-                                    <div className="text-sm font-medium text-gray-900">{activity.user}</div>
-                                    <div className="text-xs text-gray-600">{activity.time}</div>
+                                    <div className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                                        {activity.user}
+                                        <span className="text-xs text-gray-500">• {activity.time}</span>
+                                    </div>
+                                    <div className="text-xs text-gray-600">{activity.description}</div>
                                 </div>
                             </div>
                         ))}
                     </div>
+                    
+                    {/* Пагінація - показується тільки при мінімум 4 записах */}
+                    {recentActivity.length >= 4 && activityPagination.totalPages > 1 && (
+                        <div className="mt-6 pt-4 border-t border-gray-200">
+                            <div className="relative">
+                                {/* Декоративний фон */}
+                                <div className="absolute inset-0 bg-gradient-to-r from-blue-50/50 to-purple-50/50 rounded-2xl opacity-60"></div>
+                                
+                                <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-lg border border-white/40">
+                                    <div className="flex items-center justify-between">
+                                        {/* Кнопка "Попередня" */}
+                                        <button
+                                            onClick={handlePrevPage}
+                                            disabled={!activityPagination.hasPrevPage}
+                                            className={`group relative overflow-hidden px-5 py-2.5 rounded-xl font-medium text-sm transition-all duration-500 transform ${
+                                                activityPagination.hasPrevPage
+                                                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:scale-105 hover:shadow-xl hover:shadow-blue-500/25 active:scale-95 cursor-pointer hover:from-blue-600 hover:to-blue-700'
+                                                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                            }`}
+                                        >
+                                            {activityPagination.hasPrevPage && (
+                                                <>
+                                                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                                    <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-blue-500 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                                    <div className="relative flex items-center gap-2">
+                                                        <svg className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                                        </svg>
+                                                        <span className="transition-all duration-300 group-hover:font-semibold">Попередня</span>
+                                                    </div>
+                                                </>
+                                            )}
+                                            {!activityPagination.hasPrevPage && (
+                                                <div className="flex items-center gap-2">
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                                    </svg>
+                                                    <span>Попередня</span>
+                                                </div>
+                                            )}
+                                        </button>
+
+                                        {/* Центральна інформація */}
+                                        <div className="flex items-center gap-4">
+                                            {/* Номери сторінок */}
+                                            <div className="flex items-center gap-2">
+                                                {Array.from({ length: Math.min(activityPagination.totalPages, 4) }, (_, i) => {
+                                                    const pageNum = i + 1;
+                                                    const isActive = pageNum === activityPagination.currentPage;
+                                                    return (
+                                                        <button
+                                                            key={pageNum}
+                                                            onClick={() => handlePageClick(pageNum)}
+                                                            className={`relative w-10 h-10 rounded-xl font-semibold text-sm transition-all duration-500 transform cursor-pointer ${
+                                                                isActive
+                                                                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white scale-110 shadow-lg shadow-blue-500/30'
+                                                                    : 'bg-gray-100 text-gray-600 hover:bg-gradient-to-r hover:from-blue-100 hover:to-blue-200 hover:scale-105 hover:shadow-md hover:shadow-blue-200/50'
+                                                            }`}
+                                                        >
+                                                            {isActive && (
+                                                                <>
+                                                                    <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-blue-500 rounded-xl animate-pulse opacity-30"></div>
+                                                                    <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full animate-bounce"></div>
+                                                                </>
+                                                            )}
+                                                            <span className="relative z-10">{pageNum}</span>
+                                                        </button>
+                                                    );
+                                                })}
+                                                
+                                                {activityPagination.totalPages > 4 && (
+                                                    <>
+                                                        <span className="text-gray-400 font-medium">⋯</span>
+                                                        <button
+                                                            onClick={() => handlePageClick(activityPagination.totalPages)}
+                                                            className="w-10 h-10 rounded-xl font-semibold text-sm bg-gray-100 text-gray-600 hover:bg-gradient-to-r hover:from-blue-100 hover:to-blue-200 hover:scale-105 hover:shadow-md hover:shadow-blue-200/50 transition-all duration-500 cursor-pointer"
+                                                        >
+                                                            {activityPagination.totalPages}
+                                                        </button>
+                                                    </>
+                                                )}
+                                            </div>
+
+                                            {/* Індикатор прогресу */}
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-2 h-2 bg-gradient-to-r from-blue-400 to-blue-500 rounded-full animate-pulse"></div>
+                                                    <span className="text-sm font-medium text-gray-700">
+                                                        {activityPagination.currentPage} з {activityPagination.totalPages}
+                                                    </span>
+                                                </div>
+                                                
+                                                {/* Прогрес бар */}
+                                                <div className="w-20 h-2 bg-gray-200 rounded-full overflow-hidden relative">
+                                                    <div 
+                                                        className="h-full bg-gradient-to-r from-blue-400 to-blue-500 rounded-full relative overflow-hidden"
+                                                        style={{ 
+                                                            width: `${(activityPagination.currentPage / activityPagination.totalPages) * 100}%`,
+                                                            animation: 'waterFill 1.5s ease-out'
+                                                        }}
+                                                    >
+                                                        {/* Анімація "води" що заповнюється */}
+                                                        <div 
+                                                            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
+                                                            style={{ animation: 'waterWave 2s ease-in-out infinite' }}
+                                                        ></div>
+                                                        <div className="absolute inset-0 bg-gradient-to-r from-blue-300 to-blue-400 rounded-full opacity-30 animate-pulse"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Кнопка "Наступна" */}
+                                        <button
+                                            onClick={handleNextPage}
+                                            disabled={!activityPagination.hasNextPage}
+                                            className={`group relative overflow-hidden px-5 py-2.5 rounded-xl font-medium text-sm transition-all duration-500 transform ${
+                                                activityPagination.hasNextPage
+                                                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:scale-105 hover:shadow-xl hover:shadow-blue-500/25 active:scale-95 cursor-pointer hover:from-blue-600 hover:to-blue-700'
+                                                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                            }`}
+                                        >
+                                            {activityPagination.hasNextPage && (
+                                                <>
+                                                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                                    <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-blue-500 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                                    <div className="relative flex items-center gap-2">
+                                                        <span className="transition-all duration-300 group-hover:font-semibold">Наступна</span>
+                                                        <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                        </svg>
+                                                    </div>
+                                                </>
+                                            )}
+                                            {!activityPagination.hasNextPage && (
+                                                <div className="flex items-center gap-2">
+                                                    <span>Наступна</span>
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                    </svg>
+                                                </div>
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
