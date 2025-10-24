@@ -2,6 +2,8 @@ import React from 'react';
 import ModerationHeader from './ModerationHeader';
 import ModerationFilters from './ModerationFilters';
 import AnnouncementsList from './AnnouncementsList';
+import CommentsList from './CommentsList';
+import ReviewsList from './ReviewsList';
 import AllContentList from './AllContentList';
 import ModerationPagination from './ModerationPagination';
 
@@ -24,7 +26,17 @@ const AdminModeration = ({
     announcementsPagination,
     handleAnnouncementsPrevPage,
     handleAnnouncementsNextPage,
-    handleAnnouncementsPageClick
+    handleAnnouncementsPageClick,
+    commentsContent,
+    commentsPagination,
+    handleCommentsPrevPage,
+    handleCommentsNextPage,
+    handleCommentsPageClick,
+    reviewsContent,
+    reviewsPagination,
+    handleReviewsPrevPage,
+    handleReviewsNextPage,
+    handleReviewsPageClick
 }) => {
     return (
         <div className="space-y-6">
@@ -71,6 +83,40 @@ const AdminModeration = ({
                                 onPrevPage={handleAnnouncementsPrevPage}
                                 onNextPage={handleAnnouncementsNextPage}
                                 onPageClick={handleAnnouncementsPageClick}
+                            />
+                        )}
+                    </>
+                )}
+
+                {moderationFilter === 'comments' && (
+                    <>
+                        <CommentsList
+                            commentsContent={commentsContent}
+                            handleDeleteItem={handleDeleteItem}
+                        />
+                        {commentsContent && commentsContent.length > 0 && commentsPagination && commentsPagination.totalPages > 1 && (
+                            <ModerationPagination
+                                pagination={commentsPagination}
+                                onPrevPage={handleCommentsPrevPage}
+                                onNextPage={handleCommentsNextPage}
+                                onPageClick={handleCommentsPageClick}
+                            />
+                        )}
+                    </>
+                )}
+
+                {moderationFilter === 'reviews' && (
+                    <>
+                        <ReviewsList
+                            reviewsContent={reviewsContent}
+                            handleDeleteItem={handleDeleteItem}
+                        />
+                        {reviewsContent && reviewsContent.length > 0 && reviewsPagination && reviewsPagination.totalPages > 1 && (
+                            <ModerationPagination
+                                pagination={reviewsPagination}
+                                onPrevPage={handleReviewsPrevPage}
+                                onNextPage={handleReviewsNextPage}
+                                onPageClick={handleReviewsPageClick}
                             />
                         )}
                     </>
