@@ -34,6 +34,10 @@ router.get('/stats', authRequired, requireAdmin, async (req, res) => {
         // Підрахунок коментарів (тільки до оголошень, не відгуки до викладачів)
         const totalComments = await Comment.countDocuments();
 
+        // Підрахунок відгуків про викладачів
+        const { TeacherComment } = await import('../models/TeacherComment.js');
+        const totalReviews = await TeacherComment.countDocuments();
+
         // Підрахунок скарг на розгляді
         const pendingReports = await Report.countDocuments({ 
             status: 'open' 
@@ -51,6 +55,7 @@ router.get('/stats', authRequired, requireAdmin, async (req, res) => {
             admins,
             activeAnnouncements,
             totalComments,
+            totalReviews,
             pendingReports,
             nameChangeRequests
         });
@@ -135,6 +140,67 @@ router.patch('/reports/:reportId/reject', authRequired, requireAdmin, async (req
         res.json({ message: 'Report rejected successfully', report });
     } catch (error) {
         console.error('Error rejecting report:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Отримання даних для модерації
+router.get('/moderation', authRequired, requireAdmin, async (req, res) => {
+    try {
+        const { Announcement } = await import('../models/Announcement.js');
+        const { Comment } = await import('../models/Comment.js');
+        const { TeacherComment } = await import('../models/TeacherComment.js');
+
+        // Підрахунок оголошень
+        const totalAnnouncements = await Announcement.countDocuments();
+        const publishedAnnouncements = await Announcement.countDocuments({ status: 'published' });
+        const draftAnnouncements = await Announcement.countDocuments({ status: 'draft' });
+
+        // Підрахунок коментарів
+        const totalComments = await Comment.countDocuments();
+
+        // Підрахунок відгуків про викладачів
+        const totalReviews = await TeacherComment.countDocuments();
+
+        // Останні елементи для модерації
+        const recentAnnouncements = await Announcement.find()
+            .populate('authorId', 'displayName email')
+            .sort({ createdAt: -1 })
+            .limit(10);
+
+        const recentComments = await Comment.find()
+            .populate('authorId', 'displayName email')
+            .sort({ createdAt: -1 })
+            .limit(10);
+
+        const recentReviews = await TeacherComment.find()
+            .populate('authorId', 'displayName email')
+            .populate('teacherId', 'name')
+            .sort({ createdAt: -1 })
+            .limit(10);
+
+        res.json({
+            statistics: {
+                announcements: {
+                    total: totalAnnouncements,
+                    published: publishedAnnouncements,
+                    draft: draftAnnouncements
+                },
+                comments: {
+                    total: totalComments
+                },
+                reviews: {
+                    total: totalReviews
+                }
+            },
+            recentContent: {
+                announcements: recentAnnouncements,
+                comments: recentComments,
+                reviews: recentReviews
+            }
+        });
+    } catch (error) {
+        console.error('Error getting moderation data:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });

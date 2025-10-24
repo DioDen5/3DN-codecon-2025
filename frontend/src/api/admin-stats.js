@@ -75,3 +75,15 @@ export const rejectReport = async (reportId) => {
         throw error;
     }
 };
+
+export const getModerationData = async () => {
+    try {
+        console.log('Making request to /admin/moderation...');
+        const response = await http.get('/admin/moderation');
+        console.log('Moderation data response:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Error getting moderation data:', error);
+        throw error;
+    }
+};

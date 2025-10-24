@@ -28,7 +28,7 @@ import {
     RefreshCw
 } from 'lucide-react';
 import { useAuthState } from '../api/useAuthState';
-import { getAdminStats, getAdminUsers, getAdminReports, getAdminNameChangeRequests, getAdminActivity, resolveReport, rejectReport } from '../api/admin-stats';
+import { getAdminStats, getAdminUsers, getAdminReports, getAdminNameChangeRequests, getAdminActivity, resolveReport, rejectReport, getModerationData } from '../api/admin-stats';
 import ReportReviewModal from '../components/ReportReviewModal';
 
 const AdminProfilePage = () => {
@@ -70,9 +70,16 @@ const AdminProfilePage = () => {
     const [moderationSearch, setModerationSearch] = useState('');
     const [selectedItems, setSelectedItems] = useState([]);
     const [moderationData, setModerationData] = useState({
-        announcements: [],
-        comments: [],
-        reviews: []
+        statistics: {
+            announcements: { total: 0, published: 0, draft: 0 },
+            comments: { total: 0 },
+            reviews: { total: 0 }
+        },
+        recentContent: {
+            announcements: [],
+            comments: [],
+            reviews: []
+        }
     });
     const [nameChangeRequests, setNameChangeRequests] = useState([]);
     const [users, setUsers] = useState([]);
@@ -123,6 +130,31 @@ const AdminProfilePage = () => {
                 const activityData = await getAdminActivity();
                 console.log('Admin activity received:', activityData);
                 setAllActivityData(activityData); // Зберігаємо всі дані
+
+                // Завантажуємо дані модерації (використовуємо існуючі дані)
+                console.log('Preparing moderation data from existing stats...');
+                const moderationData = {
+                    statistics: {
+                        announcements: { 
+                            total: statsData.activeAnnouncements || 0,
+                            published: statsData.activeAnnouncements || 0,
+                            draft: 0
+                        },
+                        comments: { 
+                            total: statsData.totalComments || 0
+                        },
+                        reviews: { 
+                            total: statsData.totalReviews || 0
+                        }
+                    },
+                    recentContent: {
+                        announcements: [],
+                        comments: [],
+                        reviews: []
+                    }
+                };
+                console.log('Moderation data prepared:', moderationData);
+                setModerationData(moderationData);
                 setRecentActivity(activityData); // Встановлюємо для відображення
                 
                 // Розраховуємо пагінацію (4 записи на сторінку)
@@ -465,7 +497,7 @@ const AdminProfilePage = () => {
 
         const moderationFilters = [
             { id: 'all', label: 'Весь контент', icon: FileText },
-            { id: 'announcements', label: 'Оголошення', icon: MessageSquare },
+            { id: 'announcements', label: 'Обговорення', icon: MessageSquare },
             { id: 'comments', label: 'Коментарі', icon: MessageCircle },
             { id: 'reviews', label: 'Відгуки', icon: Star }
         ];
@@ -502,15 +534,15 @@ const AdminProfilePage = () => {
                         </div>
                         <div className="flex gap-4">
                             <div className="text-center">
-                                <div className="text-2xl font-bold text-blue-600">0</div>
-                                <div className="text-sm text-gray-600">Оголошень</div>
+                                <div className="text-2xl font-bold text-blue-600">{moderationData.statistics.announcements.total}</div>
+                                <div className="text-sm text-gray-600">Обговорень</div>
                             </div>
                             <div className="text-center">
-                                <div className="text-2xl font-bold text-green-600">0</div>
+                                <div className="text-2xl font-bold text-green-600">{moderationData.statistics.comments.total}</div>
                                 <div className="text-sm text-gray-600">Коментарів</div>
                             </div>
                             <div className="text-center">
-                                <div className="text-2xl font-bold text-purple-600">0</div>
+                                <div className="text-2xl font-bold text-purple-600">{moderationData.statistics.reviews.total}</div>
                                 <div className="text-sm text-gray-600">Відгуків</div>
                             </div>
                         </div>
@@ -604,120 +636,172 @@ const AdminProfilePage = () => {
 
                         {moderationFilter === 'announcements' && (
                             <div className="space-y-3">
-                                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 moderation-slide-in hover:moderation-glow transition-all duration-300">
-                                    <div className="flex items-start justify-between">
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                                                    A
+                                {moderationData.recentContent.announcements.length > 0 ? (
+                                    moderationData.recentContent.announcements.map((announcement, index) => (
+                                        <div key={announcement._id} className="bg-gray-50 rounded-xl p-4 border border-gray-200 moderation-slide-in hover:moderation-glow transition-all duration-300" style={{ animationDelay: `${index * 0.1}s` }}>
+                                            <div className="flex items-start justify-between">
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-2 mb-2">
+                                                        <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                                                            {announcement.authorId?.displayName?.charAt(0) || 'A'}
+                                                        </div>
+                                                        <div>
+                                                            <div className="font-medium text-gray-900">{announcement.title}</div>
+                                                            <div className="text-sm text-gray-600">
+                                                                Автор: {announcement.authorId?.displayName || 'Невідомий'} • {new Date(announcement.createdAt).toLocaleDateString('uk-UA')}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <p className="text-gray-700 mb-3">{announcement.body?.substring(0, 100)}...</p>
+                                                    <div className="flex items-center gap-2 mb-3">
+                                                        <span className={`px-2 py-1 rounded text-xs ${
+                                                            announcement.status === 'published' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                                                        }`}>
+                                                            {announcement.status === 'published' ? 'Опубліковано' : 'Чернетка'}
+                                                        </span>
+                                                        <span className={`px-2 py-1 rounded text-xs ${
+                                                            announcement.visibility === 'students' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
+                                                        }`}>
+                                                            {announcement.visibility === 'students' ? 'Студентам' : 'Всім'}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex gap-2">
+                                                        <button className="px-3 py-1 bg-green-100 text-green-700 rounded-lg text-sm hover:bg-green-200 transition-colors cursor-pointer">
+                                                            Схваліти
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => handleDeleteItem(announcement._id, 'announcement')}
+                                                            className="px-3 py-1 bg-red-100 text-red-700 rounded-lg text-sm hover:bg-red-200 transition-colors cursor-pointer"
+                                                        >
+                                                            Видалити
+                                                        </button>
+                                                        <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm hover:bg-blue-200 transition-colors cursor-pointer">
+                                                            Переглянути
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <div className="font-medium text-gray-900">Приклад оголошення</div>
-                                                    <div className="text-sm text-gray-600">Автор: Студент • 2 години тому</div>
-                                                </div>
-                                            </div>
-                                            <p className="text-gray-700 mb-3">Тут буде текст оголошення для модерації...</p>
-                                            <div className="flex gap-2">
-                                                <button className="px-3 py-1 bg-green-100 text-green-700 rounded-lg text-sm hover:bg-green-200 transition-colors cursor-pointer">
-                                                    Схваліти
-                                                </button>
-                                                <button 
-                                                    onClick={() => handleDeleteItem('1', 'announcement')}
-                                                    className="px-3 py-1 bg-red-100 text-red-700 rounded-lg text-sm hover:bg-red-200 transition-colors cursor-pointer"
-                                                >
-                                                    Видалити
-                                                </button>
-                                                <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm hover:bg-blue-200 transition-colors cursor-pointer">
-                                                    Переглянути
-                                                </button>
+                                                <input
+                                                    type="checkbox"
+                                                    className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
+                                                />
                                             </div>
                                         </div>
-                                        <input
-                                            type="checkbox"
-                                            className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
-                                        />
+                                    ))
+                                ) : (
+                                    <div className="text-center py-8 text-gray-500">
+                                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <MessageSquare className="w-8 h-8 text-gray-400" />
+                                        </div>
+                                        <p>Немає обговорень для модерації</p>
                                     </div>
-                                </div>
+                                )}
                             </div>
                         )}
 
                         {moderationFilter === 'comments' && (
                             <div className="space-y-3">
-                                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 moderation-slide-in hover:moderation-glow transition-all duration-300">
-                                    <div className="flex items-start justify-between">
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                                                    C
+                                {moderationData.recentContent.comments.length > 0 ? (
+                                    moderationData.recentContent.comments.map((comment, index) => (
+                                        <div key={comment._id} className="bg-gray-50 rounded-xl p-4 border border-gray-200 moderation-slide-in hover:moderation-glow transition-all duration-300" style={{ animationDelay: `${index * 0.1}s` }}>
+                                            <div className="flex items-start justify-between">
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-2 mb-2">
+                                                        <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                                                            {comment.authorId?.displayName?.charAt(0) || 'C'}
+                                                        </div>
+                                                        <div>
+                                                            <div className="font-medium text-gray-900">Коментар</div>
+                                                            <div className="text-sm text-gray-600">
+                                                                Автор: {comment.authorId?.displayName || 'Невідомий'} • {new Date(comment.createdAt).toLocaleDateString('uk-UA')}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <p className="text-gray-700 mb-3">{comment.body?.substring(0, 150)}...</p>
+                                                    <div className="flex gap-2">
+                                                        <button 
+                                                            onClick={() => handleDeleteItem(comment._id, 'comment')}
+                                                            className="px-3 py-1 bg-red-100 text-red-700 rounded-lg text-sm hover:bg-red-200 transition-colors cursor-pointer"
+                                                        >
+                                                            Видалити
+                                                        </button>
+                                                        <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm hover:bg-blue-200 transition-colors cursor-pointer">
+                                                            Переглянути
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <div className="font-medium text-gray-900">Приклад коментаря</div>
-                                                    <div className="text-sm text-gray-600">Автор: Студент • 1 година тому</div>
-                                                </div>
-                                            </div>
-                                            <p className="text-gray-700 mb-3">Тут буде текст коментаря для модерації...</p>
-                                            <div className="flex gap-2">
-                                                <button 
-                                                    onClick={() => handleDeleteItem('1', 'comment')}
-                                                    className="px-3 py-1 bg-red-100 text-red-700 rounded-lg text-sm hover:bg-red-200 transition-colors cursor-pointer"
-                                                >
-                                                    Видалити
-                                                </button>
-                                                <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm hover:bg-blue-200 transition-colors cursor-pointer">
-                                                    Переглянути
-                                                </button>
+                                                <input
+                                                    type="checkbox"
+                                                    className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
+                                                />
                                             </div>
                                         </div>
-                                        <input
-                                            type="checkbox"
-                                            className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
-                                        />
+                                    ))
+                                ) : (
+                                    <div className="text-center py-8 text-gray-500">
+                                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <MessageCircle className="w-8 h-8 text-gray-400" />
+                                        </div>
+                                        <p>Немає коментарів для модерації</p>
                                     </div>
-                                </div>
+                                )}
                             </div>
                         )}
 
                         {moderationFilter === 'reviews' && (
                             <div className="space-y-3">
-                                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 moderation-slide-in hover:moderation-glow transition-all duration-300">
-                                    <div className="flex items-start justify-between">
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                                                    R
+                                {moderationData.recentContent.reviews.length > 0 ? (
+                                    moderationData.recentContent.reviews.map((review, index) => (
+                                        <div key={review._id} className="bg-gray-50 rounded-xl p-4 border border-gray-200 moderation-slide-in hover:moderation-glow transition-all duration-300" style={{ animationDelay: `${index * 0.1}s` }}>
+                                            <div className="flex items-start justify-between">
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-2 mb-2">
+                                                        <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                                                            {review.authorId?.displayName?.charAt(0) || 'R'}
+                                                        </div>
+                                                        <div>
+                                                            <div className="font-medium text-gray-900">Відгук про викладача</div>
+                                                            <div className="text-sm text-gray-600">
+                                                                Автор: {review.authorId?.displayName || 'Невідомий'} • {new Date(review.createdAt).toLocaleDateString('uk-UA')}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 mb-2">
+                                                        <div className="flex">
+                                                            {[1,2,3,4,5].map((star) => (
+                                                                <Star key={star} className={`w-4 h-4 ${star <= review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
+                                                            ))}
+                                                        </div>
+                                                        <span className="text-sm text-gray-600">{review.rating}/5</span>
+                                                        <span className="text-sm text-gray-500">• {review.teacherId?.name || 'Викладач'}</span>
+                                                    </div>
+                                                    <p className="text-gray-700 mb-3">{review.comment?.substring(0, 150)}...</p>
+                                                    <div className="flex gap-2">
+                                                        <button 
+                                                            onClick={() => handleDeleteItem(review._id, 'review')}
+                                                            className="px-3 py-1 bg-red-100 text-red-700 rounded-lg text-sm hover:bg-red-200 transition-colors cursor-pointer"
+                                                        >
+                                                            Видалити
+                                                        </button>
+                                                        <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm hover:bg-blue-200 transition-colors cursor-pointer">
+                                                            Переглянути
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <div className="font-medium text-gray-900">Приклад відгуку</div>
-                                                    <div className="text-sm text-gray-600">Автор: Студент • 3 години тому</div>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <div className="flex">
-                                                    {[1,2,3,4,5].map((star) => (
-                                                        <Star key={star} className="w-4 h-4 text-yellow-400 fill-current" />
-                                                    ))}
-                                                </div>
-                                                <span className="text-sm text-gray-600">5/5</span>
-                                            </div>
-                                            <p className="text-gray-700 mb-3">Тут буде текст відгуку для модерації...</p>
-                                            <div className="flex gap-2">
-                                                <button 
-                                                    onClick={() => handleDeleteItem('1', 'review')}
-                                                    className="px-3 py-1 bg-red-100 text-red-700 rounded-lg text-sm hover:bg-red-200 transition-colors cursor-pointer"
-                                                >
-                                                    Видалити
-                                                </button>
-                                                <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm hover:bg-blue-200 transition-colors cursor-pointer">
-                                                    Переглянути
-                                                </button>
+                                                <input
+                                                    type="checkbox"
+                                                    className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
+                                                />
                                             </div>
                                         </div>
-                                        <input
-                                            type="checkbox"
-                                            className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
-                                        />
+                                    ))
+                                ) : (
+                                    <div className="text-center py-8 text-gray-500">
+                                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <Star className="w-8 h-8 text-gray-400" />
+                                        </div>
+                                        <p>Немає відгуків для модерації</p>
                                     </div>
-                                </div>
+                                )}
                             </div>
                         )}
                     </div>
