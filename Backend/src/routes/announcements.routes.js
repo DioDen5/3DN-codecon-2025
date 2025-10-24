@@ -31,7 +31,7 @@ router.get('/', authRequired, requireVerified, async (req, res) => {
             }},
             { $unwind: '$authorId' },
             { $sort: { publishedAt: -1 } },
-            { $limit: 20 }
+            { $limit: 100 }
         ];
     } else {
         pipeline = [
@@ -45,7 +45,7 @@ router.get('/', authRequired, requireVerified, async (req, res) => {
             }},
             { $unwind: '$authorId' },
             { $sort: { publishedAt: -1 } },
-            { $limit: 20 }
+            { $limit: 100 }
         ];
     }
     
