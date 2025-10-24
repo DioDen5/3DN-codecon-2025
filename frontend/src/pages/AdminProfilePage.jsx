@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { useAuthState } from '../api/useAuthState';
 import { getAdminStats, getAdminUsers, getAdminReports, getAdminNameChangeRequests, getAdminActivity, resolveReport, rejectReport } from '../api/admin-stats';
+import ReportReviewModal from '../components/ReportReviewModal';
 
 const AdminProfilePage = () => {
     const { user, token } = useAuthState();
@@ -59,6 +60,10 @@ const AdminProfilePage = () => {
         totalActivities: 0
     });
     const [pendingReports, setPendingReports] = useState([]);
+    
+    // Report review modal state
+    const [showReportModal, setShowReportModal] = useState(false);
+    const [selectedReport, setSelectedReport] = useState(null);
     const [nameChangeRequests, setNameChangeRequests] = useState([]);
     const [users, setUsers] = useState([]);
     const [announcements, setAnnouncements] = useState([]);
@@ -493,6 +498,16 @@ const AdminProfilePage = () => {
         </div>
     );
 
+    const handleOpenReportModal = (report) => {
+        setSelectedReport(report);
+        setShowReportModal(true);
+    };
+
+    const handleCloseReportModal = () => {
+        setShowReportModal(false);
+        setSelectedReport(null);
+    };
+
     const handleResolveReport = async (reportId) => {
         try {
             console.log('Resolving report with ID:', reportId);
@@ -516,6 +531,28 @@ const AdminProfilePage = () => {
             console.error('Error rejecting report:', error);
             console.error('Error details:', error.response?.data);
             alert(`Помилка при відхиленні скарги: ${error.response?.data?.error || error.message}`);
+        }
+    };
+
+    const handleDeleteContent = async (targetId, targetType) => {
+        try {
+            console.log('Deleting content:', targetId, targetType);
+            // Тут має бути логіка видалення контенту
+            alert(`Функція видалення ${targetType} буде реалізована`);
+        } catch (error) {
+            console.error('Error deleting content:', error);
+            alert(`Помилка при видаленні контенту: ${error.message}`);
+        }
+    };
+
+    const handleEditContent = async (targetId, targetType) => {
+        try {
+            console.log('Editing content:', targetId, targetType);
+            // Тут має бути логіка редагування контенту
+            alert(`Функція редагування ${targetType} буде реалізована`);
+        } catch (error) {
+            console.error('Error editing content:', error);
+            alert(`Помилка при редагуванні контенту: ${error.message}`);
         }
     };
 
@@ -548,20 +585,14 @@ const AdminProfilePage = () => {
                                             {new Date(report.createdAt).toLocaleString('uk-UA')}
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <button 
-                                            onClick={() => handleResolveReport(report._id)}
-                                            className="px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600 cursor-pointer transition-colors"
-                                        >
-                                            Розглянути
-                                        </button>
-                                        <button 
-                                            onClick={() => handleRejectReport(report._id)}
-                                            className="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600 cursor-pointer transition-colors"
-                                        >
-                                            Відхилити
-                                        </button>
-                                    </div>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => handleOpenReportModal(report)}
+                                                className="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 cursor-pointer transition-colors"
+                                            >
+                                                Розглянути
+                                            </button>
+                                        </div>
                                 </div>
                             </div>
                         ))}
@@ -649,6 +680,17 @@ const AdminProfilePage = () => {
                 {activeTab === 'reports' && renderReportsTab()}
                 {activeTab === 'settings' && renderSettingsTab()}
             </div>
+            
+            {/* Report Review Modal */}
+            <ReportReviewModal
+                isOpen={showReportModal}
+                onClose={handleCloseReportModal}
+                report={selectedReport}
+                onResolve={handleResolveReport}
+                onReject={handleRejectReport}
+                onDeleteContent={handleDeleteContent}
+                onEditContent={handleEditContent}
+            />
         </div>
     );
 };
