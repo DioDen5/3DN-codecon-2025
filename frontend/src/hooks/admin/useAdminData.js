@@ -89,7 +89,6 @@ export const useAdminData = () => {
             setNameChangeRequests(nameChanges);
             setActivityData(activity);
 
-            // Підготовка даних модерації з існуючих статистик
             const moderationData = {
                 announcements: stats.activeAnnouncements,
                 comments: stats.totalComments,
@@ -97,7 +96,6 @@ export const useAdminData = () => {
             };
             setModerationData(moderationData);
 
-            // Розрахунок пагінації для активності
             const itemsPerPage = 4;
             const totalActivities = activity.length;
             const totalPages = Math.ceil(totalActivities / itemsPerPage);
@@ -110,7 +108,6 @@ export const useAdminData = () => {
                 totalActivities
             });
 
-            // Завантаження контенту для модерації
             try {
                 const allContentData = await getAllModerationContent(1, 5);
                 setAllModerationContent(allContentData.content || []);
@@ -150,7 +147,6 @@ export const useAdminData = () => {
         }
     }, []);
 
-    // Функції для завантаження окремих типів контенту
     const loadAnnouncements = async (page = 1) => {
         try {
             const data = await getModerationAnnouncements(page, 5);
@@ -170,7 +166,7 @@ export const useAdminData = () => {
 
     const loadComments = async (page = 1) => {
         try {
-            const data = await getModerationComments(page, 10);
+            const data = await getModerationComments(page, 5);
             setCommentsContent(data.content || []);
             setCommentsPagination({
                 currentPage: data.pagination?.currentPage || 1,
@@ -202,12 +198,11 @@ export const useAdminData = () => {
         }
     };
 
-    // Функції для роботи зі скаргами
     const handleResolveReport = async (reportId) => {
         try {
             console.log('Resolving report:', reportId);
             await resolveReport(reportId);
-            await loadAdminData(); // Перезавантажуємо дані
+            await loadAdminData(); 
         } catch (error) {
             console.error('Error resolving report:', error);
         }
@@ -217,13 +212,12 @@ export const useAdminData = () => {
         try {
             console.log('Rejecting report:', reportId);
             await rejectReport(reportId);
-            await loadAdminData(); // Перезавантажуємо дані
+            await loadAdminData(); 
         } catch (error) {
             console.error('Error rejecting report:', error);
         }
     };
 
-    // Пагінація для активності
     const handlePrevPage = () => {
         if (activityPagination.hasPrevPage) {
             setActivityPagination(prev => ({
@@ -368,6 +362,60 @@ export const useAdminData = () => {
         }
     };
 
+    const handleCommentsPrevPage = async () => {
+        if (commentsPagination.hasPrevPage) {
+            const newPage = commentsPagination.currentPage - 1;
+            try {
+                const data = await getModerationComments(newPage, 5);
+                setCommentsContent(data.content || []);
+                setCommentsPagination({
+                    currentPage: data.pagination?.currentPage || newPage,
+                    totalPages: data.pagination?.totalPages || 1,
+                    hasNextPage: data.pagination?.hasNextPage || false,
+                    hasPrevPage: data.pagination?.hasPrevPage || false,
+                    totalItems: data.pagination?.totalItems || 0
+                });
+            } catch (error) {
+                console.error('Error loading comments:', error);
+            }
+        }
+    };
+
+    const handleCommentsNextPage = async () => {
+        if (commentsPagination.hasNextPage) {
+            const newPage = commentsPagination.currentPage + 1;
+            try {
+                const data = await getModerationComments(newPage, 5);
+                setCommentsContent(data.content || []);
+                setCommentsPagination({
+                    currentPage: data.pagination?.currentPage || newPage,
+                    totalPages: data.pagination?.totalPages || 1,
+                    hasNextPage: data.pagination?.hasNextPage || false,
+                    hasPrevPage: data.pagination?.hasPrevPage || false,
+                    totalItems: data.pagination?.totalItems || 0
+                });
+            } catch (error) {
+                console.error('Error loading comments:', error);
+            }
+        }
+    };
+
+    const handleCommentsPageClick = async (page) => {
+        try {
+            const data = await getModerationComments(page, 5);
+            setCommentsContent(data.content || []);
+            setCommentsPagination(data.pagination || {
+                currentPage: page,
+                totalPages: 1,
+                hasNextPage: false,
+                hasPrevPage: page > 1,
+                totalItems: 0
+            });
+        } catch (error) {
+            console.error('Error loading comments page:', error);
+        }
+    };
+
     return {
         loading,
         error,
@@ -400,6 +448,9 @@ export const useAdminData = () => {
         handleModerationPageClick,
         handleAnnouncementsPrevPage,
         handleAnnouncementsNextPage,
-        handleAnnouncementsPageClick
+        handleAnnouncementsPageClick,
+        handleCommentsPrevPage,
+        handleCommentsNextPage,
+        handleCommentsPageClick
     };
 };

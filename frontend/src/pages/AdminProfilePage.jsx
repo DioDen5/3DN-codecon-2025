@@ -54,7 +54,17 @@ const AdminProfilePageRefactored = () => {
         announcementsPagination,
         handleAnnouncementsPrevPage,
         handleAnnouncementsNextPage,
-        handleAnnouncementsPageClick
+        handleAnnouncementsPageClick,
+        commentsContent,
+        commentsPagination,
+        handleCommentsPrevPage,
+        handleCommentsNextPage,
+        handleCommentsPageClick,
+        reviewsContent,
+        reviewsPagination,
+        handleReviewsPrevPage,
+        handleReviewsNextPage,
+        handleReviewsPageClick
     } = useAdminData();
 
     const tabs = [
@@ -82,6 +92,18 @@ const AdminProfilePageRefactored = () => {
             }
         }
     };
+
+    useEffect(() => {
+        if (activeTab === 'moderation') {
+            if (moderationFilter === 'announcements') {
+                loadAnnouncements();
+            } else if (moderationFilter === 'comments') {
+                loadComments();
+            } else if (moderationFilter === 'reviews') {
+                loadReviews();
+            }
+        }
+    }, [moderationFilter, activeTab]);
 
     const handleOpenReportModal = (report) => {
         setSelectedReport(report);
@@ -256,6 +278,16 @@ const AdminProfilePageRefactored = () => {
                             handleAnnouncementsPrevPage={handleAnnouncementsPrevPage}
                             handleAnnouncementsNextPage={handleAnnouncementsNextPage}
                             handleAnnouncementsPageClick={handleAnnouncementsPageClick}
+                            commentsContent={commentsContent}
+                            commentsPagination={commentsPagination}
+                            handleCommentsPrevPage={handleCommentsPrevPage}
+                            handleCommentsNextPage={handleCommentsNextPage}
+                            handleCommentsPageClick={handleCommentsPageClick}
+                            reviewsContent={reviewsContent}
+                            reviewsPagination={reviewsPagination}
+                            handleReviewsPrevPage={handleReviewsPrevPage}
+                            handleReviewsNextPage={handleReviewsNextPage}
+                            handleReviewsPageClick={handleReviewsPageClick}
                         />
                     )}
 
