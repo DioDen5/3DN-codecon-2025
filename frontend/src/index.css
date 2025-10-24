@@ -2103,4 +2103,25 @@
     display: none;  /* Safari and Chrome */
 }
 
+@keyframes reportNeonGlow {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(251, 146, 60, 0.3);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 10px rgba(251, 146, 60, 0.5);
+        transform: scale(1.01);
+    }
+}
+
+.report-neon-glow {
+    animation: reportNeonGlow 2s ease-in-out infinite;
+}
+
+.report-hover-glow:hover {
+    box-shadow: 0 0 8px rgba(251, 146, 60, 0.4), 0 0 15px rgba(251, 146, 60, 0.2);
+    transform: scale(1.01);
+    transition: all 0.3s ease-in-out;
+}
+
 
