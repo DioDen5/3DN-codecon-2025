@@ -105,6 +105,7 @@ const AdminProfilePage = () => {
                 console.log('Fetching admin stats...');
                 const statsData = await getAdminStats();
                 console.log('Admin stats received:', statsData);
+                console.log('Total reviews from API:', statsData.totalReviews);
                 setStats(statsData);
 
                 // Завантажуємо користувачів
@@ -133,6 +134,11 @@ const AdminProfilePage = () => {
 
                 // Завантажуємо дані модерації (використовуємо існуючі дані)
                 console.log('Preparing moderation data from existing stats...');
+                console.log('Stats data for moderation:', {
+                    activeAnnouncements: statsData.activeAnnouncements,
+                    totalComments: statsData.totalComments,
+                    totalReviews: statsData.totalReviews
+                });
                 const moderationData = {
                     statistics: {
                         announcements: { 
@@ -973,7 +979,7 @@ const AdminProfilePage = () => {
     }
 
     return (
-        <div className="min-h-[calc(100vh-68px)] bg-gradient-to-b from-black to-gray-900 text-white">
+        <div className="min-h-[calc(100vh-68px)] bg-gradient-to-b from-black to-gray-900 text-white hide-scrollbar">
             <div className="max-w-6xl mx-auto px-3 md:px-6 py-6 md:py-10">
                 {/* Заголовок */}
                 <div className="mb-6 md:mb-8">

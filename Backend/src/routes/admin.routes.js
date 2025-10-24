@@ -36,7 +36,9 @@ router.get('/stats', authRequired, requireAdmin, async (req, res) => {
 
         // Підрахунок відгуків про викладачів
         const { TeacherComment } = await import('../models/TeacherComment.js');
+        console.log('TeacherComment model imported:', !!TeacherComment);
         const totalReviews = await TeacherComment.countDocuments();
+        console.log('Total reviews counted:', totalReviews);
 
         // Підрахунок скарг на розгляді
         const pendingReports = await Report.countDocuments({ 
@@ -48,7 +50,7 @@ router.get('/stats', authRequired, requireAdmin, async (req, res) => {
             status: 'pending' 
         });
 
-        res.json({
+        const response = {
             totalUsers,
             students,
             teachers,
@@ -58,7 +60,10 @@ router.get('/stats', authRequired, requireAdmin, async (req, res) => {
             totalReviews,
             pendingReports,
             nameChangeRequests
-        });
+        };
+        
+        console.log('Admin stats response:', response);
+        res.json(response);
     } catch (error) {
         console.error('Error getting admin stats:', error);
         res.status(500).json({ error: 'Internal server error' });
