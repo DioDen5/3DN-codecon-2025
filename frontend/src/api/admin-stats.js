@@ -43,10 +43,10 @@ export const getAdminNameChangeRequests = async () => {
     }
 };
 
-export const getAdminActivity = async () => {
+export const getAdminActivity = async (page = 1) => {
     try {
         console.log('Making request to /admin/activity...');
-        const response = await http.get('/admin/activity');
+        const response = await http.get(`/admin/activity?page=${page}&limit=4`);
         console.log('Admin activity response:', response.data);
         return response.data;
     } catch (error) {

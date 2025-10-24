@@ -74,19 +74,26 @@ export const useAdminData = () => {
             setLoading(true);
             setError(null);
 
-            const [stats, users, reports, nameChanges, activity] = await Promise.all([
+            const [stats, users, reports, nameChanges, activityResponse] = await Promise.all([
                 getAdminStats(),
                 getAdminUsers(),
                 getAdminReports(),
                 getAdminNameChangeRequests(),
-                getAdminActivity()
+                getAdminActivity(1)
             ]);
 
             setStatsData(stats);
             setUsersData(users);
             setReportsData(reports);
             setNameChangeRequests(nameChanges);
-            setActivityData(activity);
+            setActivityData(activityResponse.content || []);
+            setActivityPagination(activityResponse.pagination || {
+                currentPage: 1,
+                totalPages: 1,
+                hasNextPage: false,
+                hasPrevPage: false,
+                totalItems: 0
+            });
 
             const moderationData = {
                 announcements: stats.activeAnnouncements,
@@ -95,17 +102,6 @@ export const useAdminData = () => {
             };
             setModerationData(moderationData);
 
-            const itemsPerPage = 4;
-            const totalActivities = activity.length;
-            const totalPages = Math.ceil(totalActivities / itemsPerPage);
-            
-            setActivityPagination({
-                currentPage: 1,
-                totalPages,
-                hasNextPage: totalPages > 1,
-                hasPrevPage: false,
-                totalActivities
-            });
 
             try {
                 const allContentData = await getAllModerationContent(1, 5);
@@ -216,35 +212,58 @@ export const useAdminData = () => {
         }
     };
 
-    const handlePrevPage = () => {
+    const handlePrevPage = async () => {
         if (activityPagination.hasPrevPage) {
-            setActivityPagination(prev => ({
-                ...prev,
-                currentPage: prev.currentPage - 1,
-                hasNextPage: true,
-                hasPrevPage: prev.currentPage - 1 > 1
-            }));
+            const newPage = activityPagination.currentPage - 1;
+            try {
+                const response = await getAdminActivity(newPage);
+                setActivityData(response.content || []);
+                setActivityPagination(response.pagination || {
+                    currentPage: newPage,
+                    totalPages: 1,
+                    hasNextPage: false,
+                    hasPrevPage: newPage > 1,
+                    totalItems: 0
+                });
+            } catch (error) {
+                console.error('Error loading activity:', error);
+            }
         }
     };
 
-    const handleNextPage = () => {
+    const handleNextPage = async () => {
         if (activityPagination.hasNextPage) {
-            setActivityPagination(prev => ({
-                ...prev,
-                currentPage: prev.currentPage + 1,
-                hasNextPage: prev.currentPage + 1 < prev.totalPages,
-                hasPrevPage: true
-            }));
+            const newPage = activityPagination.currentPage + 1;
+            try {
+                const response = await getAdminActivity(newPage);
+                setActivityData(response.content || []);
+                setActivityPagination(response.pagination || {
+                    currentPage: newPage,
+                    totalPages: 1,
+                    hasNextPage: false,
+                    hasPrevPage: newPage > 1,
+                    totalItems: 0
+                });
+            } catch (error) {
+                console.error('Error loading activity:', error);
+            }
         }
     };
 
-    const handlePageClick = (page) => {
-        setActivityPagination(prev => ({
-            ...prev,
-            currentPage: page,
-            hasNextPage: page < prev.totalPages,
-            hasPrevPage: page > 1
-        }));
+    const handlePageClick = async (page) => {
+        try {
+            const response = await getAdminActivity(page);
+            setActivityData(response.content || []);
+            setActivityPagination(response.pagination || {
+                currentPage: page,
+                totalPages: 1,
+                hasNextPage: false,
+                hasPrevPage: page > 1,
+                totalItems: 0
+            });
+        } catch (error) {
+            console.error('Error loading activity:', error);
+        }
     };
 
     const handleModerationPrevPage = async () => {

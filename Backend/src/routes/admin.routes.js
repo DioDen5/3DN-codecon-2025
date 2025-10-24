@@ -227,12 +227,18 @@ router.get('/name-change-requests', authRequired, requireAdmin, async (req, res)
 // Отримання останньої активності
 router.get('/activity', authRequired, requireAdmin, async (req, res) => {
     try {
+        const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
         
         const activities = await ActivityLog.find({})
             .populate('userId', 'displayName email')
             .sort({ createdAt: -1 })
+            .skip(skip)
             .limit(limit);
+
+        const totalItems = await ActivityLog.countDocuments();
+        const totalPages = Math.ceil(totalItems / limit);
 
         // Форматуємо дані для frontend
         const formattedActivities = activities.map(activity => {
@@ -250,7 +256,7 @@ router.get('/activity', authRequired, requireAdmin, async (req, res) => {
             }
 
             return {
-                id: activity._id,
+                _id: activity._id,
                 type: activity.action,
                 user: userName,
                 time: activity.timeAgo,
@@ -259,7 +265,17 @@ router.get('/activity', authRequired, requireAdmin, async (req, res) => {
             };
         });
 
-        res.json(formattedActivities);
+        res.json({
+            content: formattedActivities,
+            pagination: {
+                currentPage: page,
+                totalPages,
+                totalItems,
+                hasNextPage: page < totalPages,
+                hasPrevPage: page > 1,
+                limit
+            }
+        });
     } catch (error) {
         console.error('Error getting activity:', error);
         res.status(500).json({ error: 'Internal server error' });
