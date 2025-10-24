@@ -46,6 +46,7 @@ async function main() {
         displayName: 'Доктор Олександр Петренко',
         firstName: 'Олександр',
         lastName: 'Петренко',
+        middleName: 'Володимирович',
         role: 'teacher',
         status: 'verified'
     });

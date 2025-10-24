@@ -6,6 +6,7 @@ const userSchema = new mongoose.Schema({
     displayName:  { type: String, required: true },
     firstName:  { type: String, required: true },
     lastName:   { type: String, required: true },
+    middleName: { type: String, required: false },
     // Ролі користувачів: student, teacher, admin
     role:      { type: String, enum: ['student','teacher','admin'], default: 'student' },
     status:    { type: String, enum: ['pending','verified','rejected','suspended'], default: 'pending', index: true },

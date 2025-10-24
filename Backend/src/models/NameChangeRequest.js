@@ -12,6 +12,7 @@ const nameChangeRequestSchema = new mongoose.Schema({
     currentDisplayName: { type: String, required: true },
     newFirstName: { type: String, required: true },
     newLastName: { type: String, required: true },
+    newMiddleName: { type: String, required: false },
     newDisplayName: { type: String, required: true },
     reason: { type: String, required: false }, // Причина зміни (опціонально)
     status: { 
