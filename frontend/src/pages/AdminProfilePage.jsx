@@ -94,17 +94,7 @@ const AdminProfilePage = () => {
                 
             } catch (error) {
                 console.error('Error loading admin data:', error);
-                // Fallback до мок даних при помилці
-                setStats({
-                    totalUsers: 1247,
-                    students: 1200,
-                    teachers: 45,
-                    admins: 2,
-                    activeAnnouncements: 23,
-                    totalComments: 156,
-                    pendingReports: 8,
-                    nameChangeRequests: 3
-                });
+                // При помилці залишаємо значення за замовчуванням (0)
             } finally {
                 setLoading(false);
             }
