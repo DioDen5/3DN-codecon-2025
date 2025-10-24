@@ -212,65 +212,29 @@ const TeacherProfilePageNew = () => {
             </div>
 
             {/* Статистика */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-white text-black rounded-xl p-4 shadow-lg border border-gray-200 relative overflow-hidden group stats-card">
-                    <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-green-100/50 to-emerald-100/30 rounded-full -translate-y-8 translate-x-8 animate-pulse"></div>
-                    <div className="relative">
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
-                                <Star className="w-5 h-5 text-white" />
-                            </div>
-                            <div>
-                                <p className="text-sm text-gray-600">Середня оцінка</p>
-                                <p className="text-xl font-bold text-gray-900">{stats.averageRating}/10</p>
-                            </div>
-                        </div>
-                    </div>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+                <div className="bg-white text-black rounded-xl p-3 md:p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
+                    <Star className="w-6 h-6 md:w-8 md:h-8 text-green-500 mx-auto mb-2" />
+                    <div className="text-lg md:text-2xl font-bold text-gray-900">{stats.averageRating}/10</div>
+                    <div className="text-xs md:text-sm text-gray-600">Середня оцінка</div>
                 </div>
-
-                <div className="bg-white text-black rounded-xl p-4 shadow-lg border border-gray-200 relative overflow-hidden group stats-card">
-                    <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-blue-100/50 to-cyan-100/30 rounded-full -translate-y-8 translate-x-8 animate-pulse"></div>
-                    <div className="relative">
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-600 rounded-lg flex items-center justify-center">
-                                <MessageCircle className="w-5 h-5 text-white" />
-                            </div>
-                            <div>
-                                <p className="text-sm text-gray-600">Відгуків</p>
-                                <p className="text-xl font-bold text-gray-900">{stats.reviews}</p>
-                            </div>
-                        </div>
-                    </div>
+                
+                <div className="bg-white text-black rounded-xl p-3 md:p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
+                    <MessageCircle className="w-6 h-6 md:w-8 md:h-8 text-blue-500 mx-auto mb-2" />
+                    <div className="text-lg md:text-2xl font-bold text-gray-900">{stats.reviews}</div>
+                    <div className="text-xs md:text-sm text-gray-600">Відгуків</div>
                 </div>
-
-                <div className="bg-white text-black rounded-xl p-4 shadow-lg border border-gray-200 relative overflow-hidden group stats-card">
-                    <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-purple-100/50 to-pink-100/30 rounded-full -translate-y-8 translate-x-8 animate-pulse"></div>
-                    <div className="relative">
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-600 rounded-lg flex items-center justify-center">
-                                <ThumbsUp className="w-5 h-5 text-white" />
-                            </div>
-                            <div>
-                                <p className="text-sm text-gray-600">Подобається</p>
-                                <p className="text-xl font-bold text-gray-900">{stats.totalLikes}</p>
-                            </div>
-                        </div>
-                    </div>
+                
+                <div className="bg-white text-black rounded-xl p-3 md:p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
+                    <ThumbsUp className="w-6 h-6 md:w-8 md:h-8 text-purple-500 mx-auto mb-2" />
+                    <div className="text-lg md:text-2xl font-bold text-gray-900">{stats.totalLikes}</div>
+                    <div className="text-xs md:text-sm text-gray-600">Подобається</div>
                 </div>
-
-                <div className="bg-white text-black rounded-xl p-4 shadow-lg border border-gray-200 relative overflow-hidden group stats-card">
-                    <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-purple-100/50 to-pink-100/30 rounded-full -translate-y-8 translate-x-8 animate-pulse"></div>
-                    <div className="relative">
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-600 rounded-lg flex items-center justify-center">
-                                <GraduationCap className="w-5 h-5 text-white" />
-                            </div>
-                            <div>
-                                <p className="text-sm text-gray-600">Спеціалізація</p>
-                                <p className="text-xl font-bold text-gray-900">AI/ML</p>
-                            </div>
-                        </div>
-                    </div>
+                
+                <div className="bg-white text-black rounded-xl p-3 md:p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
+                    <GraduationCap className="w-6 h-6 md:w-8 md:h-8 text-pink-500 mx-auto mb-2" />
+                    <div className="text-lg md:text-2xl font-bold text-gray-900">AI/ML</div>
+                    <div className="text-xs md:text-sm text-gray-600">Спеціалізація</div>
                 </div>
             </div>
 
