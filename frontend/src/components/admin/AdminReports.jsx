@@ -135,8 +135,10 @@ const AdminReports = ({ reportsData, handleOpenReportModal, handleResolveReport,
                     
                     {(!reportsData || reportsData.length === 0) ? (
                         <div className="text-center py-12">
-                            <div className="w-16 h-16 bg-gradient-to-r from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <Flag className="w-8 h-8 text-gray-400" />
+                            <div className="w-20 h-20 bg-gradient-to-r from-orange-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-4 content-icon-glow content-icon-pulse content-icon-rotate relative overflow-hidden">
+                                <div className="absolute inset-0 content-icon-shimmer opacity-30"></div>
+                                <Flag className="w-10 h-10 text-white relative z-10 drop-shadow-lg" />
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-50"></div>
                             </div>
                             <div className="text-gray-500 text-lg font-medium">Немає скарг на розгляді</div>
                             <div className="text-gray-400 text-sm mt-1">Всі скарги розглянуті</div>
