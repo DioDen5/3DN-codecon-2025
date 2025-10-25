@@ -146,7 +146,7 @@ const AdminReports = ({ reportsData, handleOpenReportModal, handleResolveReport,
                             {reportsData.map((report, index) => (
                                 <div 
                                     key={report._id} 
-                                    className={`bg-gradient-to-r from-orange-50 to-orange-100 border border-orange-200 rounded-xl p-4 report-hover-glow transition-all duration-300 cursor-pointer group report-card-animate ${
+                                    className={`bg-gradient-to-r from-orange-50 to-orange-100 border border-orange-200 rounded-xl p-4 report-hover-glow transition-all duration-300 group report-card-animate ${
                                         deletingReportId === report._id ? 'comment-delete-slide' : ''
                                     }`}
                                     style={{ animationDelay: `${index * 0.1}s` }}
