@@ -20,11 +20,15 @@ import ReportReviewModal from '../components/ReportReviewModal';
 
 const AdminProfilePageRefactored = () => {
     const { user, token } = useAuthState();
-    const [activeTab, setActiveTab] = useState('dashboard');
+    const [activeTab, setActiveTab] = useState(() => {
+        return localStorage.getItem('adminActiveTab') || 'dashboard';
+    });
     const [showReportModal, setShowReportModal] = useState(false);
     const [selectedReport, setSelectedReport] = useState(null);
     
-    const [moderationFilter, setModerationFilter] = useState('all');
+    const [moderationFilter, setModerationFilter] = useState(() => {
+        return localStorage.getItem('adminModerationFilter') || 'all';
+    });
     const [moderationSearch, setModerationSearch] = useState('');
     const [selectedItems, setSelectedItems] = useState([]);
 
@@ -82,6 +86,7 @@ const AdminProfilePageRefactored = () => {
         }
         
         setActiveTab(tabId);
+        localStorage.setItem('adminActiveTab', tabId);
         
         if (tabId === 'moderation') {
             if (moderationFilter === 'announcements') {
@@ -97,6 +102,7 @@ const AdminProfilePageRefactored = () => {
     const handleNavigateToTab = (tabId, filter = null) => {
         if (filter) {
             setModerationFilter(filter);
+            localStorage.setItem('adminModerationFilter', filter);
         }
         handleTabChange(tabId);
     };

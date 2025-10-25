@@ -25,7 +25,10 @@ const ModerationFilters = ({
                         return (
                             <button
                                 key={filter.id}
-                                onClick={() => setModerationFilter(filter.id)}
+                                onClick={() => {
+                                    setModerationFilter(filter.id);
+                                    localStorage.setItem('adminModerationFilter', filter.id);
+                                }}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 cursor-pointer ${
                                     moderationFilter === filter.id
                                         ? filter.id === 'all' 
