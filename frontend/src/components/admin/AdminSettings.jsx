@@ -112,7 +112,7 @@ const AdminSettings = () => {
                                     max="480"
                                     value={settings.sessionTimeout}
                                     onChange={(e) => updateSetting('sessionTimeout', parseInt(e.target.value))}
-                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-lg font-medium focus:security-input-focus"
+                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-1 focus:ring-blue-600 focus:border-blue-600 focus:outline-none transition-all duration-300 text-lg font-medium focus:security-input-focus"
                                 />
                             </div>
 
@@ -133,7 +133,7 @@ const AdminSettings = () => {
                                     max="10"
                                     value={settings.maxLoginAttempts}
                                     onChange={(e) => updateSetting('maxLoginAttempts', parseInt(e.target.value))}
-                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-300 text-lg font-medium focus:security-input-focus"
+                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-1 focus:ring-orange-600 focus:border-orange-600 focus:outline-none transition-all duration-300 text-lg font-medium focus:security-input-focus"
                                 />
                             </div>
                         </div>
