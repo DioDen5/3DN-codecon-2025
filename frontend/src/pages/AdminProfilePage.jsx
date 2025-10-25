@@ -143,6 +143,16 @@ const AdminProfilePageRefactored = () => {
         }
     };
 
+    const handleApproveItem = async (itemId, itemType) => {
+        try {
+            console.log('Approving item:', itemId, itemType);
+            alert(`Функція схвалення ${itemType} буде реалізована`);
+        } catch (error) {
+            console.error('Error approving item:', error);
+            alert(`Помилка при схваленні: ${error.message}`);
+        }
+    };
+
     const handleDeleteContent = async (targetId, targetType) => {
         try {
             console.log('Deleting content:', targetId, targetType);
@@ -262,6 +272,9 @@ const AdminProfilePageRefactored = () => {
                         <AdminReports
                             reportsData={reportsData}
                             handleOpenReportModal={handleOpenReportModal}
+                            handleResolveReport={handleResolveReport}
+                            handleRejectReport={handleRejectReport}
+                            onReportDeleted={() => loadAdminData()}
                         />
                     )}
 
@@ -281,6 +294,7 @@ const AdminProfilePageRefactored = () => {
                             handleModerationPageClick={handleModerationPageClick}
                             handleBulkDelete={handleBulkDelete}
                             handleDeleteItem={handleDeleteItem}
+                            handleApproveItem={handleApproveItem}
                             announcementsContent={announcementsContent}
                             announcementsPagination={announcementsPagination}
                             handleAnnouncementsPrevPage={handleAnnouncementsPrevPage}

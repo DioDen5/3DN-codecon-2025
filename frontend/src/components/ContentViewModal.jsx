@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, AlertTriangle, User, Calendar, MessageSquare, FileText, Star } from 'lucide-react';
+import { X, AlertTriangle, User, Calendar, MessageSquare, FileText, Star, CheckCircle, Trash2 } from 'lucide-react';
 
-const ContentViewModal = ({ isOpen, onClose, content }) => {
+const ContentViewModal = ({ isOpen, onClose, content, onApprove, onDelete }) => {
     const [isClosing, setIsClosing] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         if (isOpen) {
@@ -28,6 +29,34 @@ const ContentViewModal = ({ isOpen, onClose, content }) => {
             setIsClosing(false);
             onClose();
         }, 400);
+    };
+
+    const handleApprove = async () => {
+        setIsLoading(true);
+        try {
+            if (onApprove) {
+                await onApprove(content._id, content.contentType);
+            }
+            handleClose();
+        } catch (error) {
+            console.error('Error approving content:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleDelete = async () => {
+        setIsLoading(true);
+        try {
+            if (onDelete) {
+                await onDelete(content._id, content.contentType);
+            }
+            handleClose();
+        } catch (error) {
+            console.error('Error deleting content:', error);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const getTargetTypeText = (type) => {
@@ -136,7 +165,25 @@ const ContentViewModal = ({ isOpen, onClose, content }) => {
                         </div>
                     </div>
 
-                    <div className="flex justify-end">
+                    <div className="flex justify-between items-center">
+                        <div className="flex gap-3">
+                            <button
+                                onClick={handleApprove}
+                                disabled={isLoading}
+                                className="flex items-center gap-2 px-4 py-2 bg-green-100 border border-green-300 rounded-lg text-green-700 font-medium hover:bg-green-200 hover:scale-105 hover:shadow-md transition-all duration-300 disabled:opacity-50"
+                            >
+                                <CheckCircle className="w-4 h-4" />
+                                Схваліти
+                            </button>
+                            <button
+                                onClick={handleDelete}
+                                disabled={isLoading}
+                                className="flex items-center gap-2 px-4 py-2 bg-red-100 border border-red-300 rounded-lg text-red-700 font-medium hover:bg-red-200 hover:scale-105 hover:shadow-md transition-all duration-300 disabled:opacity-50"
+                            >
+                                <Trash2 className="w-4 h-4" />
+                                Видалити
+                            </button>
+                        </div>
                         <button
                             onClick={handleClose}
                             className="flex items-center gap-2 px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-200 hover:scale-105 hover:shadow-md transition-all duration-300"

@@ -22,6 +22,7 @@ const AdminModeration = ({
     handleModerationPageClick,
     handleBulkDelete,
     handleDeleteItem,
+    handleApproveItem,
     announcementsContent,
     announcementsPagination,
     handleAnnouncementsPrevPage,
@@ -59,6 +60,7 @@ const AdminModeration = ({
                             selectedItems={selectedItems}
                             setSelectedItems={setSelectedItems}
                             handleDeleteItem={handleDeleteItem}
+                            handleApproveItem={handleApproveItem}
                         />
                         {allModerationContent && allModerationContent.length > 0 && moderationPagination && moderationPagination.totalPages > 1 && (
                             <ModerationPagination
