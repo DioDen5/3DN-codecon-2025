@@ -70,7 +70,7 @@ const ContentViewModal = ({ isOpen, onClose, content, onApprove, onDelete }) => 
 
     const getTargetIcon = (type) => {
         switch (type) {
-            case 'announcement': return <MessageSquare className="w-5 h-5" />;
+            case 'announcement': return <MessageSquare className="w-5 h-5 text-blue-900" />;
             case 'comment': return <FileText className="w-5 h-5" />;
             case 'review': return <Star className="w-5 h-5" />;
             default: return <FileText className="w-5 h-5" />;
