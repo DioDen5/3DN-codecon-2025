@@ -69,6 +69,12 @@ export const useAdminData = () => {
         totalItems: 0
     });
 
+    // Зберігаємо поточні сторінки для кожного типу контенту
+    const [currentAnnouncementsPage, setCurrentAnnouncementsPage] = useState(1);
+    const [currentCommentsPage, setCurrentCommentsPage] = useState(1);
+    const [currentReviewsPage, setCurrentReviewsPage] = useState(1);
+    const [currentModerationPage, setCurrentModerationPage] = useState(1);
+
     const loadAdminData = useCallback(async () => {
         try {
             setLoading(true);
@@ -86,6 +92,8 @@ export const useAdminData = () => {
             setUsersData(users);
             setReportsData(reports);
             setNameChangeRequests(nameChanges);
+            
+            console.log('Reports loaded:', reports.length);
             setActivityData(activityResponse.content || []);
             setActivityPagination(activityResponse.pagination || {
                 currentPage: 1,
@@ -102,36 +110,11 @@ export const useAdminData = () => {
             };
             setModerationData(moderationData);
 
-
-            try {
-                const allContentData = await getAllModerationContent(1, 5);
-                setAllModerationContent(allContentData.content || []);
-                setModerationPagination({
-                    currentPage: allContentData.pagination?.currentPage || 1,
-                    totalPages: allContentData.pagination?.totalPages || 1,
-                    hasNextPage: allContentData.pagination?.hasNextPage || false,
-                    hasPrevPage: allContentData.pagination?.hasPrevPage || false,
-                    totalItems: allContentData.pagination?.totalItems || 0
-                });
-            } catch (error) {
-                console.error('Error loading all moderation content:', error);
-                setAllModerationContent([]);
-            }
-
-            try {
-                const announcementsData = await getModerationAnnouncements(1, 5);
-                setAnnouncementsContent(announcementsData.content || []);
-                setAnnouncementsPagination({
-                    currentPage: announcementsData.pagination?.currentPage || 1,
-                    totalPages: announcementsData.pagination?.totalPages || 1,
-                    hasNextPage: announcementsData.pagination?.hasNextPage || false,
-                    hasPrevPage: announcementsData.pagination?.hasPrevPage || false,
-                    totalItems: announcementsData.pagination?.totalItems || 0
-                });
-            } catch (error) {
-                console.error('Error loading announcements:', error);
-                setAnnouncementsContent([]);
-            }
+            // Завантажуємо модераційний контент з початковими сторінками
+            await loadAllModerationContent(1);
+            await loadAnnouncements(1);
+            await loadComments(1);
+            await loadReviews(1);
 
         } catch (error) {
             console.error('Error loading admin data:', error);
@@ -140,6 +123,24 @@ export const useAdminData = () => {
             setLoading(false);
         }
     }, []);
+
+    const loadAllModerationContent = async (page = 1) => {
+        try {
+            const allContentData = await getAllModerationContent(page, 5);
+            setAllModerationContent(allContentData.content || []);
+            setModerationPagination({
+                currentPage: allContentData.pagination?.currentPage || 1,
+                totalPages: allContentData.pagination?.totalPages || 1,
+                hasNextPage: allContentData.pagination?.hasNextPage || false,
+                hasPrevPage: allContentData.pagination?.hasPrevPage || false,
+                totalItems: allContentData.pagination?.totalItems || 0
+            });
+            setCurrentModerationPage(allContentData.pagination?.currentPage || 1);
+        } catch (error) {
+            console.error('Error loading all moderation content:', error);
+            setAllModerationContent([]);
+        }
+    };
 
     const loadAnnouncements = async (page = 1) => {
         try {
@@ -152,6 +153,7 @@ export const useAdminData = () => {
                 hasPrevPage: data.pagination?.hasPrevPage || false,
                 totalItems: data.pagination?.totalItems || 0
             });
+            setCurrentAnnouncementsPage(data.pagination?.currentPage || 1);
         } catch (error) {
             console.error('Error loading announcements:', error);
             setAnnouncementsContent([]);
@@ -169,6 +171,7 @@ export const useAdminData = () => {
                 hasPrevPage: data.pagination?.hasPrevPage || false,
                 totalItems: data.pagination?.totalItems || 0
             });
+            setCurrentCommentsPage(data.pagination?.currentPage || 1);
         } catch (error) {
             console.error('Error loading comments:', error);
             setCommentsContent([]);
@@ -186,6 +189,7 @@ export const useAdminData = () => {
                 hasPrevPage: data.pagination?.hasPrevPage || false,
                 totalItems: data.pagination?.totalItems || 0
             });
+            setCurrentReviewsPage(data.pagination?.currentPage || 1);
         } catch (error) {
             console.error('Error loading reviews:', error);
             setReviewsContent([]);
@@ -524,6 +528,49 @@ export const useAdminData = () => {
         handleCommentsPageClick,
         handleReviewsPrevPage,
         handleReviewsNextPage,
-        handleReviewsPageClick
+        handleReviewsPageClick,
+        refreshCurrentContent: async (contentType) => {
+            try {
+                console.log('refreshCurrentContent called with:', contentType);
+                console.log('Current pagination states:', { 
+                    moderationPagination: moderationPagination?.currentPage,
+                    announcementsPagination: announcementsPagination?.currentPage,
+                    commentsPagination: commentsPagination?.currentPage,
+                    reviewsPagination: reviewsPagination?.currentPage
+                });
+                
+                switch (contentType) {
+                    case 'all':
+                        const allPage = moderationPagination?.currentPage || 1;
+                        console.log('Refreshing all content on page:', allPage);
+                        await loadAllModerationContent(allPage);
+                        break;
+                    case 'announcements':
+                        const announcementsPage = announcementsPagination?.currentPage || 1;
+                        console.log('Refreshing announcements on page:', announcementsPage);
+                        await loadAnnouncements(announcementsPage);
+                        break;
+                    case 'comments':
+                        const commentsPage = commentsPagination?.currentPage || 1;
+                        console.log('Refreshing comments on page:', commentsPage);
+                        await loadComments(commentsPage);
+                        break;
+                    case 'reviews':
+                        const reviewsPage = reviewsPagination?.currentPage || 1;
+                        console.log('Refreshing reviews on page:', reviewsPage);
+                        await loadReviews(reviewsPage);
+                        break;
+                    default:
+                        console.log('Refreshing all content types');
+                        // Оновлюємо всі типи контенту
+                        await loadAllModerationContent(moderationPagination?.currentPage || 1);
+                        await loadAnnouncements(announcementsPagination?.currentPage || 1);
+                        await loadComments(commentsPagination?.currentPage || 1);
+                        await loadReviews(reviewsPagination?.currentPage || 1);
+                }
+            } catch (error) {
+                console.error('Error refreshing content:', error);
+            }
+        }
     };
 };
