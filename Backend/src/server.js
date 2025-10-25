@@ -51,6 +51,12 @@ app.use('/api/user', userStatsRoutes)
 app.use('/api/name-change', nameChangeRoutes)
 app.use('/api/admin', adminRoutes)
 
+// Додаємо логування всіх запитів
+app.use((req, res, next) => {
+    console.log(`${req.method} ${req.path} - ${new Date().toISOString()}`);
+    next();
+});
+
 app.use((req, res) => {
     res.status(404).json({ error: 'Not found' })
 })

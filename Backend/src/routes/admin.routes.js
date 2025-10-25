@@ -5,6 +5,7 @@ import { Comment } from '../models/Comment.js';
 import { Report } from '../models/Report.js';
 import { NameChangeRequest } from '../models/NameChangeRequest.js';
 import { ActivityLog } from '../models/ActivityLog.js';
+import { TeacherComment } from '../models/TeacherComment.js';
 import { authRequired } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -471,6 +472,66 @@ router.get('/moderation/reviews', authRequired, requireAdmin, async (req, res) =
         });
     } catch (error) {
         console.error('Error getting moderation reviews:', error);
+        res.status(500).json({ error: 'Internal server error', details: error.message });
+    }
+});
+
+router.delete('/content/:type/:id', authRequired, requireAdmin, async (req, res) => {
+    try {
+        console.log('DELETE /content route hit:', req.params);
+        const { type, id } = req.params;
+        console.log('Deleting content:', { type, id });
+        
+        let result;
+        switch (type) {
+            case 'announcement':
+                result = await Announcement.findByIdAndDelete(id);
+                break;
+            case 'comment':
+                result = await Comment.findByIdAndDelete(id);
+                break;
+            case 'review':
+                result = await TeacherComment.findByIdAndDelete(id);
+                break;
+            default:
+                console.log('Invalid content type:', type);
+                return res.status(400).json({ error: 'Invalid content type' });
+        }
+        
+        console.log('Delete result:', result);
+        if (!result) {
+            console.log('Content not found - updating report status');
+            
+            // Оновлюємо статус скарги на "вирішена" з причиною "контент не існує"
+            const report = await Report.findOne({ targetId: id, targetType: type });
+            if (report) {
+                report.status = 'resolved';
+                report.resolvedAt = new Date();
+                report.resolvedBy = req.user.id;
+                report.resolutionReason = 'Контент не існує';
+                await report.save();
+                console.log('Report status updated to resolved');
+            }
+            
+            return res.status(404).json({ error: 'Content not found', reportUpdated: true });
+        }
+        
+        console.log('Content deleted successfully');
+        
+        // Оновлюємо статус скарги на "вирішена" після успішного видалення контенту
+        const report = await Report.findOne({ targetId: id, targetType: type });
+        if (report) {
+            report.status = 'resolved';
+            report.resolvedAt = new Date();
+            report.resolvedBy = req.user.id;
+            report.resolutionReason = 'Контент видалено адміністратором';
+            await report.save();
+            console.log('Report status updated to resolved after content deletion');
+        }
+        
+        res.json({ message: 'Content deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting content:', error);
         res.status(500).json({ error: 'Internal server error', details: error.message });
     }
 });
