@@ -82,6 +82,9 @@ const AdminModeration = ({
                         <AnnouncementsList
                             announcementsContent={announcementsContent}
                             handleDeleteItem={handleDeleteItem}
+                            handleApproveItem={handleApproveItem}
+                            onContentDeleted={onContentDeleted}
+                            approvedItems={approvedItems}
                         />
                         {announcementsContent && announcementsContent.length > 0 && announcementsPagination && announcementsPagination.totalPages > 1 && (
                             <ModerationPagination
