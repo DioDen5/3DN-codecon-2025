@@ -2,7 +2,7 @@ import React from 'react';
 
 const AdminUsers = ({ usersData }) => {
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 users-slide-in">
             <div className="bg-white text-black rounded-2xl p-6 shadow-xl border border-gray-200">
                 <h3 className="text-xl font-bold text-gray-900 mb-4">Управління користувачами</h3>
                 <div className="space-y-3">

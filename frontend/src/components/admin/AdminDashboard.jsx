@@ -5,7 +5,7 @@ const AdminDashboard = ({ statsData, activityData, activityPagination, handlePre
     const stats = statsData || {};
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 dashboard-slide-in">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                 <div 
                     onClick={() => onNavigateToTab('users')}

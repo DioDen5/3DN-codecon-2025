@@ -122,7 +122,7 @@ const AdminReports = ({ reportsData, handleOpenReportModal, handleResolveReport,
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 reports-slide-in">
             <div className="bg-white text-black rounded-2xl p-6 shadow-xl border border-gray-200 relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-100/50 to-red-200/30 rounded-full -translate-y-16 translate-x-16 animate-pulse"></div>
                 <div className="relative">

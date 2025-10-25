@@ -2085,6 +2085,66 @@
     animation: moderationSlideIn 0.5s ease-out;
 }
 
+@keyframes dashboardSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes usersSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes reportsSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes settingsSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.dashboard-slide-in {
+    animation: dashboardSlideIn 0.5s ease-out;
+}
+
+.users-slide-in {
+    animation: usersSlideIn 0.5s ease-out;
+}
+
+.reports-slide-in {
+    animation: reportsSlideIn 0.5s ease-out;
+}
+
+.settings-slide-in {
+    animation: settingsSlideIn 0.5s ease-out;
+}
+
 .moderation-pulse {
     animation: moderationPulse 2s ease-in-out infinite;
 }
