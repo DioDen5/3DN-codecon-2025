@@ -144,19 +144,19 @@ const ReportReviewModal = ({ isOpen, onClose, report, onReject, onDeleteContent 
                             <button
                                 onClick={() => handleAction('delete')}
                                 disabled={isLoading}
-                                className="flex items-center justify-center gap-3 p-4 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 hover:scale-105 hover:shadow-md transition-all duration-300 disabled:opacity-50 btn-glow"
+                                className="flex items-center justify-center gap-3 p-4 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 hover:scale-105 hover:shadow-md transition-all duration-300 disabled:opacity-50 btn-glow group"
                             >
-                                <Trash2 className="w-5 h-5 text-red-600" />
+                                <Trash2 className="w-5 h-5 text-red-600 group-hover:rotate-[15deg] transition-transform duration-300" />
                                 <span className="text-red-800 font-medium">Видалити контент</span>
                             </button>
                             
                             <button
                                 onClick={() => handleAction('reject')}
                                 disabled={isLoading}
-                                className="flex items-center justify-center gap-3 p-4 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 hover:scale-105 hover:shadow-md transition-all duration-300 disabled:opacity-50 btn-glow"
+                                className="flex items-center justify-center gap-2 p-3 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 hover:scale-105 hover:shadow-md transition-all duration-300 disabled:opacity-50 btn-glow group"
                             >
-                                <XCircle className="w-5 h-5 text-gray-600" />
-                                <span className="text-gray-800 font-medium">Відхилити скаргу</span>
+                                <XCircle className="w-5 h-5 text-gray-600 group-hover:rotate-[15deg] transition-transform duration-300" />
+                                <span className="text-gray-700 font-medium">Відхилити скаргу</span>
                             </button>
                         </div>
                     </div>
@@ -166,9 +166,9 @@ const ReportReviewModal = ({ isOpen, onClose, report, onReject, onDeleteContent 
                 <div className="flex items-center justify-end gap-3 p-8 border-t border-gray-200">
                     <button
                         onClick={handleClose}
-                        className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                        className="flex items-center justify-center gap-2 p-3 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 hover:scale-105 hover:shadow-md transition-all duration-300 btn-glow"
                     >
-                        Скасувати
+                        <span className="text-gray-700 font-medium">Скасувати</span>
                     </button>
                 </div>
             </div>
