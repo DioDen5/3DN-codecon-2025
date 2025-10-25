@@ -2680,4 +2680,140 @@
     animation: moderationIconShimmer 2s ease-in-out infinite;
 }
 
+/* Dashboard Users Icon Animations */
+@keyframes dashboardUsersIconGlow {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.6), 0 0 30px rgba(59, 130, 246, 0.4);
+    }
+}
+
+@keyframes dashboardUsersIconPulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes dashboardUsersIconRotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes dashboardUsersIconShimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.dashboard-users-icon-glow {
+    animation: dashboardUsersIconGlow 2s ease-in-out infinite;
+}
+
+.dashboard-users-icon-pulse {
+    animation: dashboardUsersIconPulse 0.6s ease-out;
+}
+
+.dashboard-users-icon-rotate {
+    animation: dashboardUsersIconRotate 0.8s ease-in-out;
+}
+
+.dashboard-users-icon-shimmer {
+    position: relative;
+    overflow: hidden;
+}
+
+.dashboard-users-icon-shimmer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: dashboardUsersIconShimmer 2s ease-in-out infinite;
+}
+
+/* Dashboard Activity Icon Animations */
+@keyframes dashboardActivityIconGlow {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.6), 0 0 30px rgba(59, 130, 246, 0.4);
+    }
+}
+
+@keyframes dashboardActivityIconPulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes dashboardActivityIconRotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes dashboardActivityIconShimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.dashboard-activity-icon-glow {
+    animation: dashboardActivityIconGlow 2s ease-in-out infinite;
+}
+
+.dashboard-activity-icon-pulse {
+    animation: dashboardActivityIconPulse 0.6s ease-out;
+}
+
+.dashboard-activity-icon-rotate {
+    animation: dashboardActivityIconRotate 0.8s ease-in-out;
+}
+
+.dashboard-activity-icon-shimmer {
+    position: relative;
+    overflow: hidden;
+}
+
+.dashboard-activity-icon-shimmer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: dashboardActivityIconShimmer 2s ease-in-out infinite;
+}
+
 

@@ -47,9 +47,9 @@ const AdminDashboard = ({ statsData, activityData, activityPagination, handlePre
             <div className="bg-white text-black rounded-2xl p-6 shadow-xl border border-gray-200 relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-100/50 to-blue-200/30 rounded-full -translate-y-16 translate-x-16 animate-pulse"></div>
                 <div className="relative">
-                    <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-3">
-                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-                            <Users className="w-4 h-4 text-white" />
+                    <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-4">
+                        <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg transition-transform duration-300 dashboard-users-icon-glow dashboard-users-icon-pulse dashboard-users-icon-rotate dashboard-users-icon-shimmer relative overflow-hidden">
+                            <Users className="w-5 h-5 text-white relative z-10" />
                         </div>
                         Розподіл користувачів
                     </h3>
@@ -73,9 +73,9 @@ const AdminDashboard = ({ statsData, activityData, activityPagination, handlePre
             <div className="bg-white text-black rounded-2xl p-6 shadow-xl border border-gray-200 relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-100/50 to-blue-200/30 rounded-full -translate-y-16 translate-x-16 animate-pulse"></div>
                 <div className="relative">
-                    <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-3">
-                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-                            <Activity className="w-4 h-4 text-white" />
+                    <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-4">
+                        <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg transition-transform duration-300 dashboard-activity-icon-glow dashboard-activity-icon-pulse dashboard-activity-icon-rotate dashboard-activity-icon-shimmer relative overflow-hidden">
+                            <Activity className="w-5 h-5 text-white relative z-10" />
                         </div>
                         Остання активність
                     </h3>
