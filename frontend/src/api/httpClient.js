@@ -32,6 +32,17 @@ http.interceptors.response.use(
 
         const url = new URL(config.url, window.location.origin);
         const isAuthPath = url.pathname.startsWith('/api/auth/');
+        
+        // Перевіряємо чи це розлогування через таймаут
+        if (response.data?.sessionExpired) {
+            console.log('Session expired, redirecting to login');
+            tokenStore.clear();
+            localStorage.removeItem('token');
+            sessionStorage.removeItem('token');
+            window.location.href = '/login';
+            throw err;
+        }
+        
         if (isAuthPath || response.status !== 401 || config._retry || config._skipAuthHandler) {
             throw err;
         }

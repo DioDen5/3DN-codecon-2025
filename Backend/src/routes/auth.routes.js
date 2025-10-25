@@ -7,6 +7,7 @@ import allowed from '../config/allowed-edu-domains.json' with { type: 'json' };
 import { signJwt, verifyJwt } from '../middleware/auth.js';
 import { sendPasswordResetEmail } from '../utils/emailService.js';
 import { logUserRegistration, logUserVerification } from '../utils/activityLogger.js';
+import { checkSessionTimeout, checkIdleTimeout } from '../middleware/sessionTimeout.js';
 
 const router = express.Router();
 

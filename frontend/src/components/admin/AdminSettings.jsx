@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
     Shield, 
     Lock,
@@ -7,41 +7,96 @@ import {
     Save,
     AlertTriangle
 } from 'lucide-react';
+import { getSecuritySettings, saveSecuritySettings } from '../../api/admin-settings';
 
 const AdminSettings = () => {
     const [settings, setSettings] = useState({
         twoFactor: false,
         sessionTimeout: 30,
+        idleTimeout: 30,
         maxLoginAttempts: 5
     });
+
+    const [loading, setLoading] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
+    const [saveSuccess, setSaveSuccess] = useState(false);
+    const [error, setError] = useState(null);
+
+    // Завантажуємо налаштування при завантаженні компонента
+    useEffect(() => {
+        loadSettings();
+    }, []);
+
+    const loadSettings = async () => {
+        try {
+            setLoading(true);
+            const response = await getSecuritySettings();
+            if (response.success) {
+                setSettings({
+                    twoFactor: response.settings.twoFactorEnabled || false,
+                    sessionTimeout: response.settings.sessionTimeout || 30,
+                    idleTimeout: response.settings.idleTimeout || 30,
+                    maxLoginAttempts: response.settings.maxLoginAttempts || 5
+                });
+            }
+        } catch (error) {
+            console.error('Error loading settings:', error);
+            setError('Помилка завантаження налаштувань');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const toggleSetting = (key) => {
         setSettings(prev => ({ ...prev, [key]: !prev[key] }));
     };
 
     const updateSetting = (key, value) => {
-        setSettings(prev => ({ ...prev, [key]: value }));
+        // Перевіряємо чи значення є числом
+        const numValue = isNaN(value) ? 0 : parseInt(value);
+        setSettings(prev => ({ ...prev, [key]: numValue }));
     };
-
-    const [isSaving, setIsSaving] = useState(false);
-    const [saveSuccess, setSaveSuccess] = useState(false);
 
     const handleSave = async () => {
         setIsSaving(true);
+        setError(null);
         try {
-            // Симуляція збереження налаштувань
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            setSaveSuccess(true);
-            setTimeout(() => setSaveSuccess(false), 3000);
+            const response = await saveSecuritySettings({
+                twoFactorEnabled: settings.twoFactor,
+                sessionTimeout: settings.sessionTimeout,
+                idleTimeout: settings.idleTimeout,
+                maxLoginAttempts: settings.maxLoginAttempts
+            });
+            
+            if (response.success) {
+                setSaveSuccess(true);
+                setTimeout(() => setSaveSuccess(false), 3000);
+            } else {
+                setError('Помилка збереження налаштувань');
+            }
         } catch (error) {
             console.error('Error saving settings:', error);
+            setError('Помилка збереження налаштувань');
         } finally {
             setIsSaving(false);
         }
     };
 
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center min-h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-6 settings-slide-in">
+            {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                    {error}
+                </div>
+            )}
             <div className="bg-white text-black rounded-2xl p-8 shadow-xl border border-gray-200 relative overflow-hidden group">
                 {/* Анімований фон */}
                 <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-red-100/40 to-red-200/20 rounded-full -translate-y-20 translate-x-20 animate-pulse"></div>
@@ -111,8 +166,29 @@ const AdminSettings = () => {
                                     min="5"
                                     max="480"
                                     value={settings.sessionTimeout}
-                                    onChange={(e) => updateSetting('sessionTimeout', parseInt(e.target.value))}
+                                    onChange={(e) => updateSetting('sessionTimeout', e.target.value)}
                                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-1 focus:ring-blue-600 focus:border-blue-600 focus:outline-none transition-all duration-300 text-lg font-medium focus:security-input-focus"
+                                />
+                            </div>
+
+                            {/* Таймаут неактивності */}
+                            <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-300 group/input">
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-md group-hover/input:scale-105 transition-transform duration-300">
+                                        <Clock className="w-5 h-5 text-white" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-semibold text-gray-900">Таймаут неактивності</label>
+                                        <p className="text-xs text-gray-500">Час неактивності до виходу (хвилини)</p>
+                                    </div>
+                                </div>
+                                <input 
+                                    type="number" 
+                                    min="5"
+                                    max="120"
+                                    value={settings.idleTimeout}
+                                    onChange={(e) => updateSetting('idleTimeout', e.target.value)}
+                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-1 focus:ring-green-600 focus:border-green-600 focus:outline-none transition-all duration-300 text-lg font-medium focus:security-input-focus"
                                 />
                             </div>
 
@@ -148,7 +224,7 @@ const AdminSettings = () => {
                                         ? 'bg-gray-400 text-white cursor-not-allowed' 
                                         : saveSuccess
                                         ? 'bg-green-500 text-white shadow-lg shadow-green-200 security-save-success cursor-pointer'
-                                        : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:shadow-lg hover:shadow-blue-200 hover:scale-105 cursor-pointer hover:shadow-[0_0_20px_rgba(59,130,246,0.4)] active:scale-95 active:shadow-inner transition-all duration-300'
+                                        : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:shadow-[0_0_20px_rgba(59,130,246,0.4)] hover:scale-105 cursor-pointer active:scale-95 active:shadow-inner transition-all duration-300'
                                 }`}
                             >
                                 {isSaving ? (

@@ -7,6 +7,7 @@ import { NameChangeRequest } from '../models/NameChangeRequest.js';
 import { ActivityLog } from '../models/ActivityLog.js';
 import { TeacherComment } from '../models/TeacherComment.js';
 import { authRequired } from '../middleware/auth.js';
+import { checkSessionTimeout, checkIdleTimeout } from '../middleware/sessionTimeout.js';
 
 const router = express.Router();
 
@@ -18,8 +19,11 @@ const requireAdmin = (req, res, next) => {
     next();
 };
 
+// Комбінований мідлваре для admin routes з перевіркою таймауту
+const adminAuth = [authRequired, checkSessionTimeout, checkIdleTimeout, requireAdmin];
+
 // Статистика для адміністратора
-router.get('/stats', authRequired, requireAdmin, async (req, res) => {
+router.get('/stats', ...adminAuth, async (req, res) => {
     try {
         // Підрахунок користувачів за ролями
         const totalUsers = await User.countDocuments();
@@ -72,7 +76,7 @@ router.get('/stats', authRequired, requireAdmin, async (req, res) => {
 });
 
 // Отримання списку користувачів
-router.get('/users', authRequired, requireAdmin, async (req, res) => {
+router.get('/users', ...adminAuth, async (req, res) => {
     try {
         const users = await User.find({}, {
             _id: 1,
@@ -91,7 +95,7 @@ router.get('/users', authRequired, requireAdmin, async (req, res) => {
 });
 
 // Отримання скарг
-router.get('/reports', authRequired, requireAdmin, async (req, res) => {
+router.get('/reports', ...adminAuth, async (req, res) => {
     try {
         const reports = await Report.find({ status: 'open' })
             .populate('reporterId', 'displayName email')
