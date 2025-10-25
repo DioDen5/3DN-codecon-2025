@@ -164,10 +164,13 @@ const ContentViewModal = ({ isOpen, onClose, content, onApprove, onDelete }) => 
                         </div>
                     </div>
 
-                    <div className="bg-blue-50 rounded-xl p-6 mb-6">
-                        <h3 className="text-lg font-semibold text-blue-700 mb-4">Текст {getTargetTypeText(content.contentType)}</h3>
-                        <div className="text-blue-900 leading-relaxed whitespace-pre-wrap">
-                            {getContentText()}
+                    <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl p-6 mb-6 border border-blue-200 relative overflow-hidden comment-animate-blue">
+                        <div className="absolute top-0 right-0 w-16 h-16 bg-blue-100/30 rounded-full -translate-y-8 translate-x-8"></div>
+                        <div className="relative">
+                            <h3 className="text-lg font-semibold text-blue-700 mb-4">Текст {getTargetTypeText(content.contentType)}</h3>
+                            <div className="text-blue-900 leading-relaxed whitespace-pre-wrap">
+                                {getContentText()}
+                            </div>
                         </div>
                     </div>
 
