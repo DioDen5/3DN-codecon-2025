@@ -29,7 +29,7 @@ const Pagination = ({ pageCount, handlePageClick, currentPage = 0 }) => {
             <button
                 onClick={handlePrevious}
                 disabled={currentPage === 0}
-                className="w-10 h-10 flex items-center justify-center border border-white rounded hover:bg-white hover:text-black cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-10 h-10 flex items-center justify-center border border-white rounded hover:bg-white hover:text-black cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:disabled:cursor-not-allowed"
             >
                 <ArrowLeftIcon className="w-5 h-5" />
             </button>

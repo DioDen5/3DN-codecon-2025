@@ -104,10 +104,10 @@ const ModerationPagination = ({
             <button
                 onClick={onPrevPage}
                 disabled={!pagination.hasPrevPage}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-sm transition-all duration-300 transform cursor-pointer ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-sm transition-all duration-300 transform ${
                     pagination.hasPrevPage
-                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:scale-105 hover:shadow-lg hover:shadow-blue-500/30'
-                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:scale-105 hover:shadow-lg hover:shadow-blue-500/30 cursor-pointer'
+                        : 'bg-gray-100 text-gray-400 cursor-not-allowed hover:cursor-not-allowed'
                 }`}
             >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
