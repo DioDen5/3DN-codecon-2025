@@ -519,14 +519,23 @@ router.delete('/content/:type/:id', authRequired, requireAdmin, async (req, res)
         console.log('Content deleted successfully');
         
         // Оновлюємо статус скарги на "вирішена" після успішного видалення контенту
-        const report = await Report.findOne({ targetId: id, targetType: type });
-        if (report) {
-            report.status = 'resolved';
-            report.resolvedAt = new Date();
-            report.resolvedBy = req.user.id;
-            report.resolutionReason = 'Контент видалено адміністратором';
-            await report.save();
-            console.log('Report status updated to resolved after content deletion');
+        try {
+            console.log('Looking for report with targetId:', id, 'targetType:', type);
+            const report = await Report.findOne({ targetId: id, targetType: type });
+            console.log('Found report:', report ? 'YES' : 'NO');
+            if (report) {
+                console.log('Updating report status from', report.status, 'to resolved');
+                report.status = 'resolved';
+                report.resolvedAt = new Date();
+                report.resolvedBy = req.user.id;
+                report.resolutionReason = 'Контент видалено адміністратором';
+                await report.save();
+                console.log('Report status updated to resolved after content deletion');
+            } else {
+                console.log('No report found for targetId:', id, 'targetType:', type);
+            }
+        } catch (reportError) {
+            console.error('Error updating report status:', reportError);
         }
         
         res.json({ message: 'Content deleted successfully' });
