@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, AlertTriangle, User, Calendar, MessageSquare, FileText, Star, CheckCircle, Trash2 } from 'lucide-react';
+import { deleteContent } from '../api/admin-stats';
 
 const ContentViewModal = ({ isOpen, onClose, content, onApprove, onDelete }) => {
     const [isClosing, setIsClosing] = useState(false);
@@ -48,10 +49,16 @@ const ContentViewModal = ({ isOpen, onClose, content, onApprove, onDelete }) => 
     const handleDelete = async () => {
         setIsLoading(true);
         try {
-            if (onDelete) {
-                await onDelete(content._id, content.contentType);
-            }
+            console.log('Content object:', content);
+            console.log('Deleting content:', { targetId: content._id, targetType: content.contentType });
+            
+            const contentType = content.contentType || content.type || 'announcement';
+            console.log('Using contentType:', contentType);
+            
+            await deleteContent(content._id, contentType);
+            console.log('Content deleted successfully');
             handleClose();
+            // Не викликаємо onDelete тут, щоб уникнути подвійного видалення
         } catch (error) {
             console.error('Error deleting content:', error);
         } finally {

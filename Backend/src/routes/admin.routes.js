@@ -500,20 +500,7 @@ router.delete('/content/:type/:id', authRequired, requireAdmin, async (req, res)
         
         console.log('Delete result:', result);
         if (!result) {
-            console.log('Content not found - updating report status');
-            
-            // Оновлюємо статус скарги на "вирішена" з причиною "контент не існує"
-            const report = await Report.findOne({ targetId: id, targetType: type });
-            if (report) {
-                report.status = 'resolved';
-                report.resolvedAt = new Date();
-                report.resolvedBy = req.user.id;
-                report.resolutionReason = 'Контент не існує';
-                await report.save();
-                console.log('Report status updated to resolved');
-            }
-            
-            return res.status(404).json({ error: 'Content not found', reportUpdated: true });
+            console.log('Content not found');
         }
         
         console.log('Content deleted successfully');
@@ -538,7 +525,10 @@ router.delete('/content/:type/:id', authRequired, requireAdmin, async (req, res)
             console.error('Error updating report status:', reportError);
         }
         
-        res.json({ message: 'Content deleted successfully' });
+        res.json({ 
+            message: 'Content deleted successfully', 
+            success: true 
+        });
     } catch (error) {
         console.error('Error deleting content:', error);
         res.status(500).json({ error: 'Internal server error', details: error.message });

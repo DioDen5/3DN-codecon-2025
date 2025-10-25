@@ -8,6 +8,7 @@ import {
     ChevronLeft,
     ChevronRight
 } from 'lucide-react';
+import { deleteContent } from '../api/admin-stats';
 import { useAuthState } from '../api/useAuthState';
 import { useAdminData } from '../hooks/admin/useAdminData';
 import AdminDashboard from '../components/admin/AdminDashboard';
@@ -135,11 +136,11 @@ const AdminProfilePageRefactored = () => {
 
     const handleDeleteItem = async (itemId, itemType) => {
         try {
-            console.log('Deleting item:', itemId, itemType);
-            alert(`Функція видалення ${itemType} буде реалізована`);
+            console.log('Item deleted, refreshing data:', itemId, itemType);
+            // Просто оновлюємо дані, оскільки видалення вже відбулося в ContentViewModal
+            loadAdminData();
         } catch (error) {
-            console.error('Error deleting item:', error);
-            alert(`Помилка при видаленні: ${error.message}`);
+            console.error('Error refreshing data:', error);
         }
     };
 
