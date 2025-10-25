@@ -2190,6 +2190,116 @@
     animation: settingsSlideIn 0.5s ease-out;
 }
 
+/* Security Settings Animations */
+@keyframes securityIconGlow {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(239, 68, 68, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(239, 68, 68, 0.6), 0 0 30px rgba(239, 68, 68, 0.4);
+    }
+}
+
+@keyframes securityIconPulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes securityIconRotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes securityIconShimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+@keyframes securityToggleSlide {
+    0% {
+        transform: translateX(0.25rem);
+    }
+    100% {
+        transform: translateX(1.5rem);
+    }
+}
+
+@keyframes securityInputFocus {
+    0% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+    }
+    100% {
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+}
+
+@keyframes securitySaveSuccess {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.security-icon-glow {
+    animation: securityIconGlow 2s ease-in-out infinite;
+}
+
+.security-icon-pulse {
+    animation: securityIconPulse 0.6s ease-out;
+}
+
+.security-icon-rotate {
+    animation: securityIconRotate 0.8s ease-in-out;
+}
+
+.security-icon-shimmer {
+    position: relative;
+    overflow: hidden;
+}
+
+.security-icon-shimmer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: securityIconShimmer 2s ease-in-out infinite;
+}
+
+.security-toggle-slide {
+    animation: securityToggleSlide 0.3s ease-out;
+}
+
+.security-input-focus {
+    animation: securityInputFocus 0.3s ease-out;
+}
+
+.security-save-success {
+    animation: securitySaveSuccess 0.6s ease-out;
+}
+
 .moderation-pulse {
     animation: moderationPulse 2s ease-in-out infinite;
 }
