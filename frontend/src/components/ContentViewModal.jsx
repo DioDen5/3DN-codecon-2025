@@ -87,7 +87,7 @@ const ContentViewModal = ({ isOpen, onClose, content, onApprove, onDelete, onCon
         switch (contentType) {
             case 'announcement': return 'обговорення';
             case 'comment': return 'коментар';
-            case 'review': return 'відгук';
+            case 'review': return 'відгуку';
             default: return 'контент';
         }
     };
@@ -95,9 +95,9 @@ const ContentViewModal = ({ isOpen, onClose, content, onApprove, onDelete, onCon
     const getTargetIcon = (type) => {
         switch (type) {
             case 'announcement': return <MessageSquare className="w-5 h-5 text-blue-900" />;
-            case 'comment': return <FileText className="w-5 h-5" />;
+            case 'comment': return <FileText className="w-5 h-5 text-purple-900" />;
             case 'review': return <Star className="w-5 h-5 text-purple-600" />;
-            default: return <FileText className="w-5 h-5" />;
+            default: return <FileText className="w-5 h-5 text-purple-900" />;
         }
     };
 
