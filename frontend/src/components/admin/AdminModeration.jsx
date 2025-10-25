@@ -114,6 +114,9 @@ const AdminModeration = ({
                         <ReviewsList
                             reviewsContent={reviewsContent}
                             handleDeleteItem={handleDeleteItem}
+                            handleApproveItem={handleApproveItem}
+                            onContentDeleted={onContentDeleted}
+                            approvedItems={approvedItems}
                         />
                         {reviewsContent && reviewsContent.length > 0 && reviewsPagination && reviewsPagination.totalPages > 1 && (
                             <ModerationPagination

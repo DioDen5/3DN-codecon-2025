@@ -1,10 +1,34 @@
-import React from 'react';
-import { Star } from 'lucide-react';
+import React, { useState } from 'react';
+import { Star, Eye } from 'lucide-react';
+import StarRating from '../StarRating';
+import ContentViewModal from '../ContentViewModal';
 
 const ReviewsList = ({ 
     reviewsContent, 
-    handleDeleteItem 
+    handleDeleteItem,
+    handleApproveItem,
+    onContentDeleted,
+    approvedItems
 }) => {
+    const [showViewModal, setShowViewModal] = useState(false);
+    const [selectedContent, setSelectedContent] = useState(null);
+
+    const handleOpenViewModal = (content) => {
+        console.log('Opening view modal for content:', content);
+        setSelectedContent(content);
+        setShowViewModal(true);
+    };
+
+    const handleCloseViewModal = () => {
+        setShowViewModal(false);
+        setSelectedContent(null);
+    };
+
+    const handleContentDeleted = () => {
+        if (onContentDeleted) {
+            onContentDeleted();
+        }
+    };
     if (!reviewsContent || reviewsContent.length === 0) {
         return (
             <div className="bg-white rounded-2xl p-8 shadow-xl border border-gray-200">
@@ -24,7 +48,11 @@ const ReviewsList = ({
     return (
         <div className="space-y-3">
             {reviewsContent.map((review, index) => (
-                <div key={review._id} className="bg-gray-50 rounded-xl p-4 border border-gray-200 hover:moderation-glow transition-all duration-500 ease-out" style={{ animation: 'slideInFromLeft 0.6s ease-out both' }}>
+                <div key={review._id} className={`rounded-xl p-4 border transition-all duration-500 ease-out relative ${
+                    approvedItems.has(review._id) 
+                        ? 'bg-gradient-to-r from-green-50 to-green-100 border-green-300 shadow-green-200 shadow-lg' 
+                        : 'bg-gray-50 border-gray-200 hover:moderation-glow'
+                }`} style={{ animation: 'slideInFromLeft 0.6s ease-out both' }}>
                     <div className="flex items-start justify-between">
                         <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
@@ -38,19 +66,32 @@ const ReviewsList = ({
                                     </div>
                                 </div>
                             </div>
+                            {approvedItems.has(review._id) && (
+                                <div className="absolute top-3 right-3 bg-gradient-to-r from-green-500 to-green-600 text-white px-3 py-1 rounded-lg text-xs font-semibold shadow-lg flex items-center gap-1">
+                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                    </svg>
+                                    Перевірено
+                                </div>
+                            )}
                             <p className="text-gray-700 mb-3">{review.body?.substring(0, 150)}...</p>
                             <div className="flex items-center gap-2 mb-3">
-                                <div className="flex">
-                                    {[1,2,3,4,5].map((star) => (
-                                        <Star key={star} className={`w-4 h-4 ${star <= review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
-                                    ))}
-                                </div>
+                                <StarRating 
+                                    rating={review.rating} 
+                                    maxRating={5} 
+                                    size="sm" 
+                                    showNumber={false}
+                                    animated={false}
+                                />
                                 <span className="text-sm text-gray-600">{review.rating}/5</span>
                                 <span className="text-sm text-gray-500">• {review.teacherId?.name || 'Викладач'}</span>
                             </div>
                             <div className="flex gap-2">
-                                <button className="px-3 py-1 bg-green-100 text-green-700 rounded-lg text-sm hover:bg-green-200 transition-colors cursor-pointer">
-                                    Схваліти
+                                <button 
+                                    onClick={() => handleApproveItem(review._id, 'review')}
+                                    className="px-3 py-1 bg-green-100 text-green-700 rounded-lg text-sm hover:bg-green-200 transition-colors cursor-pointer"
+                                >
+                                    Схвалити
                                 </button>
                                 <button 
                                     onClick={() => handleDeleteItem(review._id, 'review')}
@@ -58,18 +99,27 @@ const ReviewsList = ({
                                 >
                                     Видалити
                                 </button>
-                                <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm hover:bg-blue-200 transition-colors cursor-pointer">
+                                <button 
+                                    onClick={() => handleOpenViewModal(review)}
+                                    className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm hover:bg-blue-200 transition-colors cursor-pointer flex items-center gap-1"
+                                >
+                                    <Eye className="w-4 h-4" />
                                     Переглянути
                                 </button>
                             </div>
                         </div>
-                        <input
-                            type="checkbox"
-                            className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
-                        />
                     </div>
                 </div>
             ))}
+            
+            <ContentViewModal
+                isOpen={showViewModal}
+                onClose={handleCloseViewModal}
+                content={selectedContent}
+                onApprove={handleApproveItem}
+                onDelete={handleDeleteItem}
+                onContentDeleted={handleContentDeleted}
+            />
         </div>
     );
 };
