@@ -118,6 +118,10 @@ const ContentViewModal = ({ isOpen, onClose, content, onApprove, onDelete, onCon
         return content.authorId?.displayName || content.authorId?.email || 'Невідомий';
     };
 
+    const getContentType = () => {
+        return content.contentType || content.type || (content.rating !== undefined ? 'review' : 'announcement');
+    };
+
     return createPortal(
         <div className={`fixed inset-0 z-50 flex items-center justify-center ${
             isClosing ? 'modal-closing' : 'report-backdrop-animate'
@@ -134,8 +138,16 @@ const ContentViewModal = ({ isOpen, onClose, content, onApprove, onDelete, onCon
             <div className={`bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 relative overflow-hidden ${
                 isClosing ? 'modal-closing' : 'report-modal-animate'
             }`}>
-                <div className="bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 px-6 py-4 relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-blue-500/20"></div>
+                <div className={`px-6 py-4 relative overflow-hidden ${
+                    getContentType() === 'review' 
+                        ? 'bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700'
+                        : 'bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700'
+                }`}>
+                    <div className={`absolute inset-0 ${
+                        getContentType() === 'review' 
+                            ? 'bg-gradient-to-r from-purple-400/20 to-purple-500/20'
+                            : 'bg-gradient-to-r from-blue-400/20 to-blue-500/20'
+                    }`}></div>
                     <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
                     <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12"></div>
                     
@@ -146,7 +158,9 @@ const ContentViewModal = ({ isOpen, onClose, content, onApprove, onDelete, onCon
                             </div>
                             <div>
                                 <h2 className="text-2xl font-bold text-white">Перегляд {getTargetTypeText(content.contentType)}</h2>
-                                <p className="text-blue-100 text-sm">Детальна інформація про контент</p>
+                                <p className={`text-sm ${
+                                    getContentType() === 'review' ? 'text-purple-100' : 'text-blue-100'
+                                }`}>Детальна інформація про контент</p>
                             </div>
                         </div>
                         <button
