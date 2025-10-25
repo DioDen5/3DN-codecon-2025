@@ -8,7 +8,8 @@ const ReviewsList = ({
     handleDeleteItem,
     handleApproveItem,
     onContentDeleted,
-    approvedItems
+    approvedItems,
+    loadReviews
 }) => {
     const [showViewModal, setShowViewModal] = useState(false);
     const [selectedContent, setSelectedContent] = useState(null);
@@ -27,6 +28,9 @@ const ReviewsList = ({
     const handleContentDeleted = () => {
         if (onContentDeleted) {
             onContentDeleted();
+        }
+        if (loadReviews) {
+            loadReviews();
         }
     };
     if (!reviewsContent || reviewsContent.length === 0) {

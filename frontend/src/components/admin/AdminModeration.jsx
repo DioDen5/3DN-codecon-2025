@@ -25,6 +25,7 @@ const AdminModeration = ({
     handleApproveItem,
     onContentDeleted,
     approvedItems,
+    loadReviews,
     announcementsContent,
     announcementsPagination,
     handleAnnouncementsPrevPage,
@@ -117,6 +118,7 @@ const AdminModeration = ({
                             handleApproveItem={handleApproveItem}
                             onContentDeleted={onContentDeleted}
                             approvedItems={approvedItems}
+                            loadReviews={loadReviews}
                         />
                         {reviewsContent && reviewsContent.length > 0 && reviewsPagination && reviewsPagination.totalPages > 1 && (
                             <ModerationPagination
