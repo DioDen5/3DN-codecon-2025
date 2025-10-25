@@ -81,8 +81,10 @@ const AllContentList = ({
         return (
             <div className="bg-white rounded-2xl p-8 shadow-xl border border-gray-200">
                 <div className="text-center py-12">
-                    <div className="w-20 h-20 bg-gradient-to-br from-gray-400 to-gray-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <FileText className="w-10 h-10 text-white" />
+                    <div className="w-20 h-20 bg-gradient-to-br from-gray-400 to-gray-500 rounded-full flex items-center justify-center mx-auto mb-4 content-icon-glow content-icon-pulse content-icon-rotate relative overflow-hidden">
+                        <div className="absolute inset-0 content-icon-shimmer opacity-30"></div>
+                        <FileText className="w-10 h-10 text-white relative z-10 drop-shadow-lg" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-50"></div>
                     </div>
                     <h4 className="text-lg font-semibold text-gray-900 mb-2">Нічого не знайдено</h4>
                     <p className="text-gray-600">За запитом "{searchQuery}" нічого не знайдено</p>
