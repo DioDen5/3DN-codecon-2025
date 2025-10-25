@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
 import { AlertTriangle, User, FileText, MessageCircle, Star, Clock, Eye, Flag, Hash, Users, Zap, Shield, Target, BookOpen, AlertCircle, AlertOctagon, Bug, Ban } from 'lucide-react';
 import ReportReviewModal from '../ReportReviewModal';
+import SuccessNotification from '../SuccessNotification';
+import { deleteContent } from '../../api/admin-stats';
 
-const AdminReports = ({ reportsData, handleOpenReportModal, handleResolveReport, handleRejectReport }) => {
+const AdminReports = ({ reportsData, handleOpenReportModal, handleResolveReport, handleRejectReport, onReportDeleted }) => {
     const [showModal, setShowModal] = useState(false);
     const [selectedReport, setSelectedReport] = useState(null);
+    const [deletingReportId, setDeletingReportId] = useState(null);
+    const [showSuccessNotification, setShowSuccessNotification] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
 
     const handleOpenModal = (report) => {
         setSelectedReport(report);
@@ -29,7 +34,45 @@ const AdminReports = ({ reportsData, handleOpenReportModal, handleResolveReport,
     };
 
     const handleDeleteContent = async (targetId, targetType) => {
-        console.log('Delete content:', targetId, targetType);
+        try {
+            console.log('Deleting content:', { targetId, targetType });
+            setDeletingReportId(selectedReport._id);
+            await deleteContent(targetId, targetType);
+            setSuccessMessage('Контент успішно видалено');
+            setShowSuccessNotification(true);
+            handleCloseModal();
+            // Оновлюємо список скарг негайно
+            if (onReportDeleted) {
+                onReportDeleted();
+            }
+            // Додатково оновлюємо через невелику затримку для гарантії
+            setTimeout(() => {
+                if (onReportDeleted) {
+                    onReportDeleted();
+                }
+            }, 1000);
+        } catch (error) {
+            console.error('Error deleting content:', error);
+            if (error.response?.data?.reportUpdated) {
+                setSuccessMessage('Скаргу оновлено - контент не існує');
+                setShowSuccessNotification(true);
+                handleCloseModal();
+                // Негайно оновлюємо список скарг
+                if (onReportDeleted) {
+                    onReportDeleted();
+                }
+            } else if (error.response?.status === 404) {
+                setSuccessMessage('Скаргу оновлено - контент вже не існує');
+                setShowSuccessNotification(true);
+                handleCloseModal();
+                // Негайно оновлюємо список скарг
+                if (onReportDeleted) {
+                    onReportDeleted();
+                }
+            } else {
+                alert('Помилка при видаленні контенту: ' + error.message);
+            }
+        }
     };
 
     const handleEditContent = async (targetId, targetType) => {
@@ -103,7 +146,9 @@ const AdminReports = ({ reportsData, handleOpenReportModal, handleResolveReport,
                             {reportsData.map((report, index) => (
                                 <div 
                                     key={report._id} 
-                                    className="bg-gradient-to-r from-orange-50 to-orange-100 border border-orange-200 rounded-xl p-4 report-hover-glow transition-all duration-300 cursor-pointer group report-card-animate"
+                                    className={`bg-gradient-to-r from-orange-50 to-orange-100 border border-orange-200 rounded-xl p-4 report-hover-glow transition-all duration-300 cursor-pointer group report-card-animate ${
+                                        deletingReportId === report._id ? 'comment-delete-slide' : ''
+                                    }`}
                                     style={{ animationDelay: `${index * 0.1}s` }}
                                 >
                                     <div className="flex items-start justify-between">
@@ -164,6 +209,13 @@ const AdminReports = ({ reportsData, handleOpenReportModal, handleResolveReport,
                 onReject={handleReject}
                 onDeleteContent={handleDeleteContent}
                 onEditContent={handleEditContent}
+            />
+
+            <SuccessNotification
+                message={successMessage}
+                isVisible={showSuccessNotification}
+                onClose={() => setShowSuccessNotification(false)}
+                type="success"
             />
         </div>
     );
