@@ -53,7 +53,7 @@ const CommentsList = ({
             {commentsContent.map((comment, index) => (
                 <div key={comment._id} className={`rounded-xl p-4 border transition-all duration-500 ease-out relative ${
                     approvedItems.has(comment._id) 
-                        ? 'bg-gradient-to-r from-green-50 to-green-100 border-green-300 shadow-green-200 shadow-lg'
+                        ? 'bg-gradient-to-r from-green-50 to-green-100 border-green-300 shadow-green-200 shadow-lg' 
                         : 'bg-gray-50 border-gray-200 hover:moderation-glow'
                 }`} style={{ animation: 'slideInFromLeft 0.6s ease-out both' }}>
                     <div className="flex items-start justify-between">
