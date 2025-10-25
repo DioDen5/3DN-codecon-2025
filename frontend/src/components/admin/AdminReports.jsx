@@ -103,8 +103,8 @@ const AdminReports = ({ reportsData, handleOpenReportModal, handleResolveReport,
                             {reportsData.map((report, index) => (
                                 <div 
                                     key={report._id} 
-                                    className="bg-gradient-to-r from-orange-50 to-orange-100 border border-orange-200 rounded-xl p-4 report-hover-glow transition-all duration-300 cursor-pointer group"
-                                    style={{ animation: 'slideInFromLeft 0.6s ease-out both' }}
+                                    className="bg-gradient-to-r from-orange-50 to-orange-100 border border-orange-200 rounded-xl p-4 report-hover-glow transition-all duration-300 cursor-pointer group report-card-animate"
+                                    style={{ animationDelay: `${index * 0.1}s` }}
                                 >
                                     <div className="flex items-start justify-between">
                                         <div className="flex items-start gap-3 flex-1">

@@ -4,9 +4,18 @@ import { X, AlertTriangle, User, Calendar, MessageSquare, FileText, Trash2, Edit
 
 const ReportReviewModal = ({ isOpen, onClose, report, onResolve, onReject, onDeleteContent, onEditContent }) => {
     const [isLoading, setIsLoading] = useState(false);
-    const [action, setAction] = useState(''); // 'resolve', 'reject', 'delete', 'edit'
+    const [action, setAction] = useState('');
+    const [isClosing, setIsClosing] = useState(false);
 
     if (!isOpen || !report) return null;
+
+    const handleClose = () => {
+        setIsClosing(true);
+        setTimeout(() => {
+            setIsClosing(false);
+            onClose();
+        }, 400);
+    };
 
     const handleAction = async (actionType) => {
         setIsLoading(true);
@@ -20,7 +29,7 @@ const ReportReviewModal = ({ isOpen, onClose, report, onResolve, onReject, onDel
             } else if (actionType === 'edit') {
                 await onEditContent(report.targetId, report.targetType);
             }
-            onClose();
+            handleClose();
         } catch (error) {
             console.error('Error performing action:', error);
         } finally {
@@ -49,16 +58,20 @@ const ReportReviewModal = ({ isOpen, onClose, report, onResolve, onReject, onDel
     };
 
     return createPortal(
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className={`fixed inset-0 z-50 flex items-center justify-center ${
+            isClosing ? 'modal-closing' : 'report-backdrop-animate'
+        }`}>
             {/* Backdrop */}
             <div 
-                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-                onClick={onClose}
+                className={`absolute inset-0 bg-black/50 backdrop-blur-sm ${
+                    isClosing ? '' : 'report-backdrop-animate'
+                }`}
+                onClick={handleClose}
             />
             
-            {/* Modal */}
-            <div className="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-                {/* Header */}
+            <div className={`relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto ${
+                isClosing ? '' : 'report-modal-animate'
+            }`}>
                 <div className="flex items-center justify-between p-6 border-b border-gray-200">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-orange-100 rounded-lg">
@@ -70,16 +83,14 @@ const ReportReviewModal = ({ isOpen, onClose, report, onResolve, onReject, onDel
                         </div>
                     </div>
                     <button
-                        onClick={onClose}
+                        onClick={handleClose}
                         className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                     >
                         <X className="w-5 h-5 text-gray-500" />
                     </button>
                 </div>
 
-                {/* Content */}
                 <div className="p-6 space-y-6">
-                    {/* Report Info */}
                     <div className="bg-gray-50 rounded-xl p-4">
                         <h3 className="font-semibold text-gray-900 mb-3">Інформація про скаргу</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -105,7 +116,6 @@ const ReportReviewModal = ({ isOpen, onClose, report, onResolve, onReject, onDel
                         </div>
                     </div>
 
-                    {/* Reason */}
                     {report.reason && (
                         <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
                             <h3 className="font-semibold text-orange-900 mb-2">Причина скарги</h3>
@@ -113,16 +123,14 @@ const ReportReviewModal = ({ isOpen, onClose, report, onResolve, onReject, onDel
                         </div>
                     )}
 
-                    {/* Actions */}
                     <div className="space-y-4">
                         <h3 className="font-semibold text-gray-900">Дії адміністратора</h3>
                         
-                        {/* Content Actions */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <button
                                 onClick={() => handleAction('edit')}
                                 disabled={isLoading}
-                                className="flex items-center justify-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50"
+                                className="flex items-center justify-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 hover:scale-105 hover:shadow-md transition-all duration-300 disabled:opacity-50"
                             >
                                 <Edit3 className="w-4 h-4 text-blue-600" />
                                 <span className="text-blue-800 font-medium">Редагувати контент</span>
@@ -131,7 +139,7 @@ const ReportReviewModal = ({ isOpen, onClose, report, onResolve, onReject, onDel
                             <button
                                 onClick={() => handleAction('delete')}
                                 disabled={isLoading}
-                                className="flex items-center justify-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50"
+                                className="flex items-center justify-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 hover:scale-105 hover:shadow-md transition-all duration-300 disabled:opacity-50"
                             >
                                 <Trash2 className="w-4 h-4 text-red-600" />
                                 <span className="text-red-800 font-medium">Видалити контент</span>
@@ -143,7 +151,7 @@ const ReportReviewModal = ({ isOpen, onClose, report, onResolve, onReject, onDel
                             <button
                                 onClick={() => handleAction('resolve')}
                                 disabled={isLoading}
-                                className="flex items-center justify-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors disabled:opacity-50"
+                                className="flex items-center justify-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 hover:scale-105 hover:shadow-md transition-all duration-300 disabled:opacity-50"
                             >
                                 <CheckCircle className="w-4 h-4 text-green-600" />
                                 <span className="text-green-800 font-medium">Розглянути скаргу</span>
@@ -152,7 +160,7 @@ const ReportReviewModal = ({ isOpen, onClose, report, onResolve, onReject, onDel
                             <button
                                 onClick={() => handleAction('reject')}
                                 disabled={isLoading}
-                                className="flex items-center justify-center gap-2 p-3 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50"
+                                className="flex items-center justify-center gap-2 p-3 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 hover:scale-105 hover:shadow-md transition-all duration-300 disabled:opacity-50"
                             >
                                 <XCircle className="w-4 h-4 text-gray-600" />
                                 <span className="text-gray-800 font-medium">Відхилити скаргу</span>
@@ -164,7 +172,7 @@ const ReportReviewModal = ({ isOpen, onClose, report, onResolve, onReject, onDel
                 {/* Footer */}
                 <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200">
                     <button
-                        onClick={onClose}
+                        onClick={handleClose}
                         className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
                     >
                         Скасувати
