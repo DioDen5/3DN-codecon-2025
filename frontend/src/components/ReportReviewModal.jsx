@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X, AlertTriangle, User, Calendar, MessageSquare, FileText, Trash2, Edit3, CheckCircle, XCircle } from 'lucide-react';
+import { X, AlertTriangle, User, Calendar, MessageSquare, FileText, Trash2, XCircle } from 'lucide-react';
 
-const ReportReviewModal = ({ isOpen, onClose, report, onResolve, onReject, onDeleteContent, onEditContent }) => {
+const ReportReviewModal = ({ isOpen, onClose, report, onReject, onDeleteContent }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [action, setAction] = useState('');
     const [isClosing, setIsClosing] = useState(false);
@@ -20,14 +20,10 @@ const ReportReviewModal = ({ isOpen, onClose, report, onResolve, onReject, onDel
     const handleAction = async (actionType) => {
         setIsLoading(true);
         try {
-            if (actionType === 'resolve') {
-                await onResolve(report._id);
-            } else if (actionType === 'reject') {
+            if (actionType === 'reject') {
                 await onReject(report._id);
             } else if (actionType === 'delete') {
                 await onDeleteContent(report.targetId, report.targetType);
-            } else if (actionType === 'edit') {
-                await onEditContent(report.targetId, report.targetType);
             }
             handleClose();
         } catch (error) {
@@ -144,43 +140,22 @@ const ReportReviewModal = ({ isOpen, onClose, report, onResolve, onReject, onDel
                     <div className="space-y-6 mt-8">
                         <h3 className="font-semibold text-gray-900">Дії адміністратора</h3>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <button
-                                onClick={() => handleAction('edit')}
-                                disabled={isLoading}
-                                className="flex items-center justify-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 hover:scale-105 hover:shadow-md transition-all duration-300 disabled:opacity-50 btn-glow"
-                            >
-                                <Edit3 className="w-4 h-4 text-blue-600" />
-                                <span className="text-blue-800 font-medium">Редагувати контент</span>
-                            </button>
-                            
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <button
                                 onClick={() => handleAction('delete')}
                                 disabled={isLoading}
-                                className="flex items-center justify-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 hover:scale-105 hover:shadow-md transition-all duration-300 disabled:opacity-50 btn-glow"
+                                className="flex items-center justify-center gap-3 p-4 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 hover:scale-105 hover:shadow-md transition-all duration-300 disabled:opacity-50 btn-glow"
                             >
-                                <Trash2 className="w-4 h-4 text-red-600" />
+                                <Trash2 className="w-5 h-5 text-red-600" />
                                 <span className="text-red-800 font-medium">Видалити контент</span>
-                            </button>
-                        </div>
-
-                        {/* Report Actions */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-6">
-                            <button
-                                onClick={() => handleAction('resolve')}
-                                disabled={isLoading}
-                                className="flex items-center justify-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 hover:scale-105 hover:shadow-md transition-all duration-300 disabled:opacity-50 btn-glow"
-                            >
-                                <CheckCircle className="w-4 h-4 text-green-600" />
-                                <span className="text-green-800 font-medium">Розглянути скаргу</span>
                             </button>
                             
                             <button
                                 onClick={() => handleAction('reject')}
                                 disabled={isLoading}
-                                className="flex items-center justify-center gap-2 p-3 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 hover:scale-105 hover:shadow-md transition-all duration-300 disabled:opacity-50 btn-glow"
+                                className="flex items-center justify-center gap-3 p-4 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 hover:scale-105 hover:shadow-md transition-all duration-300 disabled:opacity-50 btn-glow"
                             >
-                                <XCircle className="w-4 h-4 text-gray-600" />
+                                <XCircle className="w-5 h-5 text-gray-600" />
                                 <span className="text-gray-800 font-medium">Відхилити скаргу</span>
                             </button>
                         </div>
