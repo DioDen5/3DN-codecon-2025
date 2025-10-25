@@ -26,6 +26,7 @@ const AdminModeration = ({
     onContentDeleted,
     approvedItems,
     loadReviews,
+    loadComments,
     announcementsContent,
     announcementsPagination,
     handleAnnouncementsPrevPage,
@@ -98,6 +99,10 @@ const AdminModeration = ({
                         <CommentsList
                             commentsContent={commentsContent}
                             handleDeleteItem={handleDeleteItem}
+                            handleApproveItem={handleApproveItem}
+                            onContentDeleted={onContentDeleted}
+                            approvedItems={approvedItems}
+                            loadComments={loadComments}
                         />
                         {commentsContent && commentsContent.length > 0 && commentsPagination && commentsPagination.totalPages > 1 && (
                             <ModerationPagination

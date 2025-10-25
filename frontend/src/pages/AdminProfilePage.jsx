@@ -309,6 +309,7 @@ const AdminProfilePageRefactored = () => {
                             onContentDeleted={loadAdminData}
                             approvedItems={approvedItems}
                             loadReviews={loadReviews}
+                            loadComments={loadComments}
                             announcementsContent={announcementsContent}
                             announcementsPagination={announcementsPagination}
                             handleAnnouncementsPrevPage={handleAnnouncementsPrevPage}

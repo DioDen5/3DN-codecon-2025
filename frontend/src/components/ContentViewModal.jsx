@@ -119,7 +119,17 @@ const ContentViewModal = ({ isOpen, onClose, content, onApprove, onDelete, onCon
     };
 
     const getContentType = () => {
-        return content.contentType || content.type || (content.rating !== undefined ? 'review' : 'announcement');
+        // Спочатку перевіряємо явно встановлені поля
+        if (content.contentType) return content.contentType;
+        if (content.type) return content.type;
+        
+        // Потім визначаємо по структурі об'єкта
+        if (content.rating !== undefined) return 'review';
+        if (content.title) return 'announcement';
+        if (content.body && !content.title) return 'comment';
+        
+        // Default fallback
+        return 'announcement';
     };
 
     return createPortal(
@@ -141,12 +151,16 @@ const ContentViewModal = ({ isOpen, onClose, content, onApprove, onDelete, onCon
                 <div className={`px-6 py-4 relative overflow-hidden ${
                     getContentType() === 'review' 
                         ? 'bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700'
-                        : 'bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700'
+                        : getContentType() === 'comment'
+                            ? 'bg-gradient-to-r from-green-500 via-green-600 to-green-700'
+                            : 'bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700'
                 }`}>
                     <div className={`absolute inset-0 ${
                         getContentType() === 'review' 
                             ? 'bg-gradient-to-r from-purple-400/20 to-purple-500/20'
-                            : 'bg-gradient-to-r from-blue-400/20 to-blue-500/20'
+                            : getContentType() === 'comment'
+                                ? 'bg-gradient-to-r from-green-400/20 to-green-500/20'
+                                : 'bg-gradient-to-r from-blue-400/20 to-blue-500/20'
                     }`}></div>
                     <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
                     <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12"></div>
@@ -159,7 +173,11 @@ const ContentViewModal = ({ isOpen, onClose, content, onApprove, onDelete, onCon
                             <div>
                                 <h2 className="text-2xl font-bold text-white">Перегляд {getTargetTypeText(content.contentType)}</h2>
                                 <p className={`text-sm ${
-                                    getContentType() === 'review' ? 'text-purple-100' : 'text-blue-100'
+                                    getContentType() === 'review' 
+                                        ? 'text-purple-100' 
+                                        : getContentType() === 'comment'
+                                            ? 'text-green-100'
+                                            : 'text-blue-100'
                                 }`}>Детальна інформація про контент</p>
                             </div>
                         </div>
@@ -205,19 +223,33 @@ const ContentViewModal = ({ isOpen, onClose, content, onApprove, onDelete, onCon
                     </div>
 
                     <div className={`rounded-xl p-6 mb-6 border relative overflow-hidden ${
-                        (content.contentType === 'review' || content.rating !== undefined)
+                        getContentType() === 'review'
                             ? 'bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200 comment-animate-purple'
-                            : 'bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200 comment-animate-blue'
+                            : getContentType() === 'comment'
+                                ? 'bg-gradient-to-r from-green-50 to-green-100 border-green-200 comment-animate-green'
+                                : 'bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200 comment-animate-blue'
                     }`}>
                         <div className={`absolute top-0 right-0 w-16 h-16 rounded-full -translate-y-8 translate-x-8 ${
-                            (content.contentType === 'review' || content.rating !== undefined) ? 'bg-purple-100/30' : 'bg-blue-100/30'
+                            getContentType() === 'review' 
+                                ? 'bg-purple-100/30' 
+                                : getContentType() === 'comment'
+                                    ? 'bg-green-100/30'
+                                    : 'bg-blue-100/30'
                         }`}></div>
                         <div className="relative">
                             <h3 className={`text-lg font-semibold mb-4 ${
-                                (content.contentType === 'review' || content.rating !== undefined) ? 'text-purple-700' : 'text-blue-700'
+                                getContentType() === 'review' 
+                                    ? 'text-purple-700' 
+                                    : getContentType() === 'comment'
+                                        ? 'text-green-700'
+                                        : 'text-blue-700'
                             }`}>Текст {getTargetTypeText(content.contentType)}</h3>
                             <div className={`leading-relaxed whitespace-pre-wrap ${
-                                (content.contentType === 'review' || content.rating !== undefined) ? 'text-purple-900' : 'text-blue-900'
+                                getContentType() === 'review' 
+                                    ? 'text-purple-900' 
+                                    : getContentType() === 'comment'
+                                        ? 'text-green-900'
+                                        : 'text-blue-900'
                             }`}>
                                 {getContentText()}
                             </div>

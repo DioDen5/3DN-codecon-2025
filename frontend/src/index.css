@@ -1201,6 +1201,21 @@
     animation: commentBlinkPurple 1.8s ease-in-out infinite;
 }
 
+@keyframes commentBlinkGreen {
+    0%, 100% {
+        opacity: 1;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    50% {
+        opacity: 0.8;
+        box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4); /* Green glow */
+    }
+}
+
+.comment-animate-green {
+    animation: commentBlinkGreen 1.8s ease-in-out infinite;
+}
+
 /* Анімація видалення для форуму */
 @keyframes commentDeleteSlide {
     0% {
