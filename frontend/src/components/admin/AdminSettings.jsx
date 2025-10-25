@@ -147,8 +147,8 @@ const AdminSettings = () => {
                                     isSaving 
                                         ? 'bg-gray-400 text-white cursor-not-allowed' 
                                         : saveSuccess
-                                        ? 'bg-green-500 text-white shadow-lg shadow-green-200 security-save-success'
-                                        : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:shadow-lg hover:shadow-blue-200 hover:scale-105'
+                                        ? 'bg-green-500 text-white shadow-lg shadow-green-200 security-save-success cursor-pointer'
+                                        : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:shadow-lg hover:shadow-blue-200 hover:scale-105 cursor-pointer hover:shadow-[0_0_20px_rgba(59,130,246,0.4)] active:scale-95 active:shadow-inner transition-all duration-300'
                                 }`}
                             >
                                 {isSaving ? (
