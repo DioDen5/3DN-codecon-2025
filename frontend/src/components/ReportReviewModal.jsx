@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, AlertTriangle, User, Calendar, MessageSquare, FileText, Trash2, XCircle } from 'lucide-react';
 
@@ -6,6 +6,18 @@ const ReportReviewModal = ({ isOpen, onClose, report, onReject, onDeleteContent 
     const [isLoading, setIsLoading] = useState(false);
     const [action, setAction] = useState('');
     const [isClosing, setIsClosing] = useState(false);
+
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [isOpen]);
 
     if (!isOpen || !report) return null;
 
@@ -65,7 +77,7 @@ const ReportReviewModal = ({ isOpen, onClose, report, onReject, onDeleteContent 
                 onClick={handleClose}
             />
             
-            <div className={`relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto ${
+            <div className={`relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden ${
                 isClosing ? '' : 'report-modal-animate'
             }`}>
                 <div className="bg-gradient-to-r from-orange-500 via-orange-600 to-orange-700 px-6 py-4 relative overflow-hidden">
