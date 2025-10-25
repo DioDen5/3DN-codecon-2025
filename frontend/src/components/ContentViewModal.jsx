@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { X, AlertTriangle, User, Calendar, MessageSquare, FileText, Star, CheckCircle, Trash2 } from 'lucide-react';
 import { deleteContent } from '../api/admin-stats';
 
-const ContentViewModal = ({ isOpen, onClose, content, onApprove, onDelete }) => {
+const ContentViewModal = ({ isOpen, onClose, content, onApprove, onDelete, onContentDeleted }) => {
     const [isClosing, setIsClosing] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -58,7 +58,10 @@ const ContentViewModal = ({ isOpen, onClose, content, onApprove, onDelete }) => 
             await deleteContent(content._id, contentType);
             console.log('Content deleted successfully');
             handleClose();
-            // Не викликаємо onDelete тут, щоб уникнути подвійного видалення
+            // Викликаємо callback для оновлення даних
+            if (onContentDeleted) {
+                onContentDeleted();
+            }
         } catch (error) {
             console.error('Error deleting content:', error);
         } finally {

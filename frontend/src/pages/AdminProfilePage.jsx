@@ -296,6 +296,7 @@ const AdminProfilePageRefactored = () => {
                             handleBulkDelete={handleBulkDelete}
                             handleDeleteItem={handleDeleteItem}
                             handleApproveItem={handleApproveItem}
+                            onContentDeleted={loadAdminData}
                             announcementsContent={announcementsContent}
                             announcementsPagination={announcementsPagination}
                             handleAnnouncementsPrevPage={handleAnnouncementsPrevPage}

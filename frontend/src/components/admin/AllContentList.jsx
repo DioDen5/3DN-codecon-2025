@@ -7,7 +7,8 @@ const AllContentList = ({
     selectedItems,
     setSelectedItems,
     handleDeleteItem,
-    handleApproveItem
+    handleApproveItem,
+    onContentDeleted
 }) => {
     const [showViewModal, setShowViewModal] = useState(false);
     const [selectedContent, setSelectedContent] = useState(null);
@@ -21,6 +22,12 @@ const AllContentList = ({
     const handleCloseViewModal = () => {
         setShowViewModal(false);
         setSelectedContent(null);
+    };
+
+    const handleContentDeleted = () => {
+        if (onContentDeleted) {
+            onContentDeleted();
+        }
     };
     if (!allModerationContent || allModerationContent.length === 0) {
         return (
@@ -109,6 +116,7 @@ const AllContentList = ({
                 content={selectedContent}
                 onApprove={handleApproveItem}
                 onDelete={handleDeleteItem}
+                onContentDeleted={handleContentDeleted}
             />
         </div>
     );
