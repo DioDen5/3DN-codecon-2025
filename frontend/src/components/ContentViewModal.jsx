@@ -36,7 +36,9 @@ const ContentViewModal = ({ isOpen, onClose, content, onApprove, onDelete, onCon
         setIsLoading(true);
         try {
             if (onApprove) {
-                await onApprove(content._id, content.contentType);
+                const contentType = getContentType();
+                console.log('handleApprove - calling onApprove with:', content._id, contentType);
+                await onApprove(content._id, contentType);
             }
             handleClose();
         } catch (error) {
@@ -50,22 +52,8 @@ const ContentViewModal = ({ isOpen, onClose, content, onApprove, onDelete, onCon
         setIsLoading(true);
         try {
             console.log('Content object:', content);
-            console.log('Deleting content:', { targetId: content._id, targetType: content.contentType });
-            
-            let contentType = content.contentType || content.type;
-            
-            // Якщо contentType не встановлений, визначаємо по структурі об'єкта
-            if (!contentType) {
-                if (content.rating !== undefined) {
-                    contentType = 'review';
-                } else if (content.title) {
-                    contentType = 'announcement';
-                } else {
-                    contentType = 'comment';
-                }
-            }
-            
-            console.log('Using contentType:', contentType);
+            const contentType = getContentType();
+            console.log('Deleting content:', { targetId: content._id, targetType: contentType });
             
             await deleteContent(content._id, contentType);
             console.log('Content deleted successfully');
@@ -119,16 +107,39 @@ const ContentViewModal = ({ isOpen, onClose, content, onApprove, onDelete, onCon
     };
 
     const getContentType = () => {
+        console.log('getContentType - content object:', content);
+        console.log('getContentType - content.contentType:', content.contentType);
+        console.log('getContentType - content.type:', content.type);
+        console.log('getContentType - content.rating:', content.rating);
+        console.log('getContentType - content.title:', content.title);
+        console.log('getContentType - content.body:', content.body);
+        
         // Спочатку перевіряємо явно встановлені поля
-        if (content.contentType) return content.contentType;
-        if (content.type) return content.type;
+        if (content.contentType) {
+            console.log('getContentType - returning content.contentType:', content.contentType);
+            return content.contentType;
+        }
+        if (content.type) {
+            console.log('getContentType - returning content.type:', content.type);
+            return content.type;
+        }
         
         // Потім визначаємо по структурі об'єкта
-        if (content.rating !== undefined) return 'review';
-        if (content.title) return 'announcement';
-        if (content.body && !content.title) return 'comment';
+        if (content.rating !== undefined) {
+            console.log('getContentType - returning review (has rating)');
+            return 'review';
+        }
+        if (content.title) {
+            console.log('getContentType - returning announcement (has title)');
+            return 'announcement';
+        }
+        if (content.body && !content.title) {
+            console.log('getContentType - returning comment (has body, no title)');
+            return 'comment';
+        }
         
         // Default fallback
+        console.log('getContentType - returning default announcement');
         return 'announcement';
     };
 

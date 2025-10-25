@@ -70,7 +70,8 @@ const AdminProfilePageRefactored = () => {
         reviewsPagination,
         handleReviewsPrevPage,
         handleReviewsNextPage,
-        handleReviewsPageClick
+        handleReviewsPageClick,
+        refreshCurrentContent
     } = useAdminData();
 
     const tabs = [
@@ -146,7 +147,8 @@ const AdminProfilePageRefactored = () => {
             console.log('Deleting item:', itemId, itemType);
             await deleteContent(itemId, itemType);
             console.log('Item deleted successfully');
-            loadAdminData();
+            // Оновлюємо тільки поточний тип контенту, зберігаючи пагінацію
+            await refreshCurrentContent(moderationFilter);
         } catch (error) {
             console.error('Error deleting item:', error);
             alert(`Помилка при видаленні: ${error.message}`);
@@ -156,12 +158,14 @@ const AdminProfilePageRefactored = () => {
     const handleApproveItem = async (itemId, itemType) => {
         try {
             console.log('Approving item:', itemId, itemType);
+            console.log('Current moderationFilter:', moderationFilter);
             await approveContent(itemId, itemType);
             console.log('Item approved successfully');
-            loadAdminData();
+            // Оновлюємо тільки поточний тип контенту, зберігаючи пагінацію
+            await refreshCurrentContent(moderationFilter);
         } catch (error) {
             console.error('Error approving item:', error);
-            alert(`Помилка при схваленні: ${error.message}`);
+            // Видалено alert - тепер без оповіщення про помилку
         }
     };
 
@@ -307,7 +311,7 @@ const AdminProfilePageRefactored = () => {
                             handleBulkDelete={handleBulkDelete}
                             handleDeleteItem={handleDeleteItem}
                             handleApproveItem={handleApproveItem}
-                            onContentDeleted={loadAdminData}
+                            onContentDeleted={() => refreshCurrentContent(moderationFilter)}
                             approvedItems={approvedItems}
                             loadReviews={loadReviews}
                             loadComments={loadComments}
