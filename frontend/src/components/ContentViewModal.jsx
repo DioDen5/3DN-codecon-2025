@@ -179,17 +179,17 @@ const ContentViewModal = ({ isOpen, onClose, content, onApprove, onDelete }) => 
                             <button
                                 onClick={handleApprove}
                                 disabled={isLoading}
-                                className="flex items-center gap-2 px-4 py-2 bg-green-100 border border-green-300 rounded-lg text-green-700 font-medium hover:bg-green-200 hover:scale-105 hover:shadow-md transition-all duration-300 disabled:opacity-50 cursor-pointer"
+                                className="flex items-center gap-2 px-4 py-2 bg-green-100 border border-green-300 rounded-lg text-green-700 font-medium hover:bg-green-200 hover:scale-105 hover:shadow-md transition-all duration-300 disabled:opacity-50 cursor-pointer group"
                             >
-                                <CheckCircle className="w-4 h-4" />
+                                <CheckCircle className="w-4 h-4 group-hover:rotate-[15deg] transition-transform duration-300" />
                                 Схвалити
                             </button>
                             <button
                                 onClick={handleDelete}
                                 disabled={isLoading}
-                                className="flex items-center gap-2 px-4 py-2 bg-red-100 border border-red-300 rounded-lg text-red-700 font-medium hover:bg-red-200 hover:scale-105 hover:shadow-md transition-all duration-300 disabled:opacity-50 cursor-pointer"
+                                className="flex items-center gap-2 px-4 py-2 bg-red-100 border border-red-300 rounded-lg text-red-700 font-medium hover:bg-red-200 hover:scale-105 hover:shadow-md transition-all duration-300 disabled:opacity-50 cursor-pointer group"
                             >
-                                <Trash2 className="w-4 h-4" />
+                                <Trash2 className="w-4 h-4 group-hover:rotate-[15deg] transition-transform duration-300" />
                                 Видалити
                             </button>
                         </div>
