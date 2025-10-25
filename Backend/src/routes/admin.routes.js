@@ -492,6 +492,29 @@ router.delete('/content/:type/:id', authRequired, requireAdmin, async (req, res)
                 break;
             case 'review':
                 result = await TeacherComment.findByIdAndDelete(id);
+                // Оновлюємо статистику викладача після видалення відгуку
+                if (result && result.teacherId) {
+                    const { Teacher } = await import('../models/Teacher.js');
+                    const teacher = await Teacher.findById(result.teacherId);
+                    if (teacher) {
+                        teacher.comments = Math.max(0, teacher.comments - 1);
+                        
+                        // Перераховуємо рейтинг викладача
+                        const remainingReviews = await TeacherComment.find({ 
+                            teacherId: result.teacherId 
+                        });
+                        
+                        if (remainingReviews.length > 0) {
+                            const totalRating = remainingReviews.reduce((sum, review) => sum + (review.rating || 0), 0);
+                            teacher.rating = totalRating / remainingReviews.length;
+                        } else {
+                            teacher.rating = 0;
+                        }
+                        
+                        await teacher.save();
+                        console.log('Updated teacher statistics after review deletion');
+                    }
+                }
                 break;
             default:
                 console.log('Invalid content type:', type);

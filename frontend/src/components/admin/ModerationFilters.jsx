@@ -1,5 +1,6 @@
 import React from 'react';
 import { FileText, MessageSquare, MessageCircle, Star } from 'lucide-react';
+import SearchInput from '../SearchInput';
 
 const ModerationFilters = ({ 
     moderationFilter, 
@@ -51,20 +52,12 @@ const ModerationFilters = ({
                 </div>
 
                 <div className="flex-1">
-                    <div className="relative">
-                        <input
-                            type="text"
-                            placeholder="Пошук по тексту..."
-                            value={moderationSearch}
-                            onChange={(e) => setModerationSearch(e.target.value)}
-                            className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
-                        />
-                        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                        </div>
-                    </div>
+                    <SearchInput 
+                        placeholder="Пошук по тексту..."
+                        value={moderationSearch}
+                        onChange={(e) => setModerationSearch(e.target.value)}
+                        whiteTheme={true}
+                    />
                 </div>
             </div>
 

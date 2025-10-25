@@ -81,10 +81,11 @@ const CommentsList = ({
                             <div className="flex gap-2">
                                 <button 
                                     onClick={() => handleOpenViewModal(comment)}
-                                    className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm hover:bg-blue-200 transition-colors cursor-pointer flex items-center gap-1"
+                                    className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm hover:bg-blue-200 hover:shadow-lg hover:shadow-blue-300/50 active:scale-95 active:shadow-inner transition-all duration-300 cursor-pointer flex items-center gap-1 group relative overflow-hidden"
                                 >
-                                    <Eye className="w-4 h-4" />
-                                    Переглянути
+                                    <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-blue-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                    <Eye className="w-4 h-4 relative z-10 group-hover:rotate-12 transition-transform duration-300" />
+                                    <span className="relative z-10">Переглянути</span>
                                 </button>
                             </div>
                         </div>

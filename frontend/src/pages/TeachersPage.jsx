@@ -4,6 +4,7 @@ import TeacherCard from '../components/TeacherCard'
 import Pagination from '../components/Pagination'
 import { getTeachers } from '../api/teachers'
 import { useSort } from '../hooks/useSort'
+import { useTeacherData } from '../contexts/TeacherDataContext'
 
 const TeachersPage = () => {
     const [teachers, setTeachers] = useState([])
@@ -14,6 +15,7 @@ const TeachersPage = () => {
     const [currentPage, setCurrentPage] = useState(1)
     const [totalPages, setTotalPages] = useState(1)
     const [sortBy, setSortBy] = useState('rating')
+    const { refreshTrigger } = useTeacherData()
 
     const ITEMS_PER_PAGE = 8
 
@@ -92,7 +94,7 @@ const TeachersPage = () => {
 
     useEffect(() => {
         loadTeachers();
-    }, [currentPage, searchQuery, sortBy]);
+    }, [currentPage, searchQuery, sortBy, refreshTrigger]);
 
     const handlePageChange = (page) => {
         setCurrentPage(page);

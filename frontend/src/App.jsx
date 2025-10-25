@@ -19,6 +19,7 @@ import ResetPasswordPage from "./pages/ResetPasswordPage";
 import RequireAuth from "./utils/RequireAuth";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { NotificationProvider } from "./contexts/NotificationContext";
+import { TeacherDataProvider } from "./contexts/TeacherDataContext";
 
 function App() {
     const [modalType, setModalType] = useState(null);
@@ -41,6 +42,7 @@ function App() {
     return (
         <NotificationProvider>
             <Router>
+                <TeacherDataProvider>
                 <Header
                     onLoginOpen={() => setModalType("login")}
                     onSignupOpen={() => setModalType("signup")}
@@ -121,6 +123,7 @@ function App() {
                     <ResetPasswordForm switchToLogin={() => setModalType("login")} />
                 )}
             </Modal>
+                </TeacherDataProvider>
             </Router>
         </NotificationProvider>
     );

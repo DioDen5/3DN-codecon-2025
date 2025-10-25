@@ -12,10 +12,12 @@ import {
     resolveReport,
     rejectReport
 } from '../../api/admin-stats';
+import { useTeacherData } from '../../contexts/TeacherDataContext';
 
 export const useAdminData = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const { triggerRefresh } = useTeacherData();
     
     const [statsData, setStatsData] = useState(null);
     const [usersData, setUsersData] = useState([]);
@@ -535,6 +537,20 @@ export const useAdminData = () => {
                     commentsPagination: commentsPagination?.currentPage,
                     reviewsPagination: reviewsPagination?.currentPage
                 });
+                
+                // Оновлюємо статистику
+                const stats = await getAdminStats();
+                setStatsData(stats);
+                
+                const moderationData = {
+                    announcements: stats.activeAnnouncements,
+                    comments: stats.totalComments,
+                    reviews: stats.totalReviews
+                };
+                setModerationData(moderationData);
+                
+                // Оновлюємо дані викладачів
+                triggerRefresh();
                 
                 switch (contentType) {
                     case 'all':
