@@ -159,7 +159,6 @@ const AdminProfilePageRefactored = () => {
             await approveContent(itemId, itemType);
             console.log('Item approved successfully');
             loadAdminData();
-            alert(`Контент ${itemType} схвалено`);
         } catch (error) {
             console.error('Error approving item:', error);
             alert(`Помилка при схваленні: ${error.message}`);
