@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, AlertTriangle, User, Calendar, MessageSquare, FileText, Star, CheckCircle, Trash2 } from 'lucide-react';
+import { X, AlertTriangle, User, Calendar, MessageSquare, MessageCircle, FileText, Star, CheckCircle, Trash2 } from 'lucide-react';
 import { deleteContent } from '../api/admin-stats';
 
 const ContentViewModal = ({ isOpen, onClose, content, onApprove, onDelete, onContentDeleted }) => {
@@ -86,7 +86,7 @@ const ContentViewModal = ({ isOpen, onClose, content, onApprove, onDelete, onCon
         
         switch (contentType) {
             case 'announcement': return 'обговорення';
-            case 'comment': return 'коментар';
+            case 'comment': return 'коментаря';
             case 'review': return 'відгуку';
             default: return 'контент';
         }
@@ -95,7 +95,7 @@ const ContentViewModal = ({ isOpen, onClose, content, onApprove, onDelete, onCon
     const getTargetIcon = (type) => {
         switch (type) {
             case 'announcement': return <MessageSquare className="w-5 h-5 text-blue-900" />;
-            case 'comment': return <FileText className="w-5 h-5 text-purple-900" />;
+            case 'comment': return <MessageCircle className="w-5 h-5 text-green-900" />;
             case 'review': return <Star className="w-5 h-5 text-purple-600" />;
             default: return <FileText className="w-5 h-5 text-purple-900" />;
         }
@@ -152,7 +152,7 @@ const ContentViewModal = ({ isOpen, onClose, content, onApprove, onDelete, onCon
                     getContentType() === 'review' 
                         ? 'bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700'
                         : getContentType() === 'comment'
-                            ? 'bg-gradient-to-r from-green-500 via-green-600 to-green-700'
+                            ? 'bg-gradient-to-r from-green-600 via-green-700 to-green-800'
                             : 'bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700'
                 }`}>
                     <div className={`absolute inset-0 ${
@@ -168,15 +168,15 @@ const ContentViewModal = ({ isOpen, onClose, content, onApprove, onDelete, onCon
                     <div className="relative flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className="p-3 bg-white/20 backdrop-blur-sm rounded-full shadow-lg">
-                                {getTargetIcon(content.contentType)}
+                                {getTargetIcon(getContentType())}
                             </div>
                             <div>
-                                <h2 className="text-2xl font-bold text-white">Перегляд {getTargetTypeText(content.contentType)}</h2>
+                                <h2 className="text-2xl font-bold text-white">Перегляд {getTargetTypeText(getContentType())}</h2>
                                 <p className={`text-sm ${
                                     getContentType() === 'review' 
                                         ? 'text-purple-100' 
                                         : getContentType() === 'comment'
-                                            ? 'text-green-100'
+                                            ? 'text-green-200'
                                             : 'text-blue-100'
                                 }`}>Детальна інформація про контент</p>
                             </div>
@@ -194,7 +194,7 @@ const ContentViewModal = ({ isOpen, onClose, content, onApprove, onDelete, onCon
                     <div className="bg-gray-100 rounded-xl p-6 mb-6">
                         <h3 className="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
                             <AlertTriangle className="w-5 h-5 text-gray-500" />
-                            Інформація про {getTargetTypeText(content.contentType)}
+                            Інформація про {getTargetTypeText(getContentType())}
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-600">
                             <div className="flex items-center gap-2">
@@ -243,7 +243,7 @@ const ContentViewModal = ({ isOpen, onClose, content, onApprove, onDelete, onCon
                                     : getContentType() === 'comment'
                                         ? 'text-green-700'
                                         : 'text-blue-700'
-                            }`}>Текст {getTargetTypeText(content.contentType)}</h3>
+                            }`}>Текст {getTargetTypeText(getContentType())}</h3>
                             <div className={`leading-relaxed whitespace-pre-wrap ${
                                 getContentType() === 'review' 
                                     ? 'text-purple-900' 
