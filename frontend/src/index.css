@@ -2260,6 +2260,39 @@
     }
 }
 
+@keyframes liquidSqueeze {
+    0% {
+        transform: scale(1);
+        border-radius: 50%;
+    }
+    50% {
+        transform: scale(0.8, 0.6);
+        border-radius: 25%;
+    }
+    100% {
+        transform: scale(1);
+        border-radius: 50%;
+    }
+}
+
+@keyframes liquidBounce {
+    0% {
+        transform: scale(1);
+    }
+    25% {
+        transform: scale(0.9, 1.1);
+    }
+    50% {
+        transform: scale(1.1, 0.9);
+    }
+    75% {
+        transform: scale(0.95, 1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
 .security-icon-glow {
     animation: securityIconGlow 2s ease-in-out infinite;
 }
@@ -2298,6 +2331,14 @@
 
 .security-save-success {
     animation: securitySaveSuccess 0.6s ease-out;
+}
+
+.liquid-squeeze {
+    animation: liquidSqueeze 0.3s ease-out;
+}
+
+.liquid-bounce {
+    animation: liquidBounce 0.6s ease-out;
 }
 
 .moderation-pulse {

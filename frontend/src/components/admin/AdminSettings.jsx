@@ -74,13 +74,13 @@ const AdminSettings = () => {
                                 </div>
                                 <button 
                                     onClick={() => toggleSetting('twoFactor')}
-                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all duration-300 shadow-md hover:shadow-lg ${
+                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all duration-300 shadow-md hover:shadow-lg cursor-pointer ${
                                         settings.twoFactor 
                                             ? 'bg-gradient-to-r from-red-500 to-red-600 shadow-red-200' 
                                             : 'bg-gray-300 hover:bg-gray-400'
                                     }`}
                                 >
-                                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-lg transition-all duration-300 ${
+                                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-lg transition-all duration-200 active:scale-95 active:rounded-3xl active:h-3.5 active:w-4.5 hover:liquid-bounce ${
                                         settings.twoFactor ? 'translate-x-6' : 'translate-x-1'
                                     }`} />
                                 </button>
