@@ -2544,4 +2544,140 @@
     animation: reportsIconShimmer 2s ease-in-out infinite;
 }
 
+/* Users Icon Animations */
+@keyframes usersIconGlow {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.6), 0 0 30px rgba(59, 130, 246, 0.4);
+    }
+}
+
+@keyframes usersIconPulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes usersIconRotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes usersIconShimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.users-icon-glow {
+    animation: usersIconGlow 2s ease-in-out infinite;
+}
+
+.users-icon-pulse {
+    animation: usersIconPulse 0.6s ease-out;
+}
+
+.users-icon-rotate {
+    animation: usersIconRotate 0.8s ease-in-out;
+}
+
+.users-icon-shimmer {
+    position: relative;
+    overflow: hidden;
+}
+
+.users-icon-shimmer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: usersIconShimmer 2s ease-in-out infinite;
+}
+
+/* Moderation Icon Animations */
+@keyframes moderationIconGlow {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(99, 102, 241, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(99, 102, 241, 0.6), 0 0 30px rgba(99, 102, 241, 0.4);
+    }
+}
+
+@keyframes moderationIconPulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes moderationIconRotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes moderationIconShimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.moderation-icon-glow {
+    animation: moderationIconGlow 2s ease-in-out infinite;
+}
+
+.moderation-icon-pulse {
+    animation: moderationIconPulse 0.6s ease-out;
+}
+
+.moderation-icon-rotate {
+    animation: moderationIconRotate 0.8s ease-in-out;
+}
+
+.moderation-icon-shimmer {
+    position: relative;
+    overflow: hidden;
+}
+
+.moderation-icon-shimmer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: moderationIconShimmer 2s ease-in-out infinite;
+}
+
 

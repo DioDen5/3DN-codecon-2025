@@ -1,10 +1,18 @@
 import React from 'react';
+import { UserCog } from 'lucide-react';
 
 const AdminUsers = ({ usersData }) => {
     return (
         <div className="space-y-6 users-slide-in">
-            <div className="bg-white text-black rounded-2xl p-6 shadow-xl border border-gray-200">
-                <h3 className="text-xl font-bold text-gray-900 mb-4">Управління користувачами</h3>
+            <div className="bg-white text-black rounded-2xl p-6 shadow-xl border border-gray-200 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-100/50 to-blue-200/30 rounded-full -translate-y-16 translate-x-16 animate-pulse"></div>
+                <div className="relative">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-4">
+                        <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg transition-transform duration-300 users-icon-glow users-icon-pulse users-icon-rotate users-icon-shimmer relative overflow-hidden">
+                            <UserCog className="w-5 h-5 text-white relative z-10" />
+                        </div>
+                        Управління користувачами
+                    </h3>
                 <div className="space-y-3">
                     {usersData?.map((user) => (
                         <div key={user._id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
@@ -34,6 +42,7 @@ const AdminUsers = ({ usersData }) => {
                             </div>
                         </div>
                     ))}
+                </div>
                 </div>
             </div>
         </div>
