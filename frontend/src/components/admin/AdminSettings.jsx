@@ -51,7 +51,7 @@ const AdminSettings = () => {
                     {/* Заголовок з анімацією */}
                     <div className="mb-8">
                         <h3 className="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-4">
-                            <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300 security-icon-glow security-icon-pulse security-icon-rotate security-icon-shimmer relative overflow-hidden">
+                            <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg transition-transform duration-300 security-icon-glow security-icon-pulse security-icon-rotate security-icon-shimmer relative overflow-hidden">
                                 <Shield className="w-5 h-5 text-white relative z-10" />
                             </div>
                             Налаштування безпеки

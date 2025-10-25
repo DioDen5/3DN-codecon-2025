@@ -2041,6 +2041,22 @@
     animation: adminIconPulse 0.5s ease-out;
 }
 
+.hover\:admin-icon-bounce:hover {
+    animation: adminIconBounce 0.6s ease-out;
+}
+
+.hover\:admin-icon-shake:hover {
+    animation: adminIconShake 0.4s ease-in-out;
+}
+
+.hover\:admin-icon-rotate:hover {
+    animation: adminIconRotate 0.8s ease-in-out;
+}
+
+.hover\:admin-icon-pulse:hover {
+    animation: adminIconPulse 0.5s ease-out;
+}
+
 @keyframes fadeIn {
     0% {
         opacity: 0;

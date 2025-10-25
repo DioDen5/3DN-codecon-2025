@@ -275,13 +275,15 @@ const AdminProfilePageRefactored = () => {
                                     >
                                         <Icon 
                                             size={tab.id === 'dashboard' ? 22 : 18} 
-                                            className={
-                                                tab.id === 'dashboard' ? 'admin-icon-bounce' :
-                                                tab.id === 'moderation' ? 'admin-icon-pulse' :
-                                                tab.id === 'users' ? 'admin-icon-shake' :
-                                                tab.id === 'reports' ? 'admin-icon-bounce' :
-                                                tab.id === 'settings' ? 'admin-icon-rotate' : ''
-                                            }
+                                            className={`transition-all duration-300 ${
+                                                activeTab === tab.id ? (
+                                                    tab.id === 'dashboard' ? 'admin-icon-bounce' :
+                                                    tab.id === 'moderation' ? 'admin-icon-pulse' :
+                                                    tab.id === 'users' ? 'admin-icon-shake' :
+                                                    tab.id === 'reports' ? 'admin-icon-bounce' :
+                                                    tab.id === 'settings' ? 'admin-icon-rotate' : ''
+                                                ) : ''
+                                            }`}
                                         />
                                         <span>{tab.label}</span>
                                     </button>
