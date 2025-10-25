@@ -112,9 +112,6 @@ export const useAdminData = () => {
 
             // Завантажуємо модераційний контент з початковими сторінками
             await loadAllModerationContent(1);
-            await loadAnnouncements(1);
-            await loadComments(1);
-            await loadReviews(1);
 
         } catch (error) {
             console.error('Error loading admin data:', error);

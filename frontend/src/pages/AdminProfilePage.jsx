@@ -30,6 +30,8 @@ const AdminProfilePageRefactored = () => {
         return localStorage.getItem('adminModerationFilter') || 'all';
     });
     const [moderationSearch, setModerationSearch] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searching, setSearching] = useState(false);
     const [selectedItems, setSelectedItems] = useState([]);
     const [approvedItems, setApprovedItems] = useState(new Set());
 
@@ -45,6 +47,7 @@ const AdminProfilePageRefactored = () => {
         activityPagination,
         moderationPagination,
         loadAdminData,
+        loadAllModerationContent,
         loadAnnouncements,
         loadComments,
         loadReviews,
@@ -82,6 +85,24 @@ const AdminProfilePageRefactored = () => {
         { id: 'settings', label: 'Налаштування', icon: Settings }
     ];
 
+    // Debounce логіка для пошуку (як в форумі)
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setSearchQuery(moderationSearch.trim());
+        }, 300);
+        
+        return () => clearTimeout(timer);
+    }, [moderationSearch]);
+
+    // Ефект для пошуку
+    useEffect(() => {
+        if (searchQuery.length > 0) {
+            setSearching(true);
+        } else {
+            setSearching(false);
+        }
+    }, [searchQuery]);
+
     const handleTabChange = (tabId) => {
         if (activeTab === tabId) {
             return;
@@ -91,13 +112,15 @@ const AdminProfilePageRefactored = () => {
         localStorage.setItem('adminActiveTab', tabId);
         
         if (tabId === 'moderation') {
+            // Завантажуємо тільки потрібний тип контенту (якщо ще не завантажений)
             if (moderationFilter === 'announcements') {
-                loadAnnouncements();
+                loadAnnouncements(1);
             } else if (moderationFilter === 'comments') {
-                loadComments();
+                loadComments(1);
             } else if (moderationFilter === 'reviews') {
-                loadReviews();
+                loadReviews(1);
             }
+            // 'all' вже завантажується в loadAdminData()
         }
     };
 
@@ -112,12 +135,13 @@ const AdminProfilePageRefactored = () => {
     useEffect(() => {
         if (activeTab === 'moderation') {
             if (moderationFilter === 'announcements') {
-                loadAnnouncements();
+                loadAnnouncements(1);
             } else if (moderationFilter === 'comments') {
-                loadComments();
+                loadComments(1);
             } else if (moderationFilter === 'reviews') {
-                loadReviews();
+                loadReviews(1);
             }
+            // 'all' вже завантажується в loadAdminData()
         }
     }, [moderationFilter, activeTab]);
 
@@ -300,6 +324,8 @@ const AdminProfilePageRefactored = () => {
                             setModerationFilter={setModerationFilter}
                             moderationSearch={moderationSearch}
                             setModerationSearch={setModerationSearch}
+                            searchQuery={searchQuery}
+                            searching={searching}
                             selectedItems={selectedItems}
                             setSelectedItems={setSelectedItems}
                             moderationData={moderationData}

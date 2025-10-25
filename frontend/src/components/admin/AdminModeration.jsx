@@ -12,6 +12,8 @@ const AdminModeration = ({
     setModerationFilter,
     moderationSearch,
     setModerationSearch,
+    searchQuery,
+    searching,
     selectedItems,
     setSelectedItems,
     moderationData,
@@ -56,6 +58,7 @@ const AdminModeration = ({
                 handleBulkDelete={handleBulkDelete}
             />
 
+
             <div className="space-y-4">
                 {moderationFilter === 'all' && (
                     <>
@@ -65,6 +68,7 @@ const AdminModeration = ({
                             handleApproveItem={handleApproveItem}
                             onContentDeleted={onContentDeleted}
                             approvedItems={approvedItems}
+                            searchQuery={searchQuery}
                         />
                         {allModerationContent && allModerationContent.length > 0 && moderationPagination && moderationPagination.totalPages > 1 && (
                             <ModerationPagination
