@@ -143,11 +143,13 @@ const AdminProfilePageRefactored = () => {
 
     const handleDeleteItem = async (itemId, itemType) => {
         try {
-            console.log('Item deleted, refreshing data:', itemId, itemType);
-            // Просто оновлюємо дані, оскільки видалення вже відбулося в ContentViewModal
+            console.log('Deleting item:', itemId, itemType);
+            await deleteContent(itemId, itemType);
+            console.log('Item deleted successfully');
             loadAdminData();
         } catch (error) {
-            console.error('Error refreshing data:', error);
+            console.error('Error deleting item:', error);
+            alert(`Помилка при видаленні: ${error.message}`);
         }
     };
 

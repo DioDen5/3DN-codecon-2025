@@ -52,7 +52,19 @@ const ContentViewModal = ({ isOpen, onClose, content, onApprove, onDelete, onCon
             console.log('Content object:', content);
             console.log('Deleting content:', { targetId: content._id, targetType: content.contentType });
             
-            const contentType = content.contentType || content.type || 'announcement';
+            let contentType = content.contentType || content.type;
+            
+            // Якщо contentType не встановлений, визначаємо по структурі об'єкта
+            if (!contentType) {
+                if (content.rating !== undefined) {
+                    contentType = 'review';
+                } else if (content.title) {
+                    contentType = 'announcement';
+                } else {
+                    contentType = 'comment';
+                }
+            }
+            
             console.log('Using contentType:', contentType);
             
             await deleteContent(content._id, contentType);
@@ -70,7 +82,9 @@ const ContentViewModal = ({ isOpen, onClose, content, onApprove, onDelete, onCon
     };
 
     const getTargetTypeText = (type) => {
-        switch (type) {
+        const contentType = type || content.contentType || content.type || (content.rating !== undefined ? 'review' : 'announcement');
+        
+        switch (contentType) {
             case 'announcement': return 'обговорення';
             case 'comment': return 'коментар';
             case 'review': return 'відгук';
@@ -88,11 +102,13 @@ const ContentViewModal = ({ isOpen, onClose, content, onApprove, onDelete, onCon
     };
 
     const getContentText = () => {
-        if (content.contentType === 'announcement') {
+        const contentType = content.contentType || content.type || (content.rating !== undefined ? 'review' : 'announcement');
+        
+        if (contentType === 'announcement') {
             return content.body || 'Немає тексту';
-        } else if (content.contentType === 'comment') {
+        } else if (contentType === 'comment') {
             return content.body || 'Немає тексту';
-        } else if (content.contentType === 'review') {
+        } else if (contentType === 'review') {
             return content.body || 'Немає тексту';
         }
         return 'Немає тексту';
@@ -159,7 +175,7 @@ const ContentViewModal = ({ isOpen, onClose, content, onApprove, onDelete, onCon
                                 <span className="font-medium text-gray-500">Дата створення:</span>
                                 <span className="text-gray-600">{new Date(content.createdAt).toLocaleString('uk-UA')}</span>
                             </div>
-                            {content.contentType === 'review' && (
+                            {(content.contentType === 'review' || content.rating !== undefined) && (
                                 <div className="flex items-center gap-2">
                                     <Star className="w-4 h-4 text-gray-400" />
                                     <span className="font-medium text-gray-500">Рейтинг:</span>
@@ -175,19 +191,19 @@ const ContentViewModal = ({ isOpen, onClose, content, onApprove, onDelete, onCon
                     </div>
 
                     <div className={`rounded-xl p-6 mb-6 border relative overflow-hidden ${
-                        content.contentType === 'review' 
+                        (content.contentType === 'review' || content.rating !== undefined)
                             ? 'bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200 comment-animate-purple'
                             : 'bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200 comment-animate-blue'
                     }`}>
                         <div className={`absolute top-0 right-0 w-16 h-16 rounded-full -translate-y-8 translate-x-8 ${
-                            content.contentType === 'review' ? 'bg-purple-100/30' : 'bg-blue-100/30'
+                            (content.contentType === 'review' || content.rating !== undefined) ? 'bg-purple-100/30' : 'bg-blue-100/30'
                         }`}></div>
                         <div className="relative">
                             <h3 className={`text-lg font-semibold mb-4 ${
-                                content.contentType === 'review' ? 'text-purple-700' : 'text-blue-700'
+                                (content.contentType === 'review' || content.rating !== undefined) ? 'text-purple-700' : 'text-blue-700'
                             }`}>Текст {getTargetTypeText(content.contentType)}</h3>
                             <div className={`leading-relaxed whitespace-pre-wrap ${
-                                content.contentType === 'review' ? 'text-purple-900' : 'text-blue-900'
+                                (content.contentType === 'review' || content.rating !== undefined) ? 'text-purple-900' : 'text-blue-900'
                             }`}>
                                 {getContentText()}
                             </div>
