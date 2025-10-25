@@ -535,4 +535,108 @@ router.delete('/content/:type/:id', authRequired, requireAdmin, async (req, res)
     }
 });
 
+// POST /admin/approve/:type/:id - схвалити контент
+router.post('/approve/:type/:id', authRequired, requireAdmin, async (req, res) => {
+    console.log('POST /approve route hit:', req.params);
+    const { type, id } = req.params;
+    console.log('Approving content:', { type, id });
+    
+    try {
+        let result;
+        switch (type) {
+            case 'announcement':
+                result = await Announcement.findByIdAndUpdate(id, {
+                    isApproved: true,
+                    approvedBy: req.user.id,
+                    approvedAt: new Date()
+                }, { new: true });
+                break;
+            case 'comment':
+                result = await Comment.findByIdAndUpdate(id, {
+                    isApproved: true,
+                    approvedBy: req.user.id,
+                    approvedAt: new Date()
+                }, { new: true });
+                break;
+            case 'review':
+                result = await TeacherComment.findByIdAndUpdate(id, {
+                    isApproved: true,
+                    approvedBy: req.user.id,
+                    approvedAt: new Date()
+                }, { new: true });
+                break;
+            default:
+                console.log('Invalid content type:', type);
+                return res.status(400).json({ error: 'Invalid content type' });
+        }
+        
+        console.log('Approve result:', result);
+        if (!result) {
+            return res.status(404).json({ error: 'Content not found' });
+        }
+        
+        console.log('Content approved successfully');
+        res.json({ 
+            message: 'Content approved successfully', 
+            success: true,
+            isApproved: result.isApproved
+        });
+    } catch (error) {
+        console.error('Error approving content:', error);
+        res.status(500).json({ error: 'Internal server error', details: error.message });
+    }
+});
+
+// DELETE /admin/approve/:type/:id - скасувати схвалення контенту
+router.delete('/approve/:type/:id', authRequired, requireAdmin, async (req, res) => {
+    console.log('DELETE /approve route hit:', req.params);
+    const { type, id } = req.params;
+    console.log('Unapproving content:', { type, id });
+    
+    try {
+        let result;
+        switch (type) {
+            case 'announcement':
+                result = await Announcement.findByIdAndUpdate(id, {
+                    isApproved: false,
+                    approvedBy: null,
+                    approvedAt: null
+                }, { new: true });
+                break;
+            case 'comment':
+                result = await Comment.findByIdAndUpdate(id, {
+                    isApproved: false,
+                    approvedBy: null,
+                    approvedAt: null
+                }, { new: true });
+                break;
+            case 'review':
+                result = await TeacherComment.findByIdAndUpdate(id, {
+                    isApproved: false,
+                    approvedBy: null,
+                    approvedAt: null
+                }, { new: true });
+                break;
+            default:
+                console.log('Invalid content type:', type);
+                return res.status(400).json({ error: 'Invalid content type' });
+        }
+        
+        console.log('Unapprove result:', result);
+        if (!result) {
+            return res.status(404).json({ error: 'Content not found' });
+        }
+        
+        console.log('Content unapproved successfully');
+        res.json({ 
+            message: 'Content unapproved successfully', 
+            success: true,
+            isApproved: result.isApproved
+        });
+    } catch (error) {
+        console.error('Error unapproving content:', error);
+        res.status(500).json({ error: 'Internal server error', details: error.message });
+    }
+});
+
 export default router;

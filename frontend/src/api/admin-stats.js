@@ -135,3 +135,39 @@ export const getModerationReviews = async (page = 1, limit = 10) => {
         throw error;
     }
 };
+
+export const deleteContent = async (targetId, targetType) => {
+    try {
+        console.log(`Making DELETE request to /admin/content/${targetType}/${targetId}`);
+        const response = await http.delete(`/admin/content/${targetType}/${targetId}`);
+        console.log('Delete content response:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting content:', error);
+        throw error;
+    }
+};
+
+export const approveContent = async (contentId, contentType) => {
+    try {
+        console.log(`Making POST request to /admin/approve/${contentType}/${contentId}`);
+        const response = await http.post(`/admin/approve/${contentType}/${contentId}`);
+        console.log('Approve content response:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Error approving content:', error);
+        throw error;
+    }
+};
+
+export const unapproveContent = async (contentId, contentType) => {
+    try {
+        console.log(`Making DELETE request to /admin/approve/${contentType}/${contentId}`);
+        const response = await http.delete(`/admin/approve/${contentType}/${contentId}`);
+        console.log('Unapprove content response:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Error unapproving content:', error);
+        throw error;
+    }
+};

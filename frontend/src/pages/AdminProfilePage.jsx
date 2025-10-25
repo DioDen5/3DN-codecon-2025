@@ -8,7 +8,7 @@ import {
     ChevronLeft,
     ChevronRight
 } from 'lucide-react';
-import { deleteContent } from '../api/admin-stats';
+import { deleteContent, approveContent, unapproveContent } from '../api/admin-stats';
 import { useAuthState } from '../api/useAuthState';
 import { useAdminData } from '../hooks/admin/useAdminData';
 import AdminDashboard from '../components/admin/AdminDashboard';
@@ -156,7 +156,9 @@ const AdminProfilePageRefactored = () => {
     const handleApproveItem = async (itemId, itemType) => {
         try {
             console.log('Approving item:', itemId, itemType);
-            setApprovedItems(prev => new Set([...prev, itemId]));
+            await approveContent(itemId, itemType);
+            console.log('Item approved successfully');
+            loadAdminData();
             alert(`Контент ${itemType} схвалено`);
         } catch (error) {
             console.error('Error approving item:', error);

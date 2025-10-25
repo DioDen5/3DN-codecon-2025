@@ -31,6 +31,9 @@ const announcementSchema = new mongoose.Schema({
     moderation: { type: moderationSchema, default: () => ({}) },
     aiFlags: { type: aiFlagsSchema, default: () => ({}) },
     publishedAt: { type: Date, default: null, index: true },
+    isApproved: { type: Boolean, default: false, index: true },
+    approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'users', default: null },
+    approvedAt: { type: Date, default: null },
     createdAt: { type: Date, default: () => new Date() },
     updatedAt: { type: Date, default: () => new Date() }
 }, { versionKey: false });

@@ -52,7 +52,7 @@ const CommentsList = ({
         <div className="space-y-3">
             {commentsContent.map((comment, index) => (
                 <div key={comment._id} className={`rounded-xl p-4 border transition-all duration-500 ease-out relative ${
-                    approvedItems.has(comment._id) 
+                    comment.isApproved 
                         ? 'bg-gradient-to-r from-green-50 to-green-100 border-green-300 shadow-green-200 shadow-lg' 
                         : 'bg-gray-50 border-gray-200 hover:moderation-glow'
                 }`} style={{ animation: 'slideInFromLeft 0.6s ease-out both' }}>
@@ -69,7 +69,7 @@ const CommentsList = ({
                                     </div>
                                 </div>
                             </div>
-                            {approvedItems.has(comment._id) && (
+                            {comment.isApproved && (
                                 <div className="absolute top-3 right-3 bg-gradient-to-r from-green-500 to-green-600 text-white px-3 py-1 rounded-lg text-xs font-semibold shadow-lg flex items-center gap-1">
                                     <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
