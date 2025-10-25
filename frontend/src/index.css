@@ -2293,6 +2293,33 @@
     }
 }
 
+@keyframes liquidFill {
+    0% {
+        transform: translateX(-100%) scaleX(0);
+        opacity: 0;
+    }
+    50% {
+        transform: translateX(-50%) scaleX(1.2);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateX(0) scaleX(1);
+        opacity: 1;
+    }
+}
+
+@keyframes liquidWave {
+    0% {
+        transform: translateX(-100%) scaleX(1);
+    }
+    50% {
+        transform: translateX(0) scaleX(1.1);
+    }
+    100% {
+        transform: translateX(100%) scaleX(1);
+    }
+}
+
 .security-icon-glow {
     animation: securityIconGlow 2s ease-in-out infinite;
 }
@@ -2339,6 +2366,14 @@
 
 .liquid-bounce {
     animation: liquidBounce 0.6s ease-out;
+}
+
+.liquid-fill {
+    animation: liquidFill 0.8s ease-out;
+}
+
+.liquid-wave {
+    animation: liquidWave 1.2s ease-out;
 }
 
 .moderation-pulse {
