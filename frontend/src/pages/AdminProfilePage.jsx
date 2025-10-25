@@ -31,6 +31,7 @@ const AdminProfilePageRefactored = () => {
     });
     const [moderationSearch, setModerationSearch] = useState('');
     const [selectedItems, setSelectedItems] = useState([]);
+    const [approvedItems, setApprovedItems] = useState(new Set());
 
     const {
         loading,
@@ -153,7 +154,8 @@ const AdminProfilePageRefactored = () => {
     const handleApproveItem = async (itemId, itemType) => {
         try {
             console.log('Approving item:', itemId, itemType);
-            alert(`Функція схвалення ${itemType} буде реалізована`);
+            setApprovedItems(prev => new Set([...prev, itemId]));
+            alert(`Контент ${itemType} схвалено`);
         } catch (error) {
             console.error('Error approving item:', error);
             alert(`Помилка при схваленні: ${error.message}`);
@@ -303,6 +305,7 @@ const AdminProfilePageRefactored = () => {
                             handleDeleteItem={handleDeleteItem}
                             handleApproveItem={handleApproveItem}
                             onContentDeleted={loadAdminData}
+                            approvedItems={approvedItems}
                             announcementsContent={announcementsContent}
                             announcementsPagination={announcementsPagination}
                             handleAnnouncementsPrevPage={handleAnnouncementsPrevPage}

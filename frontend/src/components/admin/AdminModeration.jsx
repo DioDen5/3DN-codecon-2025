@@ -24,6 +24,7 @@ const AdminModeration = ({
     handleDeleteItem,
     handleApproveItem,
     onContentDeleted,
+    approvedItems,
     announcementsContent,
     announcementsPagination,
     handleAnnouncementsPrevPage,
@@ -58,11 +59,10 @@ const AdminModeration = ({
                     <>
                         <AllContentList
                             allModerationContent={allModerationContent}
-                            selectedItems={selectedItems}
-                            setSelectedItems={setSelectedItems}
                             handleDeleteItem={handleDeleteItem}
                             handleApproveItem={handleApproveItem}
                             onContentDeleted={onContentDeleted}
+                            approvedItems={approvedItems}
                         />
                         {allModerationContent && allModerationContent.length > 0 && moderationPagination && moderationPagination.totalPages > 1 && (
                             <ModerationPagination

@@ -4,11 +4,10 @@ import ContentViewModal from '../ContentViewModal';
 
 const AllContentList = ({ 
     allModerationContent, 
-    selectedItems,
-    setSelectedItems,
     handleDeleteItem,
     handleApproveItem,
-    onContentDeleted
+    onContentDeleted,
+    approvedItems
 }) => {
     const [showViewModal, setShowViewModal] = useState(false);
     const [selectedContent, setSelectedContent] = useState(null);
@@ -46,7 +45,11 @@ const AllContentList = ({
     return (
         <div className="space-y-3">
             {allModerationContent.map((item, index) => (
-                <div key={item._id} className="bg-gray-50 rounded-xl p-4 border border-gray-200 hover:moderation-glow transition-all duration-500 ease-out" style={{ animation: 'slideInFromLeft 0.6s ease-out both' }}>
+                <div key={item._id} className={`rounded-xl p-4 border transition-all duration-500 ease-out relative ${
+                    approvedItems.has(item._id) 
+                        ? 'bg-gradient-to-r from-green-50 to-green-100 border-green-300 shadow-green-200 shadow-lg' 
+                        : 'bg-gray-50 border-gray-200 hover:moderation-glow'
+                }`} style={{ animation: 'slideInFromLeft 0.6s ease-out both' }}>
                     <div className="flex items-start justify-between">
                         <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
@@ -68,6 +71,14 @@ const AllContentList = ({
                                     </div>
                                 </div>
                             </div>
+                            {approvedItems.has(item._id) && (
+                                <div className="absolute top-3 right-3 bg-gradient-to-r from-green-500 to-green-600 text-white px-3 py-1 rounded-lg text-xs font-semibold shadow-lg flex items-center gap-1">
+                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                    </svg>
+                                    Перевірено
+                                </div>
+                            )}
                             <p className="text-gray-700 mb-3">
                                 {item.contentType === 'announcement' ? item.body?.substring(0, 100) + '...' :
                                  item.contentType === 'comment' ? item.body?.substring(0, 150) + '...' :
@@ -94,18 +105,6 @@ const AllContentList = ({
                                 </button>
                             </div>
                         </div>
-                        <input
-                            type="checkbox"
-                            className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
-                            checked={selectedItems.includes(item._id)}
-                            onChange={(e) => {
-                                if (e.target.checked) {
-                                    setSelectedItems([...selectedItems, item._id]);
-                                } else {
-                                    setSelectedItems(selectedItems.filter(id => id !== item._id));
-                                }
-                            }}
-                        />
                     </div>
                 </div>
             ))}
