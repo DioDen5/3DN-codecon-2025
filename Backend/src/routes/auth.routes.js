@@ -8,6 +8,7 @@ import { signJwt, verifyJwt } from '../middleware/auth.js';
 import { sendPasswordResetEmail } from '../utils/emailService.js';
 import { logUserRegistration, logUserVerification } from '../utils/activityLogger.js';
 import { checkSessionTimeout, checkIdleTimeout } from '../middleware/sessionTimeout.js';
+import { checkLoginAttempts, logLoginAttempt } from '../middleware/loginAttempts.js';
 
 const router = express.Router();
 
@@ -87,14 +88,20 @@ router.post('/register', async (req, res) => {
     });
 });
 
-router.post('/login', async (req, res) => {
+router.post('/login', checkLoginAttempts, async (req, res) => {
     const { email, password, rememberMe } = req.body ?? {};
 
     const user = await User.findOne({ email });
-    if (!user) return res.status(401).json({ error: 'Invalid credentials' });
+    if (!user) {
+        await logLoginAttempt(req, res, () => {});
+        return res.status(401).json({ error: 'Invalid credentials' });
+    }
 
     const ok = await bcrypt.compare(password, user.passwordHash);
-    if (!ok) return res.status(401).json({ error: 'Invalid credentials' });
+    if (!ok) {
+        await logLoginAttempt(req, res, () => {});
+        return res.status(401).json({ error: 'Invalid credentials' });
+    }
 
     user.rememberMe = rememberMe || false;
     user.lastLoginEmail = rememberMe ? email : null;
@@ -105,6 +112,8 @@ router.post('/login', async (req, res) => {
 
     setRefreshCookie(res, refresh);
 
+    await logLoginAttempt(req, res, () => {});
+    
     return res.json({
         token: access,
         user: { id: user._id, displayName: user.displayName, role: user.role, status: user.status },

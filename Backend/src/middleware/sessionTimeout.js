@@ -1,27 +1,21 @@
 import { SecuritySettings } from '../models/SecuritySettings.js';
 
-// Мідлваре для перевірки таймауту сесії
 export const checkSessionTimeout = async (req, res, next) => {
     try {
-        // Отримуємо налаштування безпеки
         const settings = await SecuritySettings.findOne().sort({ createdAt: -1 });
-        const sessionTimeout = settings?.sessionTimeout || 30; // хвилини
+        const sessionTimeout = settings?.sessionTimeout || 30;
         
-        // Перевіряємо чи є токен
         if (!req.user) {
             return next();
         }
         
-        // Отримуємо час створення токена з JWT
-        const tokenCreatedAt = req.user.iat; // issued at time
+        const tokenCreatedAt = req.user.iat;
         const currentTime = Math.floor(Date.now() / 1000);
-        const sessionDuration = (currentTime - tokenCreatedAt) / 60; // хвилини
+        const sessionDuration = (currentTime - tokenCreatedAt) / 60;
         
-        // Якщо сесія перевищила таймаут
         if (sessionDuration > sessionTimeout) {
             console.log(`Session timeout: ${sessionDuration} minutes > ${sessionTimeout} minutes`);
             
-            // Очищуємо токени
             res.clearCookie('token');
             res.clearCookie('refreshToken');
             
@@ -35,32 +29,26 @@ export const checkSessionTimeout = async (req, res, next) => {
         next();
     } catch (error) {
         console.error('Error checking session timeout:', error);
-        next(); // Продовжуємо навіть при помилці
+        next();
     }
 };
 
-// Мідлваре для перевірки неактивності
 export const checkIdleTimeout = async (req, res, next) => {
     try {
-        // Отримуємо налаштування безпеки
         const settings = await SecuritySettings.findOne().sort({ createdAt: -1 });
-        const idleTimeout = settings?.idleTimeout || 30; // хвилини
+        const idleTimeout = settings?.idleTimeout || 30;
         
-        // Перевіряємо чи є токен
         if (!req.user) {
             return next();
         }
         
-        // Отримуємо час останньої активності з токена
         const lastActivity = req.user.lastActivity || req.user.iat;
         const currentTime = Math.floor(Date.now() / 1000);
-        const idleDuration = (currentTime - lastActivity) / 60; // хвилини
+        const idleDuration = (currentTime - lastActivity) / 60;
         
-        // Якщо користувач неактивний більше ніж дозволено
         if (idleDuration > idleTimeout) {
             console.log(`Idle timeout: ${idleDuration} minutes > ${idleTimeout} minutes`);
             
-            // Очищуємо токени
             res.clearCookie('token');
             res.clearCookie('refreshToken');
             
@@ -71,12 +59,11 @@ export const checkIdleTimeout = async (req, res, next) => {
             });
         }
         
-        // Оновлюємо час останньої активності
         req.user.lastActivity = currentTime;
         
         next();
     } catch (error) {
         console.error('Error checking idle timeout:', error);
-        next(); // Продовжуємо навіть при помилці
+        next();
     }
 };

@@ -11,7 +11,6 @@ import { checkSessionTimeout, checkIdleTimeout } from '../middleware/sessionTime
 
 const router = express.Router();
 
-// Middleware для перевірки прав адміністратора
 const requireAdmin = (req, res, next) => {
     if (req.user?.role !== 'admin') {
         return res.status(403).json({ error: 'Admin access required' });
@@ -19,38 +18,30 @@ const requireAdmin = (req, res, next) => {
     next();
 };
 
-// Комбінований мідлваре для admin routes з перевіркою таймауту
 const adminAuth = [authRequired, checkSessionTimeout, checkIdleTimeout, requireAdmin];
 
-// Статистика для адміністратора
 router.get('/stats', ...adminAuth, async (req, res) => {
     try {
-        // Підрахунок користувачів за ролями
         const totalUsers = await User.countDocuments();
         const students = await User.countDocuments({ role: 'student' });
         const teachers = await User.countDocuments({ role: 'teacher' });
         const admins = await User.countDocuments({ role: 'admin' });
 
-        // Підрахунок активних оголошень
         const activeAnnouncements = await Announcement.countDocuments({ 
             status: 'published' 
         });
 
-        // Підрахунок коментарів (тільки до оголошень, не відгуки до викладачів)
         const totalComments = await Comment.countDocuments();
 
-        // Підрахунок відгуків про викладачів
         const { TeacherComment } = await import('../models/TeacherComment.js');
         console.log('TeacherComment model imported:', !!TeacherComment);
         const totalReviews = await TeacherComment.countDocuments();
         console.log('Total reviews counted:', totalReviews);
 
-        // Підрахунок скарг на розгляді
         const pendingReports = await Report.countDocuments({ 
             status: 'open' 
         });
 
-        // Підрахунок запитів на зміну імені
         const nameChangeRequests = await NameChangeRequest.countDocuments({ 
             status: 'pending' 
         });
