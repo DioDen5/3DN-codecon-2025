@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FileText, Star, Eye } from 'lucide-react';
+import StarRating from '../StarRating';
 import ContentViewModal from '../ContentViewModal';
 
 const AllContentList = ({ 
@@ -86,11 +87,13 @@ const AllContentList = ({
                             </p>
                             {item.contentType === 'review' && (
                                 <div className="flex items-center gap-2 mb-2">
-                                    <div className="flex">
-                                        {[1,2,3,4,5].map((star) => (
-                                            <Star key={star} className={`w-4 h-4 ${star <= item.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
-                                        ))}
-                                    </div>
+                                    <StarRating 
+                                        rating={item.rating} 
+                                        maxRating={5} 
+                                        size="sm" 
+                                        showNumber={false}
+                                        animated={false}
+                                    />
                                     <span className="text-sm text-gray-600">{item.rating}/5</span>
                                     <span className="text-sm text-gray-500">• {item.teacherId?.name || 'Викладач'}</span>
                                 </div>
