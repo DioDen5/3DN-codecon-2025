@@ -88,18 +88,6 @@ const ReviewsList = ({
                             </div>
                             <div className="flex gap-2">
                                 <button 
-                                    onClick={() => handleApproveItem(review._id, 'review')}
-                                    className="px-3 py-1 bg-green-100 text-green-700 rounded-lg text-sm hover:bg-green-200 transition-colors cursor-pointer"
-                                >
-                                    Схвалити
-                                </button>
-                                <button 
-                                    onClick={() => handleDeleteItem(review._id, 'review')}
-                                    className="px-3 py-1 bg-red-100 text-red-700 rounded-lg text-sm hover:bg-red-200 transition-colors cursor-pointer"
-                                >
-                                    Видалити
-                                </button>
-                                <button 
                                     onClick={() => handleOpenViewModal(review)}
                                     className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm hover:bg-blue-200 transition-colors cursor-pointer flex items-center gap-1"
                                 >

@@ -82,7 +82,7 @@ const ContentViewModal = ({ isOpen, onClose, content, onApprove, onDelete, onCon
         switch (type) {
             case 'announcement': return <MessageSquare className="w-5 h-5 text-blue-900" />;
             case 'comment': return <FileText className="w-5 h-5" />;
-            case 'review': return <Star className="w-5 h-5" />;
+            case 'review': return <Star className="w-5 h-5 text-purple-600" />;
             default: return <FileText className="w-5 h-5" />;
         }
     };
@@ -174,11 +174,21 @@ const ContentViewModal = ({ isOpen, onClose, content, onApprove, onDelete, onCon
                         </div>
                     </div>
 
-                    <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl p-6 mb-6 border border-blue-200 relative overflow-hidden comment-animate-blue">
-                        <div className="absolute top-0 right-0 w-16 h-16 bg-blue-100/30 rounded-full -translate-y-8 translate-x-8"></div>
+                    <div className={`rounded-xl p-6 mb-6 border relative overflow-hidden ${
+                        content.contentType === 'review' 
+                            ? 'bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200 comment-animate-purple'
+                            : 'bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200 comment-animate-blue'
+                    }`}>
+                        <div className={`absolute top-0 right-0 w-16 h-16 rounded-full -translate-y-8 translate-x-8 ${
+                            content.contentType === 'review' ? 'bg-purple-100/30' : 'bg-blue-100/30'
+                        }`}></div>
                         <div className="relative">
-                            <h3 className="text-lg font-semibold text-blue-700 mb-4">Текст {getTargetTypeText(content.contentType)}</h3>
-                            <div className="text-blue-900 leading-relaxed whitespace-pre-wrap">
+                            <h3 className={`text-lg font-semibold mb-4 ${
+                                content.contentType === 'review' ? 'text-purple-700' : 'text-blue-700'
+                            }`}>Текст {getTargetTypeText(content.contentType)}</h3>
+                            <div className={`leading-relaxed whitespace-pre-wrap ${
+                                content.contentType === 'review' ? 'text-purple-900' : 'text-blue-900'
+                            }`}>
                                 {getContentText()}
                             </div>
                         </div>
