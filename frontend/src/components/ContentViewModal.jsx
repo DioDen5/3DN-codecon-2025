@@ -108,22 +108,28 @@ const ContentViewModal = ({ isOpen, onClose, content, onApprove, onDelete }) => 
             <div className={`bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 relative overflow-hidden ${
                 isClosing ? 'modal-closing' : 'report-modal-animate'
             }`}>
-                <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-6 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                            {getTargetIcon(content.contentType)}
+                <div className="bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 px-6 py-4 relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-blue-500/20"></div>
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
+                    <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12"></div>
+                    
+                    <div className="relative flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="p-3 bg-white/20 backdrop-blur-sm rounded-full shadow-lg">
+                                {getTargetIcon(content.contentType)}
+                            </div>
+                            <div>
+                                <h2 className="text-2xl font-bold text-white">Перегляд {getTargetTypeText(content.contentType)}</h2>
+                                <p className="text-blue-100 text-sm">Детальна інформація про контент</p>
+                            </div>
                         </div>
-                        <div>
-                            <h2 className="text-2xl font-bold text-white">Перегляд {getTargetTypeText(content.contentType)}</h2>
-                            <p className="text-blue-100 text-sm">Детальна інформація про контент</p>
-                        </div>
+                        <button
+                            onClick={handleClose}
+                            className="p-2 bg-white/10 backdrop-blur-sm rounded-full hover:bg-white/20 transition-all duration-300 cursor-pointer group"
+                        >
+                            <X className="w-5 h-5 text-white group-hover:rotate-90 transition-transform duration-300" />
+                        </button>
                     </div>
-                    <button
-                        onClick={handleClose}
-                        className="text-white hover:text-gray-200 transition-colors duration-200"
-                    >
-                        <X className="w-6 h-6" />
-                    </button>
                 </div>
 
                 <div className="p-8">
@@ -170,15 +176,15 @@ const ContentViewModal = ({ isOpen, onClose, content, onApprove, onDelete }) => 
                             <button
                                 onClick={handleApprove}
                                 disabled={isLoading}
-                                className="flex items-center gap-2 px-4 py-2 bg-green-100 border border-green-300 rounded-lg text-green-700 font-medium hover:bg-green-200 hover:scale-105 hover:shadow-md transition-all duration-300 disabled:opacity-50"
+                                className="flex items-center gap-2 px-4 py-2 bg-green-100 border border-green-300 rounded-lg text-green-700 font-medium hover:bg-green-200 hover:scale-105 hover:shadow-md transition-all duration-300 disabled:opacity-50 cursor-pointer"
                             >
                                 <CheckCircle className="w-4 h-4" />
-                                Схваліти
+                                Схвалити
                             </button>
                             <button
                                 onClick={handleDelete}
                                 disabled={isLoading}
-                                className="flex items-center gap-2 px-4 py-2 bg-red-100 border border-red-300 rounded-lg text-red-700 font-medium hover:bg-red-200 hover:scale-105 hover:shadow-md transition-all duration-300 disabled:opacity-50"
+                                className="flex items-center gap-2 px-4 py-2 bg-red-100 border border-red-300 rounded-lg text-red-700 font-medium hover:bg-red-200 hover:scale-105 hover:shadow-md transition-all duration-300 disabled:opacity-50 cursor-pointer"
                             >
                                 <Trash2 className="w-4 h-4" />
                                 Видалити
@@ -186,10 +192,9 @@ const ContentViewModal = ({ isOpen, onClose, content, onApprove, onDelete }) => 
                         </div>
                         <button
                             onClick={handleClose}
-                            className="flex items-center gap-2 px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-200 hover:scale-105 hover:shadow-md transition-all duration-300"
+                            className="px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-200 hover:scale-105 hover:shadow-md transition-all duration-300 cursor-pointer"
                         >
-                            <X className="w-4 h-4" />
-                            Закрити
+                            Скасувати
                         </button>
                     </div>
                 </div>
