@@ -89,6 +89,18 @@ const TeachersPage = () => {
                 params.q = searchQuery;
             }
             
+            if (filters.university) {
+                params.university = filters.university;
+            }
+            
+            if (filters.department) {
+                params.department = filters.department;
+            }
+            
+            if (filters.subject) {
+                params.subject = filters.subject;
+            }
+            
             const data = await getTeachers(params);
             setTeachers(data.teachers);
             setTotalPages(data.pagination.totalPages);
@@ -101,7 +113,7 @@ const TeachersPage = () => {
 
     useEffect(() => {
         loadTeachers();
-    }, [currentPage, searchQuery, sortBy, refreshTrigger]);
+    }, [currentPage, searchQuery, sortBy, refreshTrigger, filters]);
 
     const handlePageChange = (page) => {
         setCurrentPage(page);

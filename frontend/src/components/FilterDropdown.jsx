@@ -14,33 +14,45 @@ const FilterDropdown = ({
     const [filtersApplied, setFiltersApplied] = useState(false);
     const dropdownRef = useRef(null);
 
-    const filterOptions = {
-        university: [
-            { value: '', label: 'Всі університети' },
-            { value: 'Львівська політехніка', label: 'Львівська політехніка' },
-            { value: 'ЛНУ ім. І. Франка', label: 'ЛНУ ім. І. Франка' },
-            { value: 'УКУ', label: 'УКУ' },
-            { value: 'Львівська комерційна академія', label: 'Львівська комерційна академія' }
-        ],
-        department: [
-            { value: '', label: 'Всі кафедри' },
-            { value: 'Інформаційних систем', label: 'Інформаційних систем' },
-            { value: 'Комп\'ютерних наук', label: 'Комп\'ютерних наук' },
-            { value: 'Математики', label: 'Математики' },
-            { value: 'Фізики', label: 'Фізики' },
-            { value: 'Хімії', label: 'Хімії' }
-        ],
-        subject: [
-            { value: '', label: 'Всі предмети' },
-            { value: 'Програмування', label: 'Програмування' },
-            { value: 'Математика', label: 'Математика' },
-            { value: 'Фізика', label: 'Фізика' },
-            { value: 'Хімія', label: 'Хімія' },
-            { value: 'Інформатика', label: 'Інформатика' },
-            { value: 'Алгоритми', label: 'Алгоритми' },
-            { value: 'Бази даних', label: 'Бази даних' }
-        ]
-    };
+        const filterOptions = {
+            university: [
+                { value: '', label: 'Всі університети' },
+                { value: 'Львівська політехніка', label: 'Львівська політехніка' },
+                { value: 'ЛНУ ім. І. Франка', label: 'ЛНУ ім. І. Франка' },
+                { value: 'УКУ', label: 'УКУ' },
+                { value: 'Львівська комерційна академія', label: 'Львівська комерційна академія' }
+            ],
+            department: [
+                { value: '', label: 'Всі кафедри' },
+                { value: 'Інформаційних систем', label: 'Інформаційних систем' },
+                { value: 'Комп\'ютерних наук', label: 'Комп\'ютерних наук' },
+                { value: 'Математики', label: 'Математики' },
+                { value: 'Фізики', label: 'Фізики' },
+                { value: 'Правознавства', label: 'Правознавства' },
+                { value: 'Психології', label: 'Психології' },
+                { value: 'Соціології', label: 'Соціології' },
+                { value: 'Іноземних мов', label: 'Іноземних мов' },
+                { value: 'Філософії', label: 'Філософії' },
+                { value: 'Політології', label: 'Політології' },
+                { value: 'Теології', label: 'Теології' },
+                { value: 'Економіки', label: 'Економіки' }
+            ],
+            subject: [
+                { value: '', label: 'Всі предмети' },
+                { value: 'Програмування', label: 'Програмування' },
+                { value: 'Математика', label: 'Математика' },
+                { value: 'Фізика', label: 'Фізика' },
+                { value: 'Право', label: 'Право' },
+                { value: 'Психологія', label: 'Психологія' },
+                { value: 'Соціологія', label: 'Соціологія' },
+                { value: 'Англійська мова', label: 'Англійська мова' },
+                { value: 'Філософія', label: 'Філософія' },
+                { value: 'Політологія', label: 'Політологія' },
+                { value: 'Алгоритми', label: 'Алгоритми' },
+                { value: 'Теологія', label: 'Теологія' },
+                { value: 'Економіка', label: 'Економіка' }
+            ]
+        };
 
     // Removed click outside handler to prevent auto-closing
     // useEffect(() => {

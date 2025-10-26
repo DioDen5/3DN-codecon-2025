@@ -7,67 +7,80 @@ import { authRequired } from '../middleware/auth.js';
 const router = express.Router();
 
 router.get('/', async (req, res) => {
-    console.log('Teachers route hit:', req.url);
-    try {
-        const { q, page = 1, limit = 8, sort = 'rating' } = req.query;
-        const skip = (page - 1) * limit;
-        
-        let filter = {};
-        
-        if (q) {
-            const searchRegex = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
-            filter = {
-                $or: [
-                    { name: { $regex: searchRegex } },
-                    { university: { $regex: searchRegex } },
-                    { subject: { $regex: searchRegex } }
-                ]
-            };
-        }
-        
-        let sortOptions = {};
-        switch (sort) {
-            case 'rating':
-                sortOptions = { rating: -1 };
-                break;
-            case 'likes':
-                sortOptions = { likes: -1 };
-                break;
-            case 'comments':
-                sortOptions = { comments: -1 };
-                break;
-            default:
-                sortOptions = { rating: -1 };
-        }
-        
-        const teachers = await Teacher.find(filter)
-            .sort(sortOptions)
-            .skip(skip)
-            .limit(parseInt(limit));
-            
-        const teachersWithRating = teachers.map(teacher => {
-            const rating = teacher.calculateRating();
-            return {
-                ...teacher.toObject(),
-                rating: rating
-            };
-        });
-            
-        const total = await Teacher.countDocuments(filter);
-        
-        res.json({
-            teachers: teachersWithRating,
-            pagination: {
-                currentPage: parseInt(page),
-                totalPages: Math.ceil(total / limit),
-                totalItems: total,
-                itemsPerPage: parseInt(limit)
+        console.log('Teachers route hit:', req.url);
+        try {
+            const { q, page = 1, limit = 8, sort = 'rating', university, department, subject } = req.query;
+            const skip = (page - 1) * limit;
+
+            let filter = {};
+
+            if (q) {
+                const searchRegex = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+                filter = {
+                    $or: [
+                        { name: { $regex: searchRegex } },
+                        { university: { $regex: searchRegex } },
+                        { department: { $regex: searchRegex } },
+                        { subject: { $regex: searchRegex } }
+                    ]
+                };
             }
-        });
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch teachers' });
-    }
-});
+
+            if (university) {
+                filter.university = university;
+            }
+
+            if (department) {
+                filter.department = department;
+            }
+
+            if (subject) {
+                filter.subject = subject;
+            }
+
+            let sortOptions = {};
+            switch (sort) {
+                case 'rating':
+                    sortOptions = { rating: -1 };
+                    break;
+                case 'likes':
+                    sortOptions = { likes: -1 };
+                    break;
+                case 'comments':
+                    sortOptions = { comments: -1 };
+                    break;
+                default:
+                    sortOptions = { rating: -1 };
+            }
+
+            const teachers = await Teacher.find(filter)
+                .sort(sortOptions)
+                .skip(skip)
+                .limit(parseInt(limit));
+
+            const teachersWithRating = teachers.map(teacher => {
+                const rating = teacher.calculateRating();
+                return {
+                    ...teacher.toObject(),
+                    rating: rating
+                };
+            });
+
+            const total = await Teacher.countDocuments(filter);
+
+            res.json({
+                teachers: teachersWithRating,
+                pagination: {
+                    currentPage: parseInt(page),
+                    totalPages: Math.ceil(total / limit),
+                    totalItems: total,
+                    itemsPerPage: parseInt(limit)
+                }
+            });
+        } catch (error) {
+            res.status(500).json({ error: 'Failed to fetch teachers' });
+        }
+    });
 
 router.get('/:id', async (req, res) => {
     try {
@@ -89,11 +102,12 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', authRequired, async (req, res) => {
     try {
-        const { name, university, subject, image } = req.body;
+        const { name, university, department, subject, image } = req.body;
         
         const teacher = new Teacher({
             name,
             university,
+            department,
             subject,
             image
         });
