@@ -48,7 +48,9 @@ router.post('/profile-picture', authRequired, upload.single('profilePicture'), a
         
         if (userProfile) {
             if (userProfile.profilePicture) {
-                const oldFilePath = path.join(process.cwd(), 'public', userProfile.profilePicture);
+                // Витягуємо назву файлу з URL
+                const oldFileName = userProfile.profilePicture.split('/').pop();
+                const oldFilePath = path.join(process.cwd(), 'uploads', 'profile-pictures', oldFileName);
                 if (fs.existsSync(oldFilePath)) {
                     fs.unlinkSync(oldFilePath);
                 }
@@ -78,7 +80,9 @@ router.delete('/profile-picture', authRequired, async (req, res) => {
         const userProfile = await UserProfile.findOne({ userId: req.user.id });
         
         if (userProfile && userProfile.profilePicture) {
-            const filePath = path.join(process.cwd(), 'public', userProfile.profilePicture);
+            // Витягуємо назву файлу з URL
+            const fileName = userProfile.profilePicture.split('/').pop();
+            const filePath = path.join(process.cwd(), 'uploads', 'profile-pictures', fileName);
             if (fs.existsSync(filePath)) {
                 fs.unlinkSync(filePath);
             }
