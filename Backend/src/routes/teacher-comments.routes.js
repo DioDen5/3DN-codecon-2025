@@ -200,44 +200,39 @@ router.delete('/:commentId', authRequired, async (req, res) => {
             return res.status(404).json({ error: 'Comment not found' });
         }
 
-        // Оновлюємо лічильники викладача
+        await TeacherComment.findByIdAndDelete(commentId);
+
         const teacher = await Teacher.findById(comment.teacherId);
         
         if (teacher) {
-            // Віднімаємо коментар від загальної кількості
-            teacher.comments -= 1;
+            teacher.comments = Math.max(0, teacher.comments - 1);
             
-            // Визначаємо чи це позитивна чи негативна оцінка
             if (comment.rating >= 3) {
-                teacher.likes -= 1;
+                teacher.likes = Math.max(0, teacher.likes - 1);
             } else {
-                teacher.dislikes -= 1;
+                teacher.dislikes = Math.max(0, teacher.dislikes - 1);
             }
             
-            // Оновлюємо загальну кількість голосів
-            teacher.totalVotes -= 1;
+            teacher.totalVotes = Math.max(0, teacher.totalVotes - 1);
             
-            // Перераховуємо рейтинг на основі зірок (1-5 -> 0-10)
             const allComments = await TeacherComment.find({ teacherId: comment.teacherId, status: 'visible' });
             if (allComments.length > 0) {
                 const totalStars = allComments.reduce((sum, comment) => sum + (comment.rating || 0), 0);
                 const averageStars = totalStars / allComments.length;
-                // Конвертуємо з 1-5 зірок в 0-10 рейтинг
                 teacher.rating = Math.round((averageStars / 5) * 10);
             } else {
                 teacher.rating = 0;
+                teacher.likes = 0;
+                teacher.dislikes = 0;
+                teacher.totalVotes = 0;
             }
             
             await teacher.save();
         }
 
-        // Логуємо видалення відгуку
         if (teacher) {
             await logTeacherReviewDeleted(userId, teacher.name);
         }
-
-        // Видаляємо коментар
-        await TeacherComment.findByIdAndDelete(commentId);
 
         res.json({ message: 'Comment deleted successfully' });
     } catch (error) {
