@@ -791,7 +791,7 @@ const UserProfilePage = () => {
                                 </div>
                                 <button
                                     onClick={handleOpenNameChangeModal}
-                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 hover:scale-105 flex items-center gap-2"
+                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 hover:scale-105 flex items-center gap-2 cursor-pointer"
                                 >
                                     <Edit3 size={16} />
                                     Змінити
@@ -874,7 +874,7 @@ const UserProfilePage = () => {
                                         <p className="text-sm text-gray-600">Остання зміна: 3 місяці тому</p>
                                     </div>
                                 </div>
-                                <button className="px-5 py-3 bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-xl hover:from-blue-700 hover:to-blue-900 transition-all duration-300 hover:scale-105 flex items-center gap-2 shadow-lg hover:shadow-xl group/btn">
+                                <button className="px-5 py-3 bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-xl hover:from-blue-700 hover:to-blue-900 transition-all duration-300 hover:scale-105 flex items-center gap-2 shadow-lg hover:shadow-xl group/btn cursor-pointer">
                                     <Key className="w-4 h-4 group-hover/btn:rotate-12 transition-transform duration-300" />
                     Змінити пароль
                 </button>
@@ -891,7 +891,7 @@ const UserProfilePage = () => {
                                     <p className="text-sm text-gray-600">Не активована</p>
                                 </div>
                                 <div className="ml-auto">
-                                    <button className="px-5 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-xl hover:from-cyan-600 hover:to-blue-700 transition-all duration-300 hover:scale-105 flex items-center gap-2 shadow-lg hover:shadow-xl group/btn text-sm font-semibold">
+                                    <button className="px-5 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-xl hover:from-cyan-600 hover:to-blue-700 transition-all duration-300 hover:scale-105 flex items-center gap-2 shadow-lg hover:shadow-xl group/btn text-sm font-semibold cursor-pointer">
                                         <ShieldCheck className="w-4 h-4 group-hover/btn:rotate-12 transition-transform duration-300" />
                                         Увімкнути
                                     </button>
@@ -1016,7 +1016,7 @@ const UserProfilePage = () => {
                                     <button
                                         key={tab.id}
                                         onClick={() => handleTabChange(tab.id)}
-                                        className={`profile-tab flex items-center justify-center gap-2 md:gap-3 py-3 md:py-4 px-3 md:px-6 rounded-xl font-bold text-sm md:text-lg transition-all duration-300 flex-1 ${
+                                        className={`profile-tab flex items-center justify-center gap-2 md:gap-3 py-3 md:py-4 px-3 md:px-6 rounded-xl font-bold text-sm md:text-lg transition-all duration-300 flex-1 cursor-pointer ${
                                             tab.id === 'profile' ? 'ml-2' : tab.id === 'settings' ? 'mr-2' : ''
                                         } ${
                                             activeTab === tab.id
