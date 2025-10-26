@@ -190,7 +190,14 @@ const FilterDropdown = ({
                                             <select
                                                 value={localFilters[filterType] || ''}
                                                 onChange={(e) => handleFilterChange(filterType, e.target.value)}
-                                                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-white hover:bg-gray-600 hover:border-gray-500 text-lg"
+                                                className={`w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl focus:ring-1 transition-all duration-300 text-white hover:bg-gray-600 hover:border-gray-500 text-lg focus:outline-none ${
+                                                    filterType === 'university' 
+                                                        ? 'focus:ring-blue-400 focus:border-blue-400 focus:shadow-[0_0_10px_rgba(59,130,246,0.5)]'
+                                                        : filterType === 'department'
+                                                        ? 'focus:ring-green-400 focus:border-green-400 focus:shadow-[0_0_10px_rgba(34,197,94,0.5)]'
+                                                        : 'focus:ring-purple-400 focus:border-purple-400 focus:shadow-[0_0_10px_rgba(168,85,247,0.5)]'
+                                                }`}
+                                                style={{ outline: 'none' }}
                                             >
                                                 {options.map((option) => (
                                                     <option key={option.value} value={option.value} className="bg-gray-800 text-white">
