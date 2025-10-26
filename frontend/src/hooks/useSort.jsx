@@ -1,8 +1,8 @@
 import { useState, useMemo, useCallback } from 'react'
 import { FaFilter } from 'react-icons/fa'
 
-export const useSort = (data = [], options = null) => {
-    const [sortOption, setSortOption] = useState(null)
+export const useSort = (data = [], options = null, initialSort = null) => {
+    const [sortOption, setSortOption] = useState(initialSort)
 
     const defaultOptions = [
         {

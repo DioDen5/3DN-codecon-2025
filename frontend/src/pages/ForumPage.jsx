@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { listPublished } from "../api/announcements";
 import PostCard from "../components/PostCard";
 import Pagination from "../components/Pagination";
@@ -16,6 +16,7 @@ const ITEMS_PER_PAGE = 3;
 
 const ForumPage = () => {
     const nav = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
     const { isAuthed, user } = useAuthState();
     const { subscribe } = useForumRefresh();
 
@@ -23,9 +24,9 @@ const ForumPage = () => {
     const [loading, setLoading] = useState(true);
     const [searching, setSearching] = useState(false);
     const [error, setError] = useState("");
-    const [q, setQ] = useState("");
-    const [searchQuery, setSearchQuery] = useState("");
-    const [itemOffset, setItemOffset] = useState(0);
+    const [q, setQ] = useState(searchParams.get('q') || "");
+    const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || "");
+    const [itemOffset, setItemOffset] = useState(parseInt(searchParams.get('page')) * ITEMS_PER_PAGE || 0);
     const [deletingPostId, setDeletingPostId] = useState(null);
 
     const sortOptions = [
@@ -81,7 +82,7 @@ const ForumPage = () => {
         },
     ];
 
-    const { sortedData, SortDropdown, sortOption } = useSort(raw, sortOptions);
+    const { sortedData, SortDropdown, sortOption, setSortOption } = useSort(raw, sortOptions, searchParams.get('sort') || 'newest');
 
     const currentItems = useMemo(
         () => sortedData.slice(itemOffset, itemOffset + ITEMS_PER_PAGE),
@@ -89,6 +90,20 @@ const ForumPage = () => {
     );
     const pageCount = Math.ceil(sortedData.length / ITEMS_PER_PAGE);
     const currentPage = Math.floor(itemOffset / ITEMS_PER_PAGE);
+
+    const updateURL = (newParams) => {
+        const currentParams = new URLSearchParams(searchParams);
+        
+        Object.keys(newParams).forEach(key => {
+            if (newParams[key] && newParams[key] !== '') {
+                currentParams.set(key, newParams[key]);
+            } else {
+                currentParams.delete(key);
+            }
+        });
+        
+        setSearchParams(currentParams);
+    };
 
     const formatDate = (dateString) => {
         if (!dateString) return 'Невідомо';
@@ -188,10 +203,17 @@ const ForumPage = () => {
     useEffect(() => {
         const timer = setTimeout(() => {
             setSearchQuery(q.trim());
+            updateURL({ q: q.trim() });
         }, 300);
         
         return () => clearTimeout(timer);
     }, [q]);
+
+    useEffect(() => {
+        if (sortOption) {
+            updateURL({ sort: sortOption });
+        }
+    }, [sortOption]);
 
     useEffect(() => {
         loadData();
@@ -301,6 +323,7 @@ const ForumPage = () => {
                                     const newOffset =
                                         (e.selected * ITEMS_PER_PAGE) % sortedData.length;
                                     setItemOffset(newOffset);
+                                    updateURL({ page: e.selected.toString() });
                                 }}
                             />
                         )}
