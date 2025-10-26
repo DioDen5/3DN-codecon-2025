@@ -278,7 +278,25 @@ const UserProfilePage = () => {
 
     const handleProfilePictureChange = async (file) => {
         if (!file) {
-            setProfilePicture(null);
+            // Видаляємо фото через API
+            try {
+                const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+                const response = await fetch('/api/user/profile/profile-picture', {
+                    method: 'DELETE',
+                    credentials: 'include',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    setProfilePicture(null);
+                } else {
+                    console.error('Failed to delete profile picture');
+                }
+            } catch (error) {
+                console.error('Error deleting profile picture:', error);
+            }
             return;
         }
 
@@ -807,9 +825,9 @@ const UserProfilePage = () => {
                             <Mail className="w-4 h-4 text-gray-400" />
                             <span className="text-sm font-medium">{getUserEmail()}</span>
                             <span className="text-xs text-gray-400 ml-auto">Не можна змінити</span>
-                        </div>
                     </div>
                 </div>
+            </div>
 
                 {/* Статус запиту на зміну імені */}
                 {nameChangeRequest && (
@@ -879,8 +897,8 @@ const UserProfilePage = () => {
                     Змінити пароль
                 </button>
                             </div>
-                        </div>
-                        
+            </div>
+
                         <div className="bg-gradient-to-r from-cyan-100/65 to-blue-100/45 rounded-xl p-4 border border-cyan-200/65 group/field security-field">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full flex items-center justify-center security-icon">

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { listPublished } from "../api/announcements";
 import PostCard from "../components/PostCard";
 import Pagination from "../components/Pagination";
@@ -16,6 +16,7 @@ const ITEMS_PER_PAGE = 3;
 
 const ForumPage = () => {
     const nav = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
     const { isAuthed, user } = useAuthState();
     const { subscribe } = useForumRefresh();
 
@@ -23,35 +24,65 @@ const ForumPage = () => {
     const [loading, setLoading] = useState(true);
     const [searching, setSearching] = useState(false);
     const [error, setError] = useState("");
-    const [q, setQ] = useState("");
-    const [searchQuery, setSearchQuery] = useState("");
-    const [itemOffset, setItemOffset] = useState(0);
+    const [q, setQ] = useState(searchParams.get('q') || "");
+    const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || "");
+    const [itemOffset, setItemOffset] = useState(parseInt(searchParams.get('page')) * ITEMS_PER_PAGE || 0);
     const [deletingPostId, setDeletingPostId] = useState(null);
 
     const sortOptions = [
         {
-            label: '🕓 Найновіші',
+            label: (
+                <div className="flex items-center gap-2">
+                    <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M8 2v12"/>
+                        <path d="M2 8l6-6 6 6"/>
+                    </svg>
+                    Найновіші
+                </div>
+            ),
             value: 'newest',
             sort: (a, b) => new Date(b.publishedAt || b.createdAt) - new Date(a.publishedAt || a.createdAt),
         },
         {
-            label: '🕰️ Найстаріші',
+            label: (
+                <div className="flex items-center gap-2">
+                    <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M8 2v12"/>
+                        <path d="M2 8l6 6 6-6"/>
+                    </svg>
+                    Найстаріші
+                </div>
+            ),
             value: 'oldest',
             sort: (a, b) => new Date(a.publishedAt || a.createdAt) - new Date(b.publishedAt || b.createdAt),
         },
         {
-            label: '🤍 За лайками',
+            label: (
+                <div className="flex items-center gap-2">
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/>
+                    </svg>
+                    За лайками
+                </div>
+            ),
             value: 'likes',
             sort: (a, b) => (b.counts?.likes || 0) - (a.counts?.likes || 0),
         },
         {
-            label: '💬 За коментарями',
+            label: (
+                <div className="flex items-center gap-2">
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>
+                    </svg>
+                    За коментарями
+                </div>
+            ),
             value: 'comments',
             sort: (a, b) => (b.metrics?.comments || 0) - (a.metrics?.comments || 0),
         },
     ];
 
-    const { sortedData, SortDropdown, sortOption } = useSort(raw, sortOptions);
+    const { sortedData, SortDropdown, sortOption, setSortOption } = useSort(raw, sortOptions, searchParams.get('sort') || 'newest');
 
     const currentItems = useMemo(
         () => sortedData.slice(itemOffset, itemOffset + ITEMS_PER_PAGE),
@@ -59,6 +90,20 @@ const ForumPage = () => {
     );
     const pageCount = Math.ceil(sortedData.length / ITEMS_PER_PAGE);
     const currentPage = Math.floor(itemOffset / ITEMS_PER_PAGE);
+
+    const updateURL = (newParams) => {
+        const currentParams = new URLSearchParams(searchParams);
+        
+        Object.keys(newParams).forEach(key => {
+            if (newParams[key] && newParams[key] !== '') {
+                currentParams.set(key, newParams[key]);
+            } else {
+                currentParams.delete(key);
+            }
+        });
+        
+        setSearchParams(currentParams);
+    };
 
     const formatDate = (dateString) => {
         if (!dateString) return 'Невідомо';
@@ -158,10 +203,17 @@ const ForumPage = () => {
     useEffect(() => {
         const timer = setTimeout(() => {
             setSearchQuery(q.trim());
+            updateURL({ q: q.trim() });
         }, 300);
         
         return () => clearTimeout(timer);
     }, [q]);
+
+    useEffect(() => {
+        if (sortOption) {
+            updateURL({ sort: sortOption });
+        }
+    }, [sortOption]);
 
     useEffect(() => {
         loadData();
@@ -271,6 +323,7 @@ const ForumPage = () => {
                                     const newOffset =
                                         (e.selected * ITEMS_PER_PAGE) % sortedData.length;
                                     setItemOffset(newOffset);
+                                    updateURL({ page: e.selected.toString() });
                                 }}
                             />
                         )}

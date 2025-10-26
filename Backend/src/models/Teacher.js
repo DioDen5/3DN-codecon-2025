@@ -11,6 +11,11 @@ const teacherSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
+    department: {
+        type: String,
+        required: true,
+        trim: true
+    },
     subject: {
         type: String,
         required: true,
