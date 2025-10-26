@@ -99,6 +99,9 @@ export const useSort = (data = [], options = null) => {
         `}
                 >
                     <FaFilter className="w-4 h-4" />
+                    {sortOption && (
+                        <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-green-500"></div>
+                    )}
                 </button>
             </div>
         )
