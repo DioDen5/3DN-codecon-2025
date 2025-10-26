@@ -54,6 +54,13 @@ const FilterDropdown = ({
             ]
         };
 
+    useEffect(() => {
+        setLocalFilters(filters);
+        // Перевіряємо чи є активні фільтри при завантаженні
+        const hasActiveFilters = Object.values(filters).some(value => value !== '');
+        setFiltersApplied(hasActiveFilters);
+    }, [filters]);
+
     // Removed click outside handler to prevent auto-closing
     // useEffect(() => {
     //     const handleClickOutside = (event) => {

@@ -2,8 +2,6 @@ import { http } from './httpClient.js';
 
 export const getTeachers = async (params = {}) => {
     const queryString = new URLSearchParams(params).toString();
-    console.log('API Request params:', params);
-    console.log('API Request query string:', queryString);
     const response = await http.get(`/teachers${queryString ? `?${queryString}` : ''}`);
     return response.data;
 };

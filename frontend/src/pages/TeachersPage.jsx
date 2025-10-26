@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import SearchInput from '../components/SearchInput'
 import TeacherCard from '../components/TeacherCard'
 import Pagination from '../components/Pagination'
@@ -8,18 +9,19 @@ import { useSort } from '../hooks/useSort'
 import { useTeacherData } from '../contexts/TeacherDataContext'
 
 const TeachersPage = () => {
+    const [searchParams, setSearchParams] = useSearchParams()
     const [teachers, setTeachers] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
-    const [query, setQuery] = useState('')
-    const [searchQuery, setSearchQuery] = useState('')
-    const [currentPage, setCurrentPage] = useState(1)
+    const [query, setQuery] = useState(searchParams.get('q') || '')
+    const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '')
+    const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page')) || 1)
     const [totalPages, setTotalPages] = useState(1)
-    const [sortBy, setSortBy] = useState('rating')
+    const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'rating')
     const [filters, setFilters] = useState({
-        university: '',
-        department: '',
-        subject: ''
+        university: searchParams.get('university') || '',
+        department: searchParams.get('department') || '',
+        subject: searchParams.get('subject') || ''
     })
     const [isFilterOpen, setIsFilterOpen] = useState(false)
     const { refreshTrigger } = useTeacherData()
@@ -40,6 +42,14 @@ const TeachersPage = () => {
     ]
 
     const { SortDropdown, sortOption, setSortOption } = useSort(teachers, sortOptions)
+    
+    // Ініціалізуємо sortOption з URL параметрів
+    useEffect(() => {
+        const urlSort = searchParams.get('sort') || 'rating';
+        if (sortOption !== urlSort) {
+            setSortOption(urlSort);
+        }
+    }, []);
 
     const highlightText = (text, query) => {
         if (!query || !text) return text;
@@ -62,6 +72,7 @@ const TeachersPage = () => {
     useEffect(() => {
         const timer = setTimeout(() => {
             setSearchQuery(query);
+            updateURL({ q: query });
         }, 300);
         return () => clearTimeout(timer);
     }, [query]);
@@ -73,6 +84,7 @@ const TeachersPage = () => {
             return
         }
         setSortBy(sortOption)
+        updateURL({ sort: sortOption });
     }, [sortOption, setSortOption])
 
     const loadTeachers = async () => {
@@ -115,13 +127,34 @@ const TeachersPage = () => {
         loadTeachers();
     }, [currentPage, searchQuery, sortBy, refreshTrigger, filters]);
 
+    const updateURL = (newParams) => {
+        const currentParams = new URLSearchParams(searchParams);
+        
+        Object.keys(newParams).forEach(key => {
+            if (newParams[key] && newParams[key] !== '') {
+                currentParams.set(key, newParams[key]);
+            } else {
+                currentParams.delete(key);
+            }
+        });
+        
+        setSearchParams(currentParams);
+    };
+
     const handlePageChange = (page) => {
         setCurrentPage(page);
+        updateURL({ page: page.toString() });
     };
 
     const handleFiltersChange = (newFilters) => {
         setFilters(newFilters);
         setCurrentPage(1);
+        updateURL({ 
+            university: newFilters.university,
+            department: newFilters.department,
+            subject: newFilters.subject,
+            page: '1'
+        });
     };
 
     const handleFilterToggle = (isOpen) => {
