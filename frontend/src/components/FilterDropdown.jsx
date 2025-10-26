@@ -156,7 +156,7 @@ const FilterDropdown = ({
                                     </h3>
                                     <button
                                         onClick={handleClose}
-                                        className="p-2 rounded-full bg-gray-900 hover:bg-gray-700 transition-all duration-300 group transform hover:scale-110 active:scale-95"
+                                        className="p-2 rounded-full bg-gray-900 hover:bg-gray-700 transition-all duration-300 group transform hover:scale-110 active:scale-95 cursor-pointer"
                                     >
                                         <X 
                                             className="w-6 h-6 text-gray-400 group-hover:text-white transition-all duration-300" 
@@ -197,7 +197,7 @@ const FilterDropdown = ({
                                             <select
                                                 value={localFilters[filterType] || ''}
                                                 onChange={(e) => handleFilterChange(filterType, e.target.value)}
-                                                className={`w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl focus:ring-1 transition-all duration-300 text-white hover:bg-gray-600 hover:border-gray-500 text-lg focus:outline-none pr-8 ${
+                                                className={`w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl focus:ring-1 transition-all duration-300 text-white hover:bg-gray-600 hover:border-gray-500 text-lg focus:outline-none pr-8 cursor-pointer ${
                                                     filterType === 'university' 
                                                         ? 'focus:ring-blue-400 focus:border-blue-400 focus:shadow-[0_0_10px_rgba(59,130,246,0.5)]'
                                                         : filterType === 'department'
@@ -231,16 +231,16 @@ const FilterDropdown = ({
                                 </div>
 
                                 <div className="flex gap-4 mt-8 pt-6 border-t border-gray-700 animate-in slide-in-from-bottom-2 fade-in-0">
-                                    <button
-                                        onClick={handleApplyFilters}
-                                        className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white py-4 px-6 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 hover:scale-105 flex items-center justify-center gap-3 font-semibold text-lg shadow-xl hover:shadow-2xl"
-                                    >
+                                        <button
+                                            onClick={handleApplyFilters}
+                                            className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white py-4 px-6 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 hover:scale-[1.01] flex items-center justify-center gap-3 font-semibold text-lg shadow-xl hover:shadow-2xl cursor-pointer"
+                                        >
                                         <Check className="w-5 h-5" />
                                         Застосувати фільтри
                                     </button>
                                     <button
                                         onClick={handleClearFilters}
-                                        className="px-6 py-4 border-2 border-gray-600 text-gray-300 rounded-xl hover:bg-gray-700 hover:border-gray-500 transition-all duration-300 font-semibold text-lg hover:scale-105"
+                                        className="px-6 py-4 border-2 border-gray-600 text-gray-300 rounded-xl hover:bg-gray-700 hover:border-gray-500 transition-all duration-300 font-semibold text-lg hover:scale-105 cursor-pointer"
                                     >
                                         Очистити
                                     </button>
