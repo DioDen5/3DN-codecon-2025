@@ -57,7 +57,7 @@ const ForumPage = () => {
         () => sortedData.slice(itemOffset, itemOffset + ITEMS_PER_PAGE),
         [sortedData, itemOffset]
     );
-    const pageCount = Math.ceil(sortedData.length / ITEMS_PER_PAGE) || 1;
+    const pageCount = Math.ceil(sortedData.length / ITEMS_PER_PAGE);
     const currentPage = Math.floor(itemOffset / ITEMS_PER_PAGE);
 
     const formatDate = (dateString) => {
@@ -263,15 +263,17 @@ const ForumPage = () => {
                             ))}
                         </div>
 
-                        <Pagination
-                            pageCount={pageCount}
-                            currentPage={currentPage}
-                            handlePageClick={(e) => {
-                                const newOffset =
-                                    (e.selected * ITEMS_PER_PAGE) % sortedData.length;
-                                setItemOffset(newOffset);
-                            }}
-                        />
+                        {sortedData.length >= 4 && (
+                            <Pagination
+                                pageCount={pageCount}
+                                currentPage={currentPage}
+                                handlePageClick={(e) => {
+                                    const newOffset =
+                                        (e.selected * ITEMS_PER_PAGE) % sortedData.length;
+                                    setItemOffset(newOffset);
+                                }}
+                            />
+                        )}
                     </div>
                 )}
             </div>
