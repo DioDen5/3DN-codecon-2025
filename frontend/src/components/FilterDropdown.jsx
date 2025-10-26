@@ -92,7 +92,7 @@ const FilterDropdown = ({
         setLocalFilters(clearedFilters);
         onFiltersChange(clearedFilters);
         setFiltersApplied(false);
-        handleClose();
+        // Не закриваємо фільтр, залишаємо відкритим
     };
 
     const hasActiveFilters = Object.values(localFilters).some(value => value !== '');
@@ -233,14 +233,14 @@ const FilterDropdown = ({
                                 <div className="flex gap-4 mt-8 pt-6 border-t border-gray-700 animate-in slide-in-from-bottom-2 fade-in-0">
                                         <button
                                             onClick={handleApplyFilters}
-                                            className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white py-4 px-6 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 hover:scale-[1.01] flex items-center justify-center gap-3 font-semibold text-lg shadow-xl hover:shadow-2xl cursor-pointer"
+                                            className="flex-1 bg-gradient-to-r from-blue-700 to-blue-800 text-white py-4 px-6 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 hover:scale-[1.01] flex items-center justify-center gap-3 font-semibold text-lg shadow-xl hover:shadow-2xl cursor-pointer active:scale-[0.98]"
                                         >
                                         <Check className="w-5 h-5" />
                                         Застосувати фільтри
                                     </button>
                                     <button
                                         onClick={handleClearFilters}
-                                        className="px-6 py-4 border-2 border-gray-600 text-gray-300 rounded-xl hover:bg-gray-700 hover:border-gray-500 transition-all duration-300 font-semibold text-lg hover:scale-105 cursor-pointer"
+                                        className="px-6 py-4 border-2 border-gray-600 text-gray-300 rounded-xl hover:bg-gray-700 hover:border-gray-500 transition-all duration-300 font-semibold text-lg hover:scale-105 cursor-pointer active:scale-[0.98]"
                                     >
                                         Очистити
                                     </button>
