@@ -30,12 +30,27 @@ const TeachersPage = () => {
 
     const sortOptions = [
         {
-            label: '⭐ За рейтингом',
+            label: (
+                <div className="flex items-center gap-2">
+                    <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M8 1L9.5 5.5H14L10.75 8.5L12.25 13L8 10L3.75 13L5.25 8.5L2 5.5H6.5L8 1Z" />
+                        <circle cx="8" cy="8" r="1.5" fill="currentColor" opacity="0.3" />
+                    </svg>
+                    За рейтингом
+                </div>
+            ),
             value: 'rating',
             sort: (a, b) => (b.rating || 0) - (a.rating || 0),
         },
         {
-            label: '💬 За відгуками',
+            label: (
+                <div className="flex items-center gap-2">
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>
+                    </svg>
+                    За відгуками
+                </div>
+            ),
             value: 'comments',
             sort: (a, b) => (b.comments || 0) - (a.comments || 0),
         },
