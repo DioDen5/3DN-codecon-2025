@@ -16,6 +16,7 @@ import userStatsRoutes from './routes/user-stats.routes.js'
 import nameChangeRoutes from './routes/name-change.routes.js'
 import adminRoutes from './routes/admin.routes.js'
 import securitySettingsRoutes from './routes/security-settings.routes.js'
+import userProfileRoutes from './routes/user-profile.routes.js'
 
 const app = express()
 
@@ -40,6 +41,7 @@ app.use(
 app.use(cookieParser())
 
 app.use(express.json({ limit: '1mb' }))
+app.use('/uploads', express.static('uploads'))
 
 app.use('/api/auth', authRoutes)
 app.use('/api/announcements', announcementRoutes)
@@ -49,6 +51,7 @@ app.use('/api/teachers', teachersRoutes)
 app.use('/api/teacher-comments', teacherCommentsRoutes)
 app.use('/api/reports', reportsRoutes)
 app.use('/api/user', userStatsRoutes)
+app.use('/api/user/profile', userProfileRoutes)
 app.use('/api/name-change', nameChangeRoutes)
 app.use('/api/admin', adminRoutes)
 app.use('/api/admin/settings', securitySettingsRoutes)

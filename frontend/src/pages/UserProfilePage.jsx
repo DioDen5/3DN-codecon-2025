@@ -6,6 +6,7 @@ import { getNameChangeStatus } from '../api/name-change';
 import NameChangeModal from '../components/NameChangeModal';
 import TeacherProfilePageNew from './TeacherProfilePageNew';
 import AdminProfilePage from './AdminProfilePage';
+import ProfilePictureUpload from '../components/ProfilePictureUpload';
 
 const UserProfilePage = () => {
     const { user } = useAuthState();
@@ -41,6 +42,8 @@ const UserProfilePage = () => {
     });
     const [nameChangeRequest, setNameChangeRequest] = useState(null);
     const [showNameChangeModal, setShowNameChangeModal] = useState(false);
+    const [profilePicture, setProfilePicture] = useState(null);
+    const [isUploadingPicture, setIsUploadingPicture] = useState(false);
     const [privacySettings, setPrivacySettings] = useState({
         anonymousTeacherReviews: false,
         emailOnPostComments: true
@@ -152,8 +155,34 @@ const UserProfilePage = () => {
         if (user) {
             loadUserStats();
             loadNameChangeStatus();
+            loadUserProfile();
         }
     }, [user]);
+
+    const loadUserProfile = async () => {
+        try {
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            
+            const response = await fetch('/api/user/profile/profile', {
+                credentials: 'include',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Profile data loaded:', data);
+                if (data.success && data.profile.profilePicture) {
+                    console.log('Setting profile picture:', data.profile.profilePicture);
+                    setProfilePicture(data.profile.profilePicture);
+                }
+            } else {
+                console.error('Failed to load profile:', response.status, response.statusText);
+            }
+        } catch (error) {
+            console.error('Error loading user profile:', error);
+        }
+    };
 
     // Оновлення статистики тільки при переключенні на вкладку профілю
     useEffect(() => {
@@ -245,6 +274,42 @@ const UserProfilePage = () => {
         setShowNameChangeModal(false);
         // Перезавантажуємо статус після закриття модального вікна
         loadNameChangeStatus();
+    };
+
+    const handleProfilePictureChange = async (file) => {
+        if (!file) {
+            setProfilePicture(null);
+            return;
+        }
+
+        setIsUploadingPicture(true);
+        try {
+            const formData = new FormData();
+            formData.append('profilePicture', file);
+            
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            
+            const response = await fetch('/api/user/profile/profile-picture', {
+                method: 'POST',
+                body: formData,
+                credentials: 'include',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                setProfilePicture(result.profilePictureUrl);
+            } else {
+                throw new Error('Failed to upload profile picture');
+            }
+        } catch (error) {
+            console.error('Error uploading profile picture:', error);
+            alert('Помилка при завантаженні фото профілю');
+        } finally {
+            setIsUploadingPicture(false);
+        }
     };
 
     const handlePrivacySettingChange = (setting, value) => {
@@ -379,9 +444,13 @@ const UserProfilePage = () => {
             {/* Заголовок профілю */}
             <div className="profile-card bg-white text-black rounded-xl p-4 md:p-8 shadow-sm mb-6 md:mb-8">
                 <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-23 md:h-23 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-xl sm:text-2xl font-bold">
-                        {getUserDisplayName().charAt(0).toUpperCase()}
-                    </div>
+                    <ProfilePictureUpload
+                        currentAvatar={profilePicture}
+                        userName={getUserDisplayName()}
+                        onImageChange={handleProfilePictureChange}
+                        size="large"
+                        className="w-16 h-16 sm:w-20 sm:h-20 md:w-23 md:h-23"
+                    />
                     <div className="flex-1 text-center sm:text-left">
                         <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{getUserDisplayName()}</h1>
                         <p className="text-sm sm:text-base text-gray-600 flex items-center justify-center sm:justify-start gap-2 mt-1">
