@@ -11,6 +11,7 @@ const FilterDropdown = ({
     const [isOpen, setIsOpen] = useState(false);
     const [isAnimating, setIsAnimating] = useState(false);
     const [localFilters, setLocalFilters] = useState(filters);
+    const [filtersApplied, setFiltersApplied] = useState(false);
     const dropdownRef = useRef(null);
 
     const filterOptions = {
@@ -79,6 +80,7 @@ const FilterDropdown = ({
 
     const handleApplyFilters = () => {
         onFiltersChange(localFilters);
+        setFiltersApplied(true);
         handleClose();
     };
 
@@ -89,6 +91,7 @@ const FilterDropdown = ({
         }, {});
         setLocalFilters(clearedFilters);
         onFiltersChange(clearedFilters);
+        setFiltersApplied(false);
         handleClose();
     };
 
@@ -121,9 +124,13 @@ const FilterDropdown = ({
                     <rect x="2" y="11" width="12" height="1.5" rx="0.75" />
                     <circle cx="12" cy="11.75" r="1" fill="none" stroke="currentColor" strokeWidth="1.5" />
                 </svg>
-                {hasActiveFilters && (
-                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-                )}
+                    {(hasActiveFilters || filtersApplied) && (
+                        <div className={`absolute -top-1 -right-1 w-3 h-3 rounded-full ${
+                            filtersApplied 
+                                ? 'bg-green-500' 
+                                : 'bg-red-500 animate-pulse'
+                        }`}></div>
+                    )}
             </button>
 
                 {isOpen && (
@@ -190,14 +197,28 @@ const FilterDropdown = ({
                                             <select
                                                 value={localFilters[filterType] || ''}
                                                 onChange={(e) => handleFilterChange(filterType, e.target.value)}
-                                                className={`w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl focus:ring-1 transition-all duration-300 text-white hover:bg-gray-600 hover:border-gray-500 text-lg focus:outline-none ${
+                                                className={`w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl focus:ring-1 transition-all duration-300 text-white hover:bg-gray-600 hover:border-gray-500 text-lg focus:outline-none pr-8 ${
                                                     filterType === 'university' 
                                                         ? 'focus:ring-blue-400 focus:border-blue-400 focus:shadow-[0_0_10px_rgba(59,130,246,0.5)]'
                                                         : filterType === 'department'
                                                         ? 'focus:ring-green-400 focus:border-green-400 focus:shadow-[0_0_10px_rgba(34,197,94,0.5)]'
                                                         : 'focus:ring-purple-400 focus:border-purple-400 focus:shadow-[0_0_10px_rgba(168,85,247,0.5)]'
                                                 }`}
-                                                style={{ outline: 'none' }}
+                                                style={{ 
+                                                    outline: 'none',
+                                                    appearance: 'none',
+                                                    backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                                                    backgroundPosition: 'right 0.5rem center',
+                                                    backgroundRepeat: 'no-repeat',
+                                                    backgroundSize: '1.5em 1.5em',
+                                                    transition: 'background-image 0.3s ease-in-out'
+                                                }}
+                                                onFocus={(e) => {
+                                                    e.target.style.backgroundImage = `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M14 12l-4-4-4 4'/%3e%3c/svg%3e")`;
+                                                }}
+                                                onBlur={(e) => {
+                                                    e.target.style.backgroundImage = `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`;
+                                                }}
                                             >
                                                 {options.map((option) => (
                                                     <option key={option.value} value={option.value} className="bg-gray-800 text-white">
