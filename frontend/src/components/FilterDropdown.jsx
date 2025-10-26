@@ -41,16 +41,17 @@ const FilterDropdown = ({
         ]
     };
 
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-                handleClose();
-            }
-        };
+    // Removed click outside handler to prevent auto-closing
+    // useEffect(() => {
+    //     const handleClickOutside = (event) => {
+    //         if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+    //             handleClose();
+    //         }
+    //     };
 
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
+    //     document.addEventListener('mousedown', handleClickOutside);
+    //     return () => document.removeEventListener('mousedown', handleClickOutside);
+    // }, []);
 
     // Видаляємо цей useEffect, оскільки тепер логіка анімації в handleOpen
 
@@ -148,9 +149,14 @@ const FilterDropdown = ({
                                     </h3>
                                     <button
                                         onClick={handleClose}
-                                        className="p-2 rounded-full hover:bg-gray-700 transition-colors duration-200 group"
+                                        className="p-2 rounded-full bg-gray-900 hover:bg-gray-700 transition-all duration-300 group transform hover:scale-110 active:scale-95"
                                     >
-                                        <X className="w-6 h-6 text-gray-300 group-hover:text-white" />
+                                        <X 
+                                            className="w-6 h-6 text-gray-400 group-hover:text-white transition-all duration-300" 
+                                            style={{ transform: 'rotate(0deg)' }}
+                                            onMouseEnter={(e) => e.target.style.transform = 'rotate(90deg)'}
+                                            onMouseLeave={(e) => e.target.style.transform = 'rotate(0deg)'}
+                                        />
                                     </button>
                                 </div>
 
