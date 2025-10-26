@@ -136,24 +136,14 @@ const FilterDropdown = ({
                         marginTop: '2rem'
                     }}>
                     <div className="w-full max-w-6xl mx-6">
-                        <div className={`bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 rounded-3xl shadow-2xl border border-gray-700 transform transition-all duration-500 ease-out ${
+                        <div className={`bg-gradient-to-b from-black to-gray-900 rounded-3xl shadow-2xl border border-gray-700 transform transition-all duration-500 ease-out ${
                             isAnimating 
                                 ? 'translate-y-0 opacity-100 scale-100' 
                                 : '-translate-y-12 opacity-0 scale-90'
                         }`}>
                             <div className="p-8">
                                 <div className="flex items-center justify-between mb-8">
-                                    <h3 className="text-2xl font-bold text-white flex items-center gap-3">
-                                        <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-                                            <svg className="w-5 h-5 text-white" viewBox="0 0 16 16" fill="currentColor">
-                                                <rect x="2" y="3" width="12" height="1.5" rx="0.75" />
-                                                <circle cx="4" cy="3.75" r="1" fill="none" stroke="currentColor" strokeWidth="1.5" />
-                                                <rect x="2" y="7" width="12" height="1.5" rx="0.75" />
-                                                <circle cx="8" cy="7.75" r="1" fill="none" stroke="currentColor" strokeWidth="1.5" />
-                                                <rect x="2" y="11" width="12" height="1.5" rx="0.75" />
-                                                <circle cx="12" cy="11.75" r="1" fill="none" stroke="currentColor" strokeWidth="1.5" />
-                                            </svg>
-                                        </div>
+                                    <h3 className="text-2xl font-bold text-white">
                                         Фільтрація викладачів
                                     </h3>
                                     <button
