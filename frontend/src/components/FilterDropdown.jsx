@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Check } from 'lucide-react';
+import { X, Check, GraduationCap, Building2, BookMarked } from 'lucide-react';
 
 const FilterDropdown = ({ 
     filters = {}, 
@@ -168,9 +168,24 @@ const FilterDropdown = ({
                                             style={{ animationDelay: `${index * 150}ms` }}
                                         >
                                             <label className="flex items-center gap-3 text-lg font-semibold text-gray-200 mb-4 capitalize">
-                                                {filterType === 'university' && '🏛️ Університет'}
-                                                {filterType === 'department' && '🏢 Кафедра'}
-                                                {filterType === 'subject' && '📚 Предмет'}
+                                                {filterType === 'university' && (
+                                                    <>
+                                                        <GraduationCap className="w-6 h-6 text-blue-400" />
+                                                        Університет
+                                                    </>
+                                                )}
+                                                {filterType === 'department' && (
+                                                    <>
+                                                        <Building2 className="w-6 h-6 text-green-400" />
+                                                        Кафедра
+                                                    </>
+                                                )}
+                                                {filterType === 'subject' && (
+                                                    <>
+                                                        <BookMarked className="w-6 h-6 text-purple-400" />
+                                                        Предмет
+                                                    </>
+                                                )}
                                             </label>
                                             <select
                                                 value={localFilters[filterType] || ''}
