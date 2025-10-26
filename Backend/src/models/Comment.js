@@ -28,6 +28,9 @@ const commentSchema = new Schema(
             default: 'visible',
             index: true,
         },
+        isApproved: { type: Boolean, default: false, index: true },
+        approvedBy: { type: Types.ObjectId, ref: 'users', default: null },
+        approvedAt: { type: Date, default: null },
     },
     {
         versionKey: false,

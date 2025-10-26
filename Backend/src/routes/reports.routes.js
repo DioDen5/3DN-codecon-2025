@@ -2,6 +2,7 @@ import express from 'express';
 import { Report } from '../models/Report.js';
 import { authRequired } from '../middleware/auth.js';
 import { requireVerified } from '../middleware/requireVerified.js';
+import { logReportCreated } from '../utils/activityLogger.js';
 
 const router = express.Router();
 
@@ -40,6 +41,9 @@ router.post('/', authRequired, requireVerified, async (req, res) => {
             reporterId,
             reason: reason.trim()
         });
+
+        // Логуємо створення скарги
+        await logReportCreated(reporterId, targetType, targetId);
 
         res.status(201).json({
             ok: true,

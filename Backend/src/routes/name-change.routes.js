@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { NameChangeRequest } from '../models/NameChangeRequest.js';
 import { User } from '../models/User.js';
 import { authRequired } from '../middleware/auth.js';
+import { logNameChangeRequest } from '../utils/activityLogger.js';
 
 const router = express.Router();
 
@@ -105,6 +106,11 @@ router.post('/request', authRequired, async (req, res) => {
         });
 
         await nameChangeRequest.save();
+
+        // Логуємо запит на зміну імені
+        const oldName = `${user.firstName} ${user.lastName}`;
+        const newName = `${newFirstName} ${newLastName}${newMiddleName ? ` ${newMiddleName}` : ''}`;
+        await logNameChangeRequest(userId, oldName, newName);
 
         return res.json({
             message: 'Запит на зміну імені створено успішно',

@@ -32,6 +32,9 @@ const teacherCommentSchema = new Schema(
             enum: ['visible', 'hidden', 'deleted'],
             default: 'visible',
         },
+        isApproved: { type: Boolean, default: false, index: true },
+        approvedBy: { type: Types.ObjectId, ref: 'users', default: null },
+        approvedAt: { type: Date, default: null },
     },
     {
         versionKey: false,

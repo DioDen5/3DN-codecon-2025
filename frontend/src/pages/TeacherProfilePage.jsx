@@ -5,6 +5,7 @@ import { getTeacher, voteTeacher, getTeacherReactions } from '../api/teachers'
 import { getTeacherComments, createTeacherComment, getTeacherCommentCounts } from '../api/teacher-comments'
 import { useAuthState } from '../api/useAuthState'
 import { useNotification } from '../contexts/NotificationContext'
+import { useTeacherData } from '../contexts/TeacherDataContext'
 import ReviewInput from '../components/ReviewInput'
 import TeacherRepliesList from '../components/TeacherRepliesList'
 import StarRating from '../components/StarRating'
@@ -14,6 +15,7 @@ const TeacherProfilePage = () => {
     const navigate = useNavigate()
     const { isAuthed: isAuthenticated, user } = useAuthState()
     const { showSuccess } = useNotification()
+    const { refreshTrigger } = useTeacherData()
     
     const [teacher, setTeacher] = useState(null)
     const [loading, setLoading] = useState(true)
@@ -78,7 +80,7 @@ const TeacherProfilePage = () => {
 
     useEffect(() => {
         loadTeacher()
-    }, [id, isAuthenticated])
+    }, [id, isAuthenticated, refreshTrigger])
 
     const handleRatingChange = (rating) => {
         setUserRating(rating)

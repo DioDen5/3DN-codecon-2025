@@ -6,10 +6,12 @@ import DeleteConfirmationModal from './DeleteConfirmationModal';
 import ReportCommentModal from './ReportCommentModal';
 import { useAuthState } from '../api/useAuthState';
 import { useNotification } from '../contexts/NotificationContext';
+import { useTeacherData } from '../contexts/TeacherDataContext';
 
 const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
     const { isAuthed, user } = useAuthState();
     const { showSuccess } = useNotification();
+    const { triggerRefresh } = useTeacherData();
     const [error, setError] = useState(null);
     const [pendingVotes, setPendingVotes] = useState(new Set());
     const [openMenuId, setOpenMenuId] = useState(null);
@@ -124,6 +126,7 @@ const TeacherRepliesList = ({ replies, onRepliesUpdate }) => {
             }, 800);
 
             setDeleteModal({ isOpen: false, commentId: null, commentText: '' });
+            triggerRefresh();
         } catch (err) {
             console.error('Error deleting teacher comment:', err);
             setError('Помилка при видаленні коментаря');

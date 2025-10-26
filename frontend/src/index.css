@@ -1,5 +1,388 @@
 @import "tailwindcss";
 
+/* Глобальне приховання скролбара */
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+*::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
+}
+
+/* Прикольне підсвічування для іконки "Весь контент" */
+    @keyframes contentGlow {
+        0%, 100% {
+            box-shadow: 0 0 20px rgba(30, 64, 175, 0.4), 0 0 40px rgba(30, 64, 175, 0.2);
+            transform: scale(1);
+        }
+        50% {
+            box-shadow: 0 0 30px rgba(30, 64, 175, 0.6), 0 0 60px rgba(30, 64, 175, 0.4), 0 0 80px rgba(30, 64, 175, 0.2);
+            transform: scale(1.05);
+        }
+    }
+
+    @keyframes contentPulse {
+        0%, 100% {
+            background: linear-gradient(135deg, #1e40af, #1e3a8a);
+        }
+        50% {
+            background: linear-gradient(135deg, #1e3a8a, #1e3a8a);
+        }
+    }
+
+@keyframes contentRotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    25% {
+        transform: rotate(5deg);
+    }
+    75% {
+        transform: rotate(-5deg);
+    }
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
+@keyframes contentShimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.content-icon-glow {
+    animation: contentGlow 3s ease-in-out infinite;
+}
+
+.content-icon-pulse {
+    animation: contentPulse 2s ease-in-out infinite;
+}
+
+.content-icon-rotate {
+    animation: contentRotate 4s ease-in-out infinite;
+}
+
+    .content-icon-shimmer {
+        background: linear-gradient(90deg, #1e40af, #1e3a8a, #1e40af);
+        background-size: 200% 100%;
+        animation: contentShimmer 2s linear infinite;
+    }
+
+@keyframes contentParticles {
+    0% {
+        transform: rotate(0deg) translateX(30px) rotate(0deg);
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        transform: rotate(360deg) translateX(30px) rotate(-360deg);
+        opacity: 0;
+    }
+}
+
+
+    /* Анімації для обговорень */
+    @keyframes discussionGlow {
+        0%, 100% {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4), 0 0 40px rgba(59, 130, 246, 0.2);
+            transform: scale(1);
+        }
+        50% {
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.6), 0 0 60px rgba(59, 130, 246, 0.4), 0 0 80px rgba(59, 130, 246, 0.2);
+            transform: scale(1.05);
+        }
+    }
+
+    @keyframes discussionPulse {
+        0%, 100% {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        }
+        50% {
+            background: linear-gradient(135deg, #1d4ed8, #1e40af);
+        }
+    }
+
+    @keyframes discussionRotate {
+        0% {
+            transform: rotate(0deg);
+        }
+        25% {
+            transform: rotate(3deg);
+        }
+        75% {
+            transform: rotate(-3deg);
+        }
+        100% {
+            transform: rotate(0deg);
+        }
+    }
+
+    @keyframes discussionShimmer {
+        0% {
+            background-position: -200% 0;
+        }
+        100% {
+            background-position: 200% 0;
+        }
+    }
+
+    @keyframes discussionParticles {
+        0% {
+            transform: rotate(0deg) translateX(30px) rotate(0deg);
+            opacity: 0;
+        }
+        50% {
+            opacity: 1;
+        }
+        100% {
+            transform: rotate(360deg) translateX(30px) rotate(-360deg);
+            opacity: 0;
+        }
+    }
+
+    .discussion-icon-glow {
+        animation: discussionGlow 3s ease-in-out infinite;
+    }
+
+    .discussion-icon-pulse {
+        animation: discussionPulse 2s ease-in-out infinite;
+    }
+
+    .discussion-icon-rotate {
+        animation: discussionRotate 4s ease-in-out infinite;
+    }
+
+    .discussion-icon-shimmer {
+        background: linear-gradient(90deg, #3b82f6, #1d4ed8, #3b82f6);
+        background-size: 200% 100%;
+        animation: discussionShimmer 2s linear infinite;
+    }
+
+
+    /* Анімації для коментарів */
+    @keyframes commentGlow {
+        0%, 100% {
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.4), 0 0 40px rgba(34, 197, 94, 0.2);
+            transform: scale(1);
+        }
+        50% {
+            box-shadow: 0 0 30px rgba(34, 197, 94, 0.6), 0 0 60px rgba(34, 197, 94, 0.4), 0 0 80px rgba(34, 197, 94, 0.2);
+            transform: scale(1.05);
+        }
+    }
+
+    @keyframes commentPulse {
+        0%, 100% {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+        }
+        50% {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+        }
+    }
+
+    @keyframes commentRotate {
+        0% {
+            transform: rotate(0deg);
+        }
+        25% {
+            transform: rotate(5deg);
+        }
+        75% {
+            transform: rotate(-5deg);
+        }
+        100% {
+            transform: rotate(0deg);
+        }
+    }
+
+    @keyframes commentShimmer {
+        0% {
+            background-position: -200% 0;
+        }
+        100% {
+            background-position: 200% 0;
+        }
+    }
+
+    @keyframes commentParticles {
+        0% {
+            transform: rotate(0deg) translateX(30px) rotate(0deg);
+            opacity: 0;
+        }
+        50% {
+            opacity: 1;
+        }
+        100% {
+            transform: rotate(360deg) translateX(30px) rotate(-360deg);
+            opacity: 0;
+        }
+    }
+
+    .comment-icon-glow {
+        animation: commentGlow 3s ease-in-out infinite;
+    }
+
+    .comment-icon-pulse {
+        animation: commentPulse 2s ease-in-out infinite;
+    }
+
+    .comment-icon-rotate {
+        animation: commentRotate 4s ease-in-out infinite;
+    }
+
+    .comment-icon-shimmer {
+        background: linear-gradient(90deg, #22c55e, #16a34a, #22c55e);
+        background-size: 200% 100%;
+        animation: commentShimmer 2s linear infinite;
+    }
+
+    /* Анімації для обговорень */
+    @keyframes discussionGlow {
+        0%, 100% {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+        }
+        50% {
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.8);
+        }
+    }
+
+    @keyframes discussionPulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+    }
+
+    @keyframes discussionRotate {
+        0% {
+            transform: rotate(0deg);
+        }
+        25% {
+            transform: rotate(5deg);
+        }
+        75% {
+            transform: rotate(-5deg);
+        }
+        100% {
+            transform: rotate(0deg);
+        }
+    }
+
+    @keyframes discussionShimmer {
+        0% {
+            background-position: -200% 0;
+        }
+        100% {
+            background-position: 200% 0;
+        }
+    }
+
+    .discussion-icon-glow {
+        animation: discussionGlow 3s ease-in-out infinite;
+    }
+
+    .discussion-icon-pulse {
+        animation: discussionPulse 2s ease-in-out infinite;
+    }
+
+    .discussion-icon-rotate {
+        animation: discussionRotate 4s ease-in-out infinite;
+    }
+
+    .discussion-icon-shimmer {
+        background: linear-gradient(90deg, #3b82f6, #1d4ed8, #3b82f6);
+        background-size: 200% 100%;
+        animation: discussionShimmer 2s linear infinite;
+    }
+
+
+    /* Анімації для відгуків */
+    @keyframes reviewGlow {
+        0%, 100% {
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.4), 0 0 40px rgba(168, 85, 247, 0.2);
+            transform: scale(1);
+        }
+        50% {
+            box-shadow: 0 0 30px rgba(168, 85, 247, 0.6), 0 0 60px rgba(168, 85, 247, 0.4), 0 0 80px rgba(168, 85, 247, 0.2);
+            transform: scale(1.05);
+        }
+    }
+
+    @keyframes reviewPulse {
+        0%, 100% {
+            background: linear-gradient(135deg, #a855f7, #9333ea);
+        }
+        50% {
+            background: linear-gradient(135deg, #9333ea, #7c3aed);
+        }
+    }
+
+    @keyframes reviewRotate {
+        0% {
+            transform: rotate(0deg);
+        }
+        25% {
+            transform: rotate(4deg);
+        }
+        75% {
+            transform: rotate(-4deg);
+        }
+        100% {
+            transform: rotate(0deg);
+        }
+    }
+
+    @keyframes reviewShimmer {
+        0% {
+            background-position: -200% 0;
+        }
+        100% {
+            background-position: 200% 0;
+        }
+    }
+
+    @keyframes reviewParticles {
+        0% {
+            transform: rotate(0deg) translateX(30px) rotate(0deg);
+            opacity: 0;
+        }
+        50% {
+            opacity: 1;
+        }
+        100% {
+            transform: rotate(360deg) translateX(30px) rotate(-360deg);
+            opacity: 0;
+        }
+    }
+
+    .review-icon-glow {
+        animation: reviewGlow 3s ease-in-out infinite;
+    }
+
+    .review-icon-pulse {
+        animation: reviewPulse 2s ease-in-out infinite;
+    }
+
+    .review-icon-rotate {
+        animation: reviewRotate 4s ease-in-out infinite;
+    }
+
+    .review-icon-shimmer {
+        background: linear-gradient(90deg, #a855f7, #9333ea, #a855f7);
+        background-size: 200% 100%;
+        animation: reviewShimmer 2s linear infinite;
+    }
+
+
 .btn-glow {
     @apply flex items-center justify-center  border border-white/20 rounded cursor-pointer
     transition-all duration-500 ease-in-out;
@@ -788,6 +1171,51 @@
     animation: commentBlinkOrange 1.8s ease-in-out infinite;
 }
 
+@keyframes commentBlinkBlue {
+    0%, 100% {
+        opacity: 1;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    50% {
+        opacity: 0.8;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+    }
+}
+
+.comment-animate-blue {
+    animation: commentBlinkBlue 1.8s ease-in-out infinite;
+}
+
+@keyframes commentBlinkPurple {
+    0%, 100% {
+        opacity: 1;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    50% {
+        opacity: 0.8;
+        box-shadow: 0 4px 15px rgba(147, 51, 234, 0.4);
+    }
+}
+
+.comment-animate-purple {
+    animation: commentBlinkPurple 1.8s ease-in-out infinite;
+}
+
+@keyframes commentBlinkGreen {
+    0%, 100% {
+        opacity: 1;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    50% {
+        opacity: 0.8;
+        box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4); /* Green glow */
+    }
+}
+
+.comment-animate-green {
+    animation: commentBlinkGreen 1.8s ease-in-out infinite;
+}
+
 /* Анімація видалення для форуму */
 @keyframes commentDeleteSlide {
     0% {
@@ -1548,6 +1976,87 @@
     animation: profilePulse 0.6s ease-out;
 }
 
+/* Admin profile animations */
+@keyframes adminIconBounce {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes adminIconShake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-2px);
+    }
+    75% {
+        transform: translateX(2px);
+    }
+}
+
+@keyframes adminIconRotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes adminIconPulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.admin-icon-bounce {
+    animation: adminIconBounce 0.6s ease-out;
+}
+
+.admin-icon-shake {
+    animation: adminIconShake 0.4s ease-in-out;
+}
+
+.admin-icon-rotate {
+    animation: adminIconRotate 0.8s ease-in-out;
+}
+
+.admin-icon-pulse {
+    animation: adminIconPulse 0.5s ease-out;
+}
+
+.hover\:admin-icon-bounce:hover {
+    animation: adminIconBounce 0.6s ease-out;
+}
+
+.hover\:admin-icon-shake:hover {
+    animation: adminIconShake 0.4s ease-in-out;
+}
+
+.hover\:admin-icon-rotate:hover {
+    animation: adminIconRotate 0.8s ease-in-out;
+}
+
+.hover\:admin-icon-pulse:hover {
+    animation: adminIconPulse 0.5s ease-out;
+}
+
 @keyframes fadeIn {
     0% {
         opacity: 0;
@@ -1580,6 +2089,731 @@
     100% {
         transform: translateX(100%);
     }
+}
+
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInFromLeft {
+    0% {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes moderationSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes moderationPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+@keyframes moderationGlow {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
+    }
+}
+
+.moderation-slide-in {
+    animation: moderationSlideIn 0.5s ease-out;
+}
+
+@keyframes dashboardSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes usersSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes reportsSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes settingsSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.dashboard-slide-in {
+    animation: dashboardSlideIn 0.5s ease-out;
+}
+
+.users-slide-in {
+    animation: usersSlideIn 0.5s ease-out;
+}
+
+.reports-slide-in {
+    animation: reportsSlideIn 0.5s ease-out;
+}
+
+.settings-slide-in {
+    animation: settingsSlideIn 0.5s ease-out;
+}
+
+/* Security Settings Animations */
+@keyframes securityIconGlow {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(239, 68, 68, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(239, 68, 68, 0.6), 0 0 30px rgba(239, 68, 68, 0.4);
+    }
+}
+
+@keyframes securityIconPulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes securityIconRotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes securityIconShimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+@keyframes securityToggleSlide {
+    0% {
+        transform: translateX(0.25rem);
+    }
+    100% {
+        transform: translateX(1.5rem);
+    }
+}
+
+@keyframes securityInputFocus {
+    0% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+    }
+    100% {
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+}
+
+@keyframes securitySaveSuccess {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes liquidSqueeze {
+    0% {
+        transform: scale(1);
+        border-radius: 50%;
+    }
+    50% {
+        transform: scale(0.8, 0.6);
+        border-radius: 25%;
+    }
+    100% {
+        transform: scale(1);
+        border-radius: 50%;
+    }
+}
+
+@keyframes liquidBounce {
+    0% {
+        transform: scale(1);
+    }
+    25% {
+        transform: scale(0.9, 1.1);
+    }
+    50% {
+        transform: scale(1.1, 0.9);
+    }
+    75% {
+        transform: scale(0.95, 1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes liquidFill {
+    0% {
+        transform: translateX(-100%) scaleX(0);
+        opacity: 0;
+    }
+    50% {
+        transform: translateX(-50%) scaleX(1.2);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateX(0) scaleX(1);
+        opacity: 1;
+    }
+}
+
+@keyframes liquidWave {
+    0% {
+        transform: translateX(-100%) scaleX(1);
+    }
+    50% {
+        transform: translateX(0) scaleX(1.1);
+    }
+    100% {
+        transform: translateX(100%) scaleX(1);
+    }
+}
+
+.security-icon-glow {
+    animation: securityIconGlow 2s ease-in-out infinite;
+}
+
+.security-icon-pulse {
+    animation: securityIconPulse 0.6s ease-out;
+}
+
+.security-icon-rotate {
+    animation: securityIconRotate 0.8s ease-in-out;
+}
+
+.security-icon-shimmer {
+    position: relative;
+    overflow: hidden;
+}
+
+.security-icon-shimmer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: securityIconShimmer 2s ease-in-out infinite;
+}
+
+.security-toggle-slide {
+    animation: securityToggleSlide 0.3s ease-out;
+}
+
+.security-input-focus {
+    animation: securityInputFocus 0.3s ease-out;
+}
+
+.security-save-success {
+    animation: securitySaveSuccess 0.6s ease-out;
+}
+
+.liquid-squeeze {
+    animation: liquidSqueeze 0.3s ease-out;
+}
+
+.liquid-bounce {
+    animation: liquidBounce 0.6s ease-out;
+}
+
+.liquid-fill {
+    animation: liquidFill 0.8s ease-out;
+}
+
+.liquid-wave {
+    animation: liquidWave 1.2s ease-out;
+}
+
+.moderation-pulse {
+    animation: moderationPulse 2s ease-in-out infinite;
+}
+
+.moderation-glow {
+    animation: moderationGlow 2s ease-in-out infinite;
+}
+
+/* Приховання скролбара */
+.hide-scrollbar {
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+    scrollbar-width: none;  /* Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;  /* Safari and Chrome */
+}
+
+@keyframes reportNeonGlow {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(251, 146, 60, 0.3);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 10px rgba(251, 146, 60, 0.5);
+        transform: scale(1.01);
+    }
+}
+
+.report-neon-glow {
+    animation: reportNeonGlow 2s ease-in-out infinite;
+}
+
+.report-hover-glow:hover {
+    box-shadow: 0 0 8px rgba(251, 146, 60, 0.4), 0 0 15px rgba(251, 146, 60, 0.2);
+    transform: scale(1.01);
+    transition: all 0.3s ease-in-out;
+}
+
+@keyframes reportCardSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes reportModalFadeIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes reportModalBackdrop {
+    0% {
+        opacity: 0;
+        backdrop-filter: blur(0px);
+    }
+    100% {
+        opacity: 1;
+        backdrop-filter: blur(8px);
+    }
+}
+
+.report-card-animate {
+    animation: reportCardSlideIn 0.6s ease-out both;
+}
+
+.report-modal-animate {
+    animation: reportModalFadeIn 0.4s ease-out;
+}
+
+.report-backdrop-animate {
+    animation: reportModalBackdrop 0.3s ease-out;
+}
+
+/* Reports Icon Animations */
+@keyframes reportsIconGlow {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(251, 146, 60, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(251, 146, 60, 0.6), 0 0 30px rgba(251, 146, 60, 0.4);
+    }
+}
+
+@keyframes reportsIconPulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes reportsIconRotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes reportsIconShimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.reports-icon-glow {
+    animation: reportsIconGlow 2s ease-in-out infinite;
+}
+
+.reports-icon-pulse {
+    animation: reportsIconPulse 0.6s ease-out;
+}
+
+.reports-icon-rotate {
+    animation: reportsIconRotate 0.8s ease-in-out;
+}
+
+.reports-icon-shimmer {
+    position: relative;
+    overflow: hidden;
+}
+
+.reports-icon-shimmer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: reportsIconShimmer 2s ease-in-out infinite;
+}
+
+/* Users Icon Animations */
+@keyframes usersIconGlow {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.6), 0 0 30px rgba(59, 130, 246, 0.4);
+    }
+}
+
+@keyframes usersIconPulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes usersIconRotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes usersIconShimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.users-icon-glow {
+    animation: usersIconGlow 2s ease-in-out infinite;
+}
+
+.users-icon-pulse {
+    animation: usersIconPulse 0.6s ease-out;
+}
+
+.users-icon-rotate {
+    animation: usersIconRotate 0.8s ease-in-out;
+}
+
+.users-icon-shimmer {
+    position: relative;
+    overflow: hidden;
+}
+
+.users-icon-shimmer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: usersIconShimmer 2s ease-in-out infinite;
+}
+
+/* Moderation Icon Animations */
+@keyframes moderationIconGlow {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(99, 102, 241, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(99, 102, 241, 0.6), 0 0 30px rgba(99, 102, 241, 0.4);
+    }
+}
+
+@keyframes moderationIconPulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes moderationIconRotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes moderationIconShimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.moderation-icon-glow {
+    animation: moderationIconGlow 2s ease-in-out infinite;
+}
+
+.moderation-icon-pulse {
+    animation: moderationIconPulse 0.6s ease-out;
+}
+
+.moderation-icon-rotate {
+    animation: moderationIconRotate 0.8s ease-in-out;
+}
+
+.moderation-icon-shimmer {
+    position: relative;
+    overflow: hidden;
+}
+
+.moderation-icon-shimmer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: moderationIconShimmer 2s ease-in-out infinite;
+}
+
+/* Dashboard Users Icon Animations */
+@keyframes dashboardUsersIconGlow {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.6), 0 0 30px rgba(59, 130, 246, 0.4);
+    }
+}
+
+@keyframes dashboardUsersIconPulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes dashboardUsersIconRotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes dashboardUsersIconShimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.dashboard-users-icon-glow {
+    animation: dashboardUsersIconGlow 2s ease-in-out infinite;
+}
+
+.dashboard-users-icon-pulse {
+    animation: dashboardUsersIconPulse 0.6s ease-out;
+}
+
+.dashboard-users-icon-rotate {
+    animation: dashboardUsersIconRotate 0.8s ease-in-out;
+}
+
+.dashboard-users-icon-shimmer {
+    position: relative;
+    overflow: hidden;
+}
+
+.dashboard-users-icon-shimmer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: dashboardUsersIconShimmer 2s ease-in-out infinite;
+}
+
+/* Dashboard Activity Icon Animations */
+@keyframes dashboardActivityIconGlow {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.6), 0 0 30px rgba(59, 130, 246, 0.4);
+    }
+}
+
+@keyframes dashboardActivityIconPulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes dashboardActivityIconRotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes dashboardActivityIconShimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.dashboard-activity-icon-glow {
+    animation: dashboardActivityIconGlow 2s ease-in-out infinite;
+}
+
+.dashboard-activity-icon-pulse {
+    animation: dashboardActivityIconPulse 0.6s ease-out;
+}
+
+.dashboard-activity-icon-rotate {
+    animation: dashboardActivityIconRotate 0.8s ease-in-out;
+}
+
+.dashboard-activity-icon-shimmer {
+    position: relative;
+    overflow: hidden;
+}
+
+.dashboard-activity-icon-shimmer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: dashboardActivityIconShimmer 2s ease-in-out infinite;
 }
 
 

@@ -5,6 +5,7 @@ import { getUserStats, getUserActivity } from '../api/user-stats';
 import { getNameChangeStatus } from '../api/name-change';
 import NameChangeModal from '../components/NameChangeModal';
 import TeacherProfilePageNew from './TeacherProfilePageNew';
+import AdminProfilePage from './AdminProfilePage';
 
 const UserProfilePage = () => {
     const { user } = useAuthState();
@@ -14,8 +15,9 @@ const UserProfilePage = () => {
         return <TeacherProfilePageNew />;
     }
     
-    // Для адміністратора поки що показуємо студентський профіль
-    // В майбутньому можна створити окремий AdminProfilePage
+    if (user?.role === 'admin') {
+        return <AdminProfilePage />;
+    }
     const [activeTab, setActiveTab] = useState(() => {
         // Відновлюємо вибрану вкладку з localStorage або використовуємо 'profile' за замовчуванням
         return localStorage.getItem('userProfileActiveTab') || 'profile';
@@ -805,8 +807,8 @@ const UserProfilePage = () => {
                                 </div>
                                 <button className="px-5 py-3 bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-xl hover:from-blue-700 hover:to-blue-900 transition-all duration-300 hover:scale-105 flex items-center gap-2 shadow-lg hover:shadow-xl group/btn">
                                     <Key className="w-4 h-4 group-hover/btn:rotate-12 transition-transform duration-300" />
-                                    Змінити пароль
-                                </button>
+                    Змінити пароль
+                </button>
                             </div>
                         </div>
                         
@@ -877,7 +879,7 @@ const UserProfilePage = () => {
                                     privacySettings.anonymousTeacherReviews ? 'text-gray-600' : 'text-gray-500'
                                 }`}>Ваші відгуки про викладачів будуть опубліковані анонімно</p>
                             </div>
-                        </label>
+                    </label>
                     </div>
                     
                         <div className={`rounded-xl p-4 border group/field privacy-field transition-all duration-500 ease-in-out ${
@@ -913,7 +915,7 @@ const UserProfilePage = () => {
                                     privacySettings.emailOnPostComments ? 'text-gray-600' : 'text-gray-500'
                                 }`}>Отримувати повідомлення на пошту про нові коментарі до ваших постів</p>
                             </div>
-                        </label>
+                    </label>
                     </div>
                 </div>
                 </div>
