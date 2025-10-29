@@ -21,9 +21,9 @@ const Header = ({ onLoginOpen, onSignupOpen }) => {
                     <img src={logo} alt="StudLink Logo" className="h-10 w-auto object-contain" />
                 </Link>
 
-                <nav className="flex items-center gap-7 text-[0.9rem] mx-10">
+                <nav className="flex items-center gap-7 text-[1.1rem] mx-10">
                     <Link to="/" className="text-white hover:text-pink-400 transition">Головна</Link>
-                    <Link to="/teachers" className="text-white hover:text-pink-400 transition">Рейтинг викладачів</Link>
+                    <Link to="/teachers" className="text-white hover:text-pink-400 transition">Викладачі</Link>
                     <Link to="/forum" className="text-white hover:text-pink-400 transition">Форум</Link>
                 </nav>
             </div>
