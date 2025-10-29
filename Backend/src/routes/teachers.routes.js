@@ -78,6 +78,7 @@ router.get('/', async (req, res) => {
                 }
             });
         } catch (error) {
+            console.error('Teachers fetch error:', error);
             res.status(500).json({ error: 'Failed to fetch teachers' });
         }
     });

@@ -124,24 +124,34 @@ router.post('/login', checkLoginAttempts, async (req, res) => {
 
 
 router.post('/refresh', async (req, res) => {
-    const token = req.cookies?.refreshToken || null;
-    if (!token) return res.status(401).json({ error: 'No refresh token' });
+    try {
+        const token = req.cookies?.refreshToken || null;
+        if (!token) return res.status(401).json({ error: 'No refresh token' });
 
-    const payload = verifyJwt(token, 'refresh');
-    if (!payload?.id) return res.status(401).json({ error: 'Invalid refresh' });
+        let payload = null;
+        try {
+            payload = verifyJwt(token, 'refresh');
+        } catch (e) {
+            console.warn('Invalid refresh token:', e?.message || e);
+            return res.status(401).json({ error: 'Invalid refresh' });
+        }
 
-    // Отримуємо актуальну інформацію про користувача
-    const user = await User.findById(payload.id);
-    if (!user) return res.status(401).json({ error: 'User not found' });
+        if (!payload?.id) return res.status(401).json({ error: 'Invalid refresh' });
 
-    console.log('Token refresh for user:', { id: user._id, role: user.role, status: user.status });
+        const user = await User.findById(payload.id);
+        if (!user) return res.status(401).json({ error: 'User not found' });
 
-    const access = signJwt({ id: user._id, role: user.role, status: user.status }, 'access');
+        console.log('Token refresh for user:', { id: user._id, role: user.role, status: user.status });
 
-    const newRefresh = signJwt({ id: user._id }, 'refresh');
-    setRefreshCookie(res, newRefresh);
+        const access = signJwt({ id: user._id, role: user.role, status: user.status }, 'access');
+        const newRefresh = signJwt({ id: user._id }, 'refresh');
+        setRefreshCookie(res, newRefresh);
 
-    return res.json({ token: access });
+        return res.json({ token: access });
+    } catch (error) {
+        console.error('Refresh error:', error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
 });
 
 
