@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
 import { UserRound } from "lucide-react";
 import { useAuthState } from "../api/useAuthState";
@@ -22,9 +22,31 @@ const Header = ({ onLoginOpen, onSignupOpen }) => {
                 </Link>
 
                 <nav className="flex items-center gap-7 text-[1.1rem] mx-10">
-                    <Link to="/" className="text-white hover:text-pink-400 transition">Головна</Link>
-                    <Link to="/teachers" className="text-white hover:text-pink-400 transition">Викладачі</Link>
-                    <Link to="/forum" className="text-white hover:text-pink-400 transition">Форум</Link>
+                    <NavLink
+                        to="/"
+                        className={({ isActive }) =>
+                            `transition-colors duration-300 ${isActive ? 'text-pink-400' : 'text-white hover:text-pink-400'}`
+                        }
+                        end
+                    >
+                        Головна
+                    </NavLink>
+                    <NavLink
+                        to="/teachers"
+                        className={({ isActive }) =>
+                            `transition-colors duration-300 ${isActive ? 'text-pink-400' : 'text-white hover:text-pink-400'}`
+                        }
+                    >
+                        Викладачі
+                    </NavLink>
+                    <NavLink
+                        to="/forum"
+                        className={({ isActive }) =>
+                            `transition-colors duration-300 ${isActive ? 'text-pink-400' : 'text-white hover:text-pink-400'}`
+                        }
+                    >
+                        Форум
+                    </NavLink>
                 </nav>
             </div>
 
