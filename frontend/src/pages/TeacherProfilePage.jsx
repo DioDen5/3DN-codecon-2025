@@ -154,7 +154,7 @@ const TeacherProfilePage = () => {
     }
 
     return (
-        <div className="min-h-[calc(100vh-68px)] bg-gradient-to-b from-black to-gray-900 px-6 py-10 text-white">
+        <div className="min-h-[calc(100vh-68px)] bg-gradient-to-b from-black to-gray-900 px-6 py-10 text-white animate-[slideInFromLeft_0.6s_ease-out_both]">
             <div className="max-w-4xl mx-auto space-y-6">
                 <button
                     onClick={() => navigate('/teachers')}
