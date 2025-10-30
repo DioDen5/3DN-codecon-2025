@@ -554,6 +554,8 @@ export const useAdminData = () => {
         handleReviewsPrevPage,
         handleReviewsNextPage,
         handleReviewsPageClick,
+        approveNameRequest,
+        rejectNameRequest,
         refreshCurrentContent: async (contentType) => {
             try {
                 console.log('refreshCurrentContent called with:', contentType);
