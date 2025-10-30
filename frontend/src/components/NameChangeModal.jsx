@@ -63,21 +63,37 @@ const NameChangeModal = ({ isOpen, onClose, currentName }) => {
         setSuccess('');
 
         try {
-            const response = await requestNameChange(formData);
-            setSuccess('✅ Запит на зміну імені створено успішно!\n\n📋 Ваш запит буде розглянуто модераторами протягом 1-3 робочих днів.\n\n📧 Ви отримаєте сповіщення про результат на email.');
-                setFormData({
-                    newFirstName: '',
-                    newLastName: '',
-                    newMiddleName: '',
-                    reason: ''
-                });
+            const payload = {
+                newFirstName: (formData.newFirstName || '').trim(),
+                newLastName: (formData.newLastName || '').trim(),
+                newMiddleName: (formData.newMiddleName || '').trim(),
+                reason: (formData.reason || '').trim()
+            };
+            const isUkr = (t) => /^[А-ЯІЇЄҐа-яіїєґ'\-\s]+$/.test(t || '');
+            const isEng = (t) => /^[A-Za-z'\-\s]+$/.test(t || '');
+            if (payload.newFirstName.length < 2 || payload.newLastName.length < 2) {
+                setError('Невалідні дані: мінімальна довжина імені/прізвища — 2 символи');
+                return;
+            }
+            const langs = [payload.newFirstName, payload.newLastName, payload.newMiddleName].filter(Boolean).map(t => (isUkr(t) ? 'uk' : isEng(t) ? 'en' : 'mixed'));
+            if (langs.includes('mixed') || (langs.length && !langs.every(l => l === langs[0]))) {
+                setError('Ім’я, прізвище та по батькові мають бути однією мовою (укр/англ)');
+                return;
+            }
+            const response = await requestNameChange({
+                newFirstName: payload.newFirstName,
+                newLastName: payload.newLastName,
+                newMiddleName: payload.newMiddleName || undefined,
+                reason: payload.reason || undefined
+            });
+            setSuccess('✅ Запит на зміну імені створено успішно!');
+            setFormData({ newFirstName: '', newLastName: '', newMiddleName: '', reason: '' });
             await loadExistingRequest();
         } catch (error) {
-            if (error.response?.data?.error) {
-                setError(error.response.data.error);
-            } else {
-                setError('❌ Помилка при створенні запиту.\n\n🔄 Будь ласка, спробуйте ще раз або зверніться до підтримки.');
-            }
+            const apiError = error?.response?.data;
+            const msg = apiError?.error || apiError?.message || '❌ Помилка при створенні запиту';
+            const details = apiError?.details?.[0]?.message ? `\n${apiError.details[0].message}` : '';
+            setError(`${msg}${details}`);
         } finally {
             setLoading(false);
         }
