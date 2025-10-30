@@ -46,8 +46,6 @@ const UserProfilePage = () => {
         anonymousTeacherReviews: false,
         emailOnPostComments: false
     });
-    const [sectionSpin, setSectionSpin] = useState({ profile: false, security: false, privacy: false });
-    const [sectionShimmer, setSectionShimmer] = useState({ profile: false, security: false, privacy: false });
 
     // Role-based rendering moved below, after hooks, to keep hook order stable
 
@@ -651,21 +649,11 @@ const UserProfilePage = () => {
                 <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-indigo-100/40 to-blue-100/30 rounded-full translate-y-12 -translate-x-12 animate-bounce decorative-element-2" style={{animationDuration: '3s'}}></div>
                 
                 <div className="relative">
-                    <h3
-                        onClick={() => {
-                            setSectionSpin(p => ({ ...p, profile: true }));
-                            setSectionShimmer(p => ({ ...p, profile: true }));
-                            setTimeout(() => setSectionSpin(p => ({ ...p, profile: false })), 500);
-                            setTimeout(() => setSectionShimmer(p => ({ ...p, profile: false })), 600);
-                        }}
-                        className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3 relative overflow-hidden cursor-pointer select-none"
-                    >
-                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg flex items-center justify-center transition-transform duration-500"
-                        >
-                            <User className={`w-4 h-4 text-white ${sectionSpin.profile ? 'rotate-180 transition-transform duration-500' : ''}`} />
+                    <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3 relative overflow-hidden select-none">
+                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg flex items-center justify-center shadow-lg transition-transform duration-300 security-icon-glow security-icon-pulse security-icon-rotate security-icon-shimmer relative overflow-hidden">
+                            <User className="w-4 h-4 text-white relative z-10" />
                         </div>
                         <span className="relative z-10">Налаштування профілю</span>
-                        <div className={`absolute left-0 top-1/2 -translate-y-1/2 h-3 rounded-full bg-white/30 transition-all duration-500 ${sectionShimmer.profile ? 'w-full' : 'w-0'}`}></div>
                     </h3>
                 <div className="space-y-4">
                     <div>
@@ -743,20 +731,11 @@ const UserProfilePage = () => {
                 <div className="absolute top-1/2 left-1/2 w-16 h-16 bg-gradient-to-r from-cyan-100/30 to-blue-100/30 rounded-full -translate-x-8 -translate-y-8 animate-ping decorative-element-3" style={{animationDuration: '4s'}}></div>
                 
                 <div className="relative">
-                    <h3
-                        onClick={() => {
-                            setSectionSpin(p => ({ ...p, security: true }));
-                            setSectionShimmer(p => ({ ...p, security: true }));
-                            setTimeout(() => setSectionSpin(p => ({ ...p, security: false })), 500);
-                            setTimeout(() => setSectionShimmer(p => ({ ...p, security: false })), 600);
-                        }}
-                        className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3 relative overflow-hidden cursor-pointer select-none"
-                    >
-                        <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg flex items-center justify-center transition-transform duration-500">
-                            <Shield className={`w-4 h-4 text-white ${sectionSpin.security ? 'rotate-180 transition-transform duration-500' : ''}`} />
+                    <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3 relative overflow-hidden select-none">
+                        <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg flex items-center justify-center shadow-lg transition-transform duration-300 security-icon-glow security-icon-pulse security-icon-rotate security-icon-shimmer relative overflow-hidden">
+                            <Shield className="w-4 h-4 text-white relative z-10" />
                         </div>
                         <span className="relative z-10">Безпека</span>
-                        <div className={`absolute left-0 top-1/2 -translate-y-1/2 h-3 rounded-full bg-white/30 transition-all duration-500 ${sectionShimmer.security ? 'w-full' : 'w-0'}`}></div>
                     </h3>
                     
                     <div className="space-y-4">
@@ -805,20 +784,11 @@ const UserProfilePage = () => {
                 <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-indigo-100/40 to-blue-100/30 rounded-full translate-y-12 -translate-x-12 animate-bounce decorative-element-2" style={{animationDuration: '3s'}}></div>
                 
                 <div className="relative">
-                    <h3
-                        onClick={() => {
-                            setSectionSpin(p => ({ ...p, privacy: true }));
-                            setSectionShimmer(p => ({ ...p, privacy: true }));
-                            setTimeout(() => setSectionSpin(p => ({ ...p, privacy: false })), 500);
-                            setTimeout(() => setSectionShimmer(p => ({ ...p, privacy: false })), 600);
-                        }}
-                        className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3 relative overflow-hidden cursor-pointer select-none"
-                    >
-                        <div className="w-8 h-8 bg-gradient-to-br from-blue-400 via-blue-600 to-blue-800 rounded-lg flex items-center justify-center transition-transform duration-500">
-                            <Eye className={`w-4 h-4 text-white ${sectionSpin.privacy ? 'rotate-180 transition-transform duration-500' : ''}`} />
+                    <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3 relative overflow-hidden select-none">
+                        <div className="w-8 h-8 bg-gradient-to-br from-blue-400 via-blue-600 to-blue-800 rounded-lg flex items-center justify-center shadow-lg transition-transform duration-300 security-icon-glow security-icon-pulse security-icon-rotate security-icon-shimmer relative overflow-hidden">
+                            <Eye className="w-4 h-4 text-white relative z-10" />
                         </div>
                         <span className="relative z-10">Приватність</span>
-                        <div className={`absolute left-0 top-1/2 -translate-y-1/2 h-3 rounded-full bg-white/30 transition-all duration-500 ${sectionShimmer.privacy ? 'w-full' : 'w-0'}`}></div>
                     </h3>
                 <div className="space-y-4">
                         <div className={`rounded-xl p-4 border group/field privacy-field transition-all duration-500 ease-in-out ${
