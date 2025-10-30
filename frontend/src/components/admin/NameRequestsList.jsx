@@ -21,24 +21,65 @@ const NameRequestsList = ({ nameRequests = [], onApprove = () => {}, onReject = 
     return (
         <div className="space-y-6">
             <div className="text-2xl font-semibold mb-1">Заявки на зміну імені</div>
-            <div className="text-gray-600 mb-6">
-                Тут ви можете розглядати запити студентів на зміну імені, прізвища або по батькові. Підтверджений запит оновить ці дані в акаунті студенту.
-            </div>
-            {nameRequests.map(req => (
-                <div key={req._id || req.id} className="bg-white rounded-2xl p-6 shadow-xl border border-blue-100 flex flex-col md:flex-row md:items-center gap-6 md:gap-10 animate-[slideInFromLeft_0.6s_ease-out_both]">
-                    <div className="flex-1 space-y-2">
-                        <div><span className="font-medium text-gray-700">Користувач:</span> {req.userId?.displayName || req.userId?.email || req.userDisplayName}</div>
-                        <div><span className="font-medium text-gray-700">Поточне ім'я:</span> {req.currentFirstName} {req.currentLastName}</div>
-                        <div><span className="font-medium text-gray-700">Нове ім'я:</span> {req.newFirstName}</div>
-                        <div><span className="font-medium text-gray-700">Нове прізвище:</span> {req.newLastName}</div>
-                        {req.newMiddleName && <div><span className="font-medium text-gray-700">По батькові:</span> {req.newMiddleName}</div>}
-                        {req.reason && <div><span className="font-medium text-gray-700">Причина:</span> {req.reason}</div>}
+            <div className="text-gray-600 mb-6">Тут ви можете розглядати запити студентів на зміну імені. Підтверджений запит оновить дані в акаунті.</div>
+
+            {nameRequests.map((req) => (
+                <div
+                    key={req._id || req.id}
+                    className="bg-white rounded-2xl p-6 shadow-xl border border-gray-200 animate-[slideInFromLeft_0.6s_ease-out_both]"
+                >
+                    <div className="flex items-start justify-between gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-x-8 gap-y-3 w-full">
+                            <div className="text-gray-700 font-medium">Користувач:</div>
+                            <div className="text-gray-900 break-words">
+                                {req.userId?.displayName || req.userId?.email || req.userDisplayName || '—'}
+                            </div>
+
+                            <div className="text-gray-700 font-medium">Поточне ім'я:</div>
+                            <div className="text-gray-900 break-words">
+                                {(req.currentFirstName || '') + ' ' + (req.currentLastName || '')}
+                            </div>
+
+                            <div className="text-gray-700 font-medium">Нове ім'я:</div>
+                            <div className="text-gray-900 break-words">{req.newFirstName || '—'}</div>
+
+                            <div className="text-gray-700 font-medium">Нове прізвище:</div>
+                            <div className="text-gray-900 break-words">{req.newLastName || '—'}</div>
+
+                            {req.newMiddleName ? (
+                                <>
+                                    <div className="text-gray-700 font-medium">По батькові:</div>
+                                    <div className="text-gray-900 break-words">{req.newMiddleName}</div>
+                                </>
+                            ) : null}
+
+                            {(
+                                <>
+                                    <div className="text-gray-700 font-medium">Причина:</div>
+                                    <div className="text-gray-900/80 break-words">{req.reason || '—'}</div>
+                                </>
+                            )}
+                        </div>
+
+                        <div className="text-xs text-gray-400 whitespace-nowrap ml-auto pl-2 pt-1">
+                            Створено: {req.createdAt ? new Date(req.createdAt).toLocaleDateString('uk-UA') : '—'}
+                        </div>
                     </div>
-                    <div className="flex items-center gap-4 mt-4 md:mt-0">
-                        <button className="px-5 py-2 bg-green-500 hover:bg-green-600 text-white font-medium rounded-xl transition" onClick={() => onApprove(req._id || req.id)}>Підтвердити</button>
-                        <button className="px-5 py-2 bg-red-500 hover:bg-red-600 text-white font-medium rounded-xl transition" onClick={() => onReject(req._id || req.id)}>Відхилити</button>
+
+                    <div className="mt-6 flex flex-wrap items-center justify-end gap-3">
+                        <button
+                            className="px-5 py-2 rounded-full bg-green-500 hover:bg-green-600 text-white font-medium transition-colors shadow-sm active:scale-[0.98]"
+                            onClick={() => onApprove(req._id || req.id)}
+                        >
+                            Підтвердити
+                        </button>
+                        <button
+                            className="px-5 py-2 rounded-full bg-red-500 hover:bg-red-600 text-white font-medium transition-colors shadow-sm active:scale-[0.98]"
+                            onClick={() => onReject(req._id || req.id)}
+                        >
+                            Відхилити
+                        </button>
                     </div>
-                    <div className="text-xs text-gray-400 mt-2 md:mt-0 md:text-right">Створено: {new Date(req.createdAt).toLocaleDateString('uk-UA')}</div>
                 </div>
             ))}
         </div>
