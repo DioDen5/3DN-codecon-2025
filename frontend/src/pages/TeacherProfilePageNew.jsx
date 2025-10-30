@@ -241,7 +241,7 @@ const TeacherProfilePageNew = () => {
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-100/50 to-blue-200/30 rounded-full -translate-y-16 translate-x-16 animate-pulse"></div>
                 <div className="relative">
                     <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-3">
-                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-800 rounded-lg flex items-center justify-center">
+                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-800 rounded-lg flex items-center justify-center shadow-lg transition-transform duration-300 security-icon-glow security-icon-pulse security-icon-rotate security-icon-shimmer relative overflow-hidden">
                             <BookOpen className="w-4 h-4 text-white" />
                         </div>
                         Біографія
@@ -255,7 +255,7 @@ const TeacherProfilePageNew = () => {
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-cyan-100/50 to-blue-100/30 rounded-full -translate-y-16 translate-x-16 animate-pulse"></div>
                 <div className="relative">
                     <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-3">
-                        <div className="w-8 h-8 bg-gradient-to-r from-blue-800 to-blue-500 rounded-lg flex items-center justify-center">
+                        <div className="w-8 h-8 bg-gradient-to-r from-blue-800 to-blue-500 rounded-lg flex items-center justify-center shadow-lg transition-transform duration-300 security-icon-glow security-icon-pulse security-icon-rotate security-icon-shimmer relative overflow-hidden">
                             <Mail className="w-4 h-4 text-white" />
                         </div>
                         Контактна інформація
@@ -282,7 +282,7 @@ const TeacherProfilePageNew = () => {
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-100/50 to-blue-200/30 rounded-full -translate-y-16 translate-x-16 animate-pulse"></div>
                 <div className="relative">
                     <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-3">
-                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-lg transition-transform duration-300 security-icon-glow security-icon-pulse security-icon-rotate security-icon-shimmer relative overflow-hidden">
                             <Star className="w-4 h-4 text-white" />
                         </div>
                         Статистика відгуків
@@ -333,7 +333,7 @@ const TeacherProfilePageNew = () => {
                 
                 <div className="relative">
                     <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg flex items-center justify-center">
+                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg flex items-center justify-center shadow-lg transition-transform duration-300 security-icon-glow security-icon-pulse security-icon-rotate security-icon-shimmer relative overflow-hidden">
                             <User className="w-4 h-4 text-white" />
                         </div>
                         Налаштування профілю
@@ -414,7 +414,7 @@ const TeacherProfilePageNew = () => {
                 
                 <div className="relative">
                     <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                        <div className="w-8 h-8 bg-gradient-to-br from-blue-400 via-blue-600 to-blue-800 rounded-lg flex items-center justify-center">
+                        <div className="w-8 h-8 bg-gradient-to-br from-blue-400 via-blue-600 to-blue-800 rounded-lg flex items-center justify-center shadow-lg transition-transform duration-300 security-icon-glow security-icon-pulse security-icon-rotate security-icon-shimmer relative overflow-hidden">
                             <Eye className="w-4 h-4 text-white" />
                         </div>
                         Приватність
@@ -567,9 +567,11 @@ const TeacherProfilePageNew = () => {
                 </div>
 
                 {/* Контент табів */}
-                {activeTab === 'profile' && renderProfileTab()}
-                {activeTab === 'reviews' && renderReviewsTab()}
-                {activeTab === 'settings' && renderSettingsTab()}
+                <div key={activeTab} className="animate-[slideInFromLeft_0.6s_ease-out_both]">
+                    {activeTab === 'profile' && renderProfileTab()}
+                    {activeTab === 'reviews' && renderReviewsTab()}
+                    {activeTab === 'settings' && renderSettingsTab()}
+                </div>
             </div>
 
             {/* Модальне вікно для зміни імені */}
