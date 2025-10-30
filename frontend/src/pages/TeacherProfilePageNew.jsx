@@ -282,25 +282,25 @@ const TeacherProfilePageNew = () => {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                 <div className="bg-white text-black rounded-xl p-3 md:p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
                     <Star className="w-6 h-6 md:w-8 md:h-8 text-green-500 mx-auto mb-2" />
-                    <div className="text-lg md:text-2xl font-bold text-gray-900">{stats.averageRating}/10</div>
+                    <div className="text-lg md:text-2xl font-bold text-gray-900 stat-number-pop">{stats.averageRating}/10</div>
                     <div className="text-xs md:text-sm text-gray-600">Середня оцінка</div>
                 </div>
                 
                 <div className="bg-white text-black rounded-xl p-3 md:p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
                     <MessageSquare className="w-6 h-6 md:w-8 md:h-8 text-orange-500 mx-auto mb-2" />
-                    <div className="text-lg md:text-2xl font-bold text-gray-900">{stats.reviews}</div>
+                    <div className="text-lg md:text-2xl font-bold text-gray-900 stat-number-pop">{stats.reviews}</div>
                     <div className="text-xs md:text-sm text-gray-600">Відгуків</div>
                 </div>
                 
                 <div className="bg-white text-black rounded-xl p-3 md:p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
                     <ThumbsUp className="w-6 h-6 md:w-8 md:h-8 text-purple-500 mx-auto mb-2" />
-                    <div className="text-lg md:text-2xl font-bold text-gray-900">{stats.totalLikes}</div>
+                    <div className="text-lg md:text-2xl font-bold text-gray-900 stat-number-pop">{stats.totalLikes}</div>
                     <div className="text-xs md:text-sm text-gray-600">Подобається</div>
                 </div>
                 
                 <div className="bg-white text-black rounded-xl p-3 md:p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
                     <GraduationCap className="w-6 h-6 md:w-8 md:h-8 text-pink-500 mx-auto mb-2" />
-                    <div className="text-lg md:text-2xl font-bold text-gray-900">AI/ML</div>
+                    <div className="text-lg md:text-2xl font-bold text-gray-900 stat-number-pop">AI/ML</div>
                     <div className="text-xs md:text-sm text-gray-600">Спеціалізація</div>
                 </div>
             </div>
