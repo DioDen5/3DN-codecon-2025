@@ -10,15 +10,6 @@ import ProfilePictureUpload from '../components/ProfilePictureUpload';
 
 const UserProfilePage = () => {
     const { user } = useAuthState();
-    
-    // Перевіряємо роль користувача і показуємо відповідний профіль
-    if (user?.role === 'teacher') {
-        return <TeacherProfilePageNew />;
-    }
-    
-    if (user?.role === 'admin') {
-        return <AdminProfilePage />;
-    }
     const [activeTab, setActiveTab] = useState(() => {
         // Відновлюємо вибрану вкладку з localStorage або використовуємо 'profile' за замовчуванням
         return localStorage.getItem('userProfileActiveTab') || 'profile';
@@ -1020,6 +1011,10 @@ const UserProfilePage = () => {
             </div>
         );
     }
+
+    // Після виклику всіх хуків: умовний рендер за роллю
+    if (user?.role === 'teacher') return <TeacherProfilePageNew />;
+    if (user?.role === 'admin') return <AdminProfilePage />;
 
     return (
         <div className="min-h-[calc(100vh-68px)] bg-gradient-to-b from-black to-gray-900 text-white">

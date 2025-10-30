@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, User, AlertCircle, CheckCircle, Clock, MessageSquare } from 'lucide-react';
 import { requestNameChange, getNameChangeStatus, cancelNameChangeRequest } from '../api/name-change';
+import { useAuthState } from '../api/useAuthState';
 
 const NameChangeModal = ({ isOpen, onClose, currentName }) => {
+    const { user } = useAuthState();
     const [formData, setFormData] = useState({
         newFirstName: '',
         newLastName: '',
@@ -256,20 +258,22 @@ const NameChangeModal = ({ isOpen, onClose, currentName }) => {
                                 </div>
                             </div>
 
-                            {/* По батькові */}
-                            <div>
-                                <label className="name-change-label">
-                                    По батькові:
-                                </label>
-                                <input
-                                    type="text"
-                                    name="newMiddleName"
-                                    value={formData.newMiddleName}
-                                    onChange={handleInputChange}
-                                    className="name-change-input"
-                                    placeholder="Введіть по батькові"
-                                />
-                            </div>
+                            {/* По батькові – тільки для викладачів */}
+                            {user?.role === 'teacher' && (
+                                <div>
+                                    <label className="name-change-label">
+                                        По батькові:
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="newMiddleName"
+                                        value={formData.newMiddleName}
+                                        onChange={handleInputChange}
+                                        className="name-change-input"
+                                        placeholder="Введіть по батькові"
+                                    />
+                                </div>
+                            )}
 
 
                             <div>
