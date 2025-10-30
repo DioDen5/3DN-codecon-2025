@@ -650,7 +650,7 @@ const UserProfilePage = () => {
                 
                 <div className="relative">
                     <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3 relative select-none">
-                        <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg flex items-center justify-center shadow-lg transition-transform duration-300 security-icon-glow security-icon-pulse security-icon-rotate security-icon-shimmer relative overflow-hidden">
+                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg flex items-center justify-center shadow-lg transition-transform duration-300 security-icon-glow security-icon-pulse security-icon-rotate security-icon-shimmer relative overflow-hidden">
                             <User className="w-4 h-4 text-white relative z-10" />
                         </div>
                         <span className="relative z-10">Налаштування профілю</span>
@@ -732,7 +732,7 @@ const UserProfilePage = () => {
                 
                 <div className="relative">
                     <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3 relative select-none">
-                        <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg flex items-center justify-center shadow-lg transition-transform duration-300 security-icon-glow security-icon-pulse security-icon-rotate security-icon-shimmer relative overflow-hidden">
+                        <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg flex items-center justify-center shadow-lg transition-transform duration-300 security-icon-glow security-icon-pulse security-icon-rotate security-icon-shimmer relative overflow-hidden">
                             <Shield className="w-4 h-4 text-white relative z-10" />
                         </div>
                         <span className="relative z-10">Безпека</span>
@@ -785,7 +785,7 @@ const UserProfilePage = () => {
                 
                 <div className="relative">
                     <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3 relative select-none">
-                        <div className="w-10 h-10 bg-gradient-to-br from-blue-400 via-blue-600 to-blue-800 rounded-lg flex items-center justify-center shadow-lg transition-transform duration-300 security-icon-glow security-icon-pulse security-icon-rotate security-icon-shimmer relative overflow-hidden">
+                        <div className="w-8 h-8 bg-gradient-to-br from-blue-400 via-blue-600 to-blue-800 rounded-lg flex items-center justify-center shadow-lg transition-transform duration-300 security-icon-glow security-icon-pulse security-icon-rotate security-icon-shimmer relative overflow-hidden">
                             <Eye className="w-4 h-4 text-white relative z-10" />
                         </div>
                         <span className="relative z-10">Приватність</span>
