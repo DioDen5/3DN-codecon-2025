@@ -24,7 +24,7 @@ const NameRequestModal = ({ isOpen, onClose, request, onApprove, onReject }) => 
     return createPortal(
         <div className={`fixed inset-0 z-50 flex items-center justify-center ${isClosing ? 'modal-closing' : 'report-backdrop-animate'}`}>
             <div className={`absolute inset-0 bg-black/50 backdrop-blur-sm ${isClosing ? '' : 'report-backdrop-animate'}`} onClick={handleClose} />
-            <div className={`bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 relative overflow-hidden ${isClosing ? 'modal-closing' : 'report-modal-animate'} ring-1 ring-white/10 shadow-[0_0_120px_24px_rgba(37,99,235,0.28)]`}>
+            <div className={`bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 relative overflow-hidden ${isClosing ? 'modal-closing' : 'report-modal-animate'} ring-1 ring-white/10 shadow-[0_0_108px_22px_rgba(37,99,235,0.25)]`}>
                 <div className="px-6 py-4 relative overflow-hidden bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700">
                     <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-blue-500/20"></div>
                     <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
@@ -70,7 +70,7 @@ const NameRequestModal = ({ isOpen, onClose, request, onApprove, onReject }) => 
                         </div>
                     </div>
 
-                    <div className="rounded-xl p-6 mb-6 border relative overflow-hidden bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200">
+                    <div className="rounded-xl p-6 mb-6 border relative overflow-hidden bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200 comment-animate-blue">
                         <div className="absolute top-0 right-0 w-16 h-16 rounded-full -translate-y-8 translate-x-8 bg-blue-100/30"></div>
                         <div className="relative space-y-2 text-blue-900">
                             <h3 className="text-lg font-semibold mb-2 text-blue-700">Дані запиту</h3>
