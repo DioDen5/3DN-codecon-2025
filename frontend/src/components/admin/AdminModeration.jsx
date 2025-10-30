@@ -6,6 +6,7 @@ import CommentsList from './CommentsList';
 import ReviewsList from './ReviewsList';
 import AllContentList from './AllContentList';
 import ModerationPagination from './ModerationPagination';
+import NameRequestsList from './NameRequestsList';
 
 const AdminModeration = ({
     moderationFilter,
@@ -141,6 +142,10 @@ const AdminModeration = ({
                             />
                         )}
                     </>
+                )}
+
+                {moderationFilter === 'name-requests' && (
+                    <NameRequestsList />
                 )}
             </div>
         </div>

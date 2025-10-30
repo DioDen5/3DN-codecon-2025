@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileText, MessageSquare, MessageCircle, Star } from 'lucide-react';
+import { FileText, MessageSquare, MessageCircle, Star, UserRound } from 'lucide-react';
 import SearchInput from '../SearchInput';
 
 const ModerationFilters = ({ 
@@ -14,7 +14,8 @@ const ModerationFilters = ({
         { id: 'all', label: 'Весь контент', icon: FileText },
         { id: 'announcements', label: 'Обговорення', icon: MessageSquare },
         { id: 'comments', label: 'Коментарі', icon: MessageCircle },
-        { id: 'reviews', label: 'Відгуки', icon: Star }
+        { id: 'reviews', label: 'Відгуки', icon: Star },
+        { id: 'name-requests', label: 'Зміна імені', icon: UserRound }
     ];
 
     return (
@@ -40,6 +41,8 @@ const ModerationFilters = ({
                                             ? 'bg-green-500 text-white shadow-lg transform scale-105'
                                             : filter.id === 'reviews'
                                             ? 'bg-purple-500 text-white shadow-lg transform scale-105'
+                                            : filter.id === 'name-requests'
+                                            ? 'bg-blue-400 text-white shadow-lg transform scale-105'
                                             : 'bg-blue-500 text-white shadow-lg transform scale-105'
                                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-105'
                                 }`}
