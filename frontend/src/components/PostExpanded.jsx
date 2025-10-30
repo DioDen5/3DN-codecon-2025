@@ -193,7 +193,7 @@ const PostExpanded = ({ post, onReaction, searchQuery = '', onDelete }) => {
                                 button.classList.add('button-pulse');
                                 setTimeout(() => button.classList.remove('button-pulse'), 600);
                             }}
-                            className={`flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 transform ${
+                            className={`flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 transform cursor-pointer ${
                                 openMenu 
                                     ? 'text-blue-600 bg-blue-50 scale-110 shadow-lg' 
                                     : 'text-gray-500 hover:text-blue-600 hover:bg-blue-50 hover:scale-105'
@@ -212,7 +212,7 @@ const PostExpanded = ({ post, onReaction, searchQuery = '', onDelete }) => {
                             <div className="absolute right-0 top-8 z-[9999] bg-white border border-gray-200 rounded-lg shadow-xl w-[140px] menu-enter backdrop-blur-sm overflow-hidden">
                                 <button
                                     onClick={handleDeleteClick}
-                                    className="flex items-center justify-center gap-1 w-full px-4 py-2 text-xs text-red-600 bg-transparent hover:text-red-800 transition-colors duration-200"
+                                    className="flex items-center justify-center gap-1 w-full px-4 py-2 text-xs text-red-600 bg-transparent hover:text-red-800 transition-colors duration-200 cursor-pointer"
                                 >
                                     <Trash2 size={12} />
                                     Видалити
@@ -229,7 +229,7 @@ const PostExpanded = ({ post, onReaction, searchQuery = '', onDelete }) => {
                                 button.classList.add('button-pulse');
                                 setTimeout(() => button.classList.remove('button-pulse'), 600);
                             }}
-                            className={`flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 transform ${
+                            className={`flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 transform cursor-pointer ${
                                 openMenu 
                                     ? 'text-orange-600 bg-orange-50 scale-110 shadow-lg' 
                                     : 'text-gray-500 hover:text-orange-600 hover:bg-orange-50 hover:scale-105'
@@ -248,7 +248,7 @@ const PostExpanded = ({ post, onReaction, searchQuery = '', onDelete }) => {
                             <div className="absolute right-0 top-8 z-[9999] bg-white border border-gray-200 rounded-lg shadow-xl w-[140px] menu-enter backdrop-blur-sm overflow-hidden">
                                 <button
                                     onClick={handleReport}
-                                    className="flex items-center justify-center gap-1 w-full px-4 py-2 text-xs text-orange-600 bg-transparent hover:text-orange-800 hover:bg-orange-50 transition-colors duration-200"
+                                    className="flex items-center justify-center gap-1 w-full px-4 py-2 text-xs text-orange-600 bg-transparent hover:text-orange-800 hover:bg-orange-50 transition-colors duration-200 cursor-pointer"
                                 >
                                     <Flag size={12} />
                                     Поскаржитися
@@ -267,7 +267,7 @@ const PostExpanded = ({ post, onReaction, searchQuery = '', onDelete }) => {
                 <button
                     disabled={pending}
                     onClick={() => onVote(1)}
-                    className={`flex items-center gap-2 border border-black rounded px-3 py-2 transition-all duration-300 ease-out hover:scale-105 active:scale-95 hover:bg-black hover:text-white ${
+                    className={`flex items-center gap-2 border border-black rounded px-3 py-2 transition-all duration-300 ease-out hover:scale-105 active:scale-95 hover:bg-black hover:text-white cursor-pointer ${
                         post.counts?.userReaction === 1 ? 'bg-black text-white' : ''
                     } ${
                         pending ? 'opacity-60 cursor-not-allowed' : ''
@@ -281,7 +281,7 @@ const PostExpanded = ({ post, onReaction, searchQuery = '', onDelete }) => {
                 <button
                     disabled={pending}
                     onClick={() => onVote(-1)}
-                    className={`flex items-center gap-2 border border-black rounded px-3 py-2 transition-all duration-300 ease-out hover:scale-105 active:scale-95 hover:bg-black hover:text-white ${
+                    className={`flex items-center gap-2 border border-black rounded px-3 py-2 transition-all duration-300 ease-out hover:scale-105 active:scale-95 hover:bg-black hover:text-white cursor-pointer ${
                         post.counts?.userReaction === -1 ? 'bg-black text-white' : ''
                     } ${
                         pending ? 'opacity-60 cursor-not-allowed' : ''

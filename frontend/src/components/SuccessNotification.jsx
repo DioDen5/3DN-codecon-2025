@@ -60,7 +60,7 @@ const SuccessNotification = ({ message, isVisible, onClose, type = 'success' }) 
                 {/* Хрестик закриття в правому верхньому кутку */}
                 <button
                     onClick={handleClose}
-                    className="absolute top-3 right-3 p-2 hover:bg-white/20 rounded-full transition-all duration-200 hover:scale-110 group z-10"
+                    className="absolute top-3 right-3 p-2 hover:bg-white/20 rounded-full transition-all duration-200 hover:scale-110 group z-10 cursor-pointer"
                 >
                     <X className="w-5 h-5 spin-close" />
                 </button>

@@ -46,7 +46,7 @@ export default function CommentInput({ onSubmit }) {
                 value={value}
                 onChange={(e)=>setValue(e.target.value)}
             />
-            <button disabled={busy} className="bg-blue-600 text-white rounded px-3 py-2 disabled:opacity-50">
+            <button disabled={busy} className="bg-blue-600 text-white rounded px-3 py-2 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed">
                 {busy ? 'Відправляємо…' : 'Надіслати'}
             </button>
         </form>

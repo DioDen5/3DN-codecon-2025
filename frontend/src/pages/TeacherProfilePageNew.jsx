@@ -350,7 +350,7 @@ const TeacherProfilePageNew = () => {
                                 </div>
                                 <button 
                                     onClick={handleOpenNameChangeModal}
-                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 hover:scale-105 flex items-center gap-2"
+                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 hover:scale-105 flex items-center gap-2 cursor-pointer"
                                 >
                                     <Edit3 size={16} />
                                     Редагувати
@@ -396,7 +396,7 @@ const TeacherProfilePageNew = () => {
                             {nameChangeRequest.status === 'pending' && (
                                 <button
                                     onClick={handleOpenNameChangeModal}
-                                    className="mt-3 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm"
+                                    className="mt-3 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm cursor-pointer"
                                 >
                                     Переглянути деталі
                                 </button>
@@ -515,7 +515,7 @@ const TeacherProfilePageNew = () => {
                     <p className="text-red-500 mb-4">Викладач не знайдений</p>
                     <button 
                         onClick={() => navigate('/teachers')}
-                        className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition"
+                        className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition cursor-pointer"
                     >
                         Повернутися до списку
                     </button>
@@ -530,7 +530,7 @@ const TeacherProfilePageNew = () => {
                 {/* Кнопка назад */}
                 <button
                     onClick={() => navigate('/teachers')}
-                    className="text-sm underline text-white hover:text-blue-300 transition mb-6"
+                    className="text-sm underline text-white hover:text-blue-300 transition mb-6 cursor-pointer"
                 >
                     ← Назад до списку викладачів
                 </button>
@@ -545,7 +545,7 @@ const TeacherProfilePageNew = () => {
                                     <button
                                         key={tab.id}
                                         onClick={() => handleTabChange(tab.id)}
-                                        className={`profile-tab flex items-center justify-center gap-2 md:gap-3 py-3 md:py-4 px-3 md:px-6 rounded-xl font-bold text-sm md:text-lg transition-all duration-300 flex-1 ${
+                                        className={`profile-tab flex items-center justify-center gap-2 md:gap-3 py-3 md:py-4 px-3 md:px-6 rounded-xl font-bold text-sm md:text-lg transition-all duration-300 flex-1 cursor-pointer ${
                                             tab.id === 'profile' ? 'ml-2' : tab.id === 'settings' ? 'mr-2' : ''
                                         } ${
                                             activeTab === tab.id

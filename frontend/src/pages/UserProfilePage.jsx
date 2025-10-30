@@ -507,7 +507,7 @@ const UserProfilePage = () => {
                                         disabled={!pagination.hasPrevPage}
                                         className={`group relative overflow-hidden px-5 py-2.5 rounded-xl font-medium text-sm transition-all duration-500 transform ${
                                             pagination.hasPrevPage
-                                                ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:scale-105 hover:shadow-xl hover:shadow-blue-500/25 active:scale-95'
+                                                ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:scale-105 hover:shadow-xl hover:shadow-blue-500/25 active:scale-95 cursor-pointer'
                                                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                         }`}
                                     >
@@ -543,7 +543,7 @@ const UserProfilePage = () => {
                                                     <button
                                                         key={pageNum}
                                                         onClick={() => loadUserActivity(pageNum)}
-                                                        className={`relative w-10 h-10 rounded-xl font-semibold text-sm transition-all duration-500 transform ${
+                                                        className={`relative w-10 h-10 rounded-xl font-semibold text-sm transition-all duration-500 transform cursor-pointer ${
                                                             isActive
                                                                 ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white scale-110 shadow-lg shadow-blue-500/30'
                                                                 : 'bg-gray-100 text-gray-600 hover:bg-gradient-to-r hover:from-blue-100 hover:to-blue-200 hover:scale-105 hover:shadow-md'
@@ -565,7 +565,7 @@ const UserProfilePage = () => {
                                                     <span className="text-gray-400 font-medium">⋯</span>
                                                     <button
                                                         onClick={() => loadUserActivity(pagination.totalPages)}
-                                                        className="w-10 h-10 rounded-xl font-semibold text-sm bg-gray-100 text-gray-600 hover:bg-gradient-to-r hover:from-blue-100 hover:to-blue-200 hover:scale-105 hover:shadow-md transition-all duration-500"
+                                                        className="w-10 h-10 rounded-xl font-semibold text-sm bg-gray-100 text-gray-600 hover:bg-gradient-to-r hover:from-blue-100 hover:to-blue-200 hover:scale-105 hover:shadow-md transition-all duration-500 cursor-pointer"
                                                     >
                                                         {pagination.totalPages}
                                                     </button>
@@ -608,7 +608,7 @@ const UserProfilePage = () => {
                                         disabled={!pagination.hasNextPage}
                                         className={`group relative overflow-hidden px-5 py-2.5 rounded-xl font-medium text-sm transition-all duration-500 transform ${
                                             pagination.hasNextPage
-                                                ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:scale-105 hover:shadow-xl hover:shadow-blue-500/25 active:scale-95'
+                                                ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:scale-105 hover:shadow-xl hover:shadow-blue-500/25 active:scale-95 cursor-pointer'
                                                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                         }`}
                                     >
@@ -714,7 +714,7 @@ const UserProfilePage = () => {
                         {nameChangeRequest.status === 'pending' && (
                             <button
                                 onClick={handleOpenNameChangeModal}
-                                className="mt-3 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm"
+                                    className="mt-3 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm cursor-pointer"
                             >
                                 Переглянути деталі
                             </button>

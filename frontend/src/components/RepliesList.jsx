@@ -320,7 +320,7 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
                                                 button.classList.add('button-pulse');
                                                 setTimeout(() => button.classList.remove('button-pulse'), 600);
                                             }}
-                                            className={`flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 transform ${
+                                            className={`flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 transform cursor-pointer ${
                                                 openMenuId === reply._id 
                                                     ? 'text-blue-600 bg-blue-50 scale-110 shadow-lg' 
                                                     : 'text-gray-500 hover:text-blue-600 hover:bg-blue-50 hover:scale-105'
@@ -344,7 +344,7 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
                                                                 startEdit(reply);
                                                                 setOpenMenuId(null);
                                                             }}
-                                                            className="flex items-center justify-center gap-1 w-full px-4 py-2 text-xs text-blue-600 bg-transparent hover:text-blue-800 transition-colors duration-200"
+                                                            className="flex items-center justify-center gap-1 w-full px-4 py-2 text-xs text-blue-600 bg-transparent hover:text-blue-800 transition-colors duration-200 cursor-pointer"
                                                         >
                                                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -357,7 +357,7 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
                                                                 handleDeleteClick(reply._id, reply.body?.substring(0, 50) + '...');
                                                                 setOpenMenuId(null);
                                                             }}
-                                                            className="flex items-center justify-center gap-1 w-full px-4 py-2 text-xs text-red-600 bg-transparent hover:text-red-800 transition-colors duration-200"
+                                                            className="flex items-center justify-center gap-1 w-full px-4 py-2 text-xs text-red-600 bg-transparent hover:text-red-800 transition-colors duration-200 cursor-pointer"
                                                         >
                                                             <Trash2 size={12} />
                                                             Видалити
@@ -369,7 +369,7 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
                                                             handleReportClick(reply._id, reply.body?.substring(0, 50) + '...');
                                                             setOpenMenuId(null);
                                                         }}
-                                                        className="flex items-center justify-center gap-1 w-full px-4 py-2 text-xs text-orange-600 bg-transparent hover:text-orange-800 transition-colors duration-200"
+                                                        className="flex items-center justify-center gap-1 w-full px-4 py-2 text-xs text-orange-600 bg-transparent hover:text-orange-800 transition-colors duration-200 cursor-pointer"
                                                     >
                                                         <Flag size={12} />
                                                         Поскаржитися
@@ -418,7 +418,7 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
                                 <button
                                     disabled={pendingVotes.has(reply._id)}
                                     onClick={() => handleVote(reply._id, 'like')}
-                                    className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-all duration-300 ease-out hover:scale-105 active:scale-95 ${
+                                    className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-all duration-300 ease-out hover:scale-105 active:scale-95 cursor-pointer ${
                                         reply.userReaction === 1 
                                             ? 'bg-green-100 text-green-700' 
                                             : 'bg-gray-100 text-gray-600 hover:bg-green-50'
@@ -434,7 +434,7 @@ const RepliesList = ({ replies, onRepliesUpdate }) => {
                                 <button
                                     disabled={pendingVotes.has(reply._id)}
                                     onClick={() => handleVote(reply._id, 'dislike')}
-                                    className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-all duration-300 ease-out hover:scale-105 active:scale-95 ${
+                                    className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-all duration-300 ease-out hover:scale-105 active:scale-95 cursor-pointer ${
                                         reply.userReaction === -1 
                                             ? 'bg-red-100 text-red-700' 
                                             : 'bg-gray-100 text-gray-600 hover:bg-red-50'

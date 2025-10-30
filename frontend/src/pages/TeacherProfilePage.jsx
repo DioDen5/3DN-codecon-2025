@@ -158,7 +158,7 @@ const TeacherProfilePage = () => {
             <div className="max-w-4xl mx-auto space-y-6">
                 <button
                     onClick={() => navigate('/teachers')}
-                    className="text-sm underline text-white hover:text-purple-300 transition"
+                    className="text-sm underline text-white hover:text-purple-300 transition cursor-pointer"
                 >
                     ← Назад до списку
                 </button>

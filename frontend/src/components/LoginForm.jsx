@@ -61,25 +61,25 @@ const LoginForm = ({ switchToReset, onSuccess }) => {
             </div>
 
             <div className="flex items-center justify-between text-sm">
-                <label className="flex items-center space-x-2">
+                <label className="flex items-center space-x-2 cursor-pointer">
                     <input 
                         type="checkbox" 
                         name="rememberMe"
                         checked={rememberMe}
                         onChange={(e) => setRememberMe(e.target.checked)}
-                        className="form-checkbox h-4 w-4 rounded-sm bg-transparent border-white checked:bg-white" 
+                        className="form-checkbox h-4 w-4 rounded-sm bg-transparent border-white checked:bg-white cursor-pointer" 
                     />
-                    <span className="text-md">Запам'ятати мене</span>
+                    <span className="text-md cursor-pointer">Запам'ятати мене</span>
                 </label>
 
-                <button type="button" onClick={switchToReset} className="font-medium text-md text-indigo-300 hover:underline">
+                <button type="button" onClick={switchToReset} className="font-medium text-md text-indigo-300 hover:underline cursor-pointer">
                     Забули пароль?
                 </button>
             </div>
 
             {error && <p className="text-red-400">{error}</p>}
 
-            <button type="submit" className="w-full bg-blue-700 p-2 rounded-lg mt-8 text-white hover:bg-blue-800 transition">
+            <button type="submit" className="w-full bg-blue-700 p-2 rounded-lg mt-8 text-white hover:bg-blue-800 transition cursor-pointer">
                 Авторизуватися
             </button>
         </form>
