@@ -11,7 +11,6 @@ import ProfilePictureUpload from '../components/ProfilePictureUpload';
 const UserProfilePage = () => {
     const { user } = useAuthState();
     const [activeTab, setActiveTab] = useState(() => {
-        // Відновлюємо вибрану вкладку з localStorage або використовуємо 'profile' за замовчуванням
         return localStorage.getItem('userProfileActiveTab') || 'profile';
     });
     const [stats, setStats] = useState({
@@ -48,13 +47,13 @@ const UserProfilePage = () => {
         emailOnPostComments: false
     });
 
-    // Функція для зміни вкладки з збереженням в localStorage
+    // Role-based rendering moved below, after hooks, to keep hook order stable
+
     const handleTabChange = (tabId) => {
         setActiveTab(tabId);
         localStorage.setItem('userProfileActiveTab', tabId);
     };
 
-    // Функція для завантаження статистики
     const loadUserStats = async () => {
         try {
             setLoading(true);
@@ -62,13 +61,11 @@ const UserProfilePage = () => {
             setStats(userStats);
         } catch (error) {
             console.error('Error loading user stats:', error);
-            // Використовуємо значення за замовчуванням при помилці
         } finally {
             setLoading(false);
         }
     };
 
-    // Функція для завантаження статусу запиту на зміну імені
     const loadNameChangeStatus = async () => {
         try {
             const response = await getNameChangeStatus();
@@ -83,16 +80,13 @@ const UserProfilePage = () => {
         }
     };
 
-    // Функція для завантаження активності
     const loadUserActivity = async (page = 1, animate = true) => {
         try {
             if (animate) {
                 setActivityLoading(true);
             }
             const response = await getUserActivity(page, 5);
-            
             if (animate) {
-                // Плавна анімація зміни контенту
                 setActivity([]);
                 setTimeout(() => {
                     setActivity(response.activities || []);
@@ -128,7 +122,6 @@ const UserProfilePage = () => {
         }
     };
 
-    // Функції для навігації по сторінках
     const handleNextPage = () => {
         if (pagination.hasNextPage) {
             loadUserActivity(currentPage + 1);
@@ -141,7 +134,6 @@ const UserProfilePage = () => {
         }
     };
 
-    // Завантаження статистики користувача
     useEffect(() => {
         if (user) {
             loadUserStats();
@@ -153,12 +145,9 @@ const UserProfilePage = () => {
     const loadUserProfile = async () => {
         try {
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            
             const response = await fetch('/api/user/profile/profile', {
                 credentials: 'include',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+                headers: { 'Authorization': `Bearer ${token}` }
             });
             if (response.ok) {
                 const data = await response.json();
@@ -175,31 +164,35 @@ const UserProfilePage = () => {
         }
     };
 
-    // Оновлення статистики тільки при переключенні на вкладку профілю
     useEffect(() => {
         if (user && activeTab === 'profile') {
             loadUserStats();
         }
     }, [activeTab, user]);
 
-    // Завантаження активності при переключенні на вкладку активності
     useEffect(() => {
         if (user && activeTab === 'activity') {
             loadUserActivity();
         }
     }, [activeTab, user]);
 
-    // Оновлення активності при фокусі на сторінку
     useEffect(() => {
         const handleFocus = () => {
             if (user && activeTab === 'activity') {
                 loadUserActivity();
             }
         };
-
         window.addEventListener('focus', handleFocus);
         return () => window.removeEventListener('focus', handleFocus);
     }, [user, activeTab]);
+
+    // Role-based rendering after hooks
+    if (user?.role === 'teacher') {
+        return <TeacherProfilePageNew />;
+    }
+    if (user?.role === 'admin') {
+        return <AdminProfilePage />;
+    }
 
     const tabs = [
         { id: 'profile', label: 'Профіль', icon: User },
@@ -210,36 +203,19 @@ const UserProfilePage = () => {
     const formatDate = (dateString) => {
         if (!dateString) return 'Невідомо';
         const date = new Date(dateString);
-        return date.toLocaleDateString('uk-UA', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
+        return date.toLocaleDateString('uk-UA', { year: 'numeric', month: 'long', day: 'numeric' });
     };
 
-    // Функція для форматування відносної дати
     const formatRelativeDate = (dateString) => {
         const date = new Date(dateString);
         const now = new Date();
         const diffInSeconds = Math.floor((now - date) / 1000);
-        
-        if (diffInSeconds < 60) {
-            return 'щойно';
-        } else if (diffInSeconds < 3600) {
-            const minutes = Math.floor(diffInSeconds / 60);
-            return `${minutes} хвилин тому`;
-        } else if (diffInSeconds < 86400) {
-            const hours = Math.floor(diffInSeconds / 3600);
-            return `${hours} годин тому`;
-        } else if (diffInSeconds < 604800) {
-            const days = Math.floor(diffInSeconds / 86400);
-            return `${days} днів тому`;
-        } else if (diffInSeconds < 2592000) {
-            const weeks = Math.floor(diffInSeconds / 604800);
-            return `${weeks} тижнів тому`;
-        } else {
-            return formatDate(dateString);
-        }
+        if (diffInSeconds < 60) return 'щойно';
+        if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} хвилин тому`;
+        if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} годин тому`;
+        if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} днів тому`;
+        if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 604800)} тижнів тому`;
+        return formatDate(dateString);
     };
 
     const getUserDisplayName = () => {
@@ -248,38 +224,21 @@ const UserProfilePage = () => {
         return 'Невідомий';
     };
 
-    const getUserEmail = () => {
-        return user?.email || 'student@lnu.edu.ua';
-    };
+    const getUserEmail = () => user?.email || 'student@lnu.edu.ua';
+    const getRegistrationDate = () => (user?.createdAt ? formatDate(user.createdAt) : 'Невідомо');
 
-    const getRegistrationDate = () => {
-        return user?.createdAt ? formatDate(user.createdAt) : 'Невідомо';
-    };
-
-    // Функції для обробки модального вікна зміни імені
-    const handleOpenNameChangeModal = () => {
-        setShowNameChangeModal(true);
-    };
-
-    const handleCloseNameChangeModal = () => {
-        setShowNameChangeModal(false);
-        // Перезавантажуємо статус після закриття модального вікна
-        loadNameChangeStatus();
-    };
+    const handleOpenNameChangeModal = () => setShowNameChangeModal(true);
+    const handleCloseNameChangeModal = () => { setShowNameChangeModal(false); loadNameChangeStatus(); };
 
     const handleProfilePictureChange = async (file) => {
         if (!file) {
-            // Видаляємо фото через API
             try {
                 const token = localStorage.getItem('token') || sessionStorage.getItem('token');
                 const response = await fetch('/api/user/profile/profile-picture', {
                     method: 'DELETE',
                     credentials: 'include',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
-                
                 if (response.ok) {
                     setProfilePicture(null);
                 } else {
@@ -295,16 +254,12 @@ const UserProfilePage = () => {
         try {
             const formData = new FormData();
             formData.append('profilePicture', file);
-            
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            
             const response = await fetch('/api/user/profile/profile-picture', {
                 method: 'POST',
                 body: formData,
                 credentials: 'include',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+                headers: { 'Authorization': `Bearer ${token}` }
             });
 
             if (response.ok) {
@@ -326,15 +281,11 @@ const UserProfilePage = () => {
             ...prev,
             [setting]: value
         }));
-        
-        // Запускаємо анімацію тільки при зміні на активний стан
         if (value) {
             setFieldAnimations(prev => ({
                 ...prev,
                 [setting]: true
             }));
-            
-            // Вимикаємо анімацію через час
             setTimeout(() => {
                 setFieldAnimations(prev => ({
                     ...prev,
@@ -342,138 +293,54 @@ const UserProfilePage = () => {
                 }));
             }, 600);
         }
-        
-        // Запускаємо анімацію чекбокса
         setCheckboxAnimations(prev => ({
             ...prev,
             [setting]: true
         }));
-        
-        // Вимикаємо анімацію через час
         setTimeout(() => {
             setCheckboxAnimations(prev => ({
                 ...prev,
                 [setting]: false
             }));
         }, 800);
-        
-        // Тут можна додати API виклик для збереження налаштувань
         console.log(`Privacy setting ${setting} changed to:`, value);
     };
 
-    // Функція для правильного склонування українською мовою
     const getPluralForm = (count, forms) => {
-        if (count % 10 === 1 && count % 100 !== 11) {
-            return forms[0]; // 1, 21, 31, 41, 51, 61, 71, 81, 91
-        } else if ([2, 3, 4].includes(count % 10) && ![12, 13, 14].includes(count % 100)) {
-            return forms[1]; // 2-4, 22-24, 32-34, 42-44, 52-54, 62-64, 72-74, 82-84, 92-94
-        } else {
-            return forms[2]; // 0, 5-20, 25-30, 35-40, 45-50, 55-60, 65-70, 75-80, 85-90, 95-100
-        }
+        if (count % 10 === 1 && count % 100 !== 11) return forms[0];
+        if ([2,3,4].includes(count % 10) && ![12,13,14].includes(count % 100)) return forms[1];
+        return forms[2];
     };
 
-    // Динамічні досягнення на основі реальних даних
     const getAchievements = () => {
         const userJoinDate = user?.createdAt ? new Date(user.createdAt) : null;
-        const monthsOnSite = userJoinDate ? Math.floor((new Date() - userJoinDate) / (1000 * 60 * 60 * 24 * 30)) : 0;
-
+        const monthsOnSite = userJoinDate ? Math.floor((new Date() - userJoinDate) / (1000*60*60*24*30)) : 0;
         return [
-            { 
-                id: 'first_post', 
-                name: 'Перший пост', 
-                description: 'Створив перше обговорення', 
-                earned: stats.discussions >= 1,
-                progress: Math.min(stats.discussions, 1),
-                target: 1
-            },
-            { 
-                id: 'active_commenter', 
-                name: 'Активний коментатор', 
-                description: '10+ коментарів', 
-                earned: stats.comments >= 10,
-                progress: Math.min(stats.comments, 10),
-                target: 10
-            },
-            { 
-                id: 'critic', 
-                name: 'Критик', 
-                description: '5+ відгуків про викладачів', 
-                earned: stats.reviews >= 5,
-                progress: Math.min(stats.reviews, 5),
-                target: 5
-            },
-            { 
-                id: 'popular', 
-                name: 'Популярний', 
-                description: '50+ лайків', 
-                earned: stats.totalLikes >= 50,
-                progress: Math.min(stats.totalLikes, 50),
-                target: 50
-            },
-            { 
-                id: 'veteran', 
-                name: 'Ветеран', 
-                description: 'На сайті 6+ місяців', 
-                earned: monthsOnSite >= 6,
-                progress: Math.min(monthsOnSite, 6),
-                target: 6
-            },
-            { 
-                id: 'discussion_master', 
-                name: 'Майстер обговорень', 
-                description: '20+ обговорень', 
-                earned: stats.discussions >= 20,
-                progress: Math.min(stats.discussions, 20),
-                target: 20
-            },
-            { 
-                id: 'comment_king', 
-                name: 'Король коментарів', 
-                description: '50+ коментарів', 
-                earned: stats.comments >= 50,
-                progress: Math.min(stats.comments, 50),
-                target: 50
-            },
-            { 
-                id: 'superstar', 
-                name: 'Суперзірка', 
-                description: '100+ лайків', 
-                earned: stats.totalLikes >= 100,
-                progress: Math.min(stats.totalLikes, 100),
-                target: 100
-            }
+            { id: 'first_post', name: 'Перший пост', description: 'Створив перше обговорення', earned: stats.discussions >= 1, progress: Math.min(stats.discussions, 1), target: 1 },
+            { id: 'active_commenter', name: 'Активний коментатор', description: '10+ коментарів', earned: stats.comments >= 10, progress: Math.min(stats.comments, 10), target: 10 },
+            { id: 'critic', name: 'Критик', description: '5+ відгуків про викладачів', earned: stats.reviews >= 5, progress: Math.min(stats.reviews, 5), target: 5 },
+            { id: 'popular', name: 'Популярний', description: '50+ лайків', earned: stats.totalLikes >= 50, progress: Math.min(stats.totalLikes, 50), target: 50 },
+            { id: 'veteran', name: 'Ветеран', description: 'На сайті 6+ місяців', earned: monthsOnSite >= 6, progress: Math.min(monthsOnSite, 6), target: 6 },
+            { id: 'discussion_master', name: 'Майстер обговорень', description: '20+ обговорень', earned: stats.discussions >= 20, progress: Math.min(stats.discussions, 20), target: 20 },
+            { id: 'comment_king', name: 'Король коментарів', description: '50+ коментарів', earned: stats.comments >= 50, progress: Math.min(stats.comments, 50), target: 50 },
+            { id: 'superstar', name: 'Суперзірка', description: '100+ лайків', earned: stats.totalLikes >= 100, progress: Math.min(stats.totalLikes, 100), target: 100 }
         ];
     };
 
     const achievements = getAchievements();
 
-
     const renderProfileTab = () => (
         <div className="space-y-6 md:space-y-8">
-            {/* Заголовок профілю */}
             <div className="profile-card bg-white text-black rounded-xl p-4 md:p-8 shadow-sm mb-6 md:mb-8">
                 <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
-                    <ProfilePictureUpload
-                        currentAvatar={profilePicture}
-                        userName={getUserDisplayName()}
-                        onImageChange={handleProfilePictureChange}
-                        size="large"
-                        className="w-16 h-16 sm:w-20 sm:h-20 md:w-23 md:h-23"
-                    />
+                    <ProfilePictureUpload currentAvatar={profilePicture} userName={getUserDisplayName()} onImageChange={handleProfilePictureChange} size="large" className="w-16 h-16 sm:w-20 sm:h-20 md:w-23 md:h-23" />
                     <div className="flex-1 text-center sm:text-left">
                         <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{getUserDisplayName()}</h1>
-                        <p className="text-sm sm:text-base text-gray-600 flex items-center justify-center sm:justify-start gap-2 mt-1">
-                            <Mail size={16} />
-                            {getUserEmail()}
-                        </p>
-                        <p className="text-sm sm:text-base text-gray-500 flex items-center justify-center sm:justify-start gap-2 mt-1">
-                            <GraduationCap size={16} />
-                            Студент
-                        </p>
+                        <p className="text-sm sm:text-base text-gray-600 flex items-center justify-center sm:justify-start gap-2 mt-1"><Mail size={16} />{getUserEmail()}</p>
+                        <p className="text-sm sm:text-base text-gray-500 flex items-center justify-center sm:justify-start gap-2 mt-1"><GraduationCap size={16} />Студент</p>
                     </div>
                 </div>
             </div>
-
             {/* Статистика */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                 <div className="bg-white text-black rounded-xl p-3 md:p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
@@ -1011,10 +878,6 @@ const UserProfilePage = () => {
             </div>
         );
     }
-
-    // Після виклику всіх хуків: умовний рендер за роллю
-    if (user?.role === 'teacher') return <TeacherProfilePageNew />;
-    if (user?.role === 'admin') return <AdminProfilePage />;
 
     return (
         <div className="min-h-[calc(100vh-68px)] bg-gradient-to-b from-black to-gray-900 text-white">
