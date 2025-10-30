@@ -5,6 +5,7 @@ import { useAuthState } from '../api/useAuthState';
 import { getNameChangeStatus } from '../api/name-change';
 import StarRating from '../components/StarRating';
 import NameChangeModal from '../components/NameChangeModal';
+import ProfilePictureUpload from '../components/ProfilePictureUpload';
 
 const TeacherProfilePageNew = () => {
     const { id } = useParams();
@@ -38,6 +39,8 @@ const TeacherProfilePageNew = () => {
     });
     const [nameChangeRequest, setNameChangeRequest] = useState(null);
     const [showNameChangeModal, setShowNameChangeModal] = useState(false);
+    const [profilePicture, setProfilePicture] = useState(null);
+    const [isUploadingPicture, setIsUploadingPicture] = useState(false);
 
     useEffect(() => {
         setTimeout(() => {
@@ -92,6 +95,7 @@ const TeacherProfilePageNew = () => {
     useEffect(() => {
         if (user) {
             loadNameChangeStatus();
+            loadUserProfile();
         }
     }, [user]);
 
@@ -128,6 +132,67 @@ const TeacherProfilePageNew = () => {
     // Функція для отримання поточного імені
     const getCurrentDisplayName = () => {
         return user?.displayName || teacher?.name || 'Викладач';
+    };
+
+    const loadUserProfile = async () => {
+        try {
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            const response = await fetch('/api/user/profile/profile', {
+                credentials: 'include',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success && data.profile.profilePicture) {
+                    setProfilePicture(data.profile.profilePicture);
+                }
+            }
+        } catch (e) {
+            console.error('Error loading profile picture:', e);
+        }
+    };
+
+    const handleProfilePictureChange = async (file) => {
+        if (!file) {
+            try {
+                const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+                const response = await fetch('/api/user/profile/profile-picture', {
+                    method: 'DELETE',
+                    credentials: 'include',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (response.ok) {
+                    setProfilePicture(null);
+                }
+            } catch (error) {
+                console.error('Error deleting profile picture:', error);
+            }
+            return;
+        }
+
+        setIsUploadingPicture(true);
+        try {
+            const formData = new FormData();
+            formData.append('profilePicture', file);
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            const response = await fetch('/api/user/profile/profile-picture', {
+                method: 'POST',
+                body: formData,
+                credentials: 'include',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (response.ok) {
+                const result = await response.json();
+                setProfilePicture(result.profilePictureUrl);
+            } else {
+                throw new Error('Failed to upload profile picture');
+            }
+        } catch (error) {
+            console.error('Error uploading profile picture:', error);
+            alert('Помилка при завантаженні фото профілю');
+        } finally {
+            setIsUploadingPicture(false);
+        }
     };
 
     const handlePrivacySettingChange = (setting, value) => {
@@ -185,9 +250,13 @@ const TeacherProfilePageNew = () => {
                 
                 <div className="relative">
                     <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
-                        <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-2xl sm:text-3xl font-bold shadow-lg">
-                            {teacher?.name?.charAt(0) || 'T'}
-                        </div>
+                        <ProfilePictureUpload
+                            currentAvatar={profilePicture}
+                            userName={getCurrentDisplayName()}
+                            onImageChange={handleProfilePictureChange}
+                            size="large"
+                            className="w-16 h-16 sm:w-20 sm:h-20 md:w-23 md:h-23"
+                        />
                         <div className="flex-1 text-center sm:text-left">
                             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{teacher?.name}</h1>
                             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-3">
