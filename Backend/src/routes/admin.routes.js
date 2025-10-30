@@ -220,6 +220,71 @@ router.get('/name-change-requests', authRequired, requireAdmin, async (req, res)
     }
 });
 
+// Схвалити запит на зміну імені та оновити дані користувача
+router.post('/name-change-requests/:id/approve', authRequired, requireAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const request = await NameChangeRequest.findById(id);
+        if (!request || request.status !== 'pending') {
+            return res.status(404).json({ error: 'Запит не знайдено або вже оброблено' });
+        }
+
+        const user = await User.findById(request.userId);
+        if (!user) return res.status(404).json({ error: 'Користувача не знайдено' });
+
+        user.firstName = request.newFirstName;
+        user.lastName = request.newLastName;
+        user.middleName = request.newMiddleName || null;
+        user.displayName = request.newDisplayName;
+        await user.save();
+
+        request.status = 'approved';
+        request.reviewedBy = req.user.id;
+        request.reviewedAt = new Date();
+        await request.save();
+
+        await ActivityLog.create({
+            userId: user._id,
+            action: 'name_change_approved',
+            description: `Ім'я користувача оновлено на ${user.displayName}`,
+            metadata: { requestId: request._id }
+        });
+
+        res.json({ message: 'Запит схвалено', request });
+    } catch (error) {
+        console.error('Approve name change request error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Відхилити запит на зміну імені
+router.post('/name-change-requests/:id/reject', authRequired, requireAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const request = await NameChangeRequest.findById(id);
+        if (!request || request.status !== 'pending') {
+            return res.status(404).json({ error: 'Запит не знайдено або вже оброблено' });
+        }
+
+        request.status = 'rejected';
+        request.reviewedBy = req.user.id;
+        request.reviewedAt = new Date();
+        await request.save();
+
+        await ActivityLog.create({
+            userId: request.userId,
+            action: 'name_change_rejected',
+            description: `Запит на зміну імені відхилено`,
+            metadata: { requestId: request._id }
+        });
+
+        res.json({ message: 'Запит відхилено', request });
+    } catch (error) {
+        console.error('Reject name change request error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 // Отримання останньої активності
 router.get('/activity', authRequired, requireAdmin, async (req, res) => {
     try {
