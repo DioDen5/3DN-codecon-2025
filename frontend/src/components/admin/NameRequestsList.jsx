@@ -107,9 +107,9 @@ const NameRequestsList = ({ nameRequests = [], onApprove = () => {}, onReject = 
             <div className="bg-white rounded-2xl p-8 shadow-xl border border-gray-200 animate-[slideInFromLeft_0.6s_ease-out_both]">
                 <div className="text-center py-12">
                     <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 review-icon-glow review-icon-pulse review-icon-rotate relative overflow-hidden" style={{ background: '#60A5FA' }}>
-                        <div className="absolute inset-0 review-icon-shimmer" style={{background: 'rgba(96,165,250,0.28)'}}></div>
+                        <div className="absolute inset-0 review-icon-shimmer opacity-30"></div>
                         <UserRound className="w-10 h-10 text-white relative z-10 drop-shadow-lg" />
-                        <div className="absolute inset-0" style={{background: 'radial-gradient(rgba(255,255,255,0.12) 55%, transparent 100%)'}}></div>
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-50"></div>
                     </div>
                     <h4 className="text-lg font-semibold text-gray-900 mb-2">Зміна імені</h4>
                     <p className="text-gray-600">Немає запитів на зміну імені</p>
