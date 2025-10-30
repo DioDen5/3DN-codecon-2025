@@ -914,9 +914,11 @@ const UserProfilePage = () => {
                 </div>
 
                 {/* Контент табів */}
-                {activeTab === 'profile' && renderProfileTab()}
-                {activeTab === 'activity' && renderActivityTab()}
-                {activeTab === 'settings' && renderSettingsTab()}
+                <div key={activeTab} className="animate-[slideInFromLeft_0.6s_ease-out_both]">
+                    {activeTab === 'profile' && renderProfileTab()}
+                    {activeTab === 'activity' && renderActivityTab()}
+                    {activeTab === 'settings' && renderSettingsTab()}
+                </div>
             </div>
 
             {/* Модальне вікно для зміни імені */}
