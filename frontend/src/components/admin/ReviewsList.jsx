@@ -35,7 +35,7 @@ const ReviewsList = ({
     };
     if (!reviewsContent || reviewsContent.length === 0) {
         return (
-            <div className="bg-white rounded-2xl p-8 shadow-xl border border-gray-200">
+            <div className="bg-white rounded-2xl p-8 shadow-xl border border-gray-200 animate-[slideInFromLeft_0.6s_ease-out_both]">
                 <div className="text-center py-12">
                     <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-purple-700 rounded-full flex items-center justify-center mx-auto mb-4 review-icon-glow review-icon-pulse review-icon-rotate relative overflow-hidden">
                         <div className="absolute inset-0 review-icon-shimmer opacity-30"></div>
