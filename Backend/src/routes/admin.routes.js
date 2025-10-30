@@ -209,7 +209,7 @@ router.get('/moderation', authRequired, requireAdmin, async (req, res) => {
 // Отримання запитів на зміну імені
 router.get('/name-change-requests', authRequired, requireAdmin, async (req, res) => {
     try {
-        const requests = await NameChangeRequest.find({ status: 'pending' })
+        const requests = await NameChangeRequest.find({ status: { $in: ['pending','approved'] } })
             .populate('userId', 'displayName email')
             .sort({ createdAt: -1 });
 

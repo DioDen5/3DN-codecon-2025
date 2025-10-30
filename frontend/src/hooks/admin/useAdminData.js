@@ -336,8 +336,8 @@ export const useAdminData = () => {
         try {
             const { approveNameChangeRequest } = await import('../../api/admin-stats');
             await approveNameChangeRequest(requestId);
+            setNameChangeRequests((prev) => prev.map((r) => (r._id === requestId || r.id === requestId ? { ...r, status: 'approved' } : r)));
             await loadNameChangeRequests();
-            await loadAdminData();
         } catch (e) {}
     };
 
