@@ -649,9 +649,9 @@ const UserProfilePage = () => {
                 <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-indigo-100/40 to-blue-100/30 rounded-full translate-y-12 -translate-x-12 animate-bounce decorative-element-2" style={{animationDuration: '3s'}}></div>
                 
                 <div className="relative">
-                    <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3 relative overflow-hidden select-none">
-                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg flex items-center justify-center shadow-lg transition-transform duration-300 security-icon-glow security-icon-pulse security-icon-rotate security-icon-shimmer relative overflow-hidden">
-                            <User className="w-4 h-4 text-white relative z-10" />
+                    <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-4 relative overflow-hidden select-none">
+                        <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg flex items-center justify-center shadow-lg transition-transform duration-300 security-icon-glow security-icon-pulse security-icon-rotate security-icon-shimmer relative overflow-hidden">
+                            <User className="w-5 h-5 text-white relative z-10" />
                         </div>
                         <span className="relative z-10">Налаштування профілю</span>
                     </h3>
@@ -731,9 +731,9 @@ const UserProfilePage = () => {
                 <div className="absolute top-1/2 left-1/2 w-16 h-16 bg-gradient-to-r from-cyan-100/30 to-blue-100/30 rounded-full -translate-x-8 -translate-y-8 animate-ping decorative-element-3" style={{animationDuration: '4s'}}></div>
                 
                 <div className="relative">
-                    <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3 relative overflow-hidden select-none">
-                        <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg flex items-center justify-center shadow-lg transition-transform duration-300 security-icon-glow security-icon-pulse security-icon-rotate security-icon-shimmer relative overflow-hidden">
-                            <Shield className="w-4 h-4 text-white relative z-10" />
+                    <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-4 relative overflow-hidden select-none">
+                        <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg flex items-center justify-center shadow-lg transition-transform duration-300 security-icon-glow security-icon-pulse security-icon-rotate security-icon-shimmer relative overflow-hidden">
+                            <Shield className="w-5 h-5 text-white relative z-10" />
                         </div>
                         <span className="relative z-10">Безпека</span>
                     </h3>
@@ -784,9 +784,9 @@ const UserProfilePage = () => {
                 <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-indigo-100/40 to-blue-100/30 rounded-full translate-y-12 -translate-x-12 animate-bounce decorative-element-2" style={{animationDuration: '3s'}}></div>
                 
                 <div className="relative">
-                    <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3 relative overflow-hidden select-none">
-                        <div className="w-8 h-8 bg-gradient-to-br from-blue-400 via-blue-600 to-blue-800 rounded-lg flex items-center justify-center shadow-lg transition-transform duration-300 security-icon-glow security-icon-pulse security-icon-rotate security-icon-shimmer relative overflow-hidden">
-                            <Eye className="w-4 h-4 text-white relative z-10" />
+                    <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-4 relative overflow-hidden select-none">
+                        <div className="w-10 h-10 bg-gradient-to-br from-blue-400 via-blue-600 to-blue-800 rounded-lg flex items-center justify-center shadow-lg transition-transform duration-300 security-icon-glow security-icon-pulse security-icon-rotate security-icon-shimmer relative overflow-hidden">
+                            <Eye className="w-5 h-5 text-white relative z-10" />
                         </div>
                         <span className="relative z-10">Приватність</span>
                     </h3>
