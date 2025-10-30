@@ -18,14 +18,12 @@ const NameChangeModal = ({ isOpen, onClose, currentName }) => {
     const [existingRequest, setExistingRequest] = useState(null);
     const [isClosing, setIsClosing] = useState(false);
 
-    // Завантаження статусу існуючого запиту
     useEffect(() => {
         if (isOpen) {
             loadExistingRequest();
         }
     }, [isOpen]);
 
-    // Блокування прокрутки сторінки при відкритому модальному вікні
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
@@ -144,23 +142,41 @@ const NameChangeModal = ({ isOpen, onClose, currentName }) => {
 
     if (!isOpen) return null;
 
+    const isTeacher = user?.role === 'teacher';
+    const currentLabel = isTeacher ? "Поточне ім'я, прізвище та по батькові" : "Поточне ім'я та прізвище";
+    const composedCurrent = (() => {
+        const first = user?.firstName?.trim();
+        const middle = user?.middleName?.trim();
+        const last = user?.lastName?.trim();
+        const parts = isTeacher ? [first, middle, last] : [first, last];
+        const joined = parts.filter(Boolean).join(' ');
+        if (joined) return joined;
+        const cn = (currentName || '').trim();
+        if (!cn) return currentName;
+        const words = cn.split(/\s+/);
+        if (isTeacher) {
+            if (words.length >= 3) return `${words[0]} ${words[1]} ${words[2]}`;
+            if (words.length === 2) return `${words[0]} ${words[1]}`;
+            return cn;
+        } else {
+            if (words.length >= 2) return `${words[0]} ${words[1]}`;
+            return cn;
+        }
+    })();
+
     return createPortal(
         <div className={`fixed inset-0 z-[9999] flex items-center justify-center p-4 ${
             isClosing ? 'modal-closing' : ''
         }`} onClick={(e) => e.stopPropagation()}>
-            {/* Backdrop */}
             <div 
                 className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-backdrop-fade"
                 onClick={handleClose}
             />
             
-            {/* Modal */}
             <div className={`relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] sm:max-h-[85vh] flex flex-col overflow-hidden modal-content ${
                 isClosing ? '' : 'animate-modal-slide-in'
             }`} onClick={(e) => e.stopPropagation()}>
-                {/* Заголовок */}
                 <div className="bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 px-4 sm:px-6 py-3 sm:py-4 relative overflow-hidden flex-shrink-0">
-                    {/* Background decoration */}
                     <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-blue-500/20"></div>
                     <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
                     <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12"></div>
@@ -186,7 +202,6 @@ const NameChangeModal = ({ isOpen, onClose, currentName }) => {
                 </div>
 
                 <div className="flex-1 px-4 sm:px-6 py-4 sm:py-6">
-                    {/* Існуючий запит */}
                     {existingRequest && (
                         <div className={`mb-4 p-3 rounded-xl border ${getStatusColor(existingRequest.status)}`}>
                             <div className="flex items-center gap-3 mb-2">
@@ -217,80 +232,36 @@ const NameChangeModal = ({ isOpen, onClose, currentName }) => {
                         </div>
                     )}
 
-                    {/* Форма для нового запиту */}
                     {(!existingRequest || existingRequest.status !== 'pending') && (
                         <form onSubmit={handleSubmit} className="space-y-2">
-                            {/* Поточне ім'я */}
                             <div className="bg-gray-100 p-3 rounded-lg border border-gray-200">
-                                <h3 className="font-semibold text-gray-900 mb-1 text-sm">Поточне ім'я</h3>
-                                <p className="text-gray-700 text-sm">{currentName}</p>
+                                <h3 className="font-semibold text-gray-900 mb-1 text-sm">{currentLabel}</h3>
+                                <p className="text-gray-700 text-sm">{composedCurrent}</p>
                             </div>
 
-                            {/* Нове ім'я */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-2">
                                 <div>
-                                    <label className="name-change-label">
-                                        Нове ім'я:
-                                    </label>
-                                    <input
-                                        type="text"
-                                        name="newFirstName"
-                                        value={formData.newFirstName}
-                                        onChange={handleInputChange}
-                                        required
-                                        className="name-change-input"
-                                        placeholder="Введіть нове ім'я"
-                                    />
+                                    <label className="name-change-label">Нове ім'я:</label>
+                                    <input type="text" name="newFirstName" value={formData.newFirstName} onChange={handleInputChange} required className="name-change-input" placeholder="Введіть нове ім'я" />
                                 </div>
                                 <div>
-                                    <label className="name-change-label">
-                                        Нове прізвище:
-                                    </label>
-                                    <input
-                                        type="text"
-                                        name="newLastName"
-                                        value={formData.newLastName}
-                                        onChange={handleInputChange}
-                                        required
-                                        className="name-change-input"
-                                        placeholder="Введіть нове прізвище"
-                                    />
+                                    <label className="name-change-label">Нове прізвище:</label>
+                                    <input type="text" name="newLastName" value={formData.newLastName} onChange={handleInputChange} required className="name-change-input" placeholder="Введіть нове прізвище" />
                                 </div>
                             </div>
 
-                            {/* По батькові – тільки для викладачів */}
-                            {user?.role === 'teacher' && (
+                            {isTeacher && (
                                 <div>
-                                    <label className="name-change-label">
-                                        По батькові:
-                                    </label>
-                                    <input
-                                        type="text"
-                                        name="newMiddleName"
-                                        value={formData.newMiddleName}
-                                        onChange={handleInputChange}
-                                        className="name-change-input"
-                                        placeholder="Введіть по батькові"
-                                    />
+                                    <label className="name-change-label">По батькові:</label>
+                                    <input type="text" name="newMiddleName" value={formData.newMiddleName} onChange={handleInputChange} className="name-change-input" placeholder="Введіть по батькові" />
                                 </div>
                             )}
 
-
                             <div>
-                                <label className="name-change-label">
-                                    Причина зміни:
-                                </label>
-                                <textarea
-                                    name="reason"
-                                    value={formData.reason}
-                                    onChange={handleInputChange}
-                                    rows={2}
-                                    className="name-change-input resize-none"
-                                    placeholder="Поясніть причину зміни імені..."
-                                />
+                                <label className="name-change-label">Причина зміни:</label>
+                                <textarea name="reason" value={formData.reason} onChange={handleInputChange} rows={2} className="name-change-input resize-none" placeholder="Поясніть причину зміни імені..." />
                             </div>
 
-                            {/* Повідомлення про помилки */}
                             {error && (
                                 <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
                                     <div className="flex items-start gap-2">
@@ -300,7 +271,6 @@ const NameChangeModal = ({ isOpen, onClose, currentName }) => {
                                 </div>
                             )}
 
-                            {/* Повідомлення про успіх */}
                             {success && (
                                 <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
                                     <div className="flex items-start gap-2">
@@ -310,27 +280,13 @@ const NameChangeModal = ({ isOpen, onClose, currentName }) => {
                                 </div>
                             )}
 
-                            {/* Кнопки */}
                             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-4">
-                                <button
-                                    type="button"
-                                    onClick={handleClose}
-                                    className="flex-1 px-4 py-2.5 sm:py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all duration-200 hover:scale-102 active:scale-98 text-sm sm:text-base"
-                                >
-                                    Скасувати
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={loading}
-                                    className="flex-1 px-4 py-2.5 sm:py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-102 active:scale-98 shadow-lg hover:shadow-xl text-sm sm:text-base"
-                                >
-                                    {loading ? 'Створення запиту...' : 'Створити запит'}
-                                </button>
+                                <button type="button" onClick={handleClose} className="flex-1 px-4 py-2.5 sm:py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all duration-200 hover:scale-102 active:scale-98 text-sm sm:text-base">Скасувати</button>
+                                <button type="submit" disabled={loading} className="flex-1 px-4 py-2.5 sm:py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-102 active:scale-98 shadow-lg hover:shadow-xl text-sm sm:text-base">{loading ? 'Створення запиту...' : 'Створити запит'}</button>
                             </div>
                         </form>
                     )}
 
-                    {/* Інформація про процес */}
                     <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl border border-blue-200 relative overflow-hidden comment-animate">
                         <div className="absolute top-0 right-0 w-16 h-16 bg-blue-100/30 rounded-full -translate-y-8 translate-x-8"></div>
                         <div className="relative">
