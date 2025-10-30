@@ -24,7 +24,7 @@ const NameRequestModal = ({ isOpen, onClose, request, onApprove, onReject }) => 
     return createPortal(
         <div className={`fixed inset-0 z-50 flex items-center justify-center ${isClosing ? 'modal-closing' : 'report-backdrop-animate'}`}>
             <div className={`absolute inset-0 bg-black/50 backdrop-blur-sm ${isClosing ? '' : 'report-backdrop-animate'}`} onClick={handleClose} />
-            <div className={`bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 relative overflow-hidden ${isClosing ? 'modal-closing' : 'report-modal-animate'}`}>
+            <div className={`bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 relative overflow-hidden ${isClosing ? 'modal-closing' : 'report-modal-animate'} ring-1 ring-white/10 shadow-[0_0_120px_24px_rgba(37,99,235,0.28)]`}>
                 <div className="px-6 py-4 relative overflow-hidden bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700">
                     <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-blue-500/20"></div>
                     <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
