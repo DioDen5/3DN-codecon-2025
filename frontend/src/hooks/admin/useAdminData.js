@@ -323,6 +323,32 @@ export const useAdminData = () => {
         }
     };
 
+    const loadNameChangeRequests = useCallback(async () => {
+        try {
+            const requests = await getAdminNameChangeRequests();
+            setNameChangeRequests(requests || []);
+        } catch (e) {
+            setNameChangeRequests([]);
+        }
+    }, []);
+
+    const approveNameRequest = async (requestId) => {
+        try {
+            const { approveNameChangeRequest } = await import('../../api/admin-stats');
+            await approveNameChangeRequest(requestId);
+            setNameChangeRequests((prev) => prev.map((r) => (r._id === requestId || r.id === requestId ? { ...r, status: 'approved' } : r)));
+            await loadNameChangeRequests();
+        } catch (e) {}
+    };
+
+    const rejectNameRequest = async (requestId) => {
+        try {
+            const { rejectNameChangeRequest } = await import('../../api/admin-stats');
+            await rejectNameChangeRequest(requestId);
+            await loadNameChangeRequests();
+        } catch (e) {}
+    };
+
     useEffect(() => {
         loadAdminData();
     }, [loadAdminData]);
@@ -528,6 +554,8 @@ export const useAdminData = () => {
         handleReviewsPrevPage,
         handleReviewsNextPage,
         handleReviewsPageClick,
+        approveNameRequest,
+        rejectNameRequest,
         refreshCurrentContent: async (contentType) => {
             try {
                 console.log('refreshCurrentContent called with:', contentType);

@@ -6,6 +6,7 @@ import CommentsList from './CommentsList';
 import ReviewsList from './ReviewsList';
 import AllContentList from './AllContentList';
 import ModerationPagination from './ModerationPagination';
+import NameRequestsList from './NameRequestsList';
 
 const AdminModeration = ({
     moderationFilter,
@@ -43,7 +44,10 @@ const AdminModeration = ({
     reviewsPagination,
     handleReviewsPrevPage,
     handleReviewsNextPage,
-    handleReviewsPageClick
+    handleReviewsPageClick,
+    nameChangeRequests,
+    onApproveNameRequest,
+    onRejectNameRequest
 }) => {
     return (
         <div className="space-y-6">
@@ -141,6 +145,10 @@ const AdminModeration = ({
                             />
                         )}
                     </>
+                )}
+
+                {moderationFilter === 'name-requests' && (
+                    <NameRequestsList nameRequests={nameChangeRequests} onApprove={onApproveNameRequest} onReject={onRejectNameRequest} />
                 )}
             </div>
         </div>

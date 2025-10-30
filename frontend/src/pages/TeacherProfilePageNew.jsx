@@ -341,7 +341,7 @@ const TeacherProfilePageNew = () => {
                     <div className="space-y-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Ім'я та прізвище
+                                Поточне ім'я, прізвище та по батькові
                             </label>
                             <div className="flex items-center gap-3">
                                 <div className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed flex items-center gap-2">

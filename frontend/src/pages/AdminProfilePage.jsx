@@ -74,7 +74,10 @@ const AdminProfilePageRefactored = () => {
         handleReviewsPrevPage,
         handleReviewsNextPage,
         handleReviewsPageClick,
-        refreshCurrentContent
+        refreshCurrentContent,
+        nameChangeRequests,
+        approveNameRequest,
+        rejectNameRequest
     } = useAdminData();
 
     const tabs = [
@@ -358,6 +361,9 @@ const AdminProfilePageRefactored = () => {
                             handleReviewsPrevPage={handleReviewsPrevPage}
                             handleReviewsNextPage={handleReviewsNextPage}
                             handleReviewsPageClick={handleReviewsPageClick}
+                            nameChangeRequests={nameChangeRequests}
+                            onApproveNameRequest={(id) => approveNameRequest(id)}
+                            onRejectNameRequest={(id) => rejectNameRequest(id)}
                         />
                     )}
 

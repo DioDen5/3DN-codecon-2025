@@ -171,3 +171,13 @@ export const unapproveContent = async (contentId, contentType) => {
         throw error;
     }
 };
+
+export const approveNameChangeRequest = async (requestId) => {
+    const response = await http.post(`/admin/name-change-requests/${requestId}/approve`);
+    return response.data;
+};
+
+export const rejectNameChangeRequest = async (requestId) => {
+    const response = await http.post(`/admin/name-change-requests/${requestId}/reject`);
+    return response.data;
+};
