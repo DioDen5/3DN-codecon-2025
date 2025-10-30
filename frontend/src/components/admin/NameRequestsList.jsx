@@ -1,12 +1,8 @@
 import React from 'react';
 import { UserRound } from 'lucide-react';
 
-const MOCK_REQUESTS = [];
-
-const NameRequestsList = () => {
-    const requests = MOCK_REQUESTS;
-
-    if (!requests || requests.length === 0) {
+const NameRequestsList = ({ nameRequests = [], onApprove = () => {}, onReject = () => {} }) => {
+    if (!nameRequests || nameRequests.length === 0) {
         return (
             <div className="bg-white rounded-2xl p-8 shadow-xl border border-gray-200 animate-[slideInFromLeft_0.6s_ease-out_both]">
                 <div className="text-center py-12">
@@ -28,22 +24,25 @@ const NameRequestsList = () => {
             <div className="text-gray-600 mb-6">
                 Тут ви можете розглядати запити студентів на зміну імені, прізвища або по батькові. Підтверджений запит оновить ці дані в акаунті студенту.
             </div>
-            <div className="bg-white rounded-2xl p-6 shadow-xl border border-blue-100 flex flex-col md:flex-row md:items-center gap-6 md:gap-10">
-                <div className="flex-1 space-y-2">
-                    <div><span className="font-medium text-gray-700">Поточне ім'я:</span> Student</div>
-                    <div><span className="font-medium text-gray-700">Нове ім'я:</span> Андрій</div>
-                    <div><span className="font-medium text-gray-700">Нове прізвище:</span> Бондаренко</div>
-                    <div><span className="font-medium text-gray-700">По батькові:</span> Михайлович</div>
-                    <div><span className="font-medium text-gray-700">Причина:</span> Помилка при реєстрації</div>
+            {nameRequests.map(req => (
+                <div key={req._id || req.id} className="bg-white rounded-2xl p-6 shadow-xl border border-blue-100 flex flex-col md:flex-row md:items-center gap-6 md:gap-10 animate-[slideInFromLeft_0.6s_ease-out_both]">
+                    <div className="flex-1 space-y-2">
+                        <div><span className="font-medium text-gray-700">Користувач:</span> {req.userId?.displayName || req.userId?.email || req.userDisplayName}</div>
+                        <div><span className="font-medium text-gray-700">Поточне ім'я:</span> {req.currentFirstName} {req.currentLastName}</div>
+                        <div><span className="font-medium text-gray-700">Нове ім'я:</span> {req.newFirstName}</div>
+                        <div><span className="font-medium text-gray-700">Нове прізвище:</span> {req.newLastName}</div>
+                        {req.newMiddleName && <div><span className="font-medium text-gray-700">По батькові:</span> {req.newMiddleName}</div>}
+                        {req.reason && <div><span className="font-medium text-gray-700">Причина:</span> {req.reason}</div>}
+                    </div>
+                    <div className="flex items-center gap-4 mt-4 md:mt-0">
+                        <button className="px-5 py-2 bg-green-500 hover:bg-green-600 text-white font-medium rounded-xl transition" onClick={() => onApprove(req._id || req.id)}>Підтвердити</button>
+                        <button className="px-5 py-2 bg-red-500 hover:bg-red-600 text-white font-medium rounded-xl transition" onClick={() => onReject(req._id || req.id)}>Відхилити</button>
+                    </div>
+                    <div className="text-xs text-gray-400 mt-2 md:mt-0 md:text-right">Створено: {new Date(req.createdAt).toLocaleDateString('uk-UA')}</div>
                 </div>
-                <div className="flex items-center gap-4 mt-4 md:mt-0">
-                    <button className="px-5 py-2 bg-green-500 hover:bg-green-600 text-white font-medium rounded-xl transition">Підтвердити</button>
-                    <button className="px-5 py-2 bg-red-500 hover:bg-red-600 text-white font-medium rounded-xl transition">Відхилити</button>
-                </div>
-                <div className="text-xs text-gray-400 mt-2 md:mt-0 md:text-right">Створено: 30.10.2025</div>
-            </div>
+            ))}
         </div>
     );
-}
+};
 
 export default NameRequestsList;

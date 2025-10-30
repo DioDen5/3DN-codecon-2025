@@ -44,7 +44,8 @@ const AdminModeration = ({
     reviewsPagination,
     handleReviewsPrevPage,
     handleReviewsNextPage,
-    handleReviewsPageClick
+    handleReviewsPageClick,
+    nameChangeRequests
 }) => {
     return (
         <div className="space-y-6">
@@ -145,7 +146,7 @@ const AdminModeration = ({
                 )}
 
                 {moderationFilter === 'name-requests' && (
-                    <NameRequestsList />
+                    <NameRequestsList nameRequests={nameChangeRequests} />
                 )}
             </div>
         </div>
