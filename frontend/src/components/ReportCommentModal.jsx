@@ -74,7 +74,7 @@ const ReportCommentModal = ({ isOpen, onClose, targetType, targetId, targetTitle
                         <button
                             onClick={handleClose}
                             disabled={isSubmitting}
-                            className="p-2 text-white/60 hover:text-white/90 hover:bg-white/20 rounded-full transition-all duration-200 hover:scale-110 backdrop-blur-sm group"
+                            className="p-2 text-white/60 hover:text-white/90 hover:bg-white/20 rounded-full transition-all duration-200 hover:scale-110 backdrop-blur-sm group cursor-pointer disabled:cursor-not-allowed"
                         >
                             <X className="w-5 h-5 spin-close" />
                         </button>
@@ -143,7 +143,7 @@ const ReportCommentModal = ({ isOpen, onClose, targetType, targetId, targetTitle
                                 type="button"
                                 onClick={handleClose}
                                 disabled={isSubmitting}
-                                className="px-6 py-3 text-sm font-medium text-gray-600 bg-gray-200 rounded-xl hover:bg-gray-300 hover:scale-102 active:scale-98 transition-all duration-300 ease-out shadow-sm hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 group"
+                                className="px-6 py-3 text-sm font-medium text-gray-600 bg-gray-200 rounded-xl hover:bg-gray-300 hover:scale-102 active:scale-98 transition-all duration-300 ease-out shadow-sm hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 group cursor-pointer"
                             >
                                 <X className="w-4 h-4 bounce-x transition-all duration-300 ease-out" />
                                 Скасувати
@@ -151,7 +151,7 @@ const ReportCommentModal = ({ isOpen, onClose, targetType, targetId, targetTitle
                             <button
                                 type="submit"
                                 disabled={isSubmitting || !reason.trim()}
-                                className="px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl hover:from-orange-600 hover:to-orange-700 hover:scale-102 active:scale-98 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-300 ease-out shadow-lg hover:shadow-xl flex items-center gap-2 relative overflow-hidden group"
+                                className="px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl hover:from-orange-600 hover:to-orange-700 hover:scale-102 active:scale-98 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-300 ease-out shadow-lg hover:shadow-xl flex items-center gap-2 relative overflow-hidden group cursor-pointer"
                             >
                                 <div className="absolute inset-0 bg-gradient-to-r from-orange-400 to-orange-500 opacity-0 hover:opacity-20 transition-opacity duration-300"></div>
                                 {isSubmitting ? (

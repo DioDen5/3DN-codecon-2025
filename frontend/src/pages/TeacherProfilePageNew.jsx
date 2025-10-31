@@ -5,6 +5,7 @@ import { useAuthState } from '../api/useAuthState';
 import { getNameChangeStatus } from '../api/name-change';
 import StarRating from '../components/StarRating';
 import NameChangeModal from '../components/NameChangeModal';
+import ProfilePictureUpload from '../components/ProfilePictureUpload';
 
 const TeacherProfilePageNew = () => {
     const { id } = useParams();
@@ -38,6 +39,8 @@ const TeacherProfilePageNew = () => {
     });
     const [nameChangeRequest, setNameChangeRequest] = useState(null);
     const [showNameChangeModal, setShowNameChangeModal] = useState(false);
+    const [profilePicture, setProfilePicture] = useState(null);
+    const [isUploadingPicture, setIsUploadingPicture] = useState(false);
 
     useEffect(() => {
         setTimeout(() => {
@@ -92,6 +95,7 @@ const TeacherProfilePageNew = () => {
     useEffect(() => {
         if (user) {
             loadNameChangeStatus();
+            loadUserProfile();
         }
     }, [user]);
 
@@ -128,6 +132,67 @@ const TeacherProfilePageNew = () => {
     // Функція для отримання поточного імені
     const getCurrentDisplayName = () => {
         return user?.displayName || teacher?.name || 'Викладач';
+    };
+
+    const loadUserProfile = async () => {
+        try {
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            const response = await fetch('/api/user/profile/profile', {
+                credentials: 'include',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success && data.profile.profilePicture) {
+                    setProfilePicture(data.profile.profilePicture);
+                }
+            }
+        } catch (e) {
+            console.error('Error loading profile picture:', e);
+        }
+    };
+
+    const handleProfilePictureChange = async (file) => {
+        if (!file) {
+            try {
+                const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+                const response = await fetch('/api/user/profile/profile-picture', {
+                    method: 'DELETE',
+                    credentials: 'include',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (response.ok) {
+                    setProfilePicture(null);
+                }
+            } catch (error) {
+                console.error('Error deleting profile picture:', error);
+            }
+            return;
+        }
+
+        setIsUploadingPicture(true);
+        try {
+            const formData = new FormData();
+            formData.append('profilePicture', file);
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            const response = await fetch('/api/user/profile/profile-picture', {
+                method: 'POST',
+                body: formData,
+                credentials: 'include',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (response.ok) {
+                const result = await response.json();
+                setProfilePicture(result.profilePictureUrl);
+            } else {
+                throw new Error('Failed to upload profile picture');
+            }
+        } catch (error) {
+            console.error('Error uploading profile picture:', error);
+            alert('Помилка при завантаженні фото профілю');
+        } finally {
+            setIsUploadingPicture(false);
+        }
     };
 
     const handlePrivacySettingChange = (setting, value) => {
@@ -185,9 +250,13 @@ const TeacherProfilePageNew = () => {
                 
                 <div className="relative">
                     <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
-                        <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-2xl sm:text-3xl font-bold shadow-lg">
-                            {teacher?.name?.charAt(0) || 'T'}
-                        </div>
+                        <ProfilePictureUpload
+                            currentAvatar={profilePicture}
+                            userName={getCurrentDisplayName()}
+                            onImageChange={handleProfilePictureChange}
+                            size="large"
+                            className="w-16 h-16 sm:w-20 sm:h-20 md:w-23 md:h-23"
+                        />
                         <div className="flex-1 text-center sm:text-left">
                             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{teacher?.name}</h1>
                             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-3">
@@ -213,25 +282,25 @@ const TeacherProfilePageNew = () => {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                 <div className="bg-white text-black rounded-xl p-3 md:p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
                     <Star className="w-6 h-6 md:w-8 md:h-8 text-green-500 mx-auto mb-2" />
-                    <div className="text-lg md:text-2xl font-bold text-gray-900">{stats.averageRating}/10</div>
+                    <div className="text-lg md:text-2xl font-bold text-gray-900 stat-number-pop">{stats.averageRating}/10</div>
                     <div className="text-xs md:text-sm text-gray-600">Середня оцінка</div>
                 </div>
                 
                 <div className="bg-white text-black rounded-xl p-3 md:p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
                     <MessageSquare className="w-6 h-6 md:w-8 md:h-8 text-orange-500 mx-auto mb-2" />
-                    <div className="text-lg md:text-2xl font-bold text-gray-900">{stats.reviews}</div>
+                    <div className="text-lg md:text-2xl font-bold text-gray-900 stat-number-pop">{stats.reviews}</div>
                     <div className="text-xs md:text-sm text-gray-600">Відгуків</div>
                 </div>
                 
                 <div className="bg-white text-black rounded-xl p-3 md:p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
                     <ThumbsUp className="w-6 h-6 md:w-8 md:h-8 text-purple-500 mx-auto mb-2" />
-                    <div className="text-lg md:text-2xl font-bold text-gray-900">{stats.totalLikes}</div>
+                    <div className="text-lg md:text-2xl font-bold text-gray-900 stat-number-pop">{stats.totalLikes}</div>
                     <div className="text-xs md:text-sm text-gray-600">Подобається</div>
                 </div>
                 
                 <div className="bg-white text-black rounded-xl p-3 md:p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
                     <GraduationCap className="w-6 h-6 md:w-8 md:h-8 text-pink-500 mx-auto mb-2" />
-                    <div className="text-lg md:text-2xl font-bold text-gray-900">AI/ML</div>
+                    <div className="text-lg md:text-2xl font-bold text-gray-900 stat-number-pop">AI/ML</div>
                     <div className="text-xs md:text-sm text-gray-600">Спеціалізація</div>
                 </div>
             </div>
@@ -241,7 +310,7 @@ const TeacherProfilePageNew = () => {
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-100/50 to-blue-200/30 rounded-full -translate-y-16 translate-x-16 animate-pulse"></div>
                 <div className="relative">
                     <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-3">
-                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-800 rounded-lg flex items-center justify-center">
+                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-800 rounded-lg flex items-center justify-center shadow-lg transition-transform duration-300 security-icon-glow security-icon-pulse security-icon-rotate security-icon-shimmer relative overflow-hidden">
                             <BookOpen className="w-4 h-4 text-white" />
                         </div>
                         Біографія
@@ -255,7 +324,7 @@ const TeacherProfilePageNew = () => {
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-cyan-100/50 to-blue-100/30 rounded-full -translate-y-16 translate-x-16 animate-pulse"></div>
                 <div className="relative">
                     <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-3">
-                        <div className="w-8 h-8 bg-gradient-to-r from-blue-800 to-blue-500 rounded-lg flex items-center justify-center">
+                        <div className="w-8 h-8 bg-gradient-to-r from-blue-800 to-blue-500 rounded-lg flex items-center justify-center shadow-lg transition-transform duration-300 security-icon-glow security-icon-pulse security-icon-rotate security-icon-shimmer relative overflow-hidden">
                             <Mail className="w-4 h-4 text-white" />
                         </div>
                         Контактна інформація
@@ -282,7 +351,7 @@ const TeacherProfilePageNew = () => {
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-100/50 to-blue-200/30 rounded-full -translate-y-16 translate-x-16 animate-pulse"></div>
                 <div className="relative">
                     <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-3">
-                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-lg transition-transform duration-300 security-icon-glow security-icon-pulse security-icon-rotate security-icon-shimmer relative overflow-hidden">
                             <Star className="w-4 h-4 text-white" />
                         </div>
                         Статистика відгуків
@@ -333,7 +402,7 @@ const TeacherProfilePageNew = () => {
                 
                 <div className="relative">
                     <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg flex items-center justify-center">
+                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg flex items-center justify-center shadow-lg transition-transform duration-300 security-icon-glow security-icon-pulse security-icon-rotate security-icon-shimmer relative overflow-hidden">
                             <User className="w-4 h-4 text-white" />
                         </div>
                         Налаштування профілю
@@ -350,7 +419,7 @@ const TeacherProfilePageNew = () => {
                                 </div>
                                 <button 
                                     onClick={handleOpenNameChangeModal}
-                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 hover:scale-105 flex items-center gap-2"
+                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 hover:scale-105 flex items-center gap-2 cursor-pointer"
                                 >
                                     <Edit3 size={16} />
                                     Редагувати
@@ -396,7 +465,7 @@ const TeacherProfilePageNew = () => {
                             {nameChangeRequest.status === 'pending' && (
                                 <button
                                     onClick={handleOpenNameChangeModal}
-                                    className="mt-3 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm"
+                                    className="mt-3 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm cursor-pointer"
                                 >
                                     Переглянути деталі
                                 </button>
@@ -414,7 +483,7 @@ const TeacherProfilePageNew = () => {
                 
                 <div className="relative">
                     <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                        <div className="w-8 h-8 bg-gradient-to-br from-blue-400 via-blue-600 to-blue-800 rounded-lg flex items-center justify-center">
+                        <div className="w-8 h-8 bg-gradient-to-br from-blue-400 via-blue-600 to-blue-800 rounded-lg flex items-center justify-center shadow-lg transition-transform duration-300 security-icon-glow security-icon-pulse security-icon-rotate security-icon-shimmer relative overflow-hidden">
                             <Eye className="w-4 h-4 text-white" />
                         </div>
                         Приватність
@@ -515,7 +584,7 @@ const TeacherProfilePageNew = () => {
                     <p className="text-red-500 mb-4">Викладач не знайдений</p>
                     <button 
                         onClick={() => navigate('/teachers')}
-                        className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition"
+                        className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition cursor-pointer"
                     >
                         Повернутися до списку
                     </button>
@@ -525,12 +594,12 @@ const TeacherProfilePageNew = () => {
     }
 
     return (
-        <div className="min-h-[calc(100vh-68px)] bg-gradient-to-b from-black to-gray-900 text-white">
+        <div className="min-h-[calc(100vh-68px)] bg-gradient-to-b from-black to-gray-900 text-white animate-[slideInFromLeft_0.6s_ease-out_both]">
             <div className="max-w-4xl mx-auto px-3 md:px-6 py-6 md:py-10">
                 {/* Кнопка назад */}
                 <button
                     onClick={() => navigate('/teachers')}
-                    className="text-sm underline text-white hover:text-blue-300 transition mb-6"
+                    className="text-sm underline text-white hover:text-blue-300 transition mb-6 cursor-pointer"
                 >
                     ← Назад до списку викладачів
                 </button>
@@ -545,7 +614,7 @@ const TeacherProfilePageNew = () => {
                                     <button
                                         key={tab.id}
                                         onClick={() => handleTabChange(tab.id)}
-                                        className={`profile-tab flex items-center justify-center gap-2 md:gap-3 py-3 md:py-4 px-3 md:px-6 rounded-xl font-bold text-sm md:text-lg transition-all duration-300 flex-1 ${
+                                        className={`profile-tab flex items-center justify-center gap-2 md:gap-3 py-3 md:py-4 px-3 md:px-6 rounded-xl font-bold text-sm md:text-lg transition-all duration-300 flex-1 cursor-pointer ${
                                             tab.id === 'profile' ? 'ml-2' : tab.id === 'settings' ? 'mr-2' : ''
                                         } ${
                                             activeTab === tab.id
@@ -567,9 +636,11 @@ const TeacherProfilePageNew = () => {
                 </div>
 
                 {/* Контент табів */}
-                {activeTab === 'profile' && renderProfileTab()}
-                {activeTab === 'reviews' && renderReviewsTab()}
-                {activeTab === 'settings' && renderSettingsTab()}
+                <div key={activeTab} className="animate-[slideInFromLeft_0.6s_ease-out_both]">
+                    {activeTab === 'profile' && renderProfileTab()}
+                    {activeTab === 'reviews' && renderReviewsTab()}
+                    {activeTab === 'settings' && renderSettingsTab()}
+                </div>
             </div>
 
             {/* Модальне вікно для зміни імені */}

@@ -18,11 +18,10 @@ const Modal = ({ isOpen, onClose, children }) => {
             >
                 <button
                     onClick={onClose}
+                    className="cursor-pointer"
                 >
                     <div
-                        className="group absolute  right-4 flex items-center justify-center
-                         w-8 h-8 bg-gray-200 rounded-full bg-white/60 top-4 hover:cursor-pointer
-                         "
+                        className="group absolute right-4 top-4 flex items-center justify-center w-8 h-8 rounded-full bg-white/60 hover:cursor-pointer"
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"

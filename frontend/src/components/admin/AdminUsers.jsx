@@ -14,10 +14,34 @@ const AdminUsers = ({ usersData }) => {
                         Управління користувачами
                     </h3>
                 <div className="space-y-3">
-                    {usersData?.map((user) => (
-                        <div key={user._id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    {usersData?.map((user, index) => (
+                        <div 
+                            key={user._id} 
+                            className="flex items-center justify-between p-4 bg-gray-100 rounded-lg"
+                            style={{ 
+                                animation: `slideInFromLeft 0.6s ease-out both`,
+                                animationDelay: `${index * 0.1}s`
+                            }}
+                        >
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
+                                {user.profilePicture ? (
+                                    <img
+                                        src={user.profilePicture}
+                                        alt={user.displayName || user.email || 'User'}
+                                        className="w-10 h-10 rounded-full object-cover"
+                                        onError={(e) => {
+                                            e.target.style.display = 'none';
+                                            const placeholder = e.target.nextElementSibling;
+                                            if (placeholder) {
+                                                placeholder.style.display = 'flex';
+                                            }
+                                        }}
+                                    />
+                                ) : null}
+                                <div 
+                                    className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold"
+                                    style={{ display: user.profilePicture ? 'none' : 'flex' }}
+                                >
                                     {(user.displayName || user.email || 'U').charAt(0).toUpperCase()}
                                 </div>
                                 <div>

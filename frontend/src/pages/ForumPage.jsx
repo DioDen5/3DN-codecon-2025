@@ -11,6 +11,7 @@ import {
     countsAnnouncement,
 } from "../api/reactions"; // ✅ правильний імпорт
 import { useAuthState } from "../api/useAuthState";
+import { useNotification } from "../contexts/NotificationContext";
 
 const ITEMS_PER_PAGE = 3;
 
@@ -19,6 +20,7 @@ const ForumPage = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const { isAuthed, user } = useAuthState();
     const { subscribe } = useForumRefresh();
+    const { showSuccess } = useNotification();
 
     const [raw, setRaw] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -218,6 +220,14 @@ const ForumPage = () => {
     useEffect(() => {
         loadData();
     }, [searchQuery, isAuthed]);
+
+    useEffect(() => {
+        const justLoggedIn = sessionStorage.getItem('justLoggedIn');
+        if (justLoggedIn === 'true' && isAuthed) {
+            showSuccess('Ви успішно увійшли в систему!');
+            sessionStorage.removeItem('justLoggedIn');
+        }
+    }, [isAuthed, showSuccess]);
 
     useEffect(() => {
         const unsubscribe = subscribe(() => {

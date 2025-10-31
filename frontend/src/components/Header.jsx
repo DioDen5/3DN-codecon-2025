@@ -54,13 +54,13 @@ const Header = ({ onLoginOpen, onSignupOpen }) => {
                 <div className="flex items-center gap-3">
                     <button
                         onClick={onLoginOpen}
-                        className="px-5 py-2 min-w-[96px] rounded-md bg-blue-200 text-blue-600 font-medium hover:bg-gray-100 transition"
+                        className="px-5 py-2 min-w-[96px] rounded-md bg-blue-200 text-blue-600 font-medium hover:bg-gray-100 transition cursor-pointer"
                     >
                         Увійти
                     </button>
                     <button
                         onClick={onSignupOpen}
-                        className="px-5 py-2 min-w-[96px] rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700 transition"
+                        className="px-5 py-2 min-w-[96px] rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700 transition cursor-pointer"
                     >
                         Реєстрація
                     </button>
@@ -76,7 +76,7 @@ const Header = ({ onLoginOpen, onSignupOpen }) => {
                     </Link>
                     <button
                         onClick={handleLogout}
-                        className="px-5 py-2 min-w-[96px] rounded-md bg-red-600 text-white font-medium hover:bg-red-700 transition"
+                        className="px-5 py-2 min-w-[96px] rounded-md bg-red-600 text-white font-medium hover:bg-red-700 transition cursor-pointer"
                     >
                         Вийти
                     </button>

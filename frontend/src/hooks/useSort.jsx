@@ -72,7 +72,7 @@ export const useSort = (data = [], options = null, initialSort = null) => {
                         <button
                             key={value}
                             onClick={() => handleSelect(value)}
-                            className={`text-white text-sm py-1 px-3 rounded whitespace-nowrap transition ${
+                            className={`text-white text-sm py-1 px-3 rounded whitespace-nowrap transition cursor-pointer ${
                                 sortOption === value
                                     ? 'bg-white/20'
                                     : 'bg-black/70 hover:bg-white/10'

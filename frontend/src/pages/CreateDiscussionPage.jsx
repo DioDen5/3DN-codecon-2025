@@ -106,7 +106,7 @@ const CreateDiscussionPage = () => {
                             className={`font-medium py-2 px-6 rounded-lg transition ${
                                 isSubmitting 
                                     ? 'bg-gray-400 cursor-not-allowed text-white' 
-                                    : 'bg-blue-600 hover:bg-blue-700 text-white'
+                                    : 'bg-blue-600 hover:bg-blue-700 text-white cursor-pointer'
                             }`}
                         >
                             {isSubmitting ? 'Створюємо...' : 'Опублікувати'}

@@ -125,7 +125,7 @@ const PostCard = ({
                 <div className="relative">
                     <button
                         onClick={handleMenuToggle}
-                        className={`flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 transform ${
+                        className={`flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 transform cursor-pointer ${
                             openMenu 
                                 ? (isOwnPost 
                                     ? 'text-blue-600 bg-blue-50 scale-110 shadow-lg' 
@@ -147,7 +147,7 @@ const PostCard = ({
                             {isOwnPost ? (
                                 <button
                                     onClick={handleDeleteClick}
-                                    className="flex items-center justify-center gap-1 w-full px-4 py-2 text-xs text-red-600 bg-transparent hover:text-red-800 hover:bg-red-50 transition-colors duration-200"
+                                        className="flex items-center justify-center gap-1 w-full px-4 py-2 text-xs text-red-600 bg-transparent hover:text-red-800 hover:bg-red-50 transition-colors duration-200 cursor-pointer"
                                 >
                                     <Trash2 size={12} />
                                     Видалити
@@ -155,7 +155,7 @@ const PostCard = ({
                             ) : (
                                 <button
                                     onClick={handleReport}
-                                    className="flex items-center justify-center gap-1 w-full px-4 py-2 text-xs text-orange-600 bg-transparent hover:text-orange-800 hover:bg-orange-50 transition-colors duration-200"
+                                        className="flex items-center justify-center gap-1 w-full px-4 py-2 text-xs text-orange-600 bg-transparent hover:text-orange-800 hover:bg-orange-50 transition-colors duration-200 cursor-pointer"
                                 >
                                     <Flag size={12} />
                                     Поскаржитися
@@ -177,7 +177,7 @@ const PostCard = ({
                 <button
                     onClick={handleLike}
                     disabled={pending}
-                    className={`flex items-center gap-2 border border-black rounded px-3 py-2 transition hover:bg-black hover:text-white ${
+                    className={`flex items-center gap-2 border border-black rounded px-3 py-2 transition hover:bg-black hover:text-white cursor-pointer ${
                         voted === 'like' ? 'bg-black text-white' : ''
                     } ${
                         pending ? 'opacity-60 cursor-not-allowed' : ''
@@ -191,7 +191,7 @@ const PostCard = ({
                 <button
                     onClick={handleDislike}
                     disabled={pending}
-                    className={`flex items-center gap-2 border border-black rounded px-3 py-2 transition hover:bg-black hover:text-white ${
+                    className={`flex items-center gap-2 border border-black rounded px-3 py-2 transition hover:bg-black hover:text-white cursor-pointer ${
                         voted === 'dislike' ? 'bg-black text-white' : ''
                     } ${
                         pending ? 'opacity-60 cursor-not-allowed' : ''

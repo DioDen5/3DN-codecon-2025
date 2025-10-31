@@ -185,7 +185,7 @@ const NameChangeModal = ({ isOpen, onClose, currentName }) => {
             isClosing ? 'modal-closing' : ''
         }`} onClick={(e) => e.stopPropagation()}>
             <div 
-                className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-backdrop-fade"
+                className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-backdrop-fade cursor-pointer"
                 onClick={handleClose}
             />
             
@@ -210,7 +210,7 @@ const NameChangeModal = ({ isOpen, onClose, currentName }) => {
                         <button
                             onClick={handleClose}
                             disabled={loading}
-                            className="p-2 text-white/60 hover:text-white/90 hover:bg-white/20 rounded-full transition-all duration-200 hover:scale-110 backdrop-blur-sm group"
+                            className="p-2 text-white/60 hover:text-white/90 hover:bg-white/20 rounded-full transition-all duration-200 hover:scale-110 backdrop-blur-sm group cursor-pointer disabled:cursor-not-allowed"
                         >
                             <X className="w-5 h-5 spin-close" />
                         </button>
@@ -218,7 +218,7 @@ const NameChangeModal = ({ isOpen, onClose, currentName }) => {
                 </div>
 
                 <div className="flex-1 px-4 sm:px-6 py-4 sm:py-6">
-                    {existingRequest && (
+                    {existingRequest && existingRequest.status !== 'rejected' && (
                         <div className={`mb-4 p-3 rounded-xl border ${getStatusColor(existingRequest.status)}`}>
                             <div className="flex items-center gap-3 mb-2">
                                 {getStatusIcon(existingRequest.status)}
@@ -240,7 +240,7 @@ const NameChangeModal = ({ isOpen, onClose, currentName }) => {
                             {existingRequest.status === 'pending' && (
                                 <button
                                     onClick={handleCancelRequest}
-                                    className="mt-3 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm"
+                                    className="mt-3 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm cursor-pointer"
                                 >
                                     Скасувати запит
                                 </button>
@@ -297,8 +297,8 @@ const NameChangeModal = ({ isOpen, onClose, currentName }) => {
                             )}
 
                             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-4">
-                                <button type="button" onClick={handleClose} className="flex-1 px-4 py-2.5 sm:py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all duration-200 hover:scale-102 active:scale-98 text-sm sm:text-base">Скасувати</button>
-                                <button type="submit" disabled={loading} className="flex-1 px-4 py-2.5 sm:py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-102 active:scale-98 shadow-lg hover:shadow-xl text-sm sm:text-base">{loading ? 'Створення запиту...' : 'Створити запит'}</button>
+                                <button type="button" onClick={handleClose} className="flex-1 px-4 py-2.5 sm:py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all duration-200 hover:scale-102 active:scale-98 text-sm sm:text-base cursor-pointer">Скасувати</button>
+                                <button type="submit" disabled={loading} className="flex-1 px-4 py-2.5 sm:py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-102 active:scale-98 shadow-lg hover:shadow-xl text-sm sm:text-base cursor-pointer">{loading ? 'Створення запиту...' : 'Створити запит'}</button>
                             </div>
                         </form>
                     )}

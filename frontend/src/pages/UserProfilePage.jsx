@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Activity, Settings, Mail, Calendar, Award, MessageCircle, MessageSquare, ThumbsUp, Star, GraduationCap, Edit3, Clock, CheckCircle, AlertCircle, Shield, Lock, Key, Power, ToggleRight, Play, Smartphone, ShieldCheck, Eye, EyeOff } from 'lucide-react';
+import { User, Activity, Settings, Mail, Calendar, Award, MessageCircle, MessageSquare, ThumbsUp, Star, GraduationCap, Edit3, Clock, CheckCircle, AlertCircle, Shield, Lock, Key, Power, ToggleRight, Play, Smartphone, ShieldCheck, Eye, EyeOff, X } from 'lucide-react';
 import { useAuthState } from '../api/useAuthState';
 import { getUserStats, getUserActivity } from '../api/user-stats';
 import { getNameChangeStatus } from '../api/name-change';
@@ -32,6 +32,11 @@ const UserProfilePage = () => {
     });
     const [nameChangeRequest, setNameChangeRequest] = useState(null);
     const [showNameChangeModal, setShowNameChangeModal] = useState(false);
+    const [isRejectedRequestClosed, setIsRejectedRequestClosed] = useState(() => {
+        const closed = localStorage.getItem('closedRejectedNameRequest');
+        return closed === 'true';
+    });
+    const [isRejectedRequestClosing, setIsRejectedRequestClosing] = useState(false);
     const [profilePicture, setProfilePicture] = useState(null);
     const [isUploadingPicture, setIsUploadingPicture] = useState(false);
     const [privacySettings, setPrivacySettings] = useState({
@@ -70,9 +75,21 @@ const UserProfilePage = () => {
         try {
             const response = await getNameChangeStatus();
             if (response.hasRequest) {
-                setNameChangeRequest(response.request);
+                const request = response.request;
+                const isClosed = localStorage.getItem('closedRejectedNameRequest') === 'true';
+                if (request.status === 'rejected' && isClosed) {
+                    setIsRejectedRequestClosed(true);
+                } else {
+                    if (request.status !== 'rejected') {
+                        localStorage.removeItem('closedRejectedNameRequest');
+                        setIsRejectedRequestClosed(false);
+                    }
+                }
+                setNameChangeRequest(request);
             } else {
                 setNameChangeRequest(null);
+                localStorage.removeItem('closedRejectedNameRequest');
+                setIsRejectedRequestClosed(false);
             }
         } catch (error) {
             console.error('Error loading name change status:', error);
@@ -229,6 +246,15 @@ const UserProfilePage = () => {
 
     const handleOpenNameChangeModal = () => setShowNameChangeModal(true);
     const handleCloseNameChangeModal = () => { setShowNameChangeModal(false); loadNameChangeStatus(); };
+    
+    const handleCloseRejectedRequest = () => {
+        setIsRejectedRequestClosing(true);
+        setTimeout(() => {
+            setIsRejectedRequestClosed(true);
+            setIsRejectedRequestClosing(false);
+            localStorage.setItem('closedRejectedNameRequest', 'true');
+        }, 400);
+    };
 
     const handleProfilePictureChange = async (file) => {
         if (!file) {
@@ -450,7 +476,7 @@ const UserProfilePage = () => {
                 {activity.map((activityItem, index) => (
                     <div 
                         key={activityItem.id || index} 
-                        className="flex items-center justify-between p-3 md:p-4 bg-gray-100 rounded-lg cursor-pointer hover:scale-101 hover:bg-gray-200 transition-all duration-500 transform animate-fadeIn"
+                        className="flex items-center p-3 md:p-4 bg-gray-100 rounded-lg cursor-pointer hover:scale-101 hover:bg-gray-200 transition-all duration-500 transform animate-fadeIn"
                         style={{ 
                             animationDelay: `${index * 0.1}s`,
                             animation: 'fadeIn 0.6s ease-out forwards'
@@ -483,10 +509,6 @@ const UserProfilePage = () => {
                                         <p className="text-xs md:text-sm text-gray-500">{formatRelativeDate(activityItem.date)}</p>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-1 text-xs md:text-sm text-gray-600">
-                                    <ThumbsUp className="w-3 h-3 md:w-4 md:h-4" />
-                                    <span>{activityItem.likes || 0}</span>
-                                </div>
                             </div>
                         ))}
                     </div>
@@ -507,7 +529,7 @@ const UserProfilePage = () => {
                                         disabled={!pagination.hasPrevPage}
                                         className={`group relative overflow-hidden px-5 py-2.5 rounded-xl font-medium text-sm transition-all duration-500 transform ${
                                             pagination.hasPrevPage
-                                                ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:scale-105 hover:shadow-xl hover:shadow-blue-500/25 active:scale-95'
+                                                ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:scale-105 hover:shadow-xl hover:shadow-blue-500/25 active:scale-95 cursor-pointer'
                                                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                         }`}
                                     >
@@ -543,7 +565,7 @@ const UserProfilePage = () => {
                                                     <button
                                                         key={pageNum}
                                                         onClick={() => loadUserActivity(pageNum)}
-                                                        className={`relative w-10 h-10 rounded-xl font-semibold text-sm transition-all duration-500 transform ${
+                                                        className={`relative w-10 h-10 rounded-xl font-semibold text-sm transition-all duration-500 transform cursor-pointer ${
                                                             isActive
                                                                 ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white scale-110 shadow-lg shadow-blue-500/30'
                                                                 : 'bg-gray-100 text-gray-600 hover:bg-gradient-to-r hover:from-blue-100 hover:to-blue-200 hover:scale-105 hover:shadow-md'
@@ -565,7 +587,7 @@ const UserProfilePage = () => {
                                                     <span className="text-gray-400 font-medium">⋯</span>
                                                     <button
                                                         onClick={() => loadUserActivity(pagination.totalPages)}
-                                                        className="w-10 h-10 rounded-xl font-semibold text-sm bg-gray-100 text-gray-600 hover:bg-gradient-to-r hover:from-blue-100 hover:to-blue-200 hover:scale-105 hover:shadow-md transition-all duration-500"
+                                                        className="w-10 h-10 rounded-xl font-semibold text-sm bg-gray-100 text-gray-600 hover:bg-gradient-to-r hover:from-blue-100 hover:to-blue-200 hover:scale-105 hover:shadow-md transition-all duration-500 cursor-pointer"
                                                     >
                                                         {pagination.totalPages}
                                                     </button>
@@ -608,7 +630,7 @@ const UserProfilePage = () => {
                                         disabled={!pagination.hasNextPage}
                                         className={`group relative overflow-hidden px-5 py-2.5 rounded-xl font-medium text-sm transition-all duration-500 transform ${
                                             pagination.hasNextPage
-                                                ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:scale-105 hover:shadow-xl hover:shadow-blue-500/25 active:scale-95'
+                                                ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:scale-105 hover:shadow-xl hover:shadow-blue-500/25 active:scale-95 cursor-pointer'
                                                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                         }`}
                                     >
@@ -649,11 +671,11 @@ const UserProfilePage = () => {
                 <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-indigo-100/40 to-blue-100/30 rounded-full translate-y-12 -translate-x-12 animate-bounce decorative-element-2" style={{animationDuration: '3s'}}></div>
                 
                 <div className="relative">
-                    <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg flex items-center justify-center">
-                            <User className="w-4 h-4 text-white" />
+                    <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3 relative select-none">
+                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg flex items-center justify-center shadow-lg transition-transform duration-300 security-icon-glow security-icon-pulse security-icon-rotate security-icon-shimmer relative overflow-hidden">
+                            <User className="w-4 h-4 text-white relative z-10" />
                         </div>
-                        Налаштування профілю
+                        <span className="relative z-10">Налаштування профілю</span>
                     </h3>
                 <div className="space-y-4">
                     <div>
@@ -688,19 +710,31 @@ const UserProfilePage = () => {
             </div>
 
                 {/* Статус запиту на зміну імені */}
-                {nameChangeRequest && (
-                    <div className="mt-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                {nameChangeRequest && !(nameChangeRequest.status === 'rejected' && isRejectedRequestClosed) && (
+                    <div className={`mt-6 p-4 rounded-xl border relative ${
+                        nameChangeRequest.status === 'rejected' 
+                            ? `bg-red-50/80 border-red-300/70 rejected-request-glow shadow-sm ${isRejectedRequestClosing ? 'rejected-request-closing' : ''}` 
+                            : 'bg-gray-50 border-gray-200'
+                    }`}>
+                        {nameChangeRequest.status === 'rejected' && (
+                            <button
+                                onClick={handleCloseRejectedRequest}
+                                className="absolute top-3 right-3 p-2 text-red-400/60 hover:text-red-500/90 bg-red-100/30 hover:bg-red-200/30 rounded-full transition-all duration-200 hover:scale-110 backdrop-blur-sm group cursor-pointer"
+                            >
+                                <X className="w-5 h-5 spin-close" />
+                            </button>
+                        )}
                         <div className="flex items-center gap-3 mb-3">
                             {nameChangeRequest.status === 'pending' && <Clock className="w-5 h-5 text-yellow-500" />}
                             {nameChangeRequest.status === 'approved' && <CheckCircle className="w-5 h-5 text-green-500" />}
-                            {nameChangeRequest.status === 'rejected' && <AlertCircle className="w-5 h-5 text-red-500" />}
-                            <h4 className="font-semibold text-gray-900">
+                            {nameChangeRequest.status === 'rejected' && <AlertCircle className={`w-5 h-5 ${nameChangeRequest.status === 'rejected' ? 'text-red-400 rejected-icon-animate' : 'text-red-500'}`} />}
+                            <h4 className={`font-semibold ${nameChangeRequest.status === 'rejected' ? 'text-red-500' : 'text-gray-900'}`}>
                                 {nameChangeRequest.status === 'pending' && 'Запит на зміну імені очікує розгляду'}
                                 {nameChangeRequest.status === 'approved' && 'Запит на зміну імені схвалено'}
                                 {nameChangeRequest.status === 'rejected' && 'Запит на зміну імені відхилено'}
                             </h4>
                         </div>
-                        <div className="text-sm text-gray-600 space-y-1">
+                        <div className={`text-sm space-y-1 ${nameChangeRequest.status === 'rejected' ? 'text-red-400' : 'text-gray-600'}`}>
                             <p><strong>Нове ім'я:</strong> {nameChangeRequest.newFirstName} {nameChangeRequest.newLastName}</p>
                             <p><strong>Відображуване ім'я:</strong> {nameChangeRequest.newDisplayName}</p>
                             {nameChangeRequest.reason && (
@@ -714,7 +748,7 @@ const UserProfilePage = () => {
                         {nameChangeRequest.status === 'pending' && (
                             <button
                                 onClick={handleOpenNameChangeModal}
-                                className="mt-3 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm"
+                                    className="mt-3 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm cursor-pointer"
                             >
                                 Переглянути деталі
                             </button>
@@ -731,11 +765,11 @@ const UserProfilePage = () => {
                 <div className="absolute top-1/2 left-1/2 w-16 h-16 bg-gradient-to-r from-cyan-100/30 to-blue-100/30 rounded-full -translate-x-8 -translate-y-8 animate-ping decorative-element-3" style={{animationDuration: '4s'}}></div>
                 
                 <div className="relative">
-                    <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                        <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg flex items-center justify-center">
-                            <Shield className="w-4 h-4 text-white" />
+                    <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3 relative select-none">
+                        <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg flex items-center justify-center shadow-lg transition-transform duration-300 security-icon-glow security-icon-pulse security-icon-rotate security-icon-shimmer relative overflow-hidden">
+                            <Shield className="w-4 h-4 text-white relative z-10" />
                         </div>
-                        Безпека
+                        <span className="relative z-10">Безпека</span>
                     </h3>
                     
                     <div className="space-y-4">
@@ -784,11 +818,11 @@ const UserProfilePage = () => {
                 <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-indigo-100/40 to-blue-100/30 rounded-full translate-y-12 -translate-x-12 animate-bounce decorative-element-2" style={{animationDuration: '3s'}}></div>
                 
                 <div className="relative">
-                    <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                        <div className="w-8 h-8 bg-gradient-to-br from-blue-400 via-blue-600 to-blue-800 rounded-lg flex items-center justify-center">
-                            <Eye className="w-4 h-4 text-white" />
+                    <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3 relative select-none">
+                        <div className="w-8 h-8 bg-gradient-to-br from-blue-400 via-blue-600 to-blue-800 rounded-lg flex items-center justify-center shadow-lg transition-transform duration-300 security-icon-glow security-icon-pulse security-icon-rotate security-icon-shimmer relative overflow-hidden">
+                            <Eye className="w-4 h-4 text-white relative z-10" />
                         </div>
-                        Приватність
+                        <span className="relative z-10">Приватність</span>
                     </h3>
                 <div className="space-y-4">
                         <div className={`rounded-xl p-4 border group/field privacy-field transition-all duration-500 ease-in-out ${
@@ -914,12 +948,13 @@ const UserProfilePage = () => {
                 </div>
 
                 {/* Контент табів */}
-                {activeTab === 'profile' && renderProfileTab()}
-                {activeTab === 'activity' && renderActivityTab()}
-                {activeTab === 'settings' && renderSettingsTab()}
+                <div key={activeTab} className="animate-[slideInFromLeft_0.6s_ease-out_both]">
+                    {activeTab === 'profile' && renderProfileTab()}
+                    {activeTab === 'activity' && renderActivityTab()}
+                    {activeTab === 'settings' && renderSettingsTab()}
+                </div>
             </div>
 
-            {/* Модальне вікно для зміни імені */}
             <NameChangeModal
                 isOpen={showNameChangeModal}
                 onClose={handleCloseNameChangeModal}

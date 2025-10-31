@@ -75,7 +75,7 @@ export default function ReviewInput({ onSubmit, userRating, onRatingChange, isVo
                     </p>
                     <button 
                         disabled={busy || userRating < 1 || userRating > 5} 
-                        className="bg-blue-600 text-white rounded-lg px-6 py-2 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700 hover:scale-105 active:scale-95 transition-all duration-300 ease-out shadow-sm hover:shadow-md"
+                        className="bg-blue-600 text-white rounded-lg px-6 py-2 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700 hover:scale-105 active:scale-95 transition-all duration-300 ease-out shadow-sm hover:shadow-md cursor-pointer"
                     >
                         {busy ? 'Відправляємо...' : 'Надіслати відгук'}
                     </button>

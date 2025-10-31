@@ -95,7 +95,7 @@ const ReportReviewModal = ({ isOpen, onClose, report, onReject, onDeleteContent 
                         <button
                             onClick={handleClose}
                             disabled={isLoading}
-                            className="p-2 text-white/60 hover:text-white/90 hover:bg-white/20 rounded-full transition-all duration-200 hover:scale-110 backdrop-blur-sm group"
+                            className="p-2 text-white/60 hover:text-white/90 hover:bg-white/20 rounded-full transition-all duration-200 hover:scale-110 backdrop-blur-sm group cursor-pointer disabled:cursor-not-allowed"
                         >
                             <X className="w-5 h-5 spin-close" />
                         </button>
