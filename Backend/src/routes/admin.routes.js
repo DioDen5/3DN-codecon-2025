@@ -1,5 +1,6 @@
 import express from 'express';
 import { User } from '../models/User.js';
+import { UserProfile } from '../models/UserProfile.js';
 import { Announcement } from '../models/Announcement.js';
 import { Comment } from '../models/Comment.js';
 import { Report } from '../models/Report.js';
@@ -76,9 +77,25 @@ router.get('/users', ...adminAuth, async (req, res) => {
             role: 1,
             status: 1,
             createdAt: 1
-        }).sort({ createdAt: -1 });
+        }).sort({ createdAt: -1 }).lean();
 
-        res.json(users);
+        const userIds = users.map(u => u._id);
+        const userProfiles = await UserProfile.find({ userId: { $in: userIds } }, {
+            userId: 1,
+            profilePicture: 1
+        }).lean();
+
+        const profileMap = {};
+        userProfiles.forEach(profile => {
+            profileMap[profile.userId.toString()] = profile.profilePicture;
+        });
+
+        const usersWithProfiles = users.map(user => ({
+            ...user,
+            profilePicture: profileMap[user._id.toString()] || null
+        }));
+
+        res.json(usersWithProfiles);
     } catch (error) {
         console.error('Error getting users:', error);
         res.status(500).json({ error: 'Internal server error' });
@@ -209,7 +226,7 @@ router.get('/moderation', authRequired, requireAdmin, async (req, res) => {
 // Отримання запитів на зміну імені
 router.get('/name-change-requests', authRequired, requireAdmin, async (req, res) => {
     try {
-        const requests = await NameChangeRequest.find({ status: { $in: ['pending','approved'] } })
+        const requests = await NameChangeRequest.find({ status: 'pending' })
             .populate('userId', 'displayName email')
             .sort({ createdAt: -1 });
 
