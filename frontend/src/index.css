@@ -2578,6 +2578,28 @@
     animation: rejectedIconPulse 1.5s ease-in-out infinite;
 }
 
+@keyframes rejectedRequestClose {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+        max-height: 500px;
+        margin-top: 1.5rem;
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.95);
+        max-height: 0;
+        margin-top: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+}
+
+.rejected-request-closing {
+    animation: rejectedRequestClose 0.4s ease-in-out forwards;
+    overflow: hidden;
+}
+
 @keyframes reportCardSlideIn {
     0% {
         opacity: 0;

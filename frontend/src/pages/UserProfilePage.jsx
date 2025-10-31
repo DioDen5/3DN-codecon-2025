@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Activity, Settings, Mail, Calendar, Award, MessageCircle, MessageSquare, ThumbsUp, Star, GraduationCap, Edit3, Clock, CheckCircle, AlertCircle, Shield, Lock, Key, Power, ToggleRight, Play, Smartphone, ShieldCheck, Eye, EyeOff } from 'lucide-react';
+import { User, Activity, Settings, Mail, Calendar, Award, MessageCircle, MessageSquare, ThumbsUp, Star, GraduationCap, Edit3, Clock, CheckCircle, AlertCircle, Shield, Lock, Key, Power, ToggleRight, Play, Smartphone, ShieldCheck, Eye, EyeOff, X } from 'lucide-react';
 import { useAuthState } from '../api/useAuthState';
 import { getUserStats, getUserActivity } from '../api/user-stats';
 import { getNameChangeStatus } from '../api/name-change';
@@ -32,6 +32,11 @@ const UserProfilePage = () => {
     });
     const [nameChangeRequest, setNameChangeRequest] = useState(null);
     const [showNameChangeModal, setShowNameChangeModal] = useState(false);
+    const [isRejectedRequestClosed, setIsRejectedRequestClosed] = useState(() => {
+        const closed = localStorage.getItem('closedRejectedNameRequest');
+        return closed === 'true';
+    });
+    const [isRejectedRequestClosing, setIsRejectedRequestClosing] = useState(false);
     const [profilePicture, setProfilePicture] = useState(null);
     const [isUploadingPicture, setIsUploadingPicture] = useState(false);
     const [privacySettings, setPrivacySettings] = useState({
@@ -70,9 +75,21 @@ const UserProfilePage = () => {
         try {
             const response = await getNameChangeStatus();
             if (response.hasRequest) {
-                setNameChangeRequest(response.request);
+                const request = response.request;
+                const isClosed = localStorage.getItem('closedRejectedNameRequest') === 'true';
+                if (request.status === 'rejected' && isClosed) {
+                    setIsRejectedRequestClosed(true);
+                } else {
+                    if (request.status !== 'rejected') {
+                        localStorage.removeItem('closedRejectedNameRequest');
+                        setIsRejectedRequestClosed(false);
+                    }
+                }
+                setNameChangeRequest(request);
             } else {
                 setNameChangeRequest(null);
+                localStorage.removeItem('closedRejectedNameRequest');
+                setIsRejectedRequestClosed(false);
             }
         } catch (error) {
             console.error('Error loading name change status:', error);
@@ -229,6 +246,15 @@ const UserProfilePage = () => {
 
     const handleOpenNameChangeModal = () => setShowNameChangeModal(true);
     const handleCloseNameChangeModal = () => { setShowNameChangeModal(false); loadNameChangeStatus(); };
+    
+    const handleCloseRejectedRequest = () => {
+        setIsRejectedRequestClosing(true);
+        setTimeout(() => {
+            setIsRejectedRequestClosed(true);
+            setIsRejectedRequestClosing(false);
+            localStorage.setItem('closedRejectedNameRequest', 'true');
+        }, 400);
+    };
 
     const handleProfilePictureChange = async (file) => {
         if (!file) {
@@ -688,12 +714,20 @@ const UserProfilePage = () => {
             </div>
 
                 {/* Статус запиту на зміну імені */}
-                {nameChangeRequest && (
-                    <div className={`mt-6 p-4 rounded-xl border ${
+                {nameChangeRequest && !(nameChangeRequest.status === 'rejected' && isRejectedRequestClosed) && (
+                    <div className={`mt-6 p-4 rounded-xl border relative ${
                         nameChangeRequest.status === 'rejected' 
-                            ? 'bg-red-50/80 border-red-300/70 rejected-request-glow shadow-sm' 
+                            ? `bg-red-50/80 border-red-300/70 rejected-request-glow shadow-sm ${isRejectedRequestClosing ? 'rejected-request-closing' : ''}` 
                             : 'bg-gray-50 border-gray-200'
                     }`}>
+                        {nameChangeRequest.status === 'rejected' && (
+                            <button
+                                onClick={handleCloseRejectedRequest}
+                                className="absolute top-3 right-3 p-2 text-red-400/60 hover:text-red-500/90 bg-red-100/30 hover:bg-red-200/30 rounded-full transition-all duration-200 hover:scale-110 backdrop-blur-sm group cursor-pointer"
+                            >
+                                <X className="w-5 h-5 spin-close" />
+                            </button>
+                        )}
                         <div className="flex items-center gap-3 mb-3">
                             {nameChangeRequest.status === 'pending' && <Clock className="w-5 h-5 text-yellow-500" />}
                             {nameChangeRequest.status === 'approved' && <CheckCircle className="w-5 h-5 text-green-500" />}
@@ -925,7 +959,6 @@ const UserProfilePage = () => {
                 </div>
             </div>
 
-            {/* Модальне вікно для зміни імені */}
             <NameChangeModal
                 isOpen={showNameChangeModal}
                 onClose={handleCloseNameChangeModal}
