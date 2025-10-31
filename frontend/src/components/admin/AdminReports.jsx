@@ -122,8 +122,11 @@ const AdminReports = ({ reportsData, handleOpenReportModal, handleResolveReport,
     };
 
     return (
-        <div className="space-y-6 reports-slide-in">
-            <div className="bg-white text-black rounded-2xl p-6 shadow-xl border border-gray-200 relative overflow-hidden group">
+        <div className="space-y-6">
+            <div 
+                className="bg-white text-black rounded-2xl p-6 shadow-xl border border-gray-200 relative overflow-hidden group"
+                style={{ animation: 'slideInFromLeft 0.6s ease-out both' }}
+            >
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-100/50 to-red-200/30 rounded-full -translate-y-16 translate-x-16 animate-pulse"></div>
                 <div className="relative">
                     <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-4">
@@ -148,10 +151,13 @@ const AdminReports = ({ reportsData, handleOpenReportModal, handleResolveReport,
                             {reportsData.map((report, index) => (
                                 <div 
                                     key={report._id} 
-                                    className={`bg-gradient-to-r from-orange-50 to-orange-100 border border-orange-200 rounded-xl p-4 report-hover-glow transition-all duration-300 group report-card-animate ${
+                                    className={`bg-gradient-to-r from-orange-50 to-orange-100 border border-orange-200 rounded-xl p-4 report-hover-glow transition-all duration-300 group ${
                                         deletingReportId === report._id ? 'comment-delete-slide' : ''
                                     }`}
-                                    style={{ animationDelay: `${index * 0.1}s` }}
+                                    style={{ 
+                                        animation: 'slideInFromLeft 0.6s ease-out both',
+                                        animationDelay: `${index * 0.1}s`
+                                    }}
                                 >
                                     <div className="flex items-start justify-between">
                                         <div className="flex items-start gap-3 flex-1">
