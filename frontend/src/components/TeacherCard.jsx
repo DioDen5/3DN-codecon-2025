@@ -17,13 +17,19 @@ const TeacherCard = ({
 }) => {
     const navigate = useNavigate()
 
+    const handleCardClick = () => {
+        navigate(`/teachers/${_id}`)
+    }
+
     return (
-        <div className="bg-white text-black rounded-xl overflow-hidden shadow-md w-full max-w-xs cursor-pointer hover:scale-[1.02] transition">
+        <div 
+            className="bg-white text-black rounded-xl overflow-hidden shadow-md w-full max-w-xs cursor-pointer hover:-translate-y-3 hover:shadow-xl transition-all duration-500 ease-in-out border-0"
+            onClick={handleCardClick}
+        >
             <img 
                 src={image} 
                 alt={name} 
-                className="w-full h-64 object-cover object-[center_20%]" 
-                onClick={() => navigate(`/teachers/${_id}`)}
+                className="w-full h-64 object-cover object-[center_20%] pointer-events-none" 
             />
             <div className="p-3">
                 <h3 className="text-sm font-medium leading-tight mb-1">
