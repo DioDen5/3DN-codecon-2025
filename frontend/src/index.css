@@ -2559,8 +2559,23 @@
     }
 }
 
+@keyframes rejectedIconPulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.9;
+    }
+}
+
 .rejected-request-glow {
     animation: rejectedBlurPulse 2s ease-in-out infinite;
+}
+
+.rejected-icon-animate {
+    animation: rejectedIconPulse 1.5s ease-in-out infinite;
 }
 
 @keyframes reportCardSlideIn {

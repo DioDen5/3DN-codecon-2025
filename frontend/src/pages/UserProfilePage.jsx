@@ -697,7 +697,7 @@ const UserProfilePage = () => {
                         <div className="flex items-center gap-3 mb-3">
                             {nameChangeRequest.status === 'pending' && <Clock className="w-5 h-5 text-yellow-500" />}
                             {nameChangeRequest.status === 'approved' && <CheckCircle className="w-5 h-5 text-green-500" />}
-                            {nameChangeRequest.status === 'rejected' && <AlertCircle className={`w-5 h-5 ${nameChangeRequest.status === 'rejected' ? 'text-red-400' : 'text-red-500'}`} />}
+                            {nameChangeRequest.status === 'rejected' && <AlertCircle className={`w-5 h-5 ${nameChangeRequest.status === 'rejected' ? 'text-red-400 rejected-icon-animate' : 'text-red-500'}`} />}
                             <h4 className={`font-semibold ${nameChangeRequest.status === 'rejected' ? 'text-red-500' : 'text-gray-900'}`}>
                                 {nameChangeRequest.status === 'pending' && 'Запит на зміну імені очікує розгляду'}
                                 {nameChangeRequest.status === 'approved' && 'Запит на зміну імені схвалено'}
