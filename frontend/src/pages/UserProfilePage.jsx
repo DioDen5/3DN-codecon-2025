@@ -689,18 +689,22 @@ const UserProfilePage = () => {
 
                 {/* Статус запиту на зміну імені */}
                 {nameChangeRequest && (
-                    <div className="mt-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                    <div className={`mt-6 p-4 rounded-xl border ${
+                        nameChangeRequest.status === 'rejected' 
+                            ? 'bg-red-50/80 border-red-300/70 rejected-request-glow shadow-sm' 
+                            : 'bg-gray-50 border-gray-200'
+                    }`}>
                         <div className="flex items-center gap-3 mb-3">
                             {nameChangeRequest.status === 'pending' && <Clock className="w-5 h-5 text-yellow-500" />}
                             {nameChangeRequest.status === 'approved' && <CheckCircle className="w-5 h-5 text-green-500" />}
-                            {nameChangeRequest.status === 'rejected' && <AlertCircle className="w-5 h-5 text-red-500" />}
-                            <h4 className="font-semibold text-gray-900">
+                            {nameChangeRequest.status === 'rejected' && <AlertCircle className={`w-5 h-5 ${nameChangeRequest.status === 'rejected' ? 'text-red-400' : 'text-red-500'}`} />}
+                            <h4 className={`font-semibold ${nameChangeRequest.status === 'rejected' ? 'text-red-500' : 'text-gray-900'}`}>
                                 {nameChangeRequest.status === 'pending' && 'Запит на зміну імені очікує розгляду'}
                                 {nameChangeRequest.status === 'approved' && 'Запит на зміну імені схвалено'}
                                 {nameChangeRequest.status === 'rejected' && 'Запит на зміну імені відхилено'}
                             </h4>
                         </div>
-                        <div className="text-sm text-gray-600 space-y-1">
+                        <div className={`text-sm space-y-1 ${nameChangeRequest.status === 'rejected' ? 'text-red-400' : 'text-gray-600'}`}>
                             <p><strong>Нове ім'я:</strong> {nameChangeRequest.newFirstName} {nameChangeRequest.newLastName}</p>
                             <p><strong>Відображуване ім'я:</strong> {nameChangeRequest.newDisplayName}</p>
                             {nameChangeRequest.reason && (

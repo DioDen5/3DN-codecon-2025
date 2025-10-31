@@ -2550,6 +2550,19 @@
     animation: statNumberPop 0.6s ease-out both;
 }
 
+@keyframes rejectedBlurPulse {
+    0%, 100% {
+        box-shadow: 0 2px 8px rgba(239, 68, 68, 0.15), 0 0 10px rgba(239, 68, 68, 0.2);
+    }
+    50% {
+        box-shadow: 0 2px 12px rgba(239, 68, 68, 0.25), 0 0 15px rgba(239, 68, 68, 0.35);
+    }
+}
+
+.rejected-request-glow {
+    animation: rejectedBlurPulse 2s ease-in-out infinite;
+}
+
 @keyframes reportCardSlideIn {
     0% {
         opacity: 0;
