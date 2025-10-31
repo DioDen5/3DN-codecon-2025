@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { login, getLocalRememberedLogin } from "../api/auth";
+import { login, getLocalRememberedLogin, sendVerificationCode, loginWithCode } from "../api/auth";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../state/AuthContext";
 import { useNotification } from "../contexts/NotificationContext";
@@ -9,9 +9,12 @@ const LoginForm = ({ switchToReset, onSuccess }) => {
     const [password, setPassword] = useState("");
     const [rememberMe, setRememberMe] = useState(false);
     const [error, setError] = useState(null);
+    const [showCodeForm, setShowCodeForm] = useState(false);
+    const [verificationCode, setVerificationCode] = useState('');
+    const [codeSent, setCodeSent] = useState(false);
     const navigate = useNavigate();
     const { loginSuccess } = useAuth();
-    const { showSuccess } = useNotification();
+    const { showSuccess, showError } = useNotification();
 
     useEffect(() => {
         const rememberedData = getLocalRememberedLogin();
@@ -21,19 +24,123 @@ const LoginForm = ({ switchToReset, onSuccess }) => {
         }
     }, []);
 
-    const handleSubmit = async (e) => {
+    const handleSendCode = async () => {
+        try {
+            await sendVerificationCode(email, 'login');
+            setCodeSent(true);
+            showSuccess('Код надіслано на пошту');
+        } catch (error) {
+            showError(error.response?.data?.error || 'Помилка відправки коду');
+        }
+    };
+
+    const handleLoginWithCode = async (e) => {
         e.preventDefault();
         setError(null);
+        
+        if (!verificationCode || verificationCode.length !== 6) {
+            setError('Код повинен містити 6 цифр');
+            return;
+        }
+        
         try {
-            const { token, user } = await login(email, password, rememberMe);
+            const { token, user } = await loginWithCode(email, verificationCode);
             loginSuccess({ token, user });
             sessionStorage.setItem('justLoggedIn', 'true');
             onSuccess?.();
             navigate("/forum");
-        } catch {
-            setError("Невірна пошта або пароль");
+        } catch (error) {
+            setError(error.response?.data?.error || 'Невірний код');
         }
     };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError(null);
+        try {
+            const { token, user, requiresCodeVerification } = await login(email, password, rememberMe);
+            
+            if (requiresCodeVerification) {
+                setShowCodeForm(true);
+                await handleSendCode();
+                return;
+            }
+            
+            loginSuccess({ token, user });
+            sessionStorage.setItem('justLoggedIn', 'true');
+            onSuccess?.();
+            navigate("/forum");
+        } catch (error) {
+            if (error.response?.data?.requiresCodeVerification) {
+                setShowCodeForm(true);
+                await handleSendCode();
+            } else {
+                setError(error.response?.data?.error || "Невірна пошта або пароль");
+            }
+        }
+    };
+
+    if (showCodeForm) {
+        return (
+            <div className="space-y-6 p-10 w-full text-white">
+                <div className="mb-4">
+                    <h2 className="text-xl font-semibold mb-2">Підтвердження входу</h2>
+                    <p className="text-sm text-gray-300">
+                        Профіль викладача з поштою <strong>{email}</strong> існує в системі.
+                        Введіть код, надісланий на вашу пошту.
+                    </p>
+                </div>
+                
+                <form onSubmit={handleLoginWithCode} className="space-y-4">
+                    <div>
+                        <label className="block text-sm mb-2">Код верифікації</label>
+                        <input
+                            type="text"
+                            maxLength="6"
+                            value={verificationCode}
+                            onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ''))}
+                            className="w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 text-center text-2xl tracking-widest"
+                            placeholder="000000"
+                            autoFocus
+                        />
+                    </div>
+                    
+                    {!codeSent && (
+                        <button
+                            type="button"
+                            onClick={handleSendCode}
+                            className="w-full py-2 text-sm text-blue-400 hover:text-blue-300"
+                        >
+                            Надіслати код повторно
+                        </button>
+                    )}
+                    
+                    {error && <p className="text-red-400 text-sm">{error}</p>}
+                    
+                    <div className="flex gap-3">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setShowCodeForm(false);
+                                setVerificationCode('');
+                                setCodeSent(false);
+                                setError(null);
+                            }}
+                            className="flex-1 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg"
+                        >
+                            Назад
+                        </button>
+                        <button
+                            type="submit"
+                            className="flex-1 py-2 bg-blue-700 hover:bg-blue-800 rounded-lg"
+                        >
+                            Підтвердити
+                        </button>
+                    </div>
+                </form>
+            </div>
+        );
+    }
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6 p-10 w-full text-white">

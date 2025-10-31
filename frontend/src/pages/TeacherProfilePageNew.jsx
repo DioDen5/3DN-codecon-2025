@@ -3,9 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, User, Activity, Settings, Mail, Calendar, Award, MessageCircle, MessageSquare, ThumbsUp, Star, GraduationCap, BookOpen, Shield, Lock, Key, Power, ToggleRight, Play, Smartphone, ShieldCheck, Eye, EyeOff, Edit3, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import { useAuthState } from '../api/useAuthState';
 import { getNameChangeStatus } from '../api/name-change';
+import { getMyTeacherProfile } from '../api/teachers';
 import StarRating from '../components/StarRating';
 import NameChangeModal from '../components/NameChangeModal';
 import ProfilePictureUpload from '../components/ProfilePictureUpload';
+import TeacherClaimModal from '../components/TeacherClaimModal';
 
 const TeacherProfilePageNew = () => {
     const { id } = useParams();
@@ -41,6 +43,9 @@ const TeacherProfilePageNew = () => {
     const [showNameChangeModal, setShowNameChangeModal] = useState(false);
     const [profilePicture, setProfilePicture] = useState(null);
     const [isUploadingPicture, setIsUploadingPicture] = useState(false);
+    const [myTeacherProfile, setMyTeacherProfile] = useState(null);
+    const [hasClaimRequest, setHasClaimRequest] = useState(false);
+    const [showClaimModal, setShowClaimModal] = useState(false);
 
     useEffect(() => {
         setTimeout(() => {
@@ -91,11 +96,12 @@ const TeacherProfilePageNew = () => {
         }, 1000);
     }, [id, user]);
 
-    // Завантаження статусу запиту на зміну імені
+    // Завантаження статусу запиту на зміну імені та Teacher профілю
     useEffect(() => {
-        if (user) {
+        if (user && user.role === 'teacher') {
             loadNameChangeStatus();
             loadUserProfile();
+            loadMyTeacherProfile();
         }
     }, [user]);
 
@@ -150,6 +156,43 @@ const TeacherProfilePageNew = () => {
         } catch (e) {
             console.error('Error loading profile picture:', e);
         }
+    };
+
+    // Завантаження свого Teacher профілю
+    const loadMyTeacherProfile = async () => {
+        if (!user || user.role !== 'teacher') return;
+        
+        try {
+            const data = await getMyTeacherProfile();
+            if (data.teacher) {
+                setMyTeacherProfile(data.teacher);
+                setHasClaimRequest(data.hasClaimRequest || false);
+                // Якщо є прив'язаний профіль, завантажуємо його дані
+                if (data.teacher) {
+                    setTeacher(data.teacher);
+                }
+            } else {
+                setMyTeacherProfile(null);
+                setHasClaimRequest(data.hasClaimRequest || false);
+            }
+        } catch (error) {
+            console.error('Error loading my teacher profile:', error);
+            setMyTeacherProfile(null);
+            setHasClaimRequest(false);
+        }
+    };
+
+    const handleOpenClaimModal = () => {
+        setShowClaimModal(true);
+    };
+
+    const handleCloseClaimModal = () => {
+        setShowClaimModal(false);
+        loadMyTeacherProfile();
+    };
+
+    const handleClaimSuccess = () => {
+        loadMyTeacherProfile();
     };
 
     const handleProfilePictureChange = async (file) => {
@@ -438,6 +481,58 @@ const TeacherProfilePageNew = () => {
                         </div>
                     </div>
                     
+                    {/* Статус Teacher профілю */}
+                    {user?.role === 'teacher' && (
+                        <div className="mt-6 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-200 animate-[slideInFromLeft_0.6s_ease-out_both]">
+                            {!myTeacherProfile ? (
+                                <div>
+                                    <div className="flex items-center gap-3 mb-3">
+                                        <AlertCircle className="w-5 h-5 text-yellow-600" />
+                                        <h4 className="font-semibold text-gray-900">
+                                            Профіль викладача не прив'язано
+                                        </h4>
+                                    </div>
+                                    <p className="text-sm text-gray-700 mb-4">
+                                        Щоб мати доступ до редагування свого профілю викладача, вам потрібно подати заявку на отримання профілю.
+                                    </p>
+                                    <button
+                                        onClick={handleOpenClaimModal}
+                                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium cursor-pointer"
+                                    >
+                                        Подати заявку на профіль
+                                    </button>
+                                </div>
+                            ) : (
+                                <div>
+                                    <div className="flex items-center gap-3 mb-3">
+                                        <CheckCircle className="w-5 h-5 text-green-600" />
+                                        <h4 className="font-semibold text-gray-900">
+                                            Профіль викладача прив'язано
+                                        </h4>
+                                    </div>
+                                    <div className="text-sm text-gray-700 space-y-1">
+                                        <p><strong>Ім'я:</strong> {myTeacherProfile.name}</p>
+                                        <p><strong>Університет:</strong> {myTeacherProfile.university}</p>
+                                        <p><strong>Кафедра:</strong> {myTeacherProfile.department}</p>
+                                        {myTeacherProfile.subject && (
+                                            <p><strong>Предмет:</strong> {myTeacherProfile.subject}</p>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                            {hasClaimRequest && (
+                                <div className="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                                    <div className="flex items-center gap-2">
+                                        <Clock className="w-4 h-4 text-yellow-600" />
+                                        <p className="text-sm text-yellow-800">
+                                            У вас є активна заявка, яка очікує розгляду адміністратором
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                    
                     {/* Статус запиту на зміну імені */}
                     {nameChangeRequest && (
                         <div className="mt-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
@@ -644,6 +739,11 @@ const TeacherProfilePageNew = () => {
             </div>
 
             {/* Модальне вікно для зміни імені */}
+            <TeacherClaimModal
+                isOpen={showClaimModal}
+                onClose={handleCloseClaimModal}
+                onSuccess={handleClaimSuccess}
+            />
             <NameChangeModal
                 isOpen={showNameChangeModal}
                 onClose={handleCloseNameChangeModal}

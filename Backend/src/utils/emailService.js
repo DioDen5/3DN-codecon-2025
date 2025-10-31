@@ -111,3 +111,92 @@ export const sendPasswordResetEmailDev = async (email, resetUrl, userName) => {
     
     return { success: true, messageId: 'dev-mode' };
 };
+
+const getVerificationCodeTemplate = (code, type = 'login') => {
+    const typeText = type === 'login' ? 'входу в систему' : 'підтвердження профілю';
+    return {
+        subject: `Код ${typeText} - 3DN CodeCon`,
+        html: `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="utf-8">
+                <style>
+                    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }
+                    .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+                    .code { background: #fff; border: 2px dashed #667eea; padding: 20px; text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 8px; margin: 20px 0; color: #667eea; }
+                    .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+                    .warning { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h1>3DN CodeCon</h1>
+                        <p>Код ${typeText}</p>
+                    </div>
+                    <div class="content">
+                        <h2>Ваш код для ${typeText}</h2>
+                        <p>Використайте наступний код для ${typeText}:</p>
+                        <div class="code">${code}</div>
+                        <div class="warning">
+                            <strong>Важливо:</strong> Цей код дійсний протягом 15 хвилин.
+                        </div>
+                        <p>Якщо ви не запитували цей код, просто проігноруйте цей лист.</p>
+                    </div>
+                    <div class="footer">
+                        <p>© 2025 3DN CodeCon. Всі права захищені.</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+        `,
+        text: `
+            Ваш код для ${typeText}: ${code}
+            
+            Цей код дійсний протягом 15 хвилин.
+            
+            Якщо ви не запитували цей код, просто проігноруйте цей лист.
+            
+            © 2025 3DN CodeCon
+        `
+    };
+};
+
+export const sendVerificationCodeEmail = async (email, code, type = 'login') => {
+    try {
+        const transporter = createTransporter();
+        
+        if (!transporter) {
+            return await sendVerificationCodeEmailDev(email, code, type);
+        }
+        
+        const template = getVerificationCodeTemplate(code, type);
+        
+        const mailOptions = {
+            from: `"${process.env.EMAIL_FROM_NAME || 'StudLink'}" <denyszastavniy@gmail.com>`,
+            to: email,
+            ...template
+        };
+        
+        const result = await transporter.sendMail(mailOptions);
+        console.log('Verification code email sent successfully:', result.messageId);
+        return { success: true, messageId: result.messageId };
+    } catch (error) {
+        console.error('Error sending verification code email:', error);
+        console.log('Falling back to dev mode...');
+        return await sendVerificationCodeEmailDev(email, code, type);
+    }
+};
+
+export const sendVerificationCodeEmailDev = async (email, code, type) => {
+    console.log('\n=== VERIFICATION CODE EMAIL (DEV MODE) ===');
+    console.log('To:', email);
+    console.log('Type:', type);
+    console.log('Code:', code);
+    console.log('==========================================\n');
+    
+    return { success: true, messageId: 'dev-mode' };
+};

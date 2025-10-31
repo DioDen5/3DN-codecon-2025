@@ -3,14 +3,17 @@ import {
     getAdminStats, 
     getAdminUsers, 
     getAdminReports, 
-    getAdminNameChangeRequests, 
+    getAdminNameChangeRequests,
+    getAdminTeacherClaimRequests,
     getAdminActivity,
     getAllModerationContent,
     getModerationAnnouncements,
     getModerationComments,
     getModerationReviews,
     resolveReport,
-    rejectReport
+    rejectReport,
+    approveTeacherClaimRequest,
+    rejectTeacherClaimRequest
 } from '../../api/admin-stats';
 import { useTeacherData } from '../../contexts/TeacherDataContext';
 
@@ -23,6 +26,7 @@ export const useAdminData = () => {
     const [usersData, setUsersData] = useState([]);
     const [reportsData, setReportsData] = useState([]);
     const [nameChangeRequests, setNameChangeRequests] = useState([]);
+    const [teacherClaimRequests, setTeacherClaimRequests] = useState([]);
     const [activityData, setActivityData] = useState([]);
     
     const [moderationData, setModerationData] = useState(null);
@@ -82,11 +86,12 @@ export const useAdminData = () => {
             setLoading(true);
             setError(null);
 
-            const [stats, users, reports, nameChanges, activityResponse] = await Promise.all([
+            const [stats, users, reports, nameChanges, teacherClaims, activityResponse] = await Promise.all([
                 getAdminStats(),
                 getAdminUsers(),
                 getAdminReports(),
                 getAdminNameChangeRequests(),
+                getAdminTeacherClaimRequests(),
                 getAdminActivity(1)
             ]);
 
@@ -94,6 +99,7 @@ export const useAdminData = () => {
             setUsersData(users);
             setReportsData(reports);
             setNameChangeRequests(nameChanges);
+            setTeacherClaimRequests(teacherClaims);
             
             console.log('Reports loaded:', reports.length);
             setActivityData(activityResponse.content || []);
@@ -332,12 +338,39 @@ export const useAdminData = () => {
         }
     }, []);
 
+    const handleApproveTeacherClaimRequest = async (requestId, adminNotes = '') => {
+        try {
+            await approveTeacherClaimRequest(requestId, adminNotes);
+            // Перезавантажуємо дані
+            const teacherClaims = await getAdminTeacherClaimRequests();
+            setTeacherClaimRequests(teacherClaims);
+            await loadAdminData();
+            triggerRefresh();
+        } catch (error) {
+            console.error('Error approving teacher claim request:', error);
+            throw error;
+        }
+    };
+
+    const handleRejectTeacherClaimRequest = async (requestId, adminNotes = '') => {
+        try {
+            await rejectTeacherClaimRequest(requestId, adminNotes);
+            // Перезавантажуємо дані
+            const teacherClaims = await getAdminTeacherClaimRequests();
+            setTeacherClaimRequests(teacherClaims);
+            await loadAdminData();
+        } catch (error) {
+            console.error('Error rejecting teacher claim request:', error);
+            throw error;
+        }
+    };
+
     const approveNameRequest = async (requestId) => {
         try {
             const { approveNameChangeRequest } = await import('../../api/admin-stats');
             await approveNameChangeRequest(requestId);
-            setNameChangeRequests((prev) => prev.map((r) => (r._id === requestId || r.id === requestId ? { ...r, status: 'approved' } : r)));
             await loadNameChangeRequests();
+            await loadAdminData();
         } catch (e) {}
     };
 
@@ -556,6 +589,9 @@ export const useAdminData = () => {
         handleReviewsPageClick,
         approveNameRequest,
         rejectNameRequest,
+        teacherClaimRequests,
+        approveTeacherClaimRequest: handleApproveTeacherClaimRequest,
+        rejectTeacherClaimRequest: handleRejectTeacherClaimRequest,
         refreshCurrentContent: async (contentType) => {
             try {
                 console.log('refreshCurrentContent called with:', contentType);

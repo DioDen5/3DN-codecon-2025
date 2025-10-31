@@ -1,7 +1,9 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import { Teacher } from '../models/Teacher.js';
+import { TeacherClaimRequest } from '../models/TeacherClaimRequest.js';
 import { Reaction } from '../models/Reaction.js';
+import { User } from '../models/User.js';
 import { authRequired } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -103,19 +105,21 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', authRequired, async (req, res) => {
     try {
-        const { name, university, department, subject, image } = req.body;
+        const { name, university, department, subject, image, email } = req.body;
         
         const teacher = new Teacher({
             name,
             university,
             department,
             subject,
-            image
+            image,
+            email: email ? email.toLowerCase().trim() : null
         });
         
         await teacher.save();
         res.status(201).json(teacher);
     } catch (error) {
+        console.error('Create teacher error:', error);
         res.status(500).json({ error: 'Failed to create teacher' });
     }
 });
@@ -225,6 +229,301 @@ router.get('/:id/reactions', authRequired, async (req, res) => {
         res.json(counts);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch reactions' });
+    }
+});
+
+// Отримати свій Teacher профіль (якщо є)
+router.get('/my-profile', authRequired, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        
+        if (req.user.role !== 'teacher') {
+            return res.status(403).json({ error: 'Only teachers can access this endpoint' });
+        }
+        
+        const teacher = await Teacher.findOne({ userId: new mongoose.Types.ObjectId(userId) });
+        
+        if (!teacher) {
+            return res.json({ teacher: null, hasClaimRequest: false });
+        }
+        
+        // Перевіряємо чи є активна заявка
+        const hasClaimRequest = await TeacherClaimRequest.exists({
+            userId: new mongoose.Types.ObjectId(userId),
+            status: 'pending'
+        });
+        
+        const teacherWithRating = {
+            ...teacher.toObject(),
+            rating: teacher.calculateRating()
+        };
+        
+        res.json({ teacher: teacherWithRating, hasClaimRequest: !!hasClaimRequest });
+    } catch (error) {
+        console.error('Get my profile error:', error);
+        res.status(500).json({ error: 'Failed to fetch profile' });
+    }
+});
+
+// Створити заявку на отримання Teacher профілю
+router.post('/claim', authRequired, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { teacherId } = req.body;
+        
+        if (req.user.role !== 'teacher') {
+            return res.status(403).json({ error: 'Only teachers can create claim requests' });
+        }
+        
+        if (!teacherId) {
+            return res.status(400).json({ error: 'Teacher ID is required' });
+        }
+        
+        // Перевіряємо чи вже є прив'язаний профіль
+        const existingTeacher = await Teacher.findOne({ userId: new mongoose.Types.ObjectId(userId) });
+        if (existingTeacher) {
+            return res.status(400).json({ error: 'You already have a teacher profile' });
+        }
+        
+        // Перевіряємо чи Teacher існує
+        const teacher = await Teacher.findById(teacherId);
+        if (!teacher) {
+            return res.status(404).json({ error: 'Teacher not found' });
+        }
+        
+        // Перевіряємо чи Teacher вже прив'язаний
+        if (teacher.userId) {
+            return res.status(400).json({ error: 'This teacher profile is already claimed' });
+        }
+        
+        // Перевіряємо чи вже є активна заявка від цього користувача
+        const existingRequest = await TeacherClaimRequest.findOne({
+            userId: new mongoose.Types.ObjectId(userId),
+            teacherId: new mongoose.Types.ObjectId(teacherId),
+            status: 'pending'
+        });
+        
+        if (existingRequest) {
+            return res.status(400).json({ error: 'You already have a pending claim request for this teacher' });
+        }
+        
+        // Отримуємо дані користувача
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        
+        // Створюємо заявку
+        const claimRequest = await TeacherClaimRequest.create({
+            teacherId: new mongoose.Types.ObjectId(teacherId),
+            userId: new mongoose.Types.ObjectId(userId),
+            userEmail: user.email,
+            teacherName: teacher.name
+        });
+        
+        res.status(201).json({
+            message: 'Claim request created successfully',
+            request: claimRequest
+        });
+    } catch (error) {
+        console.error('Create claim request error:', error);
+        res.status(500).json({ error: 'Failed to create claim request' });
+    }
+});
+
+// Отримати список заявок користувача
+router.get('/claim/my-requests', authRequired, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        
+        if (req.user.role !== 'teacher') {
+            return res.status(403).json({ error: 'Only teachers can access this endpoint' });
+        }
+        
+        const requests = await TeacherClaimRequest.find({
+            userId: new mongoose.Types.ObjectId(userId)
+        })
+        .populate('teacherId', 'name university department subject')
+        .sort({ createdAt: -1 });
+        
+        res.json({ requests });
+    } catch (error) {
+        console.error('Get my requests error:', error);
+        res.status(500).json({ error: 'Failed to fetch requests' });
+    }
+});
+
+// Встановити пароль для викладача
+router.post('/set-password', authRequired, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { password } = req.body;
+
+        if (req.user.role !== 'teacher') {
+            return res.status(403).json({ error: 'Only teachers can set password' });
+        }
+
+        if (!password || password.length < 8) {
+            return res.status(400).json({ error: 'Пароль повинен містити мінімум 8 символів' });
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const bcrypt = (await import('bcrypt')).default;
+        const teacherPasswordHash = await bcrypt.hash(password, 10);
+
+        user.teacherPassword = teacherPasswordHash;
+        user.teacherPasswordSetAt = new Date();
+        await user.save();
+
+        res.json({ 
+            message: 'Пароль успішно встановлено. Тепер ви можете входити як за кодом, так і за паролем' 
+        });
+    } catch (error) {
+        console.error('Set teacher password error:', error);
+        res.status(500).json({ error: 'Failed to set password' });
+    }
+});
+
+// Оновити профіль викладача
+router.put('/my-profile', authRequired, async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        if (req.user.role !== 'teacher') {
+            return res.status(403).json({ error: 'Only teachers can update profile' });
+        }
+
+        const teacher = await Teacher.findOne({ userId: new mongoose.Types.ObjectId(userId) });
+        if (!teacher) {
+            return res.status(404).json({ error: 'Teacher profile not found' });
+        }
+
+        const { 
+            firstName, 
+            lastName, 
+            middleName, 
+            displayName,
+            university, 
+            department, 
+            subjects, 
+            image, 
+            bio 
+        } = req.body;
+
+        const updates = {};
+        const pendingChanges = {};
+
+        if (firstName !== undefined || lastName !== undefined || middleName !== undefined || displayName !== undefined) {
+            const name = `${firstName || teacher.name.split(' ')[0]} ${middleName || ''} ${lastName || teacher.name.split(' ').slice(-1)[0]}`.trim();
+            if (teacher.status === 'verified') {
+                pendingChanges.name = name;
+                pendingChanges.firstName = firstName;
+                pendingChanges.lastName = lastName;
+                pendingChanges.middleName = middleName;
+                pendingChanges.displayName = displayName;
+            } else {
+                updates.name = name;
+            }
+        }
+
+        if (university !== undefined) {
+            if (teacher.status === 'verified') {
+                pendingChanges.university = university;
+            } else {
+                updates.university = university;
+            }
+        }
+
+        if (department !== undefined) {
+            if (teacher.status === 'verified') {
+                pendingChanges.department = department;
+            } else {
+                updates.department = department;
+            }
+        }
+
+        if (subjects !== undefined && Array.isArray(subjects)) {
+            if (teacher.status === 'verified') {
+                pendingChanges.subjects = subjects;
+                pendingChanges.subject = subjects.length > 0 ? subjects[0] : '';
+            } else {
+                updates.subjects = subjects;
+                updates.subject = subjects.length > 0 ? subjects[0] : '';
+            }
+        }
+
+        if (image !== undefined) {
+            if (teacher.status === 'verified') {
+                pendingChanges.image = image;
+            } else {
+                updates.image = image;
+            }
+        }
+
+        if (bio !== undefined) {
+            if (teacher.status === 'verified') {
+                pendingChanges.bio = bio;
+            } else {
+                updates.bio = bio;
+            }
+        }
+
+        if (teacher.status === 'verified' && Object.keys(pendingChanges).length > 0) {
+            teacher.pendingChanges = pendingChanges;
+            teacher.lastEditedAt = new Date();
+            await teacher.save();
+            return res.json({
+                message: 'Ваші зміни збережено. Адміністратор перевірить їх найближчим часом',
+                pendingChanges
+            });
+        }
+
+        if (Object.keys(updates).length > 0) {
+            Object.assign(teacher, updates);
+            teacher.lastEditedAt = new Date();
+            await teacher.save();
+        }
+
+        const teacherWithRating = {
+            ...teacher.toObject(),
+            rating: teacher.calculateRating()
+        };
+
+        res.json({
+            message: 'Профіль успішно оновлено',
+            teacher: teacherWithRating
+        });
+    } catch (error) {
+        console.error('Update teacher profile error:', error);
+        res.status(500).json({ error: 'Failed to update profile' });
+    }
+});
+
+// Отримати зміни що очікують модерації
+router.get('/my-profile/pending-changes', authRequired, async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        if (req.user.role !== 'teacher') {
+            return res.status(403).json({ error: 'Only teachers can access this endpoint' });
+        }
+
+        const teacher = await Teacher.findOne({ userId: new mongoose.Types.ObjectId(userId) });
+        if (!teacher) {
+            return res.status(404).json({ error: 'Teacher profile not found' });
+        }
+
+        res.json({
+            pendingChanges: teacher.pendingChanges || null,
+            hasPendingChanges: !!teacher.pendingChanges
+        });
+    } catch (error) {
+        console.error('Get pending changes error:', error);
+        res.status(500).json({ error: 'Failed to fetch pending changes' });
     }
 });
 

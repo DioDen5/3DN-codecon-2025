@@ -181,3 +181,34 @@ export const rejectNameChangeRequest = async (requestId) => {
     const response = await http.post(`/admin/name-change-requests/${requestId}/reject`);
     return response.data;
 };
+
+// Teacher Claim Requests
+export const getAdminTeacherClaimRequests = async () => {
+    try {
+        const response = await http.get('/admin/teacher-claim-requests');
+        return response.data;
+    } catch (error) {
+        console.error('Error getting admin teacher claim requests:', error);
+        throw error;
+    }
+};
+
+export const approveTeacherClaimRequest = async (requestId, adminNotes = '') => {
+    try {
+        const response = await http.post(`/admin/teacher-claim-requests/${requestId}/approve`, { adminNotes });
+        return response.data;
+    } catch (error) {
+        console.error('Error approving teacher claim request:', error);
+        throw error;
+    }
+};
+
+export const rejectTeacherClaimRequest = async (requestId, adminNotes = '') => {
+    try {
+        const response = await http.post(`/admin/teacher-claim-requests/${requestId}/reject`, { adminNotes });
+        return response.data;
+    } catch (error) {
+        console.error('Error rejecting teacher claim request:', error);
+        throw error;
+    }
+};

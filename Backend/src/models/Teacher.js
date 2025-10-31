@@ -18,12 +18,54 @@ const teacherSchema = new mongoose.Schema({
     },
     subject: {
         type: String,
-        required: true,
+        required: false,
+        trim: true
+    },
+    subjects: {
+        type: [String],
+        default: [],
         trim: true
     },
     image: {
         type: String,
         required: true
+    },
+    // Email викладача для автоматичної прив'язки
+    email: {
+        type: String,
+        trim: true,
+        lowercase: true,
+        index: true
+    },
+    // ID користувача, якому належить профіль
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'users',
+        default: null,
+        index: true
+    },
+    status: {
+        type: String,
+        enum: ['pending', 'verified', 'rejected'],
+        default: 'pending',
+        index: true
+    },
+    rejectionReason: {
+        type: String,
+        trim: true
+    },
+    lastEditedAt: {
+        type: Date,
+        default: null
+    },
+    pendingChanges: {
+        type: mongoose.Schema.Types.Mixed,
+        default: null
+    },
+    bio: {
+        type: String,
+        trim: true,
+        maxlength: 500
     },
     rating: {
         type: Number,

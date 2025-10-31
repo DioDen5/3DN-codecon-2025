@@ -1,7 +1,10 @@
 import { useState } from "react";
-import { register } from "../api/auth"; // Імпорт функції реєстрації
+import { register, checkEmailForRegistration, registerTeacher, sendVerificationCode, loginWithCode } from "../api/auth";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../state/AuthContext";
+import RoleSelectionModal from "./RoleSelectionModal";
+import TeacherRegistrationWizard from "./TeacherRegistrationWizard";
+import { useNotification } from "../contexts/NotificationContext";
 
 const SignupForm = ({ switchToLogin }) => {
     const [formData, setFormData] = useState({
@@ -13,9 +16,16 @@ const SignupForm = ({ switchToLogin }) => {
     });
     const [errors, setErrors] = useState({});
     const [success, setSuccess] = useState(false);
-    const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false); // Track if user tried to submit
+    const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
+    const [selectedRole, setSelectedRole] = useState(null);
+    const [showRoleModal, setShowRoleModal] = useState(true);
+    const [showLoginWithCode, setShowLoginWithCode] = useState(false);
+    const [showTeacherWizard, setShowTeacherWizard] = useState(false);
+    const [verificationCode, setVerificationCode] = useState('');
+    const [codeSent, setCodeSent] = useState(false);
     const navigate = useNavigate();
     const { loginSuccess } = useAuth();
+    const { showSuccess, showError } = useNotification();
 
     const isFormValid = formData.firstName.trim() && 
                        formData.lastName.trim() && 
@@ -52,8 +62,69 @@ const SignupForm = ({ switchToLogin }) => {
         }
     };
 
+    const handleRoleSelect = async (role) => {
+        setSelectedRole(role);
+        setShowRoleModal(false);
+        
+        if (role === 'teacher' && formData.email) {
+            await checkEmailForTeacher(formData.email);
+        }
+    };
+
+    const checkEmailForTeacher = async (email) => {
+        if (!email || !/\S+@\S+\.\S+/.test(email)) return;
+        
+        try {
+            const result = await checkEmailForRegistration(email, 'teacher');
+            
+            if (result.teacherExists) {
+                setShowLoginWithCode(true);
+                setCodeSent(false);
+                await handleSendCode(email);
+                showSuccess('Профіль викладача з такою поштою вже існує. Підтвердіть вхід за кодом');
+            }
+        } catch (error) {
+            console.error('Error checking email:', error);
+        }
+    };
+
+    const handleSendCode = async (email) => {
+        try {
+            await sendVerificationCode(email, 'login');
+            setCodeSent(true);
+            showSuccess('Код надіслано на пошту');
+        } catch (error) {
+            showError(error.response?.data?.error || 'Помилка відправки коду');
+        }
+    };
+
+    const handleLoginWithCode = async (e) => {
+        e.preventDefault();
+        setErrors({});
+        
+        if (!verificationCode || verificationCode.length !== 6) {
+            setErrors({ code: 'Код повинен містити 6 цифр' });
+            return;
+        }
+        
+        try {
+            const { token, user } = await loginWithCode(formData.email, verificationCode);
+            loginSuccess({ token, user });
+            showSuccess('Вхід успішний!');
+            navigate("/forum");
+        } catch (error) {
+            setErrors({ code: error.response?.data?.error || 'Невірний код' });
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        if (!selectedRole) {
+            setShowRoleModal(true);
+            return;
+        }
+        
         setHasAttemptedSubmit(true);
         setErrors({});
         setSuccess(false);
@@ -78,6 +149,15 @@ const SignupForm = ({ switchToLogin }) => {
             newErrors.email = 'Невірний формат email';
         }
         
+        if (selectedRole === 'teacher') {
+            if (!formData.email.trim() || !/\S+@\S+\.\S+/.test(formData.email)) {
+                setErrors(newErrors);
+                return;
+            }
+            setShowTeacherWizard(true);
+            return;
+        }
+        
         if (!formData.password) {
             newErrors.password = 'Пароль обов\'язковий';
         } else if (formData.password.length < 8) {
@@ -96,6 +176,7 @@ const SignupForm = ({ switchToLogin }) => {
         }
         
         try {
+            
             const registrationData = {
                 email: formData.email,
                 password: formData.password,
@@ -104,24 +185,21 @@ const SignupForm = ({ switchToLogin }) => {
                 lastName: formData.lastName
             };
             
-            console.log('Sending registration data:', registrationData);
-            
             const { token, user } = await register(registrationData);
             
             setSuccess(true);
             
             setTimeout(() => {
                 loginSuccess({ token, user });
-                navigate("/forum"); // Перекидання на головну сторінку
+                navigate("/forum");
             }, 1500);
         } catch (error) {
             console.error('Registration error:', error);
-            console.error('Error response:', error.response?.data);
             
             if (error.response?.status === 409) {
-                setErrors({ email: 'Користувач з таким email вже існує' });
+                setErrors({ email: 'Користувач з таким email вже існує. Якщо це ви, увійдіть в систему.' });
             } else if (error.response?.status === 400) {
-                setErrors({ general: 'Невірні дані. Перевірте правильність заповнення полів' });
+                setErrors({ general: error.response?.data?.error || 'Невірні дані. Перевірте правильність заповнення полів' });
             } else {
                 setErrors({ general: 'Помилка реєстрації. Спробуйте ще раз' });
             }
@@ -129,8 +207,96 @@ const SignupForm = ({ switchToLogin }) => {
     };
 
 
+    if (showTeacherWizard && selectedRole === 'teacher') {
+        return (
+            <TeacherRegistrationWizard
+                email={formData.email}
+                onBack={() => {
+                    setShowTeacherWizard(false);
+                    setSelectedRole(null);
+                }}
+                onSuccess={() => {
+                    setShowTeacherWizard(false);
+                    switchToLogin();
+                }}
+            />
+        );
+    }
+
+    if (showLoginWithCode) {
+        return (
+            <div className="space-y-6 p-10 w-full text-white">
+                <div className="mb-4">
+                    <h2 className="text-2xl font-semibold mb-2">Підтвердження входу</h2>
+                    <p className="text-sm text-gray-300">
+                        Профіль викладача з поштою <strong>{formData.email}</strong> вже існує в системі.
+                        Введіть код, надісланий на вашу пошту.
+                    </p>
+                </div>
+                
+                <form onSubmit={handleLoginWithCode} className="space-y-4">
+                    <div>
+                        <label className="block text-sm mb-2">Код верифікації</label>
+                        <input
+                            type="text"
+                            maxLength="6"
+                            value={verificationCode}
+                            onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ''))}
+                            className={`w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 text-center text-2xl tracking-widest ${
+                                errors.code ? 'border-2 border-red-400' : ''
+                            }`}
+                            placeholder="000000"
+                        />
+                        {errors.code && (
+                            <p className="text-red-400 text-sm mt-1">{errors.code}</p>
+                        )}
+                    </div>
+                    
+                    {!codeSent && (
+                        <button
+                            type="button"
+                            onClick={() => handleSendCode(formData.email)}
+                            className="w-full py-2 text-sm text-blue-400 hover:text-blue-300"
+                        >
+                            Надіслати код повторно
+                        </button>
+                    )}
+                    
+                    <div className="flex gap-3">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setShowLoginWithCode(false);
+                                setVerificationCode('');
+                                setCodeSent(false);
+                            }}
+                            className="flex-1 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg"
+                        >
+                            Назад
+                        </button>
+                        <button
+                            type="submit"
+                            className="flex-1 py-2 bg-blue-700 hover:bg-blue-800 rounded-lg"
+                        >
+                            Підтвердити
+                        </button>
+                    </div>
+                </form>
+            </div>
+        );
+    }
+
     return (
-        <form onSubmit={handleSubmit} className="space-y-6 p-15 w-full text-white">
+        <>
+            <RoleSelectionModal
+                isOpen={showRoleModal}
+                onClose={() => {
+                    setShowRoleModal(false);
+                    switchToLogin();
+                }}
+                onSelectRole={handleRoleSelect}
+            />
+            <form onSubmit={handleSubmit} className="space-y-6 p-15 w-full text-white">
             <h2 className="text-2xl font-semibold mb-4">Профіль</h2>
             <div>
                 <label className="block text-md">Ім'я</label>
@@ -172,7 +338,17 @@ const SignupForm = ({ switchToLogin }) => {
                     type="email"
                     name="email"
                     value={formData.email}
-                    onChange={handleChange}
+                    onChange={(e) => {
+                        handleChange(e);
+                        if (selectedRole === 'teacher' && e.target.value) {
+                            checkEmailForTeacher(e.target.value);
+                        }
+                    }}
+                    onBlur={() => {
+                        if (selectedRole === 'teacher' && formData.email) {
+                            checkEmailForTeacher(formData.email);
+                        }
+                    }}
                     className={`w-full px-4 py-2 rounded-md placeholder-white/50 focus:outline-none input text-gray-800 ${
                         errors.email 
                             ? 'bg-red-100 border-2 border-red-400' 
@@ -183,7 +359,19 @@ const SignupForm = ({ switchToLogin }) => {
                 {errors.email && (
                     <p className="text-red-400 text-sm mt-1">{errors.email}</p>
                 )}
+                {selectedRole === 'teacher' && (
+                    <p className="text-xs text-gray-400 mt-1">
+                        Якщо профіль викладача вже існує, вам надішле код на пошту
+                    </p>
+                )}
             </div>
+            {selectedRole && (
+                <div className="px-4 py-2 bg-blue-500/20 rounded-lg">
+                    <p className="text-sm">
+                        Вибрано: <strong>{selectedRole === 'student' ? 'Студент' : 'Викладач'}</strong>
+                    </p>
+                </div>
+            )}
             <h2 className="text-2xl font-semibold mb-4">Пароль</h2>
             <div>
                 <label className="block text-md">Пароль</label>
@@ -289,7 +477,8 @@ const SignupForm = ({ switchToLogin }) => {
                         </span>
                     </button>
                 </form>
-            );
-        };
+        </>
+    );
+};
 
 export default SignupForm;

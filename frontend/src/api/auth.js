@@ -73,3 +73,32 @@ export async function resetPassword(token, password) {
     const { data } = await http.post('/auth/reset-password', { token, password });
     return data;
 }
+
+export async function checkEmailForRegistration(email, role) {
+    const { data } = await http.post('/auth/register/check-email', { email, role });
+    return data;
+}
+
+export async function registerTeacher(formData) {
+    const { data } = await http.post('/auth/register/teacher', formData);
+    if (data?.token) tokenStore.set(data.token);
+    if (data?.user)  setMe(data.user);
+    return data;
+}
+
+export async function sendVerificationCode(email, type = 'login') {
+    const { data } = await http.post('/auth/send-verification-code', { email, type });
+    return data;
+}
+
+export async function verifyCode(email, code, type = 'login') {
+    const { data } = await http.post('/auth/verify-code', { email, code, type });
+    return data;
+}
+
+export async function loginWithCode(email, code) {
+    const { data } = await http.post('/auth/login-with-code', { email, code });
+    if (data?.token) tokenStore.set(data.token);
+    if (data?.user)  setMe(data.user);
+    return data;
+}

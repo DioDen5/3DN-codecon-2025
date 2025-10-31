@@ -20,3 +20,21 @@ export const getTeacherReactions = async (id) => {
     const response = await http.get(`/teachers/${id}/reactions`);
     return response.data;
 };
+
+// Отримати свій Teacher профіль (якщо є)
+export const getMyTeacherProfile = async () => {
+    const response = await http.get('/teachers/my-profile');
+    return response.data;
+};
+
+// Створити заявку на отримання Teacher профілю
+export const claimTeacher = async (teacherId) => {
+    const response = await http.post('/teachers/claim', { teacherId });
+    return response.data;
+};
+
+// Отримати список моїх заявок
+export const getMyClaimRequests = async () => {
+    const response = await http.get('/teachers/claim/my-requests');
+    return response.data;
+};

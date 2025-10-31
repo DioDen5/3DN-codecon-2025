@@ -7,6 +7,7 @@ import ReviewsList from './ReviewsList';
 import AllContentList from './AllContentList';
 import ModerationPagination from './ModerationPagination';
 import NameRequestsList from './NameRequestsList';
+import TeacherClaimRequestsList from './TeacherClaimRequestsList';
 
 const AdminModeration = ({
     moderationFilter,
@@ -47,7 +48,10 @@ const AdminModeration = ({
     handleReviewsPageClick,
     nameChangeRequests,
     onApproveNameRequest,
-    onRejectNameRequest
+    onRejectNameRequest,
+    teacherClaimRequests,
+    onApproveTeacherClaimRequest,
+    onRejectTeacherClaimRequest
 }) => {
     return (
         <div className="space-y-6">
@@ -149,6 +153,14 @@ const AdminModeration = ({
 
                 {moderationFilter === 'name-requests' && (
                     <NameRequestsList nameRequests={nameChangeRequests} onApprove={onApproveNameRequest} onReject={onRejectNameRequest} />
+                )}
+
+                {moderationFilter === 'teacher-claims' && (
+                    <TeacherClaimRequestsList 
+                        teacherClaimRequests={teacherClaimRequests} 
+                        onApprove={onApproveTeacherClaimRequest} 
+                        onReject={onRejectTeacherClaimRequest} 
+                    />
                 )}
             </div>
         </div>

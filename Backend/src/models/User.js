@@ -13,6 +13,8 @@ const userSchema = new mongoose.Schema({
     isOwner:   { type: Boolean, default: false },
     rememberMe: { type: Boolean, default: false },
     lastLoginEmail: { type: String, default: null },
+    teacherPassword: { type: String, default: null },
+    teacherPasswordSetAt: { type: Date, default: null },
     createdAt: { type: Date, default: () => new Date() },
     updatedAt: { type: Date, default: () => new Date() }
 }, { versionKey: false });

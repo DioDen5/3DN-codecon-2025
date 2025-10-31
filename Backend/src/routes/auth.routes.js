@@ -1,11 +1,14 @@
 import express from 'express';
 import { z } from 'zod';
 import bcrypt from 'bcrypt';
+import mongoose from 'mongoose';
 import { User } from '../models/User.js';
+import { Teacher } from '../models/Teacher.js';
 import { PasswordResetToken } from '../models/PasswordResetToken.js';
+import { EmailVerificationCode } from '../models/EmailVerificationCode.js';
 import allowed from '../config/allowed-edu-domains.json' with { type: 'json' };
 import { signJwt, verifyJwt } from '../middleware/auth.js';
-import { sendPasswordResetEmail } from '../utils/emailService.js';
+import { sendPasswordResetEmail, sendVerificationCodeEmail } from '../utils/emailService.js';
 import { logUserRegistration, logUserVerification } from '../utils/activityLogger.js';
 import { checkSessionTimeout, checkIdleTimeout } from '../middleware/sessionTimeout.js';
 import { checkLoginAttempts, logLoginAttempt } from '../middleware/loginAttempts.js';
@@ -91,21 +94,67 @@ router.post('/register', async (req, res) => {
 router.post('/login', checkLoginAttempts, async (req, res) => {
     const { email, password, rememberMe } = req.body ?? {};
 
-    const user = await User.findOne({ email });
+    const normalizedEmail = email?.toLowerCase().trim();
+
+    const user = await User.findOne({ email: normalizedEmail });
     if (!user) {
+        const teacher = await Teacher.findOne({ email: normalizedEmail });
+        if (teacher && !teacher.userId) {
+            await logLoginAttempt(req, res, () => {});
+            return res.status(401).json({ 
+                error: 'Teacher profile exists',
+                requiresCodeVerification: true,
+                message: 'Профіль викладача з такою поштою існує. Підтвердіть вхід за кодом'
+            });
+        }
+        
         await logLoginAttempt(req, res, () => {});
         return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    const ok = await bcrypt.compare(password, user.passwordHash);
+    let passwordToCheck = user.passwordHash;
+    if (user.role === 'teacher' && user.teacherPassword) {
+        const teacherPasswordOk = await bcrypt.compare(password, user.teacherPassword);
+        if (teacherPasswordOk) {
+            passwordToCheck = user.teacherPassword;
+        }
+    }
+
+    const ok = await bcrypt.compare(password, passwordToCheck);
     if (!ok) {
         await logLoginAttempt(req, res, () => {});
         return res.status(401).json({ error: 'Invalid credentials' });
     }
 
+    if (user.role === 'teacher') {
+        const teacher = await Teacher.findOne({ email: normalizedEmail });
+        if (teacher && !teacher.userId) {
+            teacher.userId = user._id;
+            if (teacher.status === 'pending' && user.status === 'verified') {
+                teacher.status = 'verified';
+            }
+            await teacher.save();
+        }
+    }
+
     user.rememberMe = rememberMe || false;
-    user.lastLoginEmail = rememberMe ? email : null;
+    user.lastLoginEmail = rememberMe ? normalizedEmail : null;
     await user.save();
+
+    let teacherProfile = null;
+    if (user.role === 'teacher') {
+        const existingTeacher = await Teacher.findOne({ userId: user._id });
+        if (existingTeacher) {
+            teacherProfile = {
+                id: existingTeacher._id,
+                name: existingTeacher.name,
+                university: existingTeacher.university,
+                department: existingTeacher.department,
+                subjects: existingTeacher.subjects || [existingTeacher.subject].filter(Boolean),
+                status: existingTeacher.status
+            };
+        }
+    }
 
     const access = signJwt({ id: user._id, role: user.role, status: user.status }, 'access');
     const refresh = signJwt({ id: user._id }, 'refresh');
@@ -118,7 +167,8 @@ router.post('/login', checkLoginAttempts, async (req, res) => {
         token: access,
         user: { id: user._id, displayName: user.displayName, role: user.role, status: user.status },
         rememberMe: user.rememberMe,
-        lastLoginEmail: user.lastLoginEmail
+        lastLoginEmail: user.lastLoginEmail,
+        teacherProfile
     });
 });
 
@@ -259,6 +309,391 @@ router.patch('/profile', async (req, res) => {
     } catch (error) {
         console.error('Update profile error:', error);
         return res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+router.post('/register/check-email', async (req, res) => {
+    try {
+        const { email, role } = req.body;
+
+        if (!email || !role) {
+            return res.status(400).json({ error: 'Email та роль обов\'язкові' });
+        }
+
+        if (role !== 'teacher') {
+            return res.status(400).json({ error: 'Цей endpoint тільки для викладачів' });
+        }
+
+        const normalizedEmail = email.toLowerCase().trim();
+
+        if (!isAllowedEduEmail(normalizedEmail)) {
+            return res.status(400).json({ error: 'Реєстрація дозволена тільки з корпоративної пошти університету' });
+        }
+
+        const existingUser = await User.findOne({ email: normalizedEmail });
+        if (existingUser) {
+            return res.status(409).json({ 
+                error: 'Email already used',
+                exists: true,
+                userExists: true
+            });
+        }
+
+        const existingTeacher = await Teacher.findOne({ email: normalizedEmail });
+        if (existingTeacher) {
+            return res.json({
+                exists: true,
+                teacherExists: true,
+                message: 'Профіль викладача з такою поштою вже існує в системі'
+            });
+        }
+
+        return res.json({
+            exists: false,
+            canRegister: true
+        });
+    } catch (error) {
+        console.error('Check email error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+const teacherRegisterSchema = z.object({
+    email: z.string().email(),
+    password: z.string().min(8),
+    displayName: z.string().min(2),
+    firstName: z.string().min(2),
+    lastName: z.string().min(2),
+    middleName: z.string().optional(),
+    university: z.string().min(2),
+    department: z.string().min(2),
+    subjects: z.array(z.string().min(1)).min(1),
+    image: z.string().url().optional(),
+    bio: z.string().max(500).optional()
+});
+
+router.post('/register/teacher', async (req, res) => {
+    try {
+        const parse = teacherRegisterSchema.safeParse(req.body);
+        if (!parse.success) {
+            const errorMessage = parse.error?.errors?.[0]?.message || 'Invalid input';
+            return res.status(400).json({ error: errorMessage });
+        }
+
+        const { email, password, displayName, firstName, lastName, middleName, university, department, subjects, image, bio } = parse.data;
+
+        const normalizedEmail = email.toLowerCase().trim();
+
+        if (!isAllowedEduEmail(normalizedEmail)) {
+            return res.status(400).json({ error: 'Реєстрація дозволена тільки з корпоративної пошти університету' });
+        }
+
+        const existingUser = await User.findOne({ email: normalizedEmail });
+        if (existingUser) {
+            return res.status(409).json({ error: 'Email already used' });
+        }
+
+        const existingTeacher = await Teacher.findOne({ email: normalizedEmail });
+        if (existingTeacher) {
+            return res.status(409).json({ 
+                error: 'Teacher profile already exists',
+                requiresVerification: true
+            });
+        }
+
+        const isUkrainian = (text) => /^[а-яіїєґА-ЯІЇЄҐ\s]+$/.test(text);
+        const isEnglish = (text) => /^[a-zA-Z\s]+$/.test(text);
+        
+        const firstNameLang = isUkrainian(firstName) ? 'uk' : isEnglish(firstName) ? 'en' : 'mixed';
+        const lastNameLang = isUkrainian(lastName) ? 'uk' : isEnglish(lastName) ? 'en' : 'mixed';
+        const displayNameLang = isUkrainian(displayName) ? 'uk' : isEnglish(displayName) ? 'en' : 'mixed';
+        
+        if (firstNameLang === 'mixed' || lastNameLang === 'mixed' || displayNameLang === 'mixed') {
+            return res.status(400).json({ error: 'Ім\'я та прізвище мають містити тільки літери однієї мови (української або англійської)' });
+        }
+        
+        if (firstNameLang !== lastNameLang || firstNameLang !== displayNameLang) {
+            return res.status(400).json({ error: 'Всі імена мають бути написаними однією мовою (або українською, або англійською)' });
+        }
+
+        const passwordHash = await bcrypt.hash(password, 10);
+        
+        const name = `${firstName} ${middleName ? middleName + ' ' : ''}${lastName}`.trim();
+
+        const user = await User.create({
+            email: normalizedEmail,
+            passwordHash,
+            displayName,
+            firstName,
+            lastName,
+            middleName: middleName || null,
+            role: 'teacher',
+            status: 'pending'
+        });
+
+        const teacherImage = image || '/api/placeholder/300/400';
+
+        const teacher = await Teacher.create({
+            name,
+            university,
+            department,
+            subjects: subjects || [],
+            subject: subjects && subjects.length > 0 ? subjects[0] : '',
+            email: normalizedEmail,
+            image: teacherImage,
+            bio: bio || null,
+            status: 'pending',
+            userId: null
+        });
+
+        const access = signJwt({ id: user._id, role: user.role, status: user.status }, 'access');
+        const refresh = signJwt({ id: user._id }, 'refresh');
+
+        setRefreshCookie(res, refresh);
+
+        await logUserRegistration(user._id, normalizedEmail);
+
+        return res.status(201).json({
+            token: access,
+            user: { id: user._id, displayName, role: user.role, status: user.status },
+            teacher: {
+                id: teacher._id,
+                status: teacher.status
+            },
+            message: 'Реєстрацію успішно завершено. Ваш профіль очікує верифікації адміністратором'
+        });
+    } catch (error) {
+        console.error('Teacher registration error:', error);
+        res.status(500).json({ error: 'Failed to register teacher' });
+    }
+});
+
+router.post('/send-verification-code', async (req, res) => {
+    try {
+        const { email, type = 'login' } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ error: 'Email обов\'язковий' });
+        }
+
+        if (!['login', 'registration'].includes(type)) {
+            return res.status(400).json({ error: 'Невірний тип верифікації' });
+        }
+
+        const normalizedEmail = email.toLowerCase().trim();
+
+        const existingCode = await EmailVerificationCode.findOne({
+            email: normalizedEmail,
+            type,
+            used: false,
+            expiresAt: { $gt: new Date() }
+        });
+
+        if (existingCode && existingCode.blockedUntil && new Date() < existingCode.blockedUntil) {
+            const minutesLeft = Math.ceil((existingCode.blockedUntil - new Date()) / (1000 * 60));
+            return res.status(429).json({ 
+                error: 'Забагато спроб. Спробуйте через ' + minutesLeft + ' хвилин',
+                blockedUntil: existingCode.blockedUntil
+            });
+        }
+
+        if (existingCode) {
+            const lastSent = new Date(existingCode.createdAt);
+            const oneMinuteAgo = new Date(Date.now() - 60 * 1000);
+            if (lastSent > oneMinuteAgo) {
+                return res.status(429).json({ 
+                    error: 'Код вже надіслано. Спробуйте через хвилину',
+                    canResendAt: new Date(lastSent.getTime() + 60 * 1000)
+                });
+            }
+        }
+
+        const code = EmailVerificationCode.generateCode();
+        const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+        if (existingCode) {
+            existingCode.code = code;
+            existingCode.expiresAt = expiresAt;
+            existingCode.used = false;
+            existingCode.attempts = 0;
+            existingCode.blockedUntil = null;
+            await existingCode.save();
+        } else {
+            await EmailVerificationCode.create({
+                email: normalizedEmail,
+                code,
+                type,
+                expiresAt
+            });
+        }
+
+        await sendVerificationCodeEmail(normalizedEmail, code, type);
+
+        return res.json({
+            message: 'Код надіслано на пошту',
+            expiresAt
+        });
+    } catch (error) {
+        console.error('Send verification code error:', error);
+        res.status(500).json({ error: 'Failed to send verification code' });
+    }
+});
+
+router.post('/verify-code', async (req, res) => {
+    try {
+        const { email, code, type = 'login' } = req.body;
+
+        if (!email || !code) {
+            return res.status(400).json({ error: 'Email та код обов\'язкові' });
+        }
+
+        const normalizedEmail = email.toLowerCase().trim();
+
+        const verificationCode = await EmailVerificationCode.findOne({
+            email: normalizedEmail,
+            code,
+            type,
+            used: false
+        });
+
+        if (!verificationCode) {
+            const existingCode = await EmailVerificationCode.findOne({
+                email: normalizedEmail,
+                type,
+                used: false
+            });
+
+            if (existingCode) {
+                await existingCode.incrementAttempts();
+                
+                if (existingCode.isBlocked()) {
+                    const minutesLeft = Math.ceil((existingCode.blockedUntil - new Date()) / (1000 * 60));
+                    return res.status(429).json({ 
+                        error: 'Перевищено кількість спроб. Спробуйте через ' + minutesLeft + ' хвилин',
+                        blockedUntil: existingCode.blockedUntil,
+                        attemptsLeft: 5 - existingCode.attempts
+                    });
+                }
+
+                return res.status(400).json({ 
+                    error: 'Невірний код',
+                    attemptsLeft: 5 - existingCode.attempts
+                });
+            }
+
+            return res.status(400).json({ error: 'Код не знайдено' });
+        }
+
+        if (verificationCode.isExpired()) {
+            return res.status(400).json({ error: 'Код недійсний (прострочений)' });
+        }
+
+        if (verificationCode.isBlocked()) {
+            const minutesLeft = Math.ceil((verificationCode.blockedUntil - new Date()) / (1000 * 60));
+            return res.status(429).json({ 
+                error: 'Перевищено кількість спроб. Спробуйте через ' + minutesLeft + ' хвилин',
+                blockedUntil: verificationCode.blockedUntil
+            });
+        }
+
+        await verificationCode.markAsUsed();
+
+        return res.json({
+            success: true,
+            message: 'Код підтверджено'
+        });
+    } catch (error) {
+        console.error('Verify code error:', error);
+        res.status(500).json({ error: 'Failed to verify code' });
+    }
+});
+
+router.post('/login-with-code', async (req, res) => {
+    try {
+        const { email, code } = req.body;
+
+        if (!email || !code) {
+            return res.status(400).json({ error: 'Email та код обов\'язкові' });
+        }
+
+        const normalizedEmail = email.toLowerCase().trim();
+
+        const verificationCode = await EmailVerificationCode.findOne({
+            email: normalizedEmail,
+            code,
+            type: 'login',
+            used: false
+        });
+
+        if (!verificationCode || verificationCode.isExpired() || verificationCode.isBlocked()) {
+            if (verificationCode && !verificationCode.isExpired()) {
+                await verificationCode.incrementAttempts();
+            }
+            return res.status(400).json({ error: 'Невірний або прострочений код' });
+        }
+
+        await verificationCode.markAsUsed();
+
+        const teacher = await Teacher.findOne({ email: normalizedEmail });
+        if (!teacher) {
+            return res.status(404).json({ error: 'Профіль викладача не знайдено' });
+        }
+
+        let user = await User.findOne({ email: normalizedEmail });
+
+        if (!user) {
+            const passwordHash = await bcrypt.hash(Math.random().toString(36), 10);
+            user = await User.create({
+                email: normalizedEmail,
+                passwordHash,
+                displayName: teacher.name.split(' ')[0],
+                firstName: teacher.name.split(' ')[0],
+                lastName: teacher.name.split(' ').slice(-1)[0],
+                role: 'teacher',
+                status: 'verified'
+            });
+        }
+
+        if (user.role !== 'teacher') {
+            return res.status(403).json({ error: 'Цей акаунт не є акаунтом викладача' });
+        }
+
+        if (!teacher.userId) {
+            teacher.userId = user._id;
+            teacher.status = 'verified';
+            await teacher.save();
+        }
+
+        user.status = 'verified';
+        await user.save();
+
+        const access = signJwt({ id: user._id, role: user.role, status: user.status }, 'access');
+        const refresh = signJwt({ id: user._id }, 'refresh');
+
+        setRefreshCookie(res, refresh);
+
+        await logLoginAttempt(req, res, () => {});
+
+        return res.json({
+            token: access,
+            user: { 
+                id: user._id, 
+                displayName: user.displayName, 
+                role: user.role, 
+                status: user.status 
+            },
+            teacherProfile: {
+                id: teacher._id,
+                name: teacher.name,
+                university: teacher.university,
+                department: teacher.department,
+                subjects: teacher.subjects || [teacher.subject].filter(Boolean),
+                status: teacher.status
+            }
+        });
+    } catch (error) {
+        console.error('Login with code error:', error);
+        res.status(500).json({ error: 'Failed to login with code' });
     }
 });
 

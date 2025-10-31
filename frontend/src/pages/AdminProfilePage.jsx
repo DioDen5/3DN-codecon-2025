@@ -77,7 +77,10 @@ const AdminProfilePageRefactored = () => {
         refreshCurrentContent,
         nameChangeRequests,
         approveNameRequest,
-        rejectNameRequest
+        rejectNameRequest,
+        teacherClaimRequests,
+        approveTeacherClaimRequest,
+        rejectTeacherClaimRequest
     } = useAdminData();
 
     const tabs = [
@@ -364,6 +367,9 @@ const AdminProfilePageRefactored = () => {
                             nameChangeRequests={nameChangeRequests}
                             onApproveNameRequest={(id) => approveNameRequest(id)}
                             onRejectNameRequest={(id) => rejectNameRequest(id)}
+                            teacherClaimRequests={teacherClaimRequests}
+                            onApproveTeacherClaimRequest={(id, notes) => approveTeacherClaimRequest(id, notes)}
+                            onRejectTeacherClaimRequest={(id, notes) => rejectTeacherClaimRequest(id, notes)}
                         />
                     )}
 

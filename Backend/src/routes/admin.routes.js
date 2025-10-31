@@ -1,4 +1,5 @@
 import express from 'express';
+import mongoose from 'mongoose';
 import { User } from '../models/User.js';
 import { UserProfile } from '../models/UserProfile.js';
 import { Announcement } from '../models/Announcement.js';
@@ -7,6 +8,8 @@ import { Report } from '../models/Report.js';
 import { NameChangeRequest } from '../models/NameChangeRequest.js';
 import { ActivityLog } from '../models/ActivityLog.js';
 import { TeacherComment } from '../models/TeacherComment.js';
+import { TeacherClaimRequest } from '../models/TeacherClaimRequest.js';
+import { Teacher } from '../models/Teacher.js';
 import { authRequired } from '../middleware/auth.js';
 import { checkSessionTimeout, checkIdleTimeout } from '../middleware/sessionTimeout.js';
 
@@ -47,6 +50,10 @@ router.get('/stats', ...adminAuth, async (req, res) => {
             status: 'pending' 
         });
 
+        const teacherClaimRequests = await TeacherClaimRequest.countDocuments({ 
+            status: 'pending' 
+        });
+
         const response = {
             totalUsers,
             students,
@@ -56,7 +63,8 @@ router.get('/stats', ...adminAuth, async (req, res) => {
             totalComments,
             totalReviews,
             pendingReports,
-            nameChangeRequests
+            nameChangeRequests,
+            teacherClaimRequests
         };
         
         console.log('Admin stats response:', response);
@@ -736,6 +744,306 @@ router.delete('/approve/:type/:id', authRequired, requireAdmin, async (req, res)
     } catch (error) {
         console.error('Error unapproving content:', error);
         res.status(500).json({ error: 'Internal server error', details: error.message });
+    }
+});
+
+// Отримання заявок викладачів на отримання профілю
+router.get('/teacher-claim-requests', ...adminAuth, async (req, res) => {
+    try {
+        console.log('Getting teacher claim requests...');
+        const requests = await TeacherClaimRequest.find({ status: 'pending' })
+            .populate('userId', 'displayName email firstName lastName')
+            .populate('teacherId', 'name university department subject email')
+            .sort({ createdAt: -1 });
+
+        console.log('Teacher claim requests found:', requests.length);
+        res.json(requests);
+    } catch (error) {
+        console.error('Error getting teacher claim requests:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Затвердити заявку викладача на отримання профілю
+router.post('/teacher-claim-requests/:id/approve', ...adminAuth, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const adminId = req.user.id;
+        const { adminNotes } = req.body;
+
+        const request = await TeacherClaimRequest.findById(id)
+            .populate('teacherId')
+            .populate('userId');
+
+        if (!request) {
+            return res.status(404).json({ error: 'Заявку не знайдено' });
+        }
+
+        if (request.status !== 'pending') {
+            return res.status(400).json({ error: 'Заявку вже оброблено' });
+        }
+
+        // Перевіряємо чи Teacher не вже прив'язаний
+        const teacher = await Teacher.findById(request.teacherId);
+        if (teacher.userId) {
+            return res.status(400).json({ error: 'Профіль викладача вже прив\'язаний до іншого користувача' });
+        }
+
+        // Перевіряємо чи користувач вже має профіль
+        const existingTeacher = await Teacher.findOne({ userId: request.userId._id });
+        if (existingTeacher) {
+            return res.status(400).json({ error: 'Користувач вже має прив\'язаний профіль викладача' });
+        }
+
+        // Прив'язуємо Teacher до користувача
+        teacher.userId = request.userId._id;
+        if (!teacher.email) {
+            teacher.email = request.userEmail;
+        }
+        await teacher.save();
+
+        // Оновлюємо заявку
+        request.status = 'approved';
+        request.processedAt = new Date();
+        request.processedBy = new mongoose.Types.ObjectId(adminId);
+        if (adminNotes) {
+            request.adminNotes = adminNotes;
+        }
+        await request.save();
+
+        // Відхиляємо всі інші активні заявки на цей Teacher
+        await TeacherClaimRequest.updateMany(
+            {
+                teacherId: request.teacherId._id,
+                _id: { $ne: request._id },
+                status: 'pending'
+            },
+            {
+                status: 'rejected',
+                processedAt: new Date(),
+                processedBy: new mongoose.Types.ObjectId(adminId),
+                adminNotes: 'Автоматично відхилено - профіль надано іншому користувачу'
+            }
+        );
+
+        res.json({ 
+            message: 'Заявку схвалено, профіль викладача прив\'язано до користувача', 
+            request 
+        });
+    } catch (error) {
+        console.error('Approve teacher claim request error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Відхилити заявку викладача на отримання профілю
+router.post('/teacher-claim-requests/:id/reject', ...adminAuth, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const adminId = req.user.id;
+        const { adminNotes } = req.body;
+
+        const request = await TeacherClaimRequest.findById(id);
+
+        if (!request) {
+            return res.status(404).json({ error: 'Заявку не знайдено' });
+        }
+
+        if (request.status !== 'pending') {
+            return res.status(400).json({ error: 'Заявку вже оброблено' });
+        }
+
+        // Оновлюємо заявку
+        request.status = 'rejected';
+        request.processedAt = new Date();
+        request.processedBy = new mongoose.Types.ObjectId(adminId);
+        if (adminNotes) {
+            request.adminNotes = adminNotes;
+        }
+        await request.save();
+
+        res.json({ 
+            message: 'Заявку відхилено', 
+            request 
+        });
+    } catch (error) {
+        console.error('Reject teacher claim request error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Отримати заявки на верифікацію Teacher профілів (нові реєстрації)
+router.get('/teacher-verification-requests', ...adminAuth, async (req, res) => {
+    try {
+        const teachers = await Teacher.find({ 
+            status: 'pending',
+            userId: { $ne: null }
+        })
+        .populate('userId', 'email displayName firstName lastName')
+        .sort({ createdAt: -1 });
+
+        res.json(teachers);
+    } catch (error) {
+        console.error('Error getting teacher verification requests:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Затвердити Teacher профіль
+router.post('/teacher-verification-requests/:id/approve', ...adminAuth, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const adminId = req.user.id;
+
+        const teacher = await Teacher.findById(id).populate('userId');
+        if (!teacher) {
+            return res.status(404).json({ error: 'Профіль викладача не знайдено' });
+        }
+
+        if (teacher.status !== 'pending') {
+            return res.status(400).json({ error: 'Профіль вже оброблено' });
+        }
+
+        if (!teacher.userId) {
+            return res.status(400).json({ error: 'Профіль не прив\'язаний до користувача' });
+        }
+
+        teacher.status = 'verified';
+        await teacher.save();
+
+        if (teacher.userId.status === 'pending') {
+            const user = await User.findById(teacher.userId._id);
+            if (user) {
+                user.status = 'verified';
+                await user.save();
+            }
+        }
+
+        res.json({ 
+            message: 'Профіль викладача верифіковано та опубліковано', 
+            teacher 
+        });
+    } catch (error) {
+        console.error('Approve teacher verification error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Відхилити Teacher профіль
+router.post('/teacher-verification-requests/:id/reject', ...adminAuth, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const adminId = req.user.id;
+        const { rejectionReason } = req.body;
+
+        if (!rejectionReason || rejectionReason.trim().length === 0) {
+            return res.status(400).json({ error: 'Причина відхилення обов\'язкова' });
+        }
+
+        const teacher = await Teacher.findById(id).populate('userId');
+        if (!teacher) {
+            return res.status(404).json({ error: 'Профіль викладача не знайдено' });
+        }
+
+        if (teacher.status !== 'pending') {
+            return res.status(400).json({ error: 'Профіль вже оброблено' });
+        }
+
+        teacher.status = 'rejected';
+        teacher.rejectionReason = rejectionReason.trim();
+        await teacher.save();
+
+        if (teacher.userId) {
+            const user = await User.findById(teacher.userId._id);
+            if (user && user.status === 'pending') {
+                user.status = 'rejected';
+                await user.save();
+            }
+        }
+
+        res.json({ 
+            message: 'Профіль викладача відхилено', 
+            teacher 
+        });
+    } catch (error) {
+        console.error('Reject teacher verification error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Отримати зміни профілів що очікують модерації
+router.get('/teacher-pending-changes', ...adminAuth, async (req, res) => {
+    try {
+        const teachers = await Teacher.find({ 
+            pendingChanges: { $ne: null, $exists: true },
+            status: 'verified'
+        })
+        .populate('userId', 'email displayName')
+        .sort({ lastEditedAt: -1 });
+
+        res.json(teachers);
+    } catch (error) {
+        console.error('Error getting teacher pending changes:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Затвердити зміни профілю
+router.post('/teacher-pending-changes/:id/approve', ...adminAuth, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const adminId = req.user.id;
+
+        const teacher = await Teacher.findById(id);
+        if (!teacher) {
+            return res.status(404).json({ error: 'Профіль викладача не знайдено' });
+        }
+
+        if (!teacher.pendingChanges) {
+            return res.status(400).json({ error: 'Немає змін що очікують модерації' });
+        }
+
+        Object.assign(teacher, teacher.pendingChanges);
+        teacher.pendingChanges = null;
+        teacher.lastEditedAt = new Date();
+        await teacher.save();
+
+        res.json({ 
+            message: 'Зміни профілю затверджено', 
+            teacher 
+        });
+    } catch (error) {
+        console.error('Approve teacher pending changes error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Відхилити зміни профілю
+router.post('/teacher-pending-changes/:id/reject', ...adminAuth, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const adminId = req.user.id;
+
+        const teacher = await Teacher.findById(id);
+        if (!teacher) {
+            return res.status(404).json({ error: 'Профіль викладача не знайдено' });
+        }
+
+        if (!teacher.pendingChanges) {
+            return res.status(400).json({ error: 'Немає змін що очікують модерації' });
+        }
+
+        teacher.pendingChanges = null;
+        teacher.lastEditedAt = new Date();
+        await teacher.save();
+
+        res.json({ 
+            message: 'Зміни профілю відхилено', 
+            teacher 
+        });
+    } catch (error) {
+        console.error('Reject teacher pending changes error:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
 
