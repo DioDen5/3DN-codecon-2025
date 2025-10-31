@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { login, getLocalRememberedLogin } from "../api/auth";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../state/AuthContext";
+import { useNotification } from "../contexts/NotificationContext";
 
 const LoginForm = ({ switchToReset, onSuccess }) => {
     const [email, setEmail] = useState("");
@@ -10,6 +11,7 @@ const LoginForm = ({ switchToReset, onSuccess }) => {
     const [error, setError] = useState(null);
     const navigate = useNavigate();
     const { loginSuccess } = useAuth();
+    const { showSuccess } = useNotification();
 
     useEffect(() => {
         const rememberedData = getLocalRememberedLogin();
@@ -24,9 +26,10 @@ const LoginForm = ({ switchToReset, onSuccess }) => {
         setError(null);
         try {
             const { token, user } = await login(email, password, rememberMe);
-            loginSuccess({ token, user }); 
-            onSuccess?.();                 
-            navigate("/forum");           
+            loginSuccess({ token, user });
+            sessionStorage.setItem('justLoggedIn', 'true');
+            onSuccess?.();
+            navigate("/forum");
         } catch {
             setError("Невірна пошта або пароль");
         }
