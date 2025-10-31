@@ -218,7 +218,7 @@ const NameChangeModal = ({ isOpen, onClose, currentName }) => {
                 </div>
 
                 <div className="flex-1 px-4 sm:px-6 py-4 sm:py-6">
-                    {existingRequest && (
+                    {existingRequest && existingRequest.status !== 'rejected' && (
                         <div className={`mb-4 p-3 rounded-xl border ${getStatusColor(existingRequest.status)}`}>
                             <div className="flex items-center gap-3 mb-2">
                                 {getStatusIcon(existingRequest.status)}
