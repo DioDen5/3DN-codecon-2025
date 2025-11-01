@@ -26,6 +26,7 @@ const SignupForm = ({ switchToLogin, onClose }) => {
     const [showTeacherWizard, setShowTeacherWizard] = useState(false);
     const [verificationCode, setVerificationCode] = useState('');
     const [codeSent, setCodeSent] = useState(false);
+    const [emailExistsError, setEmailExistsError] = useState(false);
     const navigate = useNavigate();
     const { loginSuccess } = useAuth();
     const { showSuccess, showError } = useNotification();
@@ -94,7 +95,7 @@ const SignupForm = ({ switchToLogin, onClose }) => {
                 await handleSendCode(email);
                 showSuccess('Профіль викладача з такою поштою вже існує. Підтвердіть вхід за кодом');
             } else if (result.userExists) {
-                setErrors({ email: 'Користувач з таким email вже існує. Якщо це ви, увійдіть в систему.' });
+                setEmailExistsError(true);
                 setEmailChecked(false);
             } else if (result.canRegister) {
                 showSuccess('Email вільний. Можна продовжувати реєстрацію.');
@@ -103,7 +104,7 @@ const SignupForm = ({ switchToLogin, onClose }) => {
             console.error('Error checking email:', error);
             setEmailChecked(false);
             if (error.response?.status === 409 && error.response?.data?.userExists) {
-                setErrors({ email: 'Користувач з таким email вже існує. Якщо це ви, увійдіть в систему.' });
+                setEmailExistsError(true);
             } else {
                 setErrors({ email: 'Помилка перевірки email. Спробуйте ще раз.' });
             }
@@ -364,6 +365,12 @@ const SignupForm = ({ switchToLogin, onClose }) => {
                                     {errors.email}
                                 </p>
                             )}
+                            {emailExistsError && (
+                                <p className="text-red-300 text-sm mt-1 flex items-center gap-1 mb-3">
+                                    <span>⚠</span>
+                                    Користувач з таким email вже існує. Якщо це ви, увійдіть в систему.
+                                </p>
+                            )}
                             {!errors.email && !emailChecked && (
                                 <p className="text-xs text-white/60 mt-2">
                                     Натисніть кнопку нижче, щоб перевірити email та продовжити
@@ -378,7 +385,36 @@ const SignupForm = ({ switchToLogin, onClose }) => {
                         </div>
                     </div>
                     
-                    {!emailChecked ? (
+                    {emailExistsError ? (
+                        <div className="space-y-3">
+                            <div className="p-4 bg-red-900/20 border border-red-500/30 rounded-lg">
+                                <p className="text-white text-sm mb-3">Оберіть одну з опцій:</p>
+                                <div className="flex gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setEmailExistsError(false);
+                                            setErrors({});
+                                            setFormData(prev => ({ ...prev, email: '' }));
+                                        }}
+                                        className="flex-1 px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg transition text-white text-sm"
+                                    >
+                                        Ввести інший email
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            onClose?.();
+                                            switchToLogin();
+                                        }}
+                                        className="flex-1 px-4 py-2 bg-blue-700 hover:bg-blue-800 rounded-lg transition text-white text-sm font-medium"
+                                    >
+                                        Увійти
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    ) : !emailChecked ? (
                         <button
                             type="button"
                             onClick={async () => {
