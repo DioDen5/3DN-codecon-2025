@@ -332,6 +332,7 @@ router.post('/register/check-email', async (req, res) => {
 
         const existingUser = await User.findOne({ email: normalizedEmail });
         if (existingUser) {
+            console.log(`[check-email] User exists for ${normalizedEmail}`);
             return res.status(409).json({ 
                 error: 'Email already used',
                 exists: true,
@@ -341,6 +342,7 @@ router.post('/register/check-email', async (req, res) => {
 
         const existingTeacher = await Teacher.findOne({ email: normalizedEmail });
         if (existingTeacher) {
+            console.log(`[check-email] Teacher profile exists for ${normalizedEmail}, userId: ${existingTeacher.userId}`);
             return res.json({
                 exists: true,
                 teacherExists: true,

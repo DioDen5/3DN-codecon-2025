@@ -84,29 +84,67 @@ const SignupForm = ({ switchToLogin, onClose }) => {
         }
         
         setErrors({});
-        setEmailChecked(true);
-        
+        setEmailExistsError(false);
+        setEmailChecked(false); // Reset before check
+
         try {
             const result = await checkEmailForRegistration(email, 'teacher');
             
+            // Якщо Teacher профіль існує (створений адміном)
             if (result.teacherExists) {
+                setEmailChecked(true);
                 setShowLoginWithCode(true);
                 setCodeSent(false);
                 await handleSendCode(email);
                 showSuccess('Профіль викладача з такою поштою вже існує. Підтвердіть вхід за кодом');
-            } else if (result.userExists) {
+                return;
+            }
+            
+            // Якщо User з таким email вже існує
+            if (result.userExists) {
                 setEmailExistsError(true);
                 setEmailChecked(false);
-            } else if (result.canRegister) {
-                showSuccess('Email вільний. Можна продовжувати реєстрацію.');
+                return;
             }
+            
+            // Якщо email вільний
+            if (result.canRegister) {
+                setEmailChecked(true);
+                showSuccess('Email вільний. Можна продовжувати реєстрацію.');
+                return;
+            }
+            
+            // Якщо нічого не підійшло
+            setErrors({ email: 'Невідома помилка при перевірці email' });
         } catch (error) {
             console.error('Error checking email:', error);
+            console.error('Error response:', error.response?.data);
             setEmailChecked(false);
-            if (error.response?.status === 409 && error.response?.data?.userExists) {
-                setEmailExistsError(true);
+            setEmailExistsError(false);
+            
+            // Обробка помилок з бекенду
+            if (error.response?.status === 409) {
+                const errorData = error.response?.data;
+                if (errorData?.userExists) {
+                    // User з таким email вже існує
+                    setEmailExistsError(true);
+                } else if (errorData?.teacherExists) {
+                    // Teacher профіль існує (хоча це має бути 200, але на всяк випадок)
+                    setEmailChecked(true);
+                    setShowLoginWithCode(true);
+                    setCodeSent(false);
+                    await handleSendCode(email);
+                    showSuccess('Профіль викладача з такою поштою вже існує. Підтвердіть вхід за кодом');
+                } else {
+                    // Інший конфлікт
+                    setErrors({ email: errorData?.error || 'Користувач з таким email вже існує' });
+                }
+            } else if (error.response?.status === 400) {
+                // Помилка валідації
+                setErrors({ email: error.response?.data?.error || 'Невірний формат email' });
             } else {
-                setErrors({ email: 'Помилка перевірки email. Спробуйте ще раз.' });
+                // Інші помилки
+                setErrors({ email: error.response?.data?.error || 'Помилка перевірки email. Спробуйте ще раз.' });
             }
         }
     };
@@ -222,19 +260,41 @@ const SignupForm = ({ switchToLogin, onClose }) => {
     };
 
 
+    // Перевірка порядку умов для правильного рендерингу
+    console.log('Component render check:', { 
+        showTeacherWizard, 
+        showRoleModal, 
+        showLoginWithCode, 
+        selectedRole, 
+        emailChecked,
+        email: formData.email 
+    });
+
     if (showTeacherWizard && selectedRole === 'teacher') {
+        console.log('✅ Rendering TeacherRegistrationWizard');
         return (
-            <TeacherRegistrationWizard
-                email={formData.email}
-                onBack={() => {
-                    setShowTeacherWizard(false);
-                    setSelectedRole(null);
-                }}
-                onSuccess={() => {
-                    setShowTeacherWizard(false);
+            <Modal isOpen={true} onClose={() => {
+                setShowTeacherWizard(false);
+                if (onClose) {
+                    onClose();
+                } else {
                     switchToLogin();
-                }}
-            />
+                }
+            }}>
+                <TeacherRegistrationWizard
+                    email={formData.email}
+                    onBack={() => {
+                        console.log('TeacherRegistrationWizard onBack called');
+                        setShowTeacherWizard(false);
+                        setSelectedRole(null);
+                    }}
+                    onSuccess={() => {
+                        console.log('TeacherRegistrationWizard onSuccess called');
+                        setShowTeacherWizard(false);
+                        switchToLogin();
+                    }}
+                />
+            </Modal>
         );
     }
 
@@ -447,8 +507,13 @@ const SignupForm = ({ switchToLogin, onClose }) => {
                             </button>
                             <button
                                 type="button"
-                                onClick={() => setShowTeacherWizard(true)}
-                                className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition font-medium text-white shadow-lg shadow-green-600/30 hover:shadow-green-600/50"
+                                onClick={() => {
+                                    console.log('Clicking "Продовжити реєстрацію" button');
+                                    console.log('Current state:', { showTeacherWizard, selectedRole, emailChecked });
+                                    setShowTeacherWizard(true);
+                                    console.log('After setShowTeacherWizard(true):', showTeacherWizard);
+                                }}
+                                className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition font-medium text-white shadow-lg shadow-green-600/30 hover:shadow-green-600/50 cursor-pointer"
                             >
                                 Продовжити реєстрацію
                             </button>
