@@ -6,6 +6,7 @@ import RoleSelectionModal from "./RoleSelectionModal";
 import TeacherRegistrationWizard from "./TeacherRegistrationWizard";
 import { useNotification } from "../contexts/NotificationContext";
 import Modal from "./Modal";
+import teacherIconSrc from "../assets/teacher-icon.svg";
 
 const SignupForm = ({ switchToLogin, onClose }) => {
     const [formData, setFormData] = useState({
@@ -327,12 +328,12 @@ const SignupForm = ({ switchToLogin, onClose }) => {
             {selectedRole === 'teacher' ? (
                 <div className="space-y-6 p-10 w-full">
                     <div className="mb-6">
-                        <div className="px-4 py-3 bg-gradient-to-br from-purple-900/20 via-indigo-900/20 to-purple-800/20 rounded-lg border border-purple-400/20 mb-4 backdrop-blur-sm">
+                        <div className="px-4 py-3 bg-gradient-to-br from-purple-900/20 via-indigo-900/20 to-purple-800/20 rounded-lg border border-purple-400/20 mb-4 backdrop-blur-sm teacher-registration-pulse">
                             <div className="flex items-center gap-2 mb-2">
-                                <div className="w-8 h-8 bg-indigo-600/80 rounded-full flex items-center justify-center backdrop-blur-sm">
-                                    <span className="text-white text-sm font-bold">В</span>
+                                <div className="w-[38.4px] h-[38.4px] bg-indigo-600/80 rounded-full flex items-center justify-center backdrop-blur-sm p-2">
+                                    <img src={teacherIconSrc} alt="Teacher" className="w-5 h-5 object-contain brightness-0 invert" />
                                 </div>
-                                <p className="text-sm font-semibold text-white">Реєстрація викладача</p>
+                                <p className="text-lg font-semibold text-white">Реєстрація викладача</p>
                             </div>
                             <p className="text-xs text-white/70">
                                 Спочатку введіть email та перевірте, чи існує профіль викладача з такою поштою
@@ -387,7 +388,7 @@ const SignupForm = ({ switchToLogin, onClose }) => {
                                 }
                                 await checkEmailForTeacher(formData.email);
                             }}
-                            className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg transition font-medium flex items-center justify-center gap-2 text-white shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50"
+                            className="w-full px-6 py-3 bg-blue-700 hover:bg-blue-800 rounded-lg transition font-medium flex items-center justify-center gap-2 text-white shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50 cursor-pointer"
                         >
                             <span>Перевірити email</span>
                             <span>→</span>

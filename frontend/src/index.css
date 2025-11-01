@@ -2985,4 +2985,18 @@
     animation: dashboardActivityIconShimmer 2s ease-in-out infinite;
 }
 
+@keyframes teacherRegistrationPulse {
+    0%, 100% {
+        opacity: 1;
+        box-shadow: 0 2px 4px rgba(139, 92, 246, 0.11);
+    }
+    50% {
+        opacity: 0.945;
+        box-shadow: 0 4px 13px rgba(139, 92, 246, 0.22), 0 0 22px rgba(139, 92, 246, 0.11);
+    }
+}
+
+.teacher-registration-pulse {
+    animation: teacherRegistrationPulse 2.5s ease-in-out infinite;
+}
 

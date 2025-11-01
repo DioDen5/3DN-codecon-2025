@@ -1,7 +1,9 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
-import { X, GraduationCap, User } from 'lucide-react';
+import { X } from 'lucide-react';
+import teacherIconSrc from '../assets/teacher-icon.svg';
+import studentIconSrc from '../assets/student-icon.svg';
 
 const RoleSelectionModal = ({ isOpen, onClose, onSelectRole }) => {
     if (!isOpen) return null;
@@ -52,8 +54,8 @@ const RoleSelectionModal = ({ isOpen, onClose, onSelectRole }) => {
                         className="w-full p-6 rounded-xl border-2 border-white/30 hover:border-blue-400 hover:bg-blue-500/20 transition-all group cursor-pointer bg-white/10"
                     >
                         <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                                <User className="w-6 h-6 text-white" />
+                            <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform p-2">
+                                <img src={studentIconSrc} alt="Student" className="w-[72%] h-[72%] object-contain brightness-0 invert" />
                             </div>
                             <div className="text-left flex-1">
                                 <h3 className="font-semibold text-white text-lg">Студент</h3>
@@ -67,8 +69,8 @@ const RoleSelectionModal = ({ isOpen, onClose, onSelectRole }) => {
                         className="w-full p-6 rounded-xl border-2 border-white/30 hover:border-indigo-400 hover:bg-indigo-500/20 transition-all group cursor-pointer bg-white/10"
                     >
                         <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-indigo-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                                <GraduationCap className="w-6 h-6 text-white" />
+                            <div className="w-12 h-12 bg-indigo-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform p-2">
+                                <img src={teacherIconSrc} alt="Teacher" className="w-[72%] h-[72%] object-contain brightness-0 invert" />
                             </div>
                             <div className="text-left flex-1">
                                 <h3 className="font-semibold text-white text-lg">Викладач</h3>
