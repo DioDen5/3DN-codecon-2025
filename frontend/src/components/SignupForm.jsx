@@ -260,18 +260,9 @@ const SignupForm = ({ switchToLogin, onClose }) => {
     };
 
 
-    // Перевірка порядку умов для правильного рендерингу
-    console.log('Component render check:', { 
-        showTeacherWizard, 
-        showRoleModal, 
-        showLoginWithCode, 
-        selectedRole, 
-        emailChecked,
-        email: formData.email 
-    });
+    // Debug logging removed for production
 
     if (showTeacherWizard && selectedRole === 'teacher') {
-        console.log('✅ Rendering TeacherRegistrationWizard');
         return (
             <Modal isOpen={true} onClose={() => {
                 setShowTeacherWizard(false);
@@ -284,12 +275,10 @@ const SignupForm = ({ switchToLogin, onClose }) => {
                 <TeacherRegistrationWizard
                     email={formData.email}
                     onBack={() => {
-                        console.log('TeacherRegistrationWizard onBack called');
                         setShowTeacherWizard(false);
                         setSelectedRole(null);
                     }}
                     onSuccess={() => {
-                        console.log('TeacherRegistrationWizard onSuccess called');
                         setShowTeacherWizard(false);
                         switchToLogin();
                     }}
@@ -519,12 +508,7 @@ const SignupForm = ({ switchToLogin, onClose }) => {
                             </button>
                             <button
                                 type="button"
-                                onClick={() => {
-                                    console.log('Clicking "Продовжити реєстрацію" button');
-                                    console.log('Current state:', { showTeacherWizard, selectedRole, emailChecked });
-                                    setShowTeacherWizard(true);
-                                    console.log('After setShowTeacherWizard(true):', showTeacherWizard);
-                                }}
+                                onClick={() => setShowTeacherWizard(true)}
                                 className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition font-medium text-white shadow-lg shadow-green-600/30 hover:shadow-green-600/50 cursor-pointer"
                             >
                                 Продовжити реєстрацію

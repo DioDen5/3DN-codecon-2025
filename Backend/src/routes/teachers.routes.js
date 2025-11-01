@@ -253,15 +253,25 @@ router.get('/my-profile', authRequired, async (req, res) => {
             status: 'pending'
         });
         
+        // Безпечне обчислення рейтингу
+        let rating = 0;
+        try {
+            rating = teacher.calculateRating ? teacher.calculateRating() : (teacher.rating || 0);
+        } catch (ratingError) {
+            console.error('Error calculating rating:', ratingError);
+            rating = teacher.rating || 0;
+        }
+        
         const teacherWithRating = {
             ...teacher.toObject(),
-            rating: teacher.calculateRating()
+            rating: rating
         };
         
         res.json({ teacher: teacherWithRating, hasClaimRequest: !!hasClaimRequest });
     } catch (error) {
         console.error('Get my profile error:', error);
-        res.status(500).json({ error: 'Failed to fetch profile' });
+        console.error('Error stack:', error.stack);
+        res.status(500).json({ error: 'Failed to fetch profile', details: error.message });
     }
 });
 
