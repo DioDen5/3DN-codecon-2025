@@ -366,10 +366,12 @@ const SignupForm = ({ switchToLogin, onClose }) => {
                                 </p>
                             )}
                             {emailExistsError && (
-                                <p className="text-red-300 text-sm mt-1 flex items-center gap-1 mb-3">
-                                    <span>⚠</span>
-                                    Користувач з таким email вже існує. Якщо це ви, увійдіть в систему.
-                                </p>
+                                <div className="mt-3 p-3 bg-red-900/20 border border-red-500/30 rounded-lg">
+                                    <p className="text-red-300 text-sm flex items-center gap-2">
+                                        <span className="text-lg">⚠</span>
+                                        <span>Користувач з таким email вже існує</span>
+                                    </p>
+                                </div>
                             )}
                             {!errors.email && !emailChecked && (
                                 <p className="text-xs text-white/60 mt-2">
@@ -386,10 +388,21 @@ const SignupForm = ({ switchToLogin, onClose }) => {
                     </div>
                     
                     {emailExistsError ? (
-                        <div className="space-y-3">
-                            <div className="p-4 bg-red-900/20 border border-red-500/30 rounded-lg">
-                                <p className="text-white text-sm mb-3">Оберіть одну з опцій:</p>
-                                <div className="flex gap-3">
+                        <div className="space-y-4">
+                            <div className="p-5 bg-gradient-to-br from-gray-800/40 to-gray-900/40 border-2 border-gray-600/30 rounded-xl backdrop-blur-sm">
+                                <h4 className="text-white font-semibold mb-4 text-center">Що далі?</h4>
+                                <div className="space-y-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            onClose?.();
+                                            switchToLogin();
+                                        }}
+                                        className="w-full px-4 py-3 bg-blue-700 hover:bg-blue-800 rounded-lg transition text-white font-medium cursor-pointer shadow-lg shadow-blue-700/30 hover:shadow-blue-700/50 flex items-center justify-center gap-2"
+                                    >
+                                        <span>Увійти в систему</span>
+                                        <span>→</span>
+                                    </button>
                                     <button
                                         type="button"
                                         onClick={() => {
@@ -397,19 +410,9 @@ const SignupForm = ({ switchToLogin, onClose }) => {
                                             setErrors({});
                                             setFormData(prev => ({ ...prev, email: '' }));
                                         }}
-                                        className="flex-1 px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg transition text-white text-sm"
+                                        className="w-full px-4 py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg transition text-white text-sm cursor-pointer"
                                     >
                                         Ввести інший email
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            onClose?.();
-                                            switchToLogin();
-                                        }}
-                                        className="flex-1 px-4 py-2 bg-blue-700 hover:bg-blue-800 rounded-lg transition text-white text-sm font-medium"
-                                    >
-                                        Увійти
                                     </button>
                                 </div>
                             </div>
