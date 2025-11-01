@@ -327,49 +327,49 @@ const SignupForm = ({ switchToLogin, onClose }) => {
             {selectedRole === 'teacher' ? (
                 <div className="space-y-6 p-10 w-full">
                     <div className="mb-6">
-                        <div className="px-4 py-3 bg-indigo-500/20 rounded-lg border border-indigo-500/30 mb-4">
+                        <div className="px-4 py-3 bg-gradient-to-br from-purple-900/20 via-indigo-900/20 to-purple-800/20 rounded-lg border border-purple-400/20 mb-4 backdrop-blur-sm">
                             <div className="flex items-center gap-2 mb-2">
-                                <div className="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center">
+                                <div className="w-8 h-8 bg-indigo-600/80 rounded-full flex items-center justify-center backdrop-blur-sm">
                                     <span className="text-white text-sm font-bold">В</span>
                                 </div>
-                                <p className="text-sm font-semibold">Реєстрація викладача</p>
+                                <p className="text-sm font-semibold text-white">Реєстрація викладача</p>
                             </div>
-                            <p className="text-xs text-gray-300">
+                            <p className="text-xs text-white/70">
                                 Спочатку введіть email та перевірте, чи існує профіль викладача з такою поштою
                             </p>
                         </div>
                         
                         <div>
-                            <label className="block text-sm mb-2 font-medium">Email *</label>
+                            <label className="block text-sm mb-2 font-medium text-white">Email *</label>
                             <input
                                 type="email"
                                 name="email"
                                 value={formData.email}
                                 onChange={handleChange}
                                 disabled={emailChecked}
-                                className={`w-full px-4 py-3 rounded-lg placeholder-white/50 focus:outline-none text-gray-800 transition-all ${
+                                className={`w-full px-4 py-3 rounded-lg placeholder-white/40 focus:outline-none transition-all ${
                                     errors.email 
-                                        ? 'bg-red-100 border-2 border-red-400' 
+                                        ? 'bg-red-900/30 border-2 border-red-500 text-white' 
                                         : emailChecked
-                                            ? 'bg-gray-300 cursor-not-allowed'
-                                            : 'bg-[#D9D9D9]/20 focus:ring-2 focus:ring-blue-500'
+                                            ? 'bg-white/5 border border-white/10 text-white/60 cursor-not-allowed'
+                                            : 'bg-white/10 border border-white/20 text-white placeholder-white/40 focus:border-blue-400 focus:ring-2 focus:ring-blue-500/50'
                                 }`}
                                 placeholder="teacher@lnu.edu.ua"
                                 autoFocus
                             />
                             {errors.email && (
-                                <p className="text-red-400 text-sm mt-1 flex items-center gap-1">
+                                <p className="text-red-300 text-sm mt-1 flex items-center gap-1">
                                     <span>⚠</span>
                                     {errors.email}
                                 </p>
                             )}
                             {!errors.email && !emailChecked && (
-                                <p className="text-xs text-gray-400 mt-2">
+                                <p className="text-xs text-white/60 mt-2">
                                     Натисніть кнопку нижче, щоб перевірити email та продовжити
                                 </p>
                             )}
                             {emailChecked && !errors.email && !showTeacherWizard && (
-                                <p className="text-xs text-green-400 mt-2 flex items-center gap-1">
+                                <p className="text-xs text-green-300 mt-2 flex items-center gap-1">
                                     <span>✓</span>
                                     Email перевірено. Можна продовжувати реєстрацію.
                                 </p>
@@ -387,7 +387,7 @@ const SignupForm = ({ switchToLogin, onClose }) => {
                                 }
                                 await checkEmailForTeacher(formData.email);
                             }}
-                            className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg transition font-medium flex items-center justify-center gap-2"
+                            className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg transition font-medium flex items-center justify-center gap-2 text-white shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50"
                         >
                             <span>Перевірити email</span>
                             <span>→</span>
@@ -401,14 +401,14 @@ const SignupForm = ({ switchToLogin, onClose }) => {
                                     setErrors({});
                                     setFormData(prev => ({ ...prev, email: '' }));
                                 }}
-                                className="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg transition"
+                                className="flex-1 px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg transition text-white"
                             >
                                 Змінити email
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setShowTeacherWizard(true)}
-                                className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition font-medium"
+                                className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition font-medium text-white shadow-lg shadow-green-600/30 hover:shadow-green-600/50"
                             >
                                 Продовжити реєстрацію
                             </button>
