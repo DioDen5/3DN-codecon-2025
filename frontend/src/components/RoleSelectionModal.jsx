@@ -28,7 +28,7 @@ const RoleSelectionModal = ({ isOpen, onClose, onSelectRole }) => {
                         <div className="group flex items-center justify-center w-8 h-8 rounded-full bg-white/60 hover:cursor-pointer">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
-                                className="w-6 h-6 text-black group-hover:text-gray-600"
+                                className="w-6 h-6 text-black group-hover:text-gray-600 group-hover:rotate-90 transition-transform duration-300"
                                 viewBox="0 0 24 24"
                                 strokeWidth="1.5"
                                 stroke="currentColor"

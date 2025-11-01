@@ -389,7 +389,7 @@ const SignupForm = ({ switchToLogin, onClose }) => {
                     
                     {emailExistsError ? (
                         <div className="space-y-4">
-                            <div className="p-5 bg-gradient-to-br from-gray-800/40 to-gray-900/40 border-2 border-gray-600/30 rounded-xl backdrop-blur-sm">
+                            <div className="p-5 bg-gradient-to-br from-gray-800/60 to-gray-900/60 border-2 border-gray-600/50 rounded-xl backdrop-blur-sm">
                                 <h4 className="text-white font-semibold mb-4 text-center">Що далі?</h4>
                                 <div className="space-y-3">
                                     <button
