@@ -5,8 +5,9 @@ import { useAuth } from "../state/AuthContext";
 import RoleSelectionModal from "./RoleSelectionModal";
 import TeacherRegistrationWizard from "./TeacherRegistrationWizard";
 import { useNotification } from "../contexts/NotificationContext";
+import Modal from "./Modal";
 
-const SignupForm = ({ switchToLogin }) => {
+const SignupForm = ({ switchToLogin, onClose }) => {
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
@@ -19,6 +20,7 @@ const SignupForm = ({ switchToLogin }) => {
     const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
     const [selectedRole, setSelectedRole] = useState(null);
     const [showRoleModal, setShowRoleModal] = useState(true);
+    const [emailChecked, setEmailChecked] = useState(false);
     const [showLoginWithCode, setShowLoginWithCode] = useState(false);
     const [showTeacherWizard, setShowTeacherWizard] = useState(false);
     const [verificationCode, setVerificationCode] = useState('');
@@ -66,13 +68,21 @@ const SignupForm = ({ switchToLogin }) => {
         setSelectedRole(role);
         setShowRoleModal(false);
         
-        if (role === 'teacher' && formData.email) {
-            await checkEmailForTeacher(formData.email);
+        if (role === 'teacher') {
+            if (formData.email && /\S+@\S+\.\S+/.test(formData.email)) {
+                await checkEmailForTeacher(formData.email);
+            }
         }
     };
 
     const checkEmailForTeacher = async (email) => {
-        if (!email || !/\S+@\S+\.\S+/.test(email)) return;
+        if (!email || !/\S+@\S+\.\S+/.test(email)) {
+            setErrors({ email: 'Введіть коректний email' });
+            return;
+        }
+        
+        setErrors({});
+        setEmailChecked(true);
         
         try {
             const result = await checkEmailForRegistration(email, 'teacher');
@@ -82,9 +92,20 @@ const SignupForm = ({ switchToLogin }) => {
                 setCodeSent(false);
                 await handleSendCode(email);
                 showSuccess('Профіль викладача з такою поштою вже існує. Підтвердіть вхід за кодом');
+            } else if (result.userExists) {
+                setErrors({ email: 'Користувач з таким email вже існує. Якщо це ви, увійдіть в систему.' });
+                setEmailChecked(false);
+            } else if (result.canRegister) {
+                showSuccess('Email вільний. Можна продовжувати реєстрацію.');
             }
         } catch (error) {
             console.error('Error checking email:', error);
+            setEmailChecked(false);
+            if (error.response?.status === 409 && error.response?.data?.userExists) {
+                setErrors({ email: 'Користувач з таким email вже існує. Якщо це ви, увійдіть в систему.' });
+            } else {
+                setErrors({ email: 'Помилка перевірки email. Спробуйте ще раз.' });
+            }
         }
     };
 
@@ -149,14 +170,6 @@ const SignupForm = ({ switchToLogin }) => {
             newErrors.email = 'Невірний формат email';
         }
         
-        if (selectedRole === 'teacher') {
-            if (!formData.email.trim() || !/\S+@\S+\.\S+/.test(formData.email)) {
-                setErrors(newErrors);
-                return;
-            }
-            setShowTeacherWizard(true);
-            return;
-        }
         
         if (!formData.password) {
             newErrors.password = 'Пароль обов\'язковий';
@@ -286,140 +299,231 @@ const SignupForm = ({ switchToLogin }) => {
         );
     }
 
-    return (
-        <>
+    if (showRoleModal) {
+        return (
             <RoleSelectionModal
                 isOpen={showRoleModal}
                 onClose={() => {
                     setShowRoleModal(false);
-                    switchToLogin();
+                    if (onClose) {
+                        onClose();
+                    } else {
+                        switchToLogin();
+                    }
                 }}
                 onSelectRole={handleRoleSelect}
             />
-            <form onSubmit={handleSubmit} className="space-y-6 p-15 w-full text-white">
-            <h2 className="text-2xl font-semibold mb-4">Профіль</h2>
-            <div>
-                <label className="block text-md">Ім'я</label>
-                <input
-                    name="firstName"
-                    value={formData.firstName}
-                    onChange={handleChange}
-                    className={`w-full px-4 py-2 rounded-md placeholder-white/50 focus:outline-none input text-gray-800 ${
-                        errors.firstName 
-                            ? 'bg-red-100 border-2 border-red-400' 
-                            : 'bg-[#D9D9D9]/20'
-                    }`}
-                    placeholder="Anna"
-                />
-                {errors.firstName && (
-                    <p className="text-red-400 text-sm mt-1">{errors.firstName}</p>
-                )}
-            </div>
-            <div>
-                <label className="block text-md">Прізвище</label>
-                <input
-                    name="lastName"
-                    value={formData.lastName}
-                    onChange={handleChange}
-                    className={`w-full px-4 py-2 rounded-md placeholder-white/50 focus:outline-none input text-gray-800 ${
-                        errors.lastName 
-                            ? 'bg-red-100 border-2 border-red-400' 
-                            : 'bg-[#D9D9D9]/20'
-                    }`}
-                    placeholder="Last Name"
-                />
-                {errors.lastName && (
-                    <p className="text-red-400 text-sm mt-1">{errors.lastName}</p>
-                )}
-            </div>
-            <div>
-                <label className="block text-md">Пошта</label>
-                <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={(e) => {
-                        handleChange(e);
-                        if (selectedRole === 'teacher' && e.target.value) {
-                            checkEmailForTeacher(e.target.value);
-                        }
-                    }}
-                    onBlur={() => {
-                        if (selectedRole === 'teacher' && formData.email) {
-                            checkEmailForTeacher(formData.email);
-                        }
-                    }}
-                    className={`w-full px-4 py-2 rounded-md placeholder-white/50 focus:outline-none input text-gray-800 ${
-                        errors.email 
-                            ? 'bg-red-100 border-2 border-red-400' 
-                            : 'bg-[#D9D9D9]/20'
-                    }`}
-                    placeholder="Пошта"
-                />
-                {errors.email && (
-                    <p className="text-red-400 text-sm mt-1">{errors.email}</p>
-                )}
-                {selectedRole === 'teacher' && (
-                    <p className="text-xs text-gray-400 mt-1">
-                        Якщо профіль викладача вже існує, вам надішле код на пошту
-                    </p>
-                )}
-            </div>
-            {selectedRole && (
-                <div className="px-4 py-2 bg-blue-500/20 rounded-lg">
-                    <p className="text-sm">
-                        Вибрано: <strong>{selectedRole === 'student' ? 'Студент' : 'Викладач'}</strong>
-                    </p>
-                </div>
-            )}
-            <h2 className="text-2xl font-semibold mb-4">Пароль</h2>
-            <div>
-                <label className="block text-md">Пароль</label>
-                <input
-                    type="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    className={`w-full px-4 py-2 rounded-md outline-none input text-gray-800 ${
-                        errors.password 
-                            ? 'bg-red-100 border-2 border-red-400' 
-                            : 'bg-white/60'
-                    }`}
-                    placeholder="Ваш пароль"
-                />
-                {errors.password && (
-                    <p className="text-red-400 text-sm mt-1">{errors.password}</p>
-                )}
-            </div>
-            <div>
-                <label className="block text-md">Підтвердження пароля</label>
-                <input
-                    type="password"
-                    name="passwordConfirm"
-                    value={formData.passwordConfirm}
-                    onChange={handleChange}
-                    className={`w-full px-4 py-2 rounded-md outline-none  input text-gray-800 ${
-                        errors.passwordConfirm 
-                            ? 'bg-red-100 border-2 border-red-400' 
-                            : 'bg-white/60'
-                    }`}
-                    placeholder="Підтвердіть пароль"
-                />
-                {errors.passwordConfirm && (
-                    <p className="text-red-400 text-sm mt-1">{errors.passwordConfirm}</p>
-                )}
-            </div>
-            
-            {errors.general && (
-                <div className="text-red-400 text-sm text-center mb-4">
-                    {errors.general}
-                </div>
-            )}
+        );
+    }
+
+    return (
+        <Modal isOpen={true} onClose={() => {
+            if (onClose) {
+                onClose();
+            } else {
+                switchToLogin();
+            }
+        }}>
+            {selectedRole === 'teacher' ? (
+                <div className="space-y-6 p-10 w-full">
+                    <div className="mb-6">
+                        <div className="px-4 py-3 bg-indigo-500/20 rounded-lg border border-indigo-500/30 mb-4">
+                            <div className="flex items-center gap-2 mb-2">
+                                <div className="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center">
+                                    <span className="text-white text-sm font-bold">В</span>
+                                </div>
+                                <p className="text-sm font-semibold">Реєстрація викладача</p>
+                            </div>
+                            <p className="text-xs text-gray-300">
+                                Спочатку введіть email та перевірте, чи існує профіль викладача з такою поштою
+                            </p>
+                        </div>
+                        
+                        <div>
+                            <label className="block text-sm mb-2 font-medium">Email *</label>
+                            <input
+                                type="email"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleChange}
+                                disabled={emailChecked}
+                                className={`w-full px-4 py-3 rounded-lg placeholder-white/50 focus:outline-none text-gray-800 transition-all ${
+                                    errors.email 
+                                        ? 'bg-red-100 border-2 border-red-400' 
+                                        : emailChecked
+                                            ? 'bg-gray-300 cursor-not-allowed'
+                                            : 'bg-[#D9D9D9]/20 focus:ring-2 focus:ring-blue-500'
+                                }`}
+                                placeholder="teacher@lnu.edu.ua"
+                                autoFocus
+                            />
+                            {errors.email && (
+                                <p className="text-red-400 text-sm mt-1 flex items-center gap-1">
+                                    <span>⚠</span>
+                                    {errors.email}
+                                </p>
+                            )}
+                            {!errors.email && !emailChecked && (
+                                <p className="text-xs text-gray-400 mt-2">
+                                    Натисніть кнопку нижче, щоб перевірити email та продовжити
+                                </p>
+                            )}
+                            {emailChecked && !errors.email && !showTeacherWizard && (
+                                <p className="text-xs text-green-400 mt-2 flex items-center gap-1">
+                                    <span>✓</span>
+                                    Email перевірено. Можна продовжувати реєстрацію.
+                                </p>
+                            )}
+                        </div>
+                    </div>
                     
+                    {!emailChecked ? (
+                        <button
+                            type="button"
+                            onClick={async () => {
+                                if (!formData.email || !/\S+@\S+\.\S+/.test(formData.email)) {
+                                    setErrors({ email: 'Введіть коректний email' });
+                                    return;
+                                }
+                                await checkEmailForTeacher(formData.email);
+                            }}
+                            className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg transition font-medium flex items-center justify-center gap-2"
+                        >
+                            <span>Перевірити email</span>
+                            <span>→</span>
+                        </button>
+                    ) : (
+                        <div className="flex gap-3">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setEmailChecked(false);
+                                    setErrors({});
+                                    setFormData(prev => ({ ...prev, email: '' }));
+                                }}
+                                className="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg transition"
+                            >
+                                Змінити email
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setShowTeacherWizard(true)}
+                                className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition font-medium"
+                            >
+                                Продовжити реєстрацію
+                            </button>
+                        </div>
+                    )}
+                </div>
+            ) : (
+                <form onSubmit={handleSubmit} className="space-y-6 p-10 w-full text-white">
+                    <div className="px-4 py-2 bg-blue-500/20 rounded-lg mb-4">
+                        <p className="text-sm">
+                            Вибрано: <strong>Студент</strong>
+                        </p>
+                    </div>
+                    
+                    <h2 className="text-2xl font-semibold mb-4">Профіль</h2>
+                    <div>
+                        <label className="block text-md">Ім'я</label>
+                        <input
+                            name="firstName"
+                            value={formData.firstName}
+                            onChange={handleChange}
+                            className={`w-full px-4 py-2 rounded-md placeholder-white/50 focus:outline-none input text-gray-800 ${
+                                errors.firstName 
+                                    ? 'bg-red-100 border-2 border-red-400' 
+                                    : 'bg-[#D9D9D9]/20'
+                            }`}
+                            placeholder="Anna"
+                        />
+                        {errors.firstName && (
+                            <p className="text-red-400 text-sm mt-1">{errors.firstName}</p>
+                        )}
+                    </div>
+                    <div>
+                        <label className="block text-md">Прізвище</label>
+                        <input
+                            name="lastName"
+                            value={formData.lastName}
+                            onChange={handleChange}
+                            className={`w-full px-4 py-2 rounded-md placeholder-white/50 focus:outline-none input text-gray-800 ${
+                                errors.lastName 
+                                    ? 'bg-red-100 border-2 border-red-400' 
+                                    : 'bg-[#D9D9D9]/20'
+                            }`}
+                            placeholder="Last Name"
+                        />
+                        {errors.lastName && (
+                            <p className="text-red-400 text-sm mt-1">{errors.lastName}</p>
+                        )}
+                    </div>
+                    <div>
+                        <label className="block text-md">Пошта</label>
+                        <input
+                            type="email"
+                            name="email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            className={`w-full px-4 py-2 rounded-md placeholder-white/50 focus:outline-none input text-gray-800 ${
+                                errors.email 
+                                    ? 'bg-red-100 border-2 border-red-400' 
+                                    : 'bg-[#D9D9D9]/20'
+                            }`}
+                            placeholder="Пошта"
+                        />
+                        {errors.email && (
+                            <p className="text-red-400 text-sm mt-1">{errors.email}</p>
+                        )}
+                    </div>
+                    
+                    <h2 className="text-2xl font-semibold mb-4">Пароль</h2>
+                    <div>
+                        <label className="block text-md">Пароль</label>
+                        <input
+                            type="password"
+                            name="password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            className={`w-full px-4 py-2 rounded-md outline-none input text-gray-800 ${
+                                errors.password 
+                                    ? 'bg-red-100 border-2 border-red-400' 
+                                    : 'bg-white/60'
+                            }`}
+                            placeholder="Ваш пароль"
+                        />
+                        {errors.password && (
+                            <p className="text-red-400 text-sm mt-1">{errors.password}</p>
+                        )}
+                    </div>
+                    <div>
+                        <label className="block text-md">Підтвердження пароля</label>
+                        <input
+                            type="password"
+                            name="passwordConfirm"
+                            value={formData.passwordConfirm}
+                            onChange={handleChange}
+                            className={`w-full px-4 py-2 rounded-md outline-none input text-gray-800 ${
+                                errors.passwordConfirm 
+                                    ? 'bg-red-100 border-2 border-red-400' 
+                                    : 'bg-white/60'
+                            }`}
+                            placeholder="Підтвердіть пароль"
+                        />
+                        {errors.passwordConfirm && (
+                            <p className="text-red-400 text-sm mt-1">{errors.passwordConfirm}</p>
+                        )}
+                    </div>
+                    
+                    {errors.general && (
+                        <div className="text-red-400 text-sm text-center mb-4">
+                            {errors.general}
+                        </div>
+                    )}
+                            
                     {success && (
                         <div className="animate-success-pop">
                             <div className="relative bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-400/40 rounded-xl px-6 py-4 backdrop-blur-sm shadow-lg animate-glow overflow-hidden">
-                                {/* Shimmer effect */}
                                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
                                 
                                 <div className="relative flex items-center space-x-3">
@@ -429,7 +533,6 @@ const SignupForm = ({ switchToLogin }) => {
                                                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                                             </svg>
                                         </div>
-                                        {/* Pulse ring */}
                                         <div className="absolute inset-0 rounded-full border-2 border-green-400 animate-ping opacity-75"></div>
                                     </div>
                                     <div className="flex-1">
@@ -438,12 +541,10 @@ const SignupForm = ({ switchToLogin }) => {
                                     </div>
                                 </div>
                                 
-                                {/* Progress bar with glow */}
                                 <div className="mt-4 bg-green-500/20 rounded-full h-2 overflow-hidden shadow-inner">
                                     <div className="animate-progress-bar bg-gradient-to-r from-green-400 via-emerald-400 to-green-500 h-full rounded-full shadow-lg shadow-green-400/50"></div>
                                 </div>
                                 
-                                {/* Floating particles effect */}
                                 <div className="absolute top-2 right-2 w-2 h-2 bg-green-400 rounded-full animate-float opacity-60"></div>
                                 <div className="absolute top-4 right-6 w-1 h-1 bg-emerald-400 rounded-full animate-float opacity-40" style={{animationDelay: '0.5s'}}></div>
                                 <div className="absolute top-6 right-3 w-1.5 h-1.5 bg-green-300 rounded-full animate-float opacity-50" style={{animationDelay: '1s'}}></div>
@@ -477,7 +578,8 @@ const SignupForm = ({ switchToLogin }) => {
                         </span>
                     </button>
                 </form>
-        </>
+            )}
+        </Modal>
     );
 };
 

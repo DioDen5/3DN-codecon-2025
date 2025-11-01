@@ -107,7 +107,7 @@ function App() {
                 </Routes>
             </ErrorBoundary>
 
-            <Modal isOpen={modalType !== null} onClose={closeModal}>
+            <Modal isOpen={modalType !== null && modalType !== "signup"} onClose={closeModal}>
                 {modalType === "login" && (
                     <LoginForm
                         switchToReset={() => setModalType("reset")}
@@ -115,14 +115,16 @@ function App() {
                     />
                 )}
 
-                {modalType === "signup" && (
-                    <SignupForm switchToLogin={() => setModalType("login")} />
-                )}
-
                 {modalType === "reset" && (
                     <ResetPasswordForm switchToLogin={() => setModalType("login")} />
                 )}
             </Modal>
+            {modalType === "signup" && (
+                <SignupForm 
+                    switchToLogin={() => setModalType("login")}
+                    onClose={() => setModalType(null)}
+                />
+            )}
                 </TeacherDataProvider>
             </Router>
         </NotificationProvider>
