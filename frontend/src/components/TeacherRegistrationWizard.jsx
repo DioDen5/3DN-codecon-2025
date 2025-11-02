@@ -143,13 +143,18 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                 bio: formData.bio || undefined
             };
             
-            const { token, user, teacher } = await registerTeacher(registrationData);
-            loginSuccess({ token, user });
-            showSuccess('Реєстрацію успішно завершено! Ваш профіль очікує верифікації адміністратором.');
-            setTimeout(() => {
-                onSuccess?.();
-                navigate("/forum");
-            }, 1500);
+                    const { token, user, teacher } = await registerTeacher(registrationData);
+                    loginSuccess({ token, user });
+                    showSuccess('Реєстрацію успішно завершено! Ваш профіль очікує верифікації адміністратором.');
+                    
+                    // Визначаємо правильний редирект для викладачів
+                    const teacherProfile = teacher ? { id: teacher.id || teacher._id } : null;
+                    const redirectPath = await getRedirectAfterLogin(user, teacherProfile);
+                    
+                    setTimeout(() => {
+                        onSuccess?.();
+                        navigate(redirectPath);
+                    }, 1500);
         } catch (error) {
             console.error('Registration error:', error);
             showError(error.response?.data?.error || 'Помилка реєстрації. Спробуйте ще раз.');

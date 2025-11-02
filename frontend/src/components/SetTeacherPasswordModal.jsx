@@ -2,10 +2,15 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { Lock, Eye, EyeOff } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { setTeacherPassword } from '../api/teachers';
 import { useNotification } from '../contexts/NotificationContext';
+import { getRedirectAfterLogin } from '../utils/getRedirectAfterLogin';
+import { useAuthState } from '../api/useAuthState';
 
 const SetTeacherPasswordModal = ({ isOpen, onClose, onSuccess }) => {
+    const navigate = useNavigate();
+    const { user } = useAuthState();
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [errors, setErrors] = useState({});
@@ -44,8 +49,17 @@ const SetTeacherPasswordModal = ({ isOpen, onClose, onSuccess }) => {
             showSuccessNotification('Пароль успішно встановлено! Тепер ви можете входити як за кодом, так і за паролем.');
             setPassword('');
             setConfirmPassword('');
-            onSuccess?.();
-            onClose();
+            
+            // Перекидаємо викладача на його профіль після встановлення пароля
+            if (user?.role === 'teacher') {
+                const redirectPath = await getRedirectAfterLogin(user);
+                onSuccess?.();
+                onClose();
+                navigate(redirectPath);
+            } else {
+                onSuccess?.();
+                onClose();
+            }
         } catch (error) {
             showErrorNotification(error.response?.data?.error || 'Помилка встановлення пароля. Спробуйте ще раз.');
         } finally {

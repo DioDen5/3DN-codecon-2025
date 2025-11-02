@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { register, checkEmailForRegistration, registerTeacher, sendVerificationCode, loginWithCode } from "../api/auth";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../state/AuthContext";
@@ -27,6 +27,7 @@ const SignupForm = ({ switchToLogin, onClose }) => {
     const [verificationCode, setVerificationCode] = useState('');
     const [codeSent, setCodeSent] = useState(false);
     const [emailExistsError, setEmailExistsError] = useState(false);
+    const codeInputRefs = useRef([]);
     const navigate = useNavigate();
     const { loginSuccess } = useAuth();
     const { showSuccess, showError } = useNotification();
@@ -169,7 +170,7 @@ const SignupForm = ({ switchToLogin, onClose }) => {
         }
         
         try {
-            const { token, user, requiresPasswordSetup } = await loginWithCode(formData.email, verificationCode);
+            const { token, user, requiresPasswordSetup, teacherProfile } = await loginWithCode(formData.email, verificationCode);
             loginSuccess({ token, user });
             showSuccess('Вхід успішний!');
             
@@ -178,7 +179,10 @@ const SignupForm = ({ switchToLogin, onClose }) => {
                 sessionStorage.setItem('teacherRequiresPasswordSetup', 'true');
             }
             
-            navigate("/forum");
+            // Визначаємо правильний редирект для викладачів
+            const redirectPath = await getRedirectAfterLogin(user, teacherProfile);
+            
+            navigate(redirectPath);
         } catch (error) {
             setErrors({ code: error.response?.data?.error || 'Невірний код' });
         }
@@ -317,33 +321,102 @@ const SignupForm = ({ switchToLogin, onClose }) => {
                     <form onSubmit={handleLoginWithCode} className="space-y-4">
                         <div>
                             <label className="block text-sm mb-2">Код верифікації</label>
-                            <input
-                                type="text"
-                                maxLength="6"
-                                value={verificationCode}
-                                onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ''))}
-                                className={`w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 text-center text-2xl tracking-widest focus:outline-none transition-all ${
-                                    errors.code 
-                                        ? 'border border-red-400 shadow-[0_0_10px_rgba(248,113,113,0.5)]' 
-                                        : 'border border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)] focus:border-blue-400 focus:shadow-[0_0_12px_rgba(59,130,246,0.6)]'
-                                }`}
-                                placeholder="000000"
-                                autoFocus
-                            />
+                            <div className="flex gap-2 justify-center items-center">
+                                {[0, 1, 2, 3, 4, 5].map((index) => {
+                                    const digit = verificationCode[index] || '';
+                                    const hasValue = digit !== '';
+                                    return (
+                                        <input
+                                            key={`${index}-${digit}`}
+                                            ref={(el) => (codeInputRefs.current[index] = el)}
+                                            type="text"
+                                            inputMode="numeric"
+                                            maxLength="1"
+                                            value={digit}
+                                            onChange={(e) => {
+                                                const newValue = e.target.value.replace(/\D/g, '');
+                                                if (newValue.length <= 1) {
+                                                    const currentCode = verificationCode.split('');
+                                                    currentCode[index] = newValue;
+                                                    const newCode = currentCode.join('').slice(0, 6);
+                                                    setVerificationCode(newCode);
+                                                    
+                                                    // Автоматичний перехід на наступне поле
+                                                    if (newValue && index < 5) {
+                                                        setTimeout(() => {
+                                                            codeInputRefs.current[index + 1]?.focus();
+                                                        }, 10);
+                                                    }
+                                                }
+                                            }}
+                                            onKeyDown={(e) => {
+                                                // Перехід на попереднє поле при Backspace
+                                                if (e.key === 'Backspace' && !digit && index > 0) {
+                                                    e.preventDefault();
+                                                    codeInputRefs.current[index - 1]?.focus();
+                                                }
+                                                // Видалення поточної цифри при Backspace
+                                                if (e.key === 'Backspace' && digit && index >= 0) {
+                                                    const currentCode = verificationCode.split('');
+                                                    currentCode[index] = '';
+                                                    setVerificationCode(currentCode.join(''));
+                                                    if (index > 0) {
+                                                        setTimeout(() => {
+                                                            codeInputRefs.current[index - 1]?.focus();
+                                                        }, 10);
+                                                    }
+                                                }
+                                                // Дозволяємо перехід стрілками
+                                                if (e.key === 'ArrowLeft' && index > 0) {
+                                                    e.preventDefault();
+                                                    codeInputRefs.current[index - 1]?.focus();
+                                                }
+                                                if (e.key === 'ArrowRight' && index < 5) {
+                                                    e.preventDefault();
+                                                    codeInputRefs.current[index + 1]?.focus();
+                                                }
+                                            }}
+                                            onFocus={(e) => e.target.select()}
+                                            onPaste={(e) => {
+                                                e.preventDefault();
+                                                const pastedText = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+                                                if (pastedText.length > 0) {
+                                                    const newCode = pastedText.split('').slice(0, 6);
+                                                    setVerificationCode(newCode.join(''));
+                                                    const nextIndex = Math.min(index + pastedText.length, 5);
+                                                    setTimeout(() => {
+                                                        codeInputRefs.current[nextIndex]?.focus();
+                                                    }, 10);
+                                                }
+                                            }}
+                                            className={`w-12 h-16 rounded-md bg-[#D9D9D9]/20 text-gray-800 text-center text-3xl font-bold focus:outline-none transition-all duration-300 ${
+                                                errors.code 
+                                                    ? 'border border-red-400 shadow-[0_0_10px_rgba(248,113,113,0.5)]' 
+                                                    : 'border border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)] focus:border-blue-400 focus:shadow-[0_0_12px_rgba(59,130,246,0.6)]'
+                                            } ${
+                                                hasValue 
+                                                    ? 'animate-digit-slide-up' 
+                                                    : ''
+                                            }`}
+                                            placeholder="_"
+                                            autoFocus={index === 0 && !verificationCode}
+                                        />
+                                    );
+                                })}
+                            </div>
                             {errors.code && (
                                 <p className="text-red-400 text-sm mt-1">{errors.code}</p>
                             )}
+                            <div className="flex justify-center mt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => handleSendCode(formData.email)}
+                                    className="text-xs text-blue-400 hover:text-blue-300 cursor-pointer transition underline underline-offset-2"
+                                >
+                                    {codeSent ? 'Надіслати код повторно' : 'Надіслати код'}
+                                </button>
+                            </div>
                         </div>
-                        
-                        {!codeSent && (
-                            <button
-                                type="button"
-                                onClick={() => handleSendCode(formData.email)}
-                                className="w-full py-2 text-sm text-blue-400 hover:text-blue-300 cursor-pointer transition"
-                            >
-                                Надіслати код повторно
-                            </button>
-                        )}
                         
                         <div className="flex gap-3">
                             <button
