@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
-import { Lock, Eye, EyeOff } from 'lucide-react';
+import { Lock, Eye, EyeOff, AlertTriangle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { setTeacherPassword } from '../api/teachers';
 import { useNotification } from '../contexts/NotificationContext';
@@ -88,19 +88,18 @@ const SetTeacherPasswordModal = ({ isOpen, onClose, onSuccess }) => {
             >
                 <div className="p-6 border-b border-white/20 relative">
                     <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-indigo-600 rounded-full flex items-center justify-center">
+                        <div className="w-12 h-12 bg-blue-800 rounded-full flex items-center justify-center flex-shrink-0">
                             <Lock className="w-6 h-6 text-white" />
                         </div>
                         <div>
-                            <h2 className="text-2xl font-bold text-white">Встановлення пароля</h2>
-                            <p className="text-sm text-white/70 mt-1">Обов'язковий крок: встановіть пароль для входу в систему</p>
+                            <h2 className="text-3xl font-bold text-white">Встановлення пароля</h2>
                         </div>
                     </div>
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
                     <div>
-                        <label className="block text-sm mb-2 text-white">Пароль *</label>
+                        <label className="block text-sm mb-2 text-white">Пароль:</label>
                         <div className="relative">
                             <input
                                 type={showPassword ? 'text' : 'password'}
@@ -125,7 +124,7 @@ const SetTeacherPasswordModal = ({ isOpen, onClose, onSuccess }) => {
                     </div>
 
                     <div>
-                        <label className="block text-sm mb-2 text-white">Підтвердження пароля *</label>
+                        <label className="block text-sm mb-2 text-white">Підтвердження пароля:</label>
                         <div className="relative">
                             <input
                                 type={showConfirmPassword ? 'text' : 'password'}
@@ -159,9 +158,12 @@ const SetTeacherPasswordModal = ({ isOpen, onClose, onSuccess }) => {
                         </button>
                     </div>
 
-                    <p className="text-xs text-white/60 text-center mt-4">
-                        ⚠️ Це обов'язковий крок. Пароль потрібен для входу в систему.
-                    </p>
+                    <div className="flex items-start gap-3 mt-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg animate-yellow-glow">
+                        <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
+                        <p className="text-xs text-white/80 leading-relaxed">
+                            Це обов'язковий крок. Пароль потрібен для наступного входу в систему.
+                        </p>
+                    </div>
                 </form>
             </motion.div>
         </div>,
