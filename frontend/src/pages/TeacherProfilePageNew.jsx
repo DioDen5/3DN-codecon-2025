@@ -347,7 +347,6 @@ const TeacherProfilePageNew = () => {
                     {(() => {
                         const specialization = teacher ? getTeacherSpecialization(teacher) : null;
                         const specColor = specialization?.color || '#FF6B9D';
-                        const specCode = specialization?.code || 'N/A';
                         const specName = specialization?.name || 'Не вказано';
                         
                         return (
@@ -356,8 +355,10 @@ const TeacherProfilePageNew = () => {
                                     className="w-6 h-6 md:w-8 md:h-8 mx-auto mb-2" 
                                     style={{ color: specColor }}
                                 />
-                                <div className="text-lg md:text-2xl font-bold text-gray-900 stat-number-pop">{specCode}</div>
-                                <div className="text-xs md:text-sm text-gray-600" title={specName}>Спеціалізація</div>
+                                <div className="text-lg md:text-2xl font-bold text-gray-900 stat-number-pop line-clamp-2" title={specName}>
+                                    {specName.length > 20 ? `${specName.substring(0, 20)}...` : specName}
+                                </div>
+                                <div className="text-xs md:text-sm text-gray-600">Спеціалізація</div>
                             </>
                         );
                     })()}
