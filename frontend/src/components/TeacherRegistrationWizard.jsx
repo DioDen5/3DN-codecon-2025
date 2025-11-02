@@ -7,6 +7,8 @@ import { useNotification } from '../contexts/NotificationContext';
 import AutocompleteInput from './AutocompleteInput';
 import universitiesData from '../data/universities.json';
 import facultiesData from '../data/faculties.json';
+import subjectsData from '../data/subjects.json';
+import { getRedirectAfterLogin } from '../utils/getRedirectAfterLogin';
 
 const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
     const navigate = useNavigate();
@@ -122,12 +124,32 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
     };
 
     const handleSubjectChange = (index, value) => {
+        // Перевіряємо на дублікати
+        const trimmedValue = value.trim();
+        const duplicateIndex = formData.subjects.findIndex((s, i) => 
+            i !== index && s.trim().toLowerCase() === trimmedValue.toLowerCase() && trimmedValue !== ''
+        );
+        
+        if (duplicateIndex !== -1) {
+            showError(`Предмет "${trimmedValue}" вже додано`);
+            return;
+        }
+        
         const newSubjects = [...formData.subjects];
         newSubjects[index] = value;
         setFormData(prev => ({
             ...prev,
             subjects: newSubjects
         }));
+        
+        // Очищуємо помилки для цього предмета
+        if (errors[`subject-${index}`]) {
+            setErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors[`subject-${index}`];
+                return newErrors;
+            });
+        }
     };
 
     const addSubject = () => {
@@ -163,6 +185,21 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
             const validSubjects = formData.subjects.filter(s => s.trim());
             if (validSubjects.length === 0) {
                 newErrors.subjects = 'Додайте хоча б один предмет';
+            }
+            
+            // Перевірка на дублікати
+            const subjectsLower = validSubjects.map(s => s.trim().toLowerCase());
+            const uniqueSubjects = new Set(subjectsLower);
+            if (subjectsLower.length !== uniqueSubjects.size) {
+                // Знаходимо дублікати
+                formData.subjects.forEach((subject, index) => {
+                    if (subject.trim()) {
+                        const count = subjectsLower.filter(s => s === subject.trim().toLowerCase()).length;
+                        if (count > 1) {
+                            newErrors[`subject-${index}`] = 'Цей предмет вже додано';
+                        }
+                    }
+                });
             }
         } else if (step === 4) {
             if (!formData.password) newErrors.password = 'Пароль обов\'язковий';
@@ -216,13 +253,22 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                     const teacherProfile = teacher ? { id: teacher.id || teacher._id } : null;
                     const redirectPath = await getRedirectAfterLogin(user, teacherProfile);
                     
+                    // Спочатку закриваємо модальне вікно реєстрації
+                    onSuccess?.();
+                    
+                    // Потім перенаправляємо на профіль
                     setTimeout(() => {
-                        onSuccess?.();
                         navigate(redirectPath);
-                    }, 1500);
+                    }, 100);
         } catch (error) {
             console.error('Registration error:', error);
-            showError(error.response?.data?.error || 'Помилка реєстрації. Спробуйте ще раз.');
+            const errorMessage = error.response?.data?.error || error.message || 'Помилка реєстрації. Спробуйте ще раз.';
+            console.error('Error details:', {
+                status: error.response?.status,
+                data: error.response?.data,
+                message: errorMessage
+            });
+            showError(errorMessage);
             setLoading(false);
         }
     };
@@ -289,7 +335,7 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                     </div>
                 );
                 
-            case 2:
+            case 2: {
                 // Крок 2: Університет + Факультет (обов'язкове) + Кафедра (опціональне)
                 const selectedUniversity = formData.university.trim();
                 const universityData = universitiesData.find(u => 
@@ -404,50 +450,117 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                         </div>
                     </div>
                 );
+            }
                 
-            case 3:
+            case 3: {
+                // Знаходимо предмети для вибраного факультету
+                const selectedFaculty = formData.faculty.trim();
+                let subjectOptions = [];
+                
+                if (selectedFaculty) {
+                    const facultySubjects = subjectsData.find(s => s.facultyName === selectedFaculty);
+                    if (facultySubjects && facultySubjects.subjects) {
+                        // Конвертуємо масив рядків у формат для AutocompleteInput
+                        // Перші 3 предмети позначаємо як популярні (найчастіші)
+                        subjectOptions = facultySubjects.subjects.map((subj, idx) => ({
+                            name: subj,
+                            shortName: subj,
+                            popular: idx < 3 // Перші 3 предмети - найчастіші
+                        }));
+                    }
+                }
+                
+                // Якщо факультет не вибрано або предметів не знайдено, показуємо всі предмети
+                if (subjectOptions.length === 0) {
+                    const allSubjects = new Set();
+                    subjectsData.forEach(faculty => {
+                        faculty.subjects.forEach(subj => {
+                            allSubjects.add(subj);
+                        });
+                    });
+                    subjectOptions = Array.from(allSubjects).slice(0, 15).map(subj => ({
+                        name: subj,
+                        shortName: subj,
+                        popular: false
+                    }));
+                }
+                
                 return (
                     <div className="space-y-4 animate-[fadeIn_0.3s_ease-out]">
                         <div>
                             <label className="block text-sm mb-2">Предмети:</label>
-                            {formData.subjects.map((subject, index) => (
-                                <div key={index} className="flex gap-2 mb-2">
-                                    <input
-                                        type="text"
-                                        value={subject}
-                                        onChange={(e) => handleSubjectChange(index, e.target.value)}
-                                        onFocus={() => handleFocus(`subject-${index}`)}
-                                        onBlur={() => handleBlur(`subject-${index}`)}
-                                        className={subject.trim() || focusedFields[`subject-${index}`] 
-                                            ? 'flex-1 px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 focus:outline-none transition-all duration-300 border border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)] focus:border-blue-400 focus:shadow-[0_0_12px_rgba(59,130,246,0.6)]'
-                                            : 'flex-1 px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 focus:outline-none transition-all duration-300 border border-gray-500'
-                                        }
-                                        placeholder={`Предмет ${index + 1}`}
-                                    />
-                                    {formData.subjects.length > 1 && (
-                                    <button
-                                        type="button"
-                                        onClick={() => removeSubject(index)}
-                                        className="px-3 py-2 bg-red-500 hover:bg-red-600 rounded-md text-white transition"
-                                    >
-                                        Видалити
-                                    </button>
-                                    )}
-                                </div>
-                            ))}
+                            {!selectedFaculty && (
+                                <p className="text-xs text-gray-400 mb-3 flex items-center gap-2">
+                                    <Lightbulb className="w-4 h-4 text-yellow-400 flex-shrink-0" />
+                                    <span>Оберіть факультет, щоб побачити список предметів для цього факультету</span>
+                                </p>
+                            )}
+                            {formData.subjects.map((subject, index) => {
+                                // Перевіряємо на дублікати
+                                const isDuplicate = formData.subjects.filter((s, i) => 
+                                    i !== index && s.trim().toLowerCase() === subject.trim().toLowerCase() && subject.trim() !== ''
+                                ).length > 0;
+                                
+                                return (
+                                    <div key={index} className="mb-3">
+                                        <div className="flex gap-2 items-start">
+                                            <div className="flex-1">
+                                                <AutocompleteInput
+                                                    value={subject}
+                                                    onChange={(value) => handleSubjectChange(index, value)}
+                                                    onFocus={() => handleFocus(`subject-${index}`)}
+                                                    onBlur={() => handleBlur(`subject-${index}`)}
+                                                    options={subjectOptions}
+                                                    placeholder={selectedFaculty ? `Предмет ${index + 1}` : "Спочатку оберіть факультет"}
+                                                    error={!!errors[`subject-${index}`] || isDuplicate}
+                                                    showPopular={true}
+                                                    maxResults={8}
+                                                    allowCustomInput={true}
+                                                    disabled={!selectedFaculty}
+                                                />
+                                                {errors[`subject-${index}`] && (
+                                                    <p className="text-red-400 text-sm mt-1">{errors[`subject-${index}`]}</p>
+                                                )}
+                                                {isDuplicate && (
+                                                    <p className="text-red-400 text-sm mt-1">Цей предмет вже додано</p>
+                                                )}
+                                            </div>
+                                            {formData.subjects.length > 1 && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeSubject(index)}
+                                                    className="px-3 py-2 bg-red-500 hover:bg-red-600 rounded-md text-white transition flex-shrink-0 mt-0"
+                                                    title="Видалити предмет"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                                    </svg>
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })}
                             <button
                                 type="button"
                                 onClick={addSubject}
-                                className="w-full py-2 bg-blue-500 hover:bg-blue-600 rounded-md text-white transition"
+                                className="w-full py-2 bg-blue-500 hover:bg-blue-600 rounded-md text-white transition font-medium"
                             >
                                 + Додати предмет
                             </button>
                             {errors.subjects && <p className="text-red-400 text-sm mt-1">{errors.subjects}</p>}
+                            {selectedFaculty && subjectOptions.length > 0 && (
+                                <p className="text-xs text-gray-400 mt-2">
+                                    ✓ Показано предмети для <strong>{selectedFaculty}</strong>. Можна також ввести свої.
+                                </p>
+                            )}
                         </div>
                     </div>
                 );
+            }
                 
-            case 4:
+            case 4: {
                 return (
                     <div className="space-y-4 animate-[fadeIn_0.3s_ease-out]">
                         <div>
@@ -479,6 +592,7 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                         </div>
                     </div>
                 );
+            }
                 
             case 5:
                 return (

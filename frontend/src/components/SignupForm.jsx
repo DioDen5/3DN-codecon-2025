@@ -291,7 +291,11 @@ const SignupForm = ({ switchToLogin, onClose }) => {
                     }}
                     onSuccess={() => {
                         setShowTeacherWizard(false);
-                        switchToLogin();
+                        // Після успішної реєстрації закриваємо модальне вікно реєстрації
+                        // Користувач вже авторизований і буде перекинутий на профіль
+                        if (onClose) {
+                            onClose();
+                        }
                     }}
                 />
             </Modal>
