@@ -12,7 +12,9 @@ const AutocompleteInput = ({
     className = '',
     error = false,
     showPopular = true,
-    maxResults = 8
+    maxResults = 8,
+    allowCustomInput = true, // Дозволити вільний ввід, якщо опції не знайдено
+    disabled = false // Заблокувати інпут
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
@@ -22,9 +24,16 @@ const AutocompleteInput = ({
 
     // Відсортувати опції: спочатку популярні, потім за релевантністю
     useEffect(() => {
+        if (disabled) {
+            setFilteredOptions([]);
+            setIsOpen(false);
+            return;
+        }
+        
         if (!searchTerm.trim()) {
-            // Якщо немає пошуку, показуємо популярні
-            const popular = options.filter(opt => opt.popular).slice(0, showPopular ? 5 : 0);
+            // Якщо немає пошуку, показуємо популярні (3 для кафедр, 5 для університетів)
+            const popularCount = maxResults <= 8 ? 3 : 5; // Для кафедр показуємо 3 найчастіші
+            const popular = options.filter(opt => opt.popular).slice(0, showPopular ? popularCount : 0);
             setFilteredOptions(popular);
         } else {
             // Фільтруємо та сортуємо за релевантністю
@@ -54,7 +63,7 @@ const AutocompleteInput = ({
             
             setFilteredOptions(filtered);
         }
-    }, [searchTerm, options, showPopular, maxResults]);
+    }, [searchTerm, options, showPopular, maxResults, disabled]);
 
     // Оновити searchTerm коли змінюється value (ззовні)
     useEffect(() => {
@@ -66,6 +75,8 @@ const AutocompleteInput = ({
     }, [value]);
 
     const handleInputChange = (e) => {
+        if (disabled) return;
+        
         const newValue = e.target.value;
         setSearchTerm(newValue);
         setIsOpen(true);
@@ -77,6 +88,8 @@ const AutocompleteInput = ({
     };
 
     const handleSelect = (option) => {
+        if (disabled) return;
+        
         setSearchTerm(option.name);
         onChange(option.name);
         setIsOpen(false);
@@ -92,6 +105,7 @@ const AutocompleteInput = ({
     };
 
     const handleFocus = () => {
+        if (disabled) return;
         setIsOpen(true);
         onFocus?.();
     };
@@ -127,9 +141,18 @@ const AutocompleteInput = ({
     const baseInputClasses = className || 'w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 focus:outline-none transition-all duration-300';
     const inputClasses = error
         ? `${baseInputClasses} border border-red-400 shadow-[0_0_10px_rgba(248,113,113,0.5)]`
-        : searchTerm.trim() || isOpen
-            ? `${baseInputClasses} border border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)] focus:border-blue-400 focus:shadow-[0_0_12px_rgba(59,130,246,0.6)]`
-            : `${baseInputClasses} border border-gray-500`;
+        : disabled
+            ? `${baseInputClasses} border border-gray-500 opacity-50 cursor-not-allowed`
+            : searchTerm.trim() || isOpen
+                ? `${baseInputClasses} border border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)] focus:border-blue-400 focus:shadow-[0_0_12px_rgba(59,130,246,0.6)]`
+                : `${baseInputClasses} border border-gray-500`;
+
+    const handleDisabledClick = (e) => {
+        if (disabled) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    };
 
     return (
         <div className="relative" ref={dropdownRef}>
@@ -139,10 +162,13 @@ const AutocompleteInput = ({
                     type="text"
                     value={searchTerm}
                     onChange={handleInputChange}
-                    onFocus={handleFocus}
+                    onFocus={disabled ? undefined : handleFocus}
                     onBlur={handleBlur}
+                    onClick={handleDisabledClick}
+                    disabled={disabled}
                     className={inputClasses}
                     placeholder={placeholder}
+                    readOnly={disabled}
                 />
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
                     {searchTerm && (

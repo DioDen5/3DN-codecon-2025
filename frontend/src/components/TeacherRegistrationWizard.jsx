@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, User, GraduationCap, BookOpen, Lock, Image, FileText, CheckCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, User, GraduationCap, BookOpen, Lock, Image, FileText, CheckCircle, Lightbulb } from 'lucide-react';
 import { registerTeacher } from '../api/auth';
 import { useAuth } from '../state/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useNotification } from '../contexts/NotificationContext';
 import AutocompleteInput from './AutocompleteInput';
 import universitiesData from '../data/universities.json';
+import departmentsData from '../data/departments.json';
 
 const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
     const navigate = useNavigate();
@@ -68,6 +69,15 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
             }));
         }
     }, [formData.firstName, formData.lastName, formData.middleName]);
+
+    // Очищуємо кафедру при зміні університету
+    const [prevUniversity, setPrevUniversity] = useState('');
+    useEffect(() => {
+        if (formData.university !== prevUniversity && prevUniversity !== '') {
+            setFormData(prev => ({ ...prev, department: '' }));
+        }
+        setPrevUniversity(formData.university);
+    }, [formData.university, prevUniversity]);
 
     const steps = [
         { number: 1, title: 'Особисті дані', icon: User },
@@ -268,6 +278,46 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                 );
                 
             case 2:
+                // Знаходимо кафедри для вибраного університету
+                const selectedUniversity = formData.university.trim();
+                const universityData = universitiesData.find(u => 
+                    u.name === selectedUniversity || u.shortName === selectedUniversity
+                );
+                
+                let departmentOptions = [];
+                if (universityData) {
+                    // Знаходимо кафедри для цього університету
+                    const universityDepartments = departmentsData.find(d => 
+                        d.universityName === universityData.name || d.universityName === universityData.shortName
+                    );
+                    
+                    if (universityDepartments && universityDepartments.departments) {
+                        // Конвертуємо масив рядків у формат для AutocompleteInput
+                        // Перші 3 кафедри позначаємо як популярні (найчастіші)
+                        departmentOptions = universityDepartments.departments.map((dept, index) => ({
+                            name: dept,
+                            shortName: dept,
+                            popular: index < 3 // Перші 3 кафедри - найчастіші
+                        }));
+                    }
+                }
+                
+                // Якщо університет не вибрано або кафедри не знайдено, показуємо всі популярні кафедри
+                if (departmentOptions.length === 0) {
+                    // Збираємо популярні кафедри з усіх університетів
+                    const allDepartments = new Set();
+                    departmentsData.forEach(university => {
+                        university.departments.forEach(dept => {
+                            allDepartments.add(dept);
+                        });
+                    });
+                    departmentOptions = Array.from(allDepartments).slice(0, 10).map(dept => ({
+                        name: dept,
+                        shortName: dept,
+                        popular: false
+                    }));
+                }
+                
                 return (
                     <div className="space-y-4 animate-[fadeIn_0.3s_ease-out]">
                         <div>
@@ -288,16 +338,36 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                         
                         <div>
                             <label className="block text-sm mb-2">Кафедра:</label>
-                            <input
-                                type="text"
+                            <AutocompleteInput
                                 value={formData.department}
-                                onChange={(e) => handleChange('department', e.target.value)}
+                                onChange={(value) => handleChange('department', value)}
                                 onFocus={() => handleFocus('department')}
                                 onBlur={() => handleBlur('department')}
-                                className={getInputClassName('department', errors.department)}
-                                placeholder="Кафедра комп'ютерних наук"
+                                options={departmentOptions}
+                                placeholder="Оберіть або введіть кафедру"
+                                error={!!errors.department}
+                                showPopular={true}
+                                maxResults={8}
+                                allowCustomInput={true}
+                                disabled={!selectedUniversity}
                             />
                             {errors.department && <p className="text-red-400 text-sm mt-1">{errors.department}</p>}
+                            {!selectedUniversity && (
+                                <p className="text-xs text-gray-400 mt-2 flex items-center gap-2">
+                                    <Lightbulb className="w-4 h-4 text-yellow-400 flex-shrink-0" />
+                                    <span>Спочатку оберіть університет, щоб побачити список кафедр</span>
+                                </p>
+                            )}
+                            {selectedUniversity && departmentOptions.length > 0 && (
+                                <p className="text-xs text-gray-400 mt-2">
+                                    ✓ Показано кафедри для <strong>{selectedUniversity}</strong>. Можна також ввести свою.
+                                </p>
+                            )}
+                            {selectedUniversity && departmentOptions.length === 0 && (
+                                <p className="text-xs text-yellow-400 mt-2">
+                                    ⚠ Кафедри для цього університету не знайдено. Можна ввести назву вручну.
+                                </p>
+                            )}
                         </div>
                     </div>
                 );
