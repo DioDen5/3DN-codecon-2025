@@ -1,0 +1,192 @@
+[
+    {
+        "name": "Штучний інтелект та машинне навчання",
+        "code": "AI/ML",
+        "keywords": [
+            "Штучний інтелект",
+            "Машинне навчання",
+            "Нейронні мережі",
+            "Deep Learning",
+            "AI",
+            "ML",
+            "Data Science",
+            "Аналіз даних",
+            "Обробка природної мови",
+            "Комп'ютерний зір"
+        ],
+        "color": "#FF6B9D",
+        "icon": "Brain"
+    },
+    {
+        "name": "Веб-розробка",
+        "code": "WEB",
+        "keywords": [
+            "Веб-програмування",
+            "Frontend",
+            "Backend",
+            "Full Stack",
+            "React",
+            "Vue",
+            "Angular",
+            "Node.js",
+            "HTML",
+            "CSS",
+            "JavaScript",
+            "TypeScript",
+            "PHP",
+            "Web Development"
+        ],
+        "color": "#4ECDC4",
+        "icon": "Globe"
+    },
+    {
+        "name": "Мобільна розробка",
+        "code": "MOBILE",
+        "keywords": [
+            "Мобільна розробка",
+            "iOS",
+            "Android",
+            "React Native",
+            "Flutter",
+            "Mobile Development",
+            "Swift",
+            "Kotlin"
+        ],
+        "color": "#95E1D3",
+        "icon": "Smartphone"
+    },
+    {
+        "name": "Бази даних",
+        "code": "DB",
+        "keywords": [
+            "Бази даних",
+            "SQL",
+            "NoSQL",
+            "MongoDB",
+            "PostgreSQL",
+            "MySQL",
+            "Database",
+            "Data Modeling"
+        ],
+        "color": "#F38181",
+        "icon": "Database"
+    },
+    {
+        "name": "Кібербезпека",
+        "code": "CYBER",
+        "keywords": [
+            "Кібербезпека",
+            "Information Security",
+            "Network Security",
+            "Ethical Hacking",
+            "Cryptography",
+            "Безпека інформації"
+        ],
+        "color": "#AA96DA",
+        "icon": "Shield"
+    },
+    {
+        "name": "Програмна інженерія",
+        "code": "SE",
+        "keywords": [
+            "Програмна інженерія",
+            "Software Engineering",
+            "Архітектура ПЗ",
+            "Design Patterns",
+            "Software Development",
+            "Системний аналіз",
+            "Тестування ПЗ"
+        ],
+        "color": "#FCBAD3",
+        "icon": "Code"
+    },
+    {
+        "name": "Алгоритми та структури даних",
+        "code": "ALGO",
+        "keywords": [
+            "Алгоритми",
+            "Структури даних",
+            "Теорія алгоритмів",
+            "Алгоритмізація",
+            "Data Structures",
+            "Algorithms",
+            "Complexity Analysis"
+        ],
+        "color": "#A8E6CF",
+        "icon": "Network"
+    },
+    {
+        "name": "Комп'ютерні мережі",
+        "code": "NETWORK",
+        "keywords": [
+            "Комп'ютерні мережі",
+            "Network Programming",
+            "TCP/IP",
+            "Мережеве програмування",
+            "Network Protocols",
+            "Distributed Systems"
+        ],
+        "color": "#FFD3A5",
+        "icon": "Network"
+    },
+    {
+        "name": "Комп'ютерна графіка",
+        "code": "GRAPHICS",
+        "keywords": [
+            "Комп'ютерна графіка",
+            "Computer Graphics",
+            "3D Modeling",
+            "Game Development",
+            "Rendering",
+            "OpenGL",
+            "DirectX"
+        ],
+        "color": "#FFAAA5",
+        "icon": "Image"
+    },
+    {
+        "name": "Математика та інформатика",
+        "code": "MATH",
+        "keywords": [
+            "Математичний аналіз",
+            "Лінійна алгебра",
+            "Дискретна математика",
+            "Теорія ймовірностей",
+            "Математична статистика",
+            "Числові методи",
+            "Mathematical Analysis",
+            "Linear Algebra"
+        ],
+        "color": "#A8D8EA",
+        "icon": "Calculator"
+    },
+    {
+        "name": "Філологія",
+        "code": "PHIL",
+        "keywords": [
+            "Українська мова",
+            "Українська література",
+            "Зарубіжна література",
+            "Лінгвістика",
+            "Практика мови",
+            "Теорія літератури"
+        ],
+        "color": "#C7CEEA",
+        "icon": "Book"
+    },
+    {
+        "name": "Історія",
+        "code": "HISTORY",
+        "keywords": [
+            "Історія України",
+            "Всесвітня історія",
+            "Археологія",
+            "Історична джерелознавство",
+            "History",
+            "Archaeology"
+        ],
+        "color": "#B8E6B8",
+        "icon": "Clock"
+    }
+]
+

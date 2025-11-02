@@ -8,6 +8,7 @@ import StarRating from '../components/StarRating';
 import NameChangeModal from '../components/NameChangeModal';
 import ProfilePictureUpload from '../components/ProfilePictureUpload';
 import TeacherClaimModal from '../components/TeacherClaimModal';
+import { getTeacherSpecialization } from '../utils/getSpecialization';
 
 const TeacherProfilePageNew = () => {
     const { id } = useParams();
@@ -343,9 +344,23 @@ const TeacherProfilePageNew = () => {
                 </div>
                 
                 <div className="bg-white text-black rounded-xl p-3 md:p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
-                    <GraduationCap className="w-6 h-6 md:w-8 md:h-8 text-pink-500 mx-auto mb-2" />
-                    <div className="text-lg md:text-2xl font-bold text-gray-900 stat-number-pop">AI/ML</div>
-                    <div className="text-xs md:text-sm text-gray-600">Спеціалізація</div>
+                    {(() => {
+                        const specialization = teacher ? getTeacherSpecialization(teacher) : null;
+                        const specColor = specialization?.color || '#FF6B9D';
+                        const specCode = specialization?.code || 'N/A';
+                        const specName = specialization?.name || 'Не вказано';
+                        
+                        return (
+                            <>
+                                <GraduationCap 
+                                    className="w-6 h-6 md:w-8 md:h-8 mx-auto mb-2" 
+                                    style={{ color: specColor }}
+                                />
+                                <div className="text-lg md:text-2xl font-bold text-gray-900 stat-number-pop">{specCode}</div>
+                                <div className="text-xs md:text-sm text-gray-600" title={specName}>Спеціалізація</div>
+                            </>
+                        );
+                    })()}
                 </div>
             </div>
 
