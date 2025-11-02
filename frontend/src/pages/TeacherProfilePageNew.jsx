@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, Activity, Settings, Mail, Calendar, Award, MessageCircle, MessageSquare, ThumbsUp, Star, GraduationCap, BookOpen, Shield, Lock, Key, Power, ToggleRight, Play, Smartphone, ShieldCheck, Eye, EyeOff, Edit3, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { ArrowLeft, User, Activity, Settings, Mail, Calendar, Award, MessageCircle, MessageSquare, ThumbsUp, Star, GraduationCap, BookOpen, Shield, Lock, Key, Power, ToggleRight, Play, Smartphone, ShieldCheck, Eye, EyeOff, Edit3, Clock, CheckCircle, AlertCircle, FileQuestion, Sparkles, Wind, Inbox, MessageSquarePlus, Zap } from 'lucide-react';
 import { useAuthState } from '../api/useAuthState';
 import { getNameChangeStatus } from '../api/name-change';
 import { getMyTeacherProfile, getTeacher } from '../api/teachers';
@@ -390,49 +390,110 @@ const TeacherProfilePageNew = () => {
 
     const renderReviewsTab = () => (
         <div className="space-y-6">
-            {/* Статистика відгуків */}
-            <div className="bg-white text-black rounded-2xl p-6 shadow-xl border border-gray-200 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-100/50 to-blue-200/30 rounded-full -translate-y-16 translate-x-16 animate-pulse"></div>
-                <div className="relative">
-                    <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-3">
-                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-lg transition-transform duration-300 security-icon-glow security-icon-pulse security-icon-rotate security-icon-shimmer relative overflow-hidden">
-                            <Star className="w-4 h-4 text-white" />
-                        </div>
-                        Статистика відгуків
-                    </h3>
-                    <div className="flex items-center gap-4">
-                        <div className="text-3xl font-bold text-gray-900">{stats.averageRating}</div>
-                        <div className="flex-1">
-                            <StarRating rating={stats.averageRating} maxRating={10} size="lg" showNumber={false} />
-                            <p className="text-sm text-gray-600 mt-1">Середня оцінка з {stats.reviews} відгуків</p>
+            {/* Статистика відгуків - показуємо тільки якщо є відгуки */}
+            {reviews.length > 0 && (
+                <div className="bg-white text-black rounded-2xl p-6 shadow-xl border border-gray-200 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-100/50 to-blue-200/30 rounded-full -translate-y-16 translate-x-16 animate-pulse"></div>
+                    <div className="relative">
+                        <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-3">
+                            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-lg transition-transform duration-300 security-icon-glow security-icon-pulse security-icon-rotate security-icon-shimmer relative overflow-hidden">
+                                <Star className="w-4 h-4 text-white" />
+                            </div>
+                            Статистика відгуків
+                        </h3>
+                        <div className="flex items-center gap-4">
+                            <div className="text-3xl font-bold text-gray-900">{stats.averageRating}</div>
+                            <div className="flex-1">
+                                <StarRating rating={stats.averageRating} maxRating={10} size="lg" showNumber={false} />
+                                <p className="text-sm text-gray-600 mt-1">Середня оцінка з {stats.reviews} відгуків</p>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            )}
 
             {/* Список відгуків */}
-            <div className="space-y-4">
-                {reviews.map((review) => (
-                    <div key={review.id} className="bg-white text-black rounded-xl p-4 shadow-lg border border-gray-200 relative overflow-hidden group review-card">
-                        <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-blue-100/30 to-indigo-100/20 rounded-full -translate-y-8 translate-x-8 animate-pulse"></div>
-                        <div className="relative">
-                            <div className="flex items-start justify-between mb-3">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                                        {review.author.charAt(0)}
-                                    </div>
-                                    <div>
-                                        <p className="font-semibold text-gray-900">{review.author}</p>
-                                        <p className="text-sm text-gray-500">{new Date(review.date).toLocaleDateString('uk-UA')}</p>
+            {reviews.length === 0 ? (
+                <div className="bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 rounded-2xl p-12 shadow-2xl border-2 border-blue-200 animate-[slideInFromLeft_0.6s_ease-out_both] relative overflow-hidden">
+                    {/* Анімовані декоративні елементи */}
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-cyan-200/30 to-blue-300/30 rounded-full -translate-y-32 translate-x-32 animate-pulse blur-2xl"></div>
+                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-indigo-200/20 to-purple-200/20 rounded-full translate-y-24 -translate-x-24 animate-pulse blur-xl"></div>
+                    
+                    <div className="text-center py-8 relative z-10">
+                        {/* Центральна іконка з анімацією */}
+                        <div className="relative mb-10 mx-auto w-40 h-40 flex items-center justify-center">
+                            {/* Оболонка з анімацією */}
+                            <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full opacity-10 blur-2xl animate-pulse"></div>
+                            
+                            {/* Основна іконка Inbox */}
+                            <div className="relative bg-white rounded-full w-32 h-32 flex items-center justify-center shadow-2xl border-4 border-blue-200 transform transition-all duration-500 hover:scale-110">
+                                <Inbox className="w-16 h-16 text-blue-500 relative z-10" />
+                                <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg animate-bounce">
+                                    <MessageSquarePlus className="w-4 h-4 text-white" />
+                                </div>
+                                <div className="absolute -bottom-1 -left-1 w-6 h-6 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center shadow-md animate-pulse">
+                                    <Zap className="w-3 h-3 text-white" />
+                                </div>
+                            </div>
+                            
+                            {/* Плаваючі елементи */}
+                            <div className="absolute -top-4 right-4 w-6 h-6 bg-blue-300 rounded-full opacity-60 animate-bounce" style={{ animationDelay: '0.5s', animationDuration: '2s' }}></div>
+                            <div className="absolute -bottom-4 left-4 w-4 h-4 bg-indigo-300 rounded-full opacity-60 animate-bounce" style={{ animationDelay: '1s', animationDuration: '2.5s' }}></div>
+                        </div>
+                        
+                        <div className="space-y-5">
+                            <h4 className="text-4xl font-extrabold text-gray-900 mb-3">
+                                Тут порожньо
+                            </h4>
+                            
+                            <div className="flex items-center justify-center gap-3 mb-2">
+                                <div className="w-3 h-3 bg-blue-400 rounded-full animate-pulse shadow-lg"></div>
+                                <div className="w-3 h-3 bg-indigo-400 rounded-full animate-pulse shadow-lg" style={{ animationDelay: '0.3s' }}></div>
+                                <div className="w-3 h-3 bg-purple-400 rounded-full animate-pulse shadow-lg" style={{ animationDelay: '0.6s' }}></div>
+                            </div>
+                            
+                            <p className="text-xl text-gray-700 font-semibold">Поки що ніхто не залишив відгуків</p>
+                            
+                            <div className="max-w-lg mx-auto mt-8">
+                                <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border-2 border-blue-200 shadow-lg hover:shadow-xl transition-all duration-300">
+                                    <div className="flex items-start gap-3">
+                                        <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                            <Sparkles className="w-5 h-5 text-white animate-pulse" />
+                                        </div>
+                                        <div className="text-left">
+                                            <p className="text-sm font-medium text-gray-700 mb-1">Студенти збираються з думками...</p>
+                                            <p className="text-xs text-gray-500 italic">Перший відгук з'явиться тут найближчим часом</p>
+                                        </div>
                                     </div>
                                 </div>
-                                <StarRating rating={review.rating} maxRating={10} size="sm" showNumber={false} />
                             </div>
-                            <p className="text-gray-700">{review.comment}</p>
                         </div>
                     </div>
-                ))}
-            </div>
+                </div>
+            ) : (
+                <div className="space-y-4">
+                    {reviews.map((review) => (
+                        <div key={review.id} className="bg-white text-black rounded-xl p-4 shadow-lg border border-gray-200 relative overflow-hidden group review-card">
+                            <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-blue-100/30 to-indigo-100/20 rounded-full -translate-y-8 translate-x-8 animate-pulse"></div>
+                            <div className="relative">
+                                <div className="flex items-start justify-between mb-3">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                                            {review.author.charAt(0)}
+                                        </div>
+                                        <div>
+                                            <p className="font-semibold text-gray-900">{review.author}</p>
+                                            <p className="text-sm text-gray-500">{new Date(review.date).toLocaleDateString('uk-UA')}</p>
+                                        </div>
+                                    </div>
+                                    <StarRating rating={review.rating} maxRating={10} size="sm" showNumber={false} />
+                                </div>
+                                <p className="text-gray-700">{review.comment}</p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 
