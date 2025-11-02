@@ -521,20 +521,28 @@ router.post('/send-verification-code', async (req, res) => {
             existingCode.blockedUntil = null;
             await existingCode.save();
         } else {
-            await EmailVerificationCode.create({
-                email: normalizedEmail,
-                code,
-                type,
+                await EmailVerificationCode.create({
+                    email: normalizedEmail,
+                    code,
+                    type,
+                    expiresAt
+                });
+            }
+
+            await sendVerificationCodeEmail(normalizedEmail, code, type);
+
+            // В dev режимі повертаємо код у відповіді (тільки для розробки)
+            const isDev = process.env.NODE_ENV !== 'production';
+            const response = {
+                message: 'Код надіслано на пошту',
                 expiresAt
-            });
-        }
+            };
+            
+            if (isDev) {
+                response.code = code; // Додаємо код тільки в dev режимі
+            }
 
-        await sendVerificationCodeEmail(normalizedEmail, code, type);
-
-        return res.json({
-            message: 'Код надіслано на пошту',
-            expiresAt
-        });
+            return res.json(response);
     } catch (error) {
         console.error('Send verification code error:', error);
         res.status(500).json({ error: 'Failed to send verification code' });
@@ -691,7 +699,8 @@ router.post('/login-with-code', async (req, res) => {
                 department: teacher.department,
                 subjects: teacher.subjects || [teacher.subject].filter(Boolean),
                 status: teacher.status
-            }
+            },
+            requiresPasswordSetup: !user.teacherPassword // Додаємо флаг якщо потрібно встановити пароль
         });
     } catch (error) {
         console.error('Login with code error:', error);

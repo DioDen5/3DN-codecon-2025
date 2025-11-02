@@ -44,9 +44,15 @@ const LoginForm = ({ switchToReset, onSuccess }) => {
         }
         
         try {
-            const { token, user } = await loginWithCode(email, verificationCode);
+            const { token, user, requiresPasswordSetup } = await loginWithCode(email, verificationCode);
             loginSuccess({ token, user });
             sessionStorage.setItem('justLoggedIn', 'true');
+            
+            // Якщо потрібно встановити пароль, зберігаємо флаг
+            if (requiresPasswordSetup) {
+                sessionStorage.setItem('teacherRequiresPasswordSetup', 'true');
+            }
+            
             onSuccess?.();
             navigate("/forum");
         } catch (error) {
@@ -99,7 +105,7 @@ const LoginForm = ({ switchToReset, onSuccess }) => {
                             maxLength="6"
                             value={verificationCode}
                             onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ''))}
-                            className="w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 text-center text-2xl tracking-widest"
+                            className="w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 text-center text-2xl tracking-widest border border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)] focus:outline-none focus:border-blue-400 focus:shadow-[0_0_12px_rgba(59,130,246,0.6)] transition-all"
                             placeholder="000000"
                             autoFocus
                         />
@@ -109,7 +115,7 @@ const LoginForm = ({ switchToReset, onSuccess }) => {
                         <button
                             type="button"
                             onClick={handleSendCode}
-                            className="w-full py-2 text-sm text-blue-400 hover:text-blue-300"
+                            className="w-full py-2 text-sm text-blue-400 hover:text-blue-300 cursor-pointer"
                         >
                             Надіслати код повторно
                         </button>
@@ -126,13 +132,13 @@ const LoginForm = ({ switchToReset, onSuccess }) => {
                                 setCodeSent(false);
                                 setError(null);
                             }}
-                            className="flex-1 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg"
+                            className="flex-1 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg cursor-pointer transition"
                         >
                             Назад
                         </button>
                         <button
                             type="submit"
-                            className="flex-1 py-2 bg-blue-700 hover:bg-blue-800 rounded-lg"
+                            className="flex-1 py-2 bg-blue-700 hover:bg-blue-800 rounded-lg cursor-pointer transition"
                         >
                             Підтвердити
                         </button>

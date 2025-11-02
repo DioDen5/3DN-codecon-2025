@@ -1,72 +1,68 @@
-import mongoose from 'mongoose';
-import { EmailVerificationCode } from './src/models/EmailVerificationCode.js';
 import { connectDB } from './src/config/db.js';
+import { EmailVerificationCode } from './src/models/EmailVerificationCode.js';
 
-async function checkVerificationCode() {
+async function checkVerificationCode(email) {
     try {
         await connectDB();
-        console.log('✅ Connected to database');
+        console.log('✅ Connected to database\n');
         
-        // Знайти останній код для тестового email
-        const testEmail = 'test.teacher@lnu.edu.ua';
+        const normalizedEmail = email.toLowerCase().trim();
         
+        // Шукаємо найновіший код (використаний або ні)
         const codes = await EmailVerificationCode.find({ 
-            email: testEmail,
-            type: 'login',
-            used: false
-        })
-        .sort({ createdAt: -1 })
-        .limit(5);
+            email: normalizedEmail 
+        }).sort({ createdAt: -1 }).limit(5);
         
         if (codes.length === 0) {
-            console.log('❌ Не знайдено кодів для email:', testEmail);
-            console.log('   Можливо код вже використано або прострочився');
+            console.log(`⚠️  Кодів для ${normalizedEmail} не знайдено\n`);
+            console.log('📝 Для отримання коду:');
+            console.log('   1. Відкрийте форму реєстрації');
+            console.log('   2. Введіть email:', normalizedEmail);
+            console.log('   3. Натисніть "Перевірити email"');
+            console.log('   4. Код з\'явиться в консолі backend або тут\n');
+            process.exit(0);
+        }
+        
+        console.log(`📋 Знайдено ${codes.length} кодів для ${normalizedEmail}:\n`);
+        
+        codes.forEach((code, index) => {
+            const isActive = !code.used && new Date() < code.expiresAt;
+            const isExpired = new Date() >= code.expiresAt;
             
-            // Подивимось всі коди (включно з використаними)
-            const allCodes = await EmailVerificationCode.find({ 
-                email: testEmail,
-                type: 'login'
-            })
-            .sort({ createdAt: -1 })
-            .limit(5);
+            console.log(`${index + 1}. Код: ${code.code}`);
+            console.log(`   Тип: ${code.type}`);
+            console.log(`   Статус: ${isActive ? '✅ Активний' : code.used ? '❌ Використаний' : isExpired ? '⏰ Прострочений' : '❓ Невідомо'}`);
+            console.log(`   Створено: ${code.createdAt.toLocaleString('uk-UA')}`);
+            console.log(`   Дійсний до: ${code.expiresAt.toLocaleString('uk-UA')}`);
             
-            if (allCodes.length > 0) {
-                console.log('\n📋 Останні коди (включно з використаними):');
-                allCodes.forEach((code, index) => {
-                    const isExpired = new Date() > code.expiresAt;
-                    const expiredText = isExpired ? ' ⏰ ПРОСТРОЧЕНО' : '';
-                    const usedText = code.used ? ' ✅ ВИКОРИСТАНО' : '';
-                    console.log(`   ${index + 1}. Code: ${code.code} | Created: ${code.createdAt.toLocaleString()} | Expires: ${code.expiresAt.toLocaleString()}${expiredText}${usedText}`);
-                });
+            if (isActive) {
+                console.log(`   ⚡ ЦЕЙ КОД АКТИВНИЙ І МОЖНА ВИКОРИСТОВУВАТИ!`);
             }
+            console.log('');
+        });
+        
+        // Знайдемо активний код
+        const activeCode = codes.find(code => !code.used && new Date() < code.expiresAt);
+        
+        if (activeCode) {
+            console.log('═══════════════════════════════════════');
+            console.log('✅ АКТИВНИЙ КОД ДЛЯ ВХОДУ:');
+            console.log(`   Email: ${normalizedEmail}`);
+            console.log(`   Код: ${activeCode.code}`);
+            console.log(`   Дійсний до: ${activeCode.expiresAt.toLocaleString('uk-UA')}`);
+            console.log('═══════════════════════════════════════\n');
         } else {
-            console.log('✅ Знайдено активні коди:');
-            codes.forEach((code, index) => {
-                const expiresIn = Math.floor((code.expiresAt - new Date()) / 1000 / 60);
-                console.log(`   ${index + 1}. Code: ${code.code}`);
-                console.log(`      Email: ${code.email}`);
-                console.log(`      Type: ${code.type}`);
-                console.log(`      Created: ${code.createdAt.toLocaleString()}`);
-                console.log(`      Expires: ${code.expiresAt.toLocaleString()}`);
-                console.log(`      Expires in: ${expiresIn} хвилин`);
-                console.log(`      Used: ${code.used}`);
-                console.log(`      Attempts: ${code.attempts}`);
-                console.log('');
-            });
-            
-            // Показати найновіший код великим шрифтом
-            console.log('🔐 НАЙНОВІШИЙ КОД ДЛЯ ВХОДУ:');
-            console.log('════════════════════════════');
-            console.log(`   ${codes[0].code}`);
-            console.log('════════════════════════════');
+            console.log('⚠️  Активного коду немає. Потрібно згенерувати новий код через UI.\n');
         }
         
         process.exit(0);
     } catch (error) {
-        console.error('❌ Error checking verification code:', error);
+        console.error('❌ Помилка:', error);
         process.exit(1);
     }
 }
 
-checkVerificationCode();
+// Отримуємо email з аргументів командного рядка
+const email = process.argv[2] || 'test.teacher4@lnu.edu.ua';
 
+checkVerificationCode(email);

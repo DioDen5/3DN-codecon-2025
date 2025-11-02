@@ -88,6 +88,19 @@ export async function registerTeacher(formData) {
 
 export async function sendVerificationCode(email, type = 'login') {
     const { data } = await http.post('/auth/send-verification-code', { email, type });
+    
+    // В dev режимі показуємо код в консолі для зручності тестування
+    if (data?.code) {
+        console.log('%c═══════════════════════════════════════', 'color: #667eea; font-weight: bold; font-size: 14px;');
+        console.log('%c📧 VERIFICATION CODE (DEV MODE)', 'color: #667eea; font-weight: bold; font-size: 16px;');
+        console.log('%c═══════════════════════════════════════', 'color: #667eea; font-weight: bold; font-size: 14px;');
+        console.log('%cEmail:', 'color: #764ba2; font-weight: bold;', email);
+        console.log('%cType:', 'color: #764ba2; font-weight: bold;', type);
+        console.log('%c🔑 CODE:', 'color: #10b981; font-weight: bold; font-size: 20px;', data.code);
+        console.log('%cExpires at:', 'color: #764ba2; font-weight: bold;', new Date(data.expiresAt).toLocaleString('uk-UA'));
+        console.log('%c═══════════════════════════════════════', 'color: #667eea; font-weight: bold; font-size: 14px;');
+    }
+    
     return data;
 }
 

@@ -21,6 +21,12 @@ export function requireVerified(req, res, next) {
         return next();
     }
 
+    // Дозволяємо викладачам доступ (навіть якщо pending - вони вже мають профіль)
+    if (u.role === 'teacher' && (u.status === 'verified' || u.status === 'pending')) {
+        console.log('Access granted: teacher (verified or pending)');
+        return next();
+    }
+
     console.log('Access denied:', { role: u.role, status: u.status });
-    return res.status(403).json({ error: 'Verified student only' });
+    return res.status(403).json({ error: 'Verified user only' });
 }

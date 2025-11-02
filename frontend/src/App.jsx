@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 
 import Header from "./components/Header";
 import Modal from "./components/Modal";
 import LoginForm from "./components/LoginForm";
 import SignupForm from "./components/SignupForm";
 import ResetPasswordForm from "./components/ResetPasswordForm";
+import SetTeacherPasswordModal from "./components/SetTeacherPasswordModal";
 
 import HomePage from "./pages/HomePage";
 import ForumPage from "./pages/ForumPage";
@@ -21,8 +22,10 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { NotificationProvider } from "./contexts/NotificationContext";
 import { TeacherDataProvider } from "./contexts/TeacherDataContext";
 
-function App() {
+function AppContent() {
+    const location = useLocation();
     const [modalType, setModalType] = useState(null);
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
     const closeModal = () => setModalType(null);
 
     useEffect(() => {
@@ -39,11 +42,22 @@ function App() {
         return () => window.removeEventListener("auth-changed", onAuthChanged);
     }, []);
 
+    // Перевіряємо чи потрібно показати модальне вікно для встановлення пароля
+    // Перевіряємо при кожній зміні маршруту
+    useEffect(() => {
+        const requiresPasswordSetup = sessionStorage.getItem('teacherRequiresPasswordSetup') === 'true';
+        if (requiresPasswordSetup) {
+            // Невелика затримка, щоб модальне вікно з'явилось після завершення навігації
+            setTimeout(() => {
+                setShowPasswordModal(true);
+                sessionStorage.removeItem('teacherRequiresPasswordSetup'); // Видаляємо флаг
+            }, 100);
+        }
+    }, [location.pathname]);
+
     return (
-        <NotificationProvider>
-            <Router>
-                <TeacherDataProvider>
-                <Header
+        <>
+            <Header
                     onLoginOpen={() => setModalType("login")}
                     onSignupOpen={() => setModalType("signup")}
                 />
@@ -125,6 +139,28 @@ function App() {
                     onClose={() => setModalType(null)}
                 />
             )}
+
+            <SetTeacherPasswordModal
+                isOpen={showPasswordModal}
+                onClose={() => {
+                    // Не дозволяємо закривати модальне вікно - це обов'язковий крок
+                    // Модальне вікно закривається тільки після успішного встановлення пароля через onSuccess
+                }}
+                onSuccess={() => {
+                    // Пароль успішно встановлено - тепер можна закрити
+                    setShowPasswordModal(false);
+                }}
+            />
+        </>
+    );
+}
+
+function App() {
+    return (
+        <NotificationProvider>
+            <Router>
+                <TeacherDataProvider>
+                    <AppContent />
                 </TeacherDataProvider>
             </Router>
         </NotificationProvider>

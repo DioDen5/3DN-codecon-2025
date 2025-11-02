@@ -169,9 +169,15 @@ const SignupForm = ({ switchToLogin, onClose }) => {
         }
         
         try {
-            const { token, user } = await loginWithCode(formData.email, verificationCode);
+            const { token, user, requiresPasswordSetup } = await loginWithCode(formData.email, verificationCode);
             loginSuccess({ token, user });
             showSuccess('Вхід успішний!');
+            
+            // Якщо потрібно встановити пароль, зберігаємо флаг
+            if (requiresPasswordSetup) {
+                sessionStorage.setItem('teacherRequiresPasswordSetup', 'true');
+            }
+            
             navigate("/forum");
         } catch (error) {
             setErrors({ code: error.response?.data?.error || 'Невірний код' });
@@ -316,8 +322,10 @@ const SignupForm = ({ switchToLogin, onClose }) => {
                                 maxLength="6"
                                 value={verificationCode}
                                 onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ''))}
-                                className={`w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 text-center text-2xl tracking-widest ${
-                                    errors.code ? 'border-2 border-red-400' : ''
+                                className={`w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 text-center text-2xl tracking-widest focus:outline-none transition-all ${
+                                    errors.code 
+                                        ? 'border border-red-400 shadow-[0_0_10px_rgba(248,113,113,0.5)]' 
+                                        : 'border border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)] focus:border-blue-400 focus:shadow-[0_0_12px_rgba(59,130,246,0.6)]'
                                 }`}
                                 placeholder="000000"
                                 autoFocus
@@ -331,7 +339,7 @@ const SignupForm = ({ switchToLogin, onClose }) => {
                             <button
                                 type="button"
                                 onClick={() => handleSendCode(formData.email)}
-                                className="w-full py-2 text-sm text-blue-400 hover:text-blue-300"
+                                className="w-full py-2 text-sm text-blue-400 hover:text-blue-300 cursor-pointer transition"
                             >
                                 Надіслати код повторно
                             </button>
@@ -345,13 +353,13 @@ const SignupForm = ({ switchToLogin, onClose }) => {
                                     setVerificationCode('');
                                     setCodeSent(false);
                                 }}
-                                className="flex-1 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg"
+                                className="flex-1 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg cursor-pointer transition"
                             >
                                 Назад
                             </button>
                             <button
                                 type="submit"
-                                className="flex-1 py-2 bg-blue-700 hover:bg-blue-800 rounded-lg"
+                                className="flex-1 py-2 bg-blue-700 hover:bg-blue-800 rounded-lg cursor-pointer transition"
                             >
                                 Підтвердити
                             </button>

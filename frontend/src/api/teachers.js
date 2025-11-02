@@ -38,3 +38,9 @@ export const getMyClaimRequests = async () => {
     const response = await http.get('/teachers/claim/my-requests');
     return response.data;
 };
+
+// Встановити пароль для викладача
+export const setTeacherPassword = async (password) => {
+    const response = await http.post('/teachers/set-password', { password });
+    return response.data;
+};
