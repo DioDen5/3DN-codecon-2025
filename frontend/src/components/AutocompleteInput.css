@@ -1,0 +1,68 @@
+/* Custom scrollbar for autocomplete dropdown */
+.autocomplete-dropdown-wrapper {
+    scrollbar-width: thin;
+    scrollbar-color: #9CA3AF #F3F4F6;
+    -ms-overflow-style: scrollbar;
+}
+
+.autocomplete-dropdown-wrapper::-webkit-scrollbar {
+    width: 8px;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    -webkit-appearance: auto !important;
+}
+
+.autocomplete-dropdown-wrapper::-webkit-scrollbar-track {
+    background: #F3F4F6 !important;
+    border-radius: 4px;
+    margin: 4px 0;
+    display: block !important;
+    visibility: visible !important;
+}
+
+.autocomplete-dropdown-wrapper::-webkit-scrollbar-thumb {
+    background: #9CA3AF !important;
+    border-radius: 4px;
+    display: block !important;
+    visibility: visible !important;
+    min-height: 30px;
+}
+
+.autocomplete-dropdown-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #6B7280 !important;
+}
+
+/* Завжди показувати скролбар для списків з більше ніж 3 елементами */
+.autocomplete-dropdown-wrapper.always-show-scrollbar {
+    overflow-y: scroll !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: #9CA3AF #F3F4F6 !important;
+    -ms-overflow-style: scrollbar !important;
+    /* Примусово показуємо скролбар через фіксовану висоту */
+    height: 16rem !important;
+}
+
+.autocomplete-dropdown-wrapper.always-show-scrollbar::-webkit-scrollbar {
+    width: 8px !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    -webkit-appearance: auto !important;
+}
+
+.autocomplete-dropdown-wrapper.always-show-scrollbar::-webkit-scrollbar-track {
+    background: #F3F4F6 !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.autocomplete-dropdown-wrapper.always-show-scrollbar::-webkit-scrollbar-thumb {
+    background: #9CA3AF !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    min-height: 30px !important;
+}
+

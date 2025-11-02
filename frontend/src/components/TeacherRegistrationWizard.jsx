@@ -4,6 +4,8 @@ import { registerTeacher } from '../api/auth';
 import { useAuth } from '../state/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useNotification } from '../contexts/NotificationContext';
+import AutocompleteInput from './AutocompleteInput';
+import universitiesData from '../data/universities.json';
 
 const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
     const navigate = useNavigate();
@@ -270,14 +272,16 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                     <div className="space-y-4 animate-[fadeIn_0.3s_ease-out]">
                         <div>
                             <label className="block text-sm mb-2">Університет:</label>
-                            <input
-                                type="text"
+                            <AutocompleteInput
                                 value={formData.university}
-                                onChange={(e) => handleChange('university', e.target.value)}
+                                onChange={(value) => handleChange('university', value)}
                                 onFocus={() => handleFocus('university')}
                                 onBlur={() => handleBlur('university')}
-                                className={getInputClassName('university', errors.university)}
-                                placeholder="Львівський національний університет"
+                                options={universitiesData}
+                                placeholder="Оберіть або введіть університет"
+                                error={!!errors.university}
+                                showPopular={true}
+                                maxResults={8}
                             />
                             {errors.university && <p className="text-red-400 text-sm mt-1">{errors.university}</p>}
                         </div>

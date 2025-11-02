@@ -1,7 +1,19 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { motion } from 'framer-motion'
 
 const Modal = ({ isOpen, onClose, children }) => {
+    // Блокуємо скрол сторінки коли модальне вікно відкрите
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden'
+            return () => {
+                document.body.style.overflow = ''
+            }
+        } else {
+            document.body.style.overflow = ''
+        }
+    }, [isOpen])
+
     if (!isOpen) return null
 
     return (

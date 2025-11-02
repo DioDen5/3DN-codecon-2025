@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { Lock, Eye, EyeOff, AlertTriangle } from 'lucide-react';
@@ -18,6 +18,18 @@ const SetTeacherPasswordModal = ({ isOpen, onClose, onSuccess }) => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const { showSuccess: showSuccessNotification, showError: showErrorNotification } = useNotification();
+
+    // Блокуємо скрол сторінки коли модальне вікно відкрите
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+            return () => {
+                document.body.style.overflow = '';
+            };
+        } else {
+            document.body.style.overflow = '';
+        }
+    }, [isOpen]);
 
     if (!isOpen) return null;
 

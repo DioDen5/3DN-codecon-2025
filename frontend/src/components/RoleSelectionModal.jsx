@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
@@ -6,6 +6,18 @@ import teacherIconSrc from '../assets/teacher-icon.svg';
 import studentIconSrc from '../assets/student-icon.svg';
 
 const RoleSelectionModal = ({ isOpen, onClose, onSelectRole }) => {
+    // Блокуємо скрол сторінки коли модальне вікно відкрите
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+            return () => {
+                document.body.style.overflow = '';
+            };
+        } else {
+            document.body.style.overflow = '';
+        }
+    }, [isOpen]);
+
     if (!isOpen) return null;
 
     return createPortal(
