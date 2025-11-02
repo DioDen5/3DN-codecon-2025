@@ -15,6 +15,7 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
         firstName: '',
         lastName: '',
         middleName: '',
+        phone: '',
         displayName: '',
         university: '',
         department: '',
@@ -22,6 +23,8 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
         password: '',
         confirmPassword: '',
         image: '',
+        imageFile: null,
+        imagePreview: null,
         bio: ''
     });
     const [errors, setErrors] = useState({});
@@ -91,7 +94,7 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
         if (step === 1) {
             if (!formData.firstName.trim()) newErrors.firstName = 'Ім\'я обов\'язкове';
             if (!formData.lastName.trim()) newErrors.lastName = 'Прізвище обов\'язкове';
-            if (!formData.displayName.trim()) newErrors.displayName = 'Відображуване ім\'я обов\'язкове';
+            // displayName генерується автоматично на основі firstName, lastName, middleName
         } else if (step === 2) {
             if (!formData.university.trim()) newErrors.university = 'Університет обов\'язковий';
             if (!formData.department.trim()) newErrors.department = 'Кафедра обов\'язкова';
@@ -168,13 +171,15 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                 return (
                     <div className="space-y-4 animate-[fadeIn_0.3s_ease-out]">
                         <div>
-                            <label className="block text-sm mb-2">Ім'я *</label>
+                            <label className="block text-sm mb-2">Ім'я:</label>
                             <input
                                 type="text"
                                 value={formData.firstName}
                                 onChange={(e) => handleChange('firstName', e.target.value)}
-                                className={`w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 ${
-                                    errors.firstName ? 'border-2 border-red-400' : ''
+                                className={`w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 focus:outline-none transition-all duration-300 ${
+                                    errors.firstName 
+                                        ? 'border border-red-400 shadow-[0_0_10px_rgba(248,113,113,0.5)]' 
+                                        : 'border border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)] focus:border-blue-400 focus:shadow-[0_0_12px_rgba(59,130,246,0.6)]'
                                 }`}
                                 placeholder="Олександр"
                             />
@@ -182,13 +187,15 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                         </div>
                         
                         <div>
-                            <label className="block text-sm mb-2">Прізвище *</label>
+                            <label className="block text-sm mb-2">Прізвище:</label>
                             <input
                                 type="text"
                                 value={formData.lastName}
                                 onChange={(e) => handleChange('lastName', e.target.value)}
-                                className={`w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 ${
-                                    errors.lastName ? 'border-2 border-red-400' : ''
+                                className={`w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 focus:outline-none transition-all duration-300 ${
+                                    errors.lastName 
+                                        ? 'border border-red-400 shadow-[0_0_10px_rgba(248,113,113,0.5)]' 
+                                        : 'border border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)] focus:border-blue-400 focus:shadow-[0_0_12px_rgba(59,130,246,0.6)]'
                                 }`}
                                 placeholder="Петренко"
                             />
@@ -196,28 +203,25 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                         </div>
                         
                         <div>
-                            <label className="block text-sm mb-2">По батькові</label>
+                            <label className="block text-sm mb-2">По батькові:</label>
                             <input
                                 type="text"
                                 value={formData.middleName}
                                 onChange={(e) => handleChange('middleName', e.target.value)}
-                                className="w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800"
+                                className="w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 focus:outline-none transition-all duration-300 border border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)] focus:border-blue-400 focus:shadow-[0_0_12px_rgba(59,130,246,0.6)]"
                                 placeholder="Володимирович"
                             />
                         </div>
                         
                         <div>
-                            <label className="block text-sm mb-2">Відображуване ім'я *</label>
+                            <label className="block text-sm mb-2">Номер телефону:</label>
                             <input
-                                type="text"
-                                value={formData.displayName}
-                                onChange={(e) => handleChange('displayName', e.target.value)}
-                                className={`w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 ${
-                                    errors.displayName ? 'border-2 border-red-400' : ''
-                                }`}
-                                placeholder="Доктор Олександр Петренко"
+                                type="tel"
+                                value={formData.phone}
+                                onChange={(e) => handleChange('phone', e.target.value)}
+                                className="w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 focus:outline-none transition-all duration-300 border border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)] focus:border-blue-400 focus:shadow-[0_0_12px_rgba(59,130,246,0.6)]"
+                                placeholder="+380 12 345 67 89"
                             />
-                            {errors.displayName && <p className="text-red-400 text-sm mt-1">{errors.displayName}</p>}
                         </div>
                     </div>
                 );
@@ -226,13 +230,15 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                 return (
                     <div className="space-y-4 animate-[fadeIn_0.3s_ease-out]">
                         <div>
-                            <label className="block text-sm mb-2">Університет *</label>
+                            <label className="block text-sm mb-2">Університет:</label>
                             <input
                                 type="text"
                                 value={formData.university}
                                 onChange={(e) => handleChange('university', e.target.value)}
-                                className={`w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 ${
-                                    errors.university ? 'border-2 border-red-400' : ''
+                                className={`w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 focus:outline-none transition-all duration-300 ${
+                                    errors.university 
+                                        ? 'border border-red-400 shadow-[0_0_10px_rgba(248,113,113,0.5)]' 
+                                        : 'border border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)] focus:border-blue-400 focus:shadow-[0_0_12px_rgba(59,130,246,0.6)]'
                                 }`}
                                 placeholder="Львівський національний університет"
                             />
@@ -240,13 +246,15 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                         </div>
                         
                         <div>
-                            <label className="block text-sm mb-2">Кафедра *</label>
+                            <label className="block text-sm mb-2">Кафедра:</label>
                             <input
                                 type="text"
                                 value={formData.department}
                                 onChange={(e) => handleChange('department', e.target.value)}
-                                className={`w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 ${
-                                    errors.department ? 'border-2 border-red-400' : ''
+                                className={`w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 focus:outline-none transition-all duration-300 ${
+                                    errors.department 
+                                        ? 'border border-red-400 shadow-[0_0_10px_rgba(248,113,113,0.5)]' 
+                                        : 'border border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)] focus:border-blue-400 focus:shadow-[0_0_12px_rgba(59,130,246,0.6)]'
                                 }`}
                                 placeholder="Кафедра комп'ютерних наук"
                             />
@@ -259,14 +267,14 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                 return (
                     <div className="space-y-4 animate-[fadeIn_0.3s_ease-out]">
                         <div>
-                            <label className="block text-sm mb-2">Предмети *</label>
+                            <label className="block text-sm mb-2">Предмети:</label>
                             {formData.subjects.map((subject, index) => (
                                 <div key={index} className="flex gap-2 mb-2">
                                     <input
                                         type="text"
                                         value={subject}
                                         onChange={(e) => handleSubjectChange(index, e.target.value)}
-                                        className="flex-1 px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800"
+                                        className="flex-1 px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 focus:outline-none transition-all duration-300 border border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)] focus:border-blue-400 focus:shadow-[0_0_12px_rgba(59,130,246,0.6)]"
                                         placeholder={`Предмет ${index + 1}`}
                                     />
                                     {formData.subjects.length > 1 && (
@@ -296,13 +304,15 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                 return (
                     <div className="space-y-4 animate-[fadeIn_0.3s_ease-out]">
                         <div>
-                            <label className="block text-sm mb-2">Пароль *</label>
+                            <label className="block text-sm mb-2">Пароль:</label>
                             <input
                                 type="password"
                                 value={formData.password}
                                 onChange={(e) => handleChange('password', e.target.value)}
-                                className={`w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 ${
-                                    errors.password ? 'border-2 border-red-400' : ''
+                                className={`w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 focus:outline-none transition-all duration-300 ${
+                                    errors.password 
+                                        ? 'border border-red-400 shadow-[0_0_10px_rgba(248,113,113,0.5)]' 
+                                        : 'border border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)] focus:border-blue-400 focus:shadow-[0_0_12px_rgba(59,130,246,0.6)]'
                                 }`}
                                 placeholder="Мінімум 8 символів"
                             />
@@ -310,13 +320,15 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                         </div>
                         
                         <div>
-                            <label className="block text-sm mb-2">Підтвердження пароля *</label>
+                            <label className="block text-sm mb-2">Підтвердження пароля:</label>
                             <input
                                 type="password"
                                 value={formData.confirmPassword}
                                 onChange={(e) => handleChange('confirmPassword', e.target.value)}
-                                className={`w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 ${
-                                    errors.confirmPassword ? 'border-2 border-red-400' : ''
+                                className={`w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 focus:outline-none transition-all duration-300 ${
+                                    errors.confirmPassword 
+                                        ? 'border border-red-400 shadow-[0_0_10px_rgba(248,113,113,0.5)]' 
+                                        : 'border border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)] focus:border-blue-400 focus:shadow-[0_0_12px_rgba(59,130,246,0.6)]'
                                 }`}
                                 placeholder="Підтвердіть пароль"
                             />
@@ -329,20 +341,69 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                 return (
                     <div className="space-y-4 animate-[fadeIn_0.3s_ease-out]">
                         <div>
-                            <label className="block text-sm mb-2">URL фото профілю</label>
-                            <input
-                                type="url"
-                                value={formData.image}
-                                onChange={(e) => handleChange('image', e.target.value)}
-                                className="w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800"
-                                placeholder="https://example.com/photo.jpg"
-                            />
-                            {formData.image && (
-                                <div className="mt-4">
-                                    <img src={formData.image} alt="Preview" className="w-32 h-32 rounded-full object-cover" />
-                                </div>
-                            )}
-                            <p className="text-xs text-gray-400 mt-2">Якщо не вказано, буде використано фото за замовчуванням</p>
+                            <label className="block text-sm mb-2">Фото профілю:</label>
+                            <div className="flex flex-col items-center gap-4">
+                                {formData.imagePreview && (
+                                    <div className="relative">
+                                        <img 
+                                            src={formData.imagePreview} 
+                                            alt="Preview" 
+                                            className="w-32 h-32 rounded-full object-cover border-4 border-blue-500 shadow-lg" 
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setFormData(prev => ({ ...prev, imageFile: null, imagePreview: null, image: '' }));
+                                            }}
+                                            className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors shadow-lg"
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
+                                )}
+                                
+                                <label className="cursor-pointer">
+                                    <div className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg transition text-white font-medium flex items-center gap-2">
+                                        <Image className="w-5 h-5" />
+                                        <span>{formData.imagePreview ? 'Змінити фото' : 'Вибрати фото'}</span>
+                                    </div>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => {
+                                            const file = e.target.files[0];
+                                            if (file) {
+                                                if (file.size > 5 * 1024 * 1024) {
+                                                    showError('Розмір файлу не повинен перевищувати 5MB');
+                                                    return;
+                                                }
+                                                
+                                                if (!file.type.startsWith('image/')) {
+                                                    showError('Будь ласка, виберіть зображення');
+                                                    return;
+                                                }
+
+                                                const reader = new FileReader();
+                                                reader.onload = (event) => {
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        imageFile: file,
+                                                        imagePreview: event.target.result,
+                                                        image: event.target.result // Зберігаємо base64 для відправки
+                                                    }));
+                                                };
+                                                reader.readAsDataURL(file);
+                                            }
+                                        }}
+                                        className="hidden"
+                                    />
+                                </label>
+                                <p className="text-xs text-gray-400 text-center">
+                                    {formData.imagePreview 
+                                        ? 'Фото вибрано. Якщо не вибрано, буде використано фото за замовчуванням'
+                                        : 'Якщо не вибрано, буде використано фото за замовчуванням'}
+                                </p>
+                            </div>
                         </div>
                     </div>
                 );
@@ -357,7 +418,7 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                                 onChange={(e) => handleChange('bio', e.target.value)}
                                 rows="6"
                                 maxLength="500"
-                                className="w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 resize-none"
+                                className="w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 resize-none focus:outline-none transition-all duration-300 border border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)] focus:border-blue-400 focus:shadow-[0_0_12px_rgba(59,130,246,0.6)]"
                                 placeholder="Коротка інформація про себе..."
                             />
                             <p className="text-xs text-gray-400 mt-2">

@@ -370,7 +370,7 @@ const teacherRegisterSchema = z.object({
     university: z.string().min(2),
     department: z.string().min(2),
     subjects: z.array(z.string().min(1)).min(1),
-    image: z.string().url().optional(),
+    image: z.string().optional(), // Може бути URL або base64 рядок
     bio: z.string().max(500).optional()
 });
 
