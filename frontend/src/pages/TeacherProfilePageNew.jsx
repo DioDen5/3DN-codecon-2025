@@ -380,7 +380,7 @@ const TeacherProfilePageNew = () => {
                         </div>
                         <div className="flex items-center gap-3">
                             <Smartphone className="w-5 h-5 text-gray-500" />
-                            <span className="text-gray-700">{teacher?.phone}</span>
+                            <span className="text-gray-700">{teacher?.phone || 'Номер - не вказано'}</span>
                         </div>
                     </div>
                 </div>
