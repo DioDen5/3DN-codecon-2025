@@ -72,6 +72,10 @@ const teacherSchema = new mongoose.Schema({
         trim: true,
         maxlength: 500
     },
+    position: {
+        type: String,
+        trim: true
+    },
     rating: {
         type: Number,
         default: 0,

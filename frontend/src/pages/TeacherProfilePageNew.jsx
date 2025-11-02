@@ -316,7 +316,7 @@ const TeacherProfilePageNew = () => {
                             </div>
                             <div className="flex items-center gap-2 text-blue-600 font-semibold">
                                 <Award size={18} />
-                                <span className="text-sm sm:text-base">{teacher?.position}</span>
+                                <span className="text-sm sm:text-base">{teacher?.position || 'Посада не вказана'}</span>
                             </div>
                         </div>
                     </div>

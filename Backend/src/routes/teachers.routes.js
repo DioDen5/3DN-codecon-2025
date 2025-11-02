@@ -155,7 +155,12 @@ router.get('/my-profile', authRequired, async (req, res) => {
             return res.json({ teacher: null, hasClaimRequest: false });
         }
         
-        console.log('Teacher found:', { _id: teacher._id, name: teacher.name, userId: teacher.userId });
+        console.log('Teacher found:', { 
+            _id: teacher._id, 
+            name: teacher.name, 
+            userId: teacher.userId,
+            position: teacher.position
+        });
         
         // Перевіряємо чи є активна заявка (безпечно)
         let hasClaimRequest = false;
@@ -194,8 +199,20 @@ router.get('/my-profile', authRequired, async (req, res) => {
             
             teacherWithRating = {
                 ...teacherObject,
-                rating: rating
+                rating: rating,
+                position: teacher.position || teacherObject.position || null // Переконуємося, що position включено
             };
+            
+            // Переконуємося, що position включено в результат
+            if (!teacherWithRating.position && teacher.position) {
+                teacherWithRating.position = teacher.position;
+            }
+            
+            console.log('Teacher position check:', {
+                teacherPosition: teacher.position,
+                teacherObjectPosition: teacherObject.position,
+                finalPosition: teacherWithRating.position
+            });
         } catch (toObjectError) {
             console.error('Error converting teacher to object:', toObjectError);
             // Якщо всі методи не працюють, використовуємо явне вказання полів
@@ -210,6 +227,7 @@ router.get('/my-profile', authRequired, async (req, res) => {
                     subjects: teacher.subjects || [],
                     image: teacher.image || '',
                     bio: teacher.bio || '',
+                    position: teacher.position || null, // Академічна посада
                     status: teacher.status || 'pending',
                     userId: teacher.userId ? teacher.userId.toString() : null,
                     rating: rating,

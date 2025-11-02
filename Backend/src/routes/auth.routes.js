@@ -372,7 +372,8 @@ const teacherRegisterSchema = z.object({
     department: z.string().min(2).optional(), // Тепер опціональне
     subjects: z.array(z.string().min(1)).min(1),
     image: z.string().min(1), // Обов'язкове поле, може бути URL або base64 рядок
-    bio: z.string().min(10).max(500) // Обов'язкове поле, мінімум 10 символів
+    bio: z.string().min(10).max(500), // Обов'язкове поле, мінімум 10 символів
+    position: z.string().min(2) // Академічна посада (обов'язкове поле)
 });
 
 router.post('/register/teacher', async (req, res) => {
@@ -390,12 +391,27 @@ router.post('/register/teacher', async (req, res) => {
             subjectsCount: req.body.subjects?.length,
             hasImage: !!req.body.image,
             imageLength: req.body.image?.length,
-            bio: req.body.bio?.substring(0, 50) + '...'
+            bio: req.body.bio?.substring(0, 50) + '...',
+            position: req.body.position
         });
         
         const parse = teacherRegisterSchema.safeParse(req.body);
         if (!parse.success) {
             console.error('Validation error details:', JSON.stringify(parse.error.errors, null, 2));
+            console.error('Request body keys:', Object.keys(req.body));
+            console.error('Request body values:', {
+                hasEmail: !!req.body.email,
+                hasPassword: !!req.body.password,
+                hasFirstName: !!req.body.firstName,
+                hasLastName: !!req.body.lastName,
+                hasUniversity: !!req.body.university,
+                hasFaculty: !!req.body.faculty,
+                hasSubjects: !!req.body.subjects,
+                hasImage: !!req.body.image,
+                hasBio: !!req.body.bio,
+                hasPosition: !!req.body.position,
+                position: req.body.position
+            });
             const errorMessage = parse.error?.errors?.[0]?.message || 'Invalid input';
             const errorPath = parse.error?.errors?.[0]?.path?.join('.') || 'unknown';
             return res.status(400).json({ 
@@ -405,7 +421,7 @@ router.post('/register/teacher', async (req, res) => {
             });
         }
 
-        const { email, password, displayName, firstName, lastName, middleName, university, faculty, department, subjects, image, bio } = parse.data;
+        const { email, password, displayName, firstName, lastName, middleName, university, faculty, department, subjects, image, bio, position } = parse.data;
 
         const normalizedEmail = email.toLowerCase().trim();
 
@@ -471,6 +487,7 @@ router.post('/register/teacher', async (req, res) => {
             email: normalizedEmail,
             image: image,
             bio: bio || null,
+            position: position || null, // Академічна посада
             status: 'pending',
             userId: userIdObjectId // Зв'язуємо Teacher профіль з User одразу після реєстрації
         });
@@ -484,7 +501,8 @@ router.post('/register/teacher', async (req, res) => {
             userIdString: teacher.userId?.toString(),
             userEmail: normalizedEmail,
             user_id: user._id,
-            user_idType: typeof user._id
+            user_idType: typeof user._id,
+            position: teacher.position
         });
 
         const access = signJwt({ id: user._id, role: user.role, status: user.status }, 'access');

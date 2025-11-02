@@ -8,6 +8,7 @@ import AutocompleteInput from './AutocompleteInput';
 import universitiesData from '../data/universities.json';
 import facultiesData from '../data/faculties.json';
 import subjectsData from '../data/subjects.json';
+import academicPositionsData from '../data/academicPositions.json';
 import { getRedirectAfterLogin } from '../utils/getRedirectAfterLogin';
 
 const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
@@ -31,7 +32,8 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
         image: '',
         imageFile: null,
         imagePreview: null,
-        bio: ''
+        bio: '',
+        position: ''
     });
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
@@ -269,6 +271,9 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                 newErrors.image = 'Фото профілю обов\'язкове';
             }
         } else if (step === 6) {
+            if (!formData.position.trim()) {
+                newErrors.position = 'Академічна посада обов\'язкова';
+            }
             if (!formData.bio.trim()) {
                 newErrors.bio = 'Біографія обов\'язкова';
             } else if (formData.bio.trim().length < 10) {
@@ -305,22 +310,28 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                 return;
             }
             
-            const registrationData = {
-                email,
-                password: formData.password,
-                displayName: formData.displayName,
-                firstName: formData.firstName,
-                lastName: formData.lastName,
-                middleName: formData.middleName || undefined,
-                university: formData.university,
-                faculty: formData.faculty,
-                department: formData.department || undefined, // Опціональне поле
-                subjects: validSubjects,
-                image: formData.image, // Обов'язкове поле
-                bio: formData.bio
-            };
+                    const registrationData = {
+                        email,
+                        password: formData.password,
+                        displayName: formData.displayName,
+                        firstName: formData.firstName,
+                        lastName: formData.lastName,
+                        middleName: formData.middleName || undefined,
+                        university: formData.university,
+                        faculty: formData.faculty,
+                        department: formData.department || undefined, // Опціональне поле
+                        subjects: validSubjects,
+                        image: formData.image, // Обов'язкове поле
+                        bio: formData.bio,
+                        position: formData.position // Академічна посада
+                    };
             
-            console.log('Registration data:', { ...registrationData, image: registrationData.image ? 'base64 image (length: ' + registrationData.image.length + ')' : 'missing' });
+            console.log('Registration data:', { 
+                ...registrationData, 
+                image: registrationData.image ? 'base64 image (length: ' + registrationData.image.length + ')' : 'missing',
+                position: registrationData.position,
+                hasPosition: !!registrationData.position
+            });
             
                     const { token, user, teacher } = await registerTeacher(registrationData);
                     loginSuccess({ token, user });
@@ -337,40 +348,54 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                     setTimeout(() => {
                         navigate(redirectPath);
                     }, 100);
-        } catch (error) {
-            console.error('Registration error:', error);
-            let errorMessage = 'Помилка реєстрації. Спробуйте ще раз.';
-            
-            if (error.response?.data) {
-                console.error('Error response data:', error.response.data);
-                
-                // Якщо є деталі помилки валідації
-                if (Array.isArray(error.response.data.errors) && error.response.data.errors.length > 0) {
-                    // Якщо Zod повертає масив помилок
-                    const firstError = error.response.data.errors[0];
-                    errorMessage = `${firstError.path?.join('.') || 'Поле'}: ${firstError.message || 'помилка валідації'}`;
-                    console.error('Validation errors:', error.response.data.errors);
-                } else if (error.response.data.error) {
-                    errorMessage = error.response.data.error;
-                    if (error.response.data.field) {
-                        errorMessage = `${error.response.data.field}: ${errorMessage}`;
+                } catch (error) {
+                    console.error('Registration error:', error);
+                    let errorMessage = 'Помилка реєстрації. Спробуйте ще раз.';
+                    
+                    if (error.response?.data) {
+                        console.error('Error response data:', error.response.data);
+                        
+                        // Якщо є деталі помилки валідації
+                        if (Array.isArray(error.response.data.errors) && error.response.data.errors.length > 0) {
+                            // Якщо Zod повертає масив помилок
+                            const firstError = error.response.data.errors[0];
+                            const fieldPath = firstError.path?.join('.') || 'невідоме поле';
+                            const fieldLabel = fieldPath === 'position' ? 'Академічна посада' : 
+                                             fieldPath === 'bio' ? 'Біографія' :
+                                             fieldPath === 'image' ? 'Фото профілю' :
+                                             fieldPath === 'subjects' ? 'Предмети' :
+                                             fieldPath === 'faculty' ? 'Факультет' :
+                                             fieldPath === 'university' ? 'Університет' :
+                                             fieldPath === 'lastName' ? 'Прізвище' :
+                                             fieldPath === 'firstName' ? 'Ім\'я' :
+                                             fieldPath === 'password' ? 'Пароль' :
+                                             fieldPath;
+                            errorMessage = `${fieldLabel}: ${firstError.message || 'помилка валідації'}`;
+                            console.error('Validation errors:', error.response.data.errors);
+                        } else if (error.response.data.error) {
+                            errorMessage = error.response.data.error;
+                            if (error.response.data.field && error.response.data.field !== 'unknown') {
+                                const fieldLabel = error.response.data.field === 'position' ? 'Академічна посада' : 
+                                                 error.response.data.field === 'bio' ? 'Біографія' :
+                                                 error.response.data.field;
+                                errorMessage = `${fieldLabel}: ${errorMessage}`;
+                            }
+                        } else if (error.response.data.message) {
+                            errorMessage = error.response.data.message;
+                        }
+                    } else if (error.message) {
+                        errorMessage = error.message;
                     }
-                } else if (error.response.data.message) {
-                    errorMessage = error.response.data.message;
+                    
+                    console.error('Error details:', {
+                        status: error.response?.status,
+                        data: error.response?.data,
+                        message: errorMessage
+                    });
+                    
+                    showError(errorMessage);
+                    setLoading(false);
                 }
-            } else if (error.message) {
-                errorMessage = error.message;
-            }
-            
-            console.error('Error details:', {
-                status: error.response?.status,
-                data: error.response?.data,
-                message: errorMessage
-            });
-            
-            showError(errorMessage);
-            setLoading(false);
-        }
     };
 
     const renderStep = () => {
@@ -787,8 +812,39 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                 );
                 
             case 6:
+                // Конвертуємо академічні посади у формат для AutocompleteInput
+                const positionOptions = academicPositionsData.map((pos, idx) => ({
+                    name: pos.name,
+                    shortName: pos.shortName,
+                    popular: pos.popular,
+                    order: pos.order
+                }));
+
                 return (
                     <div className="space-y-4 animate-[fadeIn_0.3s_ease-out]">
+                        <div>
+                            <label className="block text-sm mb-2">Академічна посада:</label>
+                            <AutocompleteInput
+                                value={formData.position}
+                                onChange={(value) => handleChange('position', value)}
+                                onFocus={() => handleFocus('position')}
+                                onBlur={() => handleBlur('position')}
+                                options={positionOptions}
+                                placeholder="Оберіть або введіть академічну посаду"
+                                error={!!errors.position}
+                                showPopular={true}
+                                maxResults={8}
+                                allowCustomInput={true}
+                            />
+                            {errors.position && <p className="text-red-400 text-sm mt-1">{errors.position}</p>}
+                            {!formData.position && (
+                                <p className="text-xs text-gray-400 mt-2 flex items-center gap-2">
+                                    <Lightbulb className="w-4 h-4 text-yellow-400 flex-shrink-0" />
+                                    <span>Наприклад: Асистент, Доцент, Професор</span>
+                                </p>
+                            )}
+                        </div>
+                        
                         <div>
                             <label className="block text-sm mb-2">Біографія:</label>
                             <textarea
