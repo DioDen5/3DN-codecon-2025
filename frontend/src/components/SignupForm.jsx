@@ -171,13 +171,14 @@ const SignupForm = ({ switchToLogin, onClose }) => {
         
         try {
             const { token, user, requiresPasswordSetup, teacherProfile } = await loginWithCode(formData.email, verificationCode);
-            loginSuccess({ token, user });
-            showSuccess('Вхід успішний!');
             
-            // Якщо потрібно встановити пароль, зберігаємо флаг
+            // Встановлюємо флаг ПЕРЕД викликом loginSuccess, щоб подія auth-changed побачила його
             if (requiresPasswordSetup) {
                 sessionStorage.setItem('teacherRequiresPasswordSetup', 'true');
             }
+            
+            loginSuccess({ token, user });
+            showSuccess('Вхід успішний!');
             
             // Визначаємо правильний редирект для викладачів
             const redirectPath = await getRedirectAfterLogin(user, teacherProfile);

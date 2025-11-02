@@ -9,22 +9,12 @@ import { getMyTeacherProfile } from '../api/teachers';
 export async function getRedirectAfterLogin(user, teacherProfile = null) {
     // Якщо користувач - викладач, перекидаємо на його профіль
     if (user?.role === 'teacher') {
-        // Якщо teacherProfile вже є в відповіді (з login/loginWithCode)
-        if (teacherProfile?.id) {
-            return `/teachers/${teacherProfile.id}`;
-        }
+        // Встановлюємо вкладку "Профіль" як активну для TeacherProfilePageNew
+        localStorage.setItem('teacherProfileActiveTab', 'profile');
         
-        // Якщо немає в відповіді, робимо запит на my-profile
-        try {
-            const data = await getMyTeacherProfile();
-            if (data?.teacher?.id || data?.teacher?._id) {
-                const teacherId = data.teacher.id || data.teacher._id;
-                return `/teachers/${teacherId}`;
-            }
-        } catch (error) {
-            console.error('Error fetching teacher profile for redirect:', error);
-            // Якщо не вдалося отримати профіль, залишаємося на форумі
-        }
+        // Для викладачів перекидаємо на /profile, де показується TeacherProfilePageNew з табами
+        // Це забезпечує відображення вкладки "Профіль" одразу після реєстрації/входу
+        return '/profile';
     }
     
     // Для студентів та інших ролей - завжди на форум

@@ -39,13 +39,14 @@ function AppContent() {
             if (e.detail?.isAuth) setModalType(null);
             
             // Перевіряємо чи потрібно показати модальне вікно для встановлення пароля після авторизації
-            const requiresPasswordSetup = sessionStorage.getItem('teacherRequiresPasswordSetup') === 'true';
-            if (requiresPasswordSetup && !showPasswordModal) {
-                setTimeout(() => {
+            // Використовуємо setTimeout, щоб дати час на встановлення флагу в sessionStorage
+            setTimeout(() => {
+                const requiresPasswordSetup = sessionStorage.getItem('teacherRequiresPasswordSetup') === 'true';
+                if (requiresPasswordSetup && !showPasswordModal) {
                     setShowPasswordModal(true);
                     sessionStorage.removeItem('teacherRequiresPasswordSetup');
-                }, 200);
-            }
+                }
+            }, 100);
         };
         window.addEventListener("auth-changed", onAuthChanged);
         return () => window.removeEventListener("auth-changed", onAuthChanged);
@@ -61,7 +62,7 @@ function AppContent() {
                 setTimeout(() => {
                     setShowPasswordModal(true);
                     sessionStorage.removeItem('teacherRequiresPasswordSetup'); // Видаляємо флаг
-                }, 100);
+                }, 200);
             }
         };
         
