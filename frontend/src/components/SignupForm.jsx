@@ -336,10 +336,11 @@ const SignupForm = ({ switchToLogin, onClose }) => {
                                             onChange={(e) => {
                                                 const newValue = e.target.value.replace(/\D/g, '');
                                                 if (newValue.length <= 1) {
-                                                    const currentCode = verificationCode.split('');
+                                                    // Створюємо масив з 6 елементів
+                                                    const currentCode = Array(6).fill('').map((_, i) => verificationCode[i] || '');
+                                                    // Встановлюємо нове значення саме в потрібний індекс
                                                     currentCode[index] = newValue;
-                                                    const newCode = currentCode.join('').slice(0, 6);
-                                                    setVerificationCode(newCode);
+                                                    setVerificationCode(currentCode.join(''));
                                                     
                                                     // Автоматичний перехід на наступне поле
                                                     if (newValue && index < 5) {
@@ -350,21 +351,23 @@ const SignupForm = ({ switchToLogin, onClose }) => {
                                                 }
                                             }}
                                             onKeyDown={(e) => {
-                                                // Перехід на попереднє поле при Backspace
+                                                // Видалення поточної цифри при Backspace
+                                                if (e.key === 'Backspace' && digit) {
+                                                    e.preventDefault();
+                                                    // Створюємо масив з 6 елементів
+                                                    const currentCode = Array(6).fill('').map((_, i) => verificationCode[i] || '');
+                                                    // Видаляємо цифру саме з поточного індексу
+                                                    currentCode[index] = '';
+                                                    setVerificationCode(currentCode.join(''));
+                                                    // Залишаємо фокус на тому ж полі
+                                                    setTimeout(() => {
+                                                        codeInputRefs.current[index]?.focus();
+                                                    }, 10);
+                                                }
+                                                // Перехід на попереднє поле при Backspace, якщо поточне поле порожнє
                                                 if (e.key === 'Backspace' && !digit && index > 0) {
                                                     e.preventDefault();
                                                     codeInputRefs.current[index - 1]?.focus();
-                                                }
-                                                // Видалення поточної цифри при Backspace
-                                                if (e.key === 'Backspace' && digit && index >= 0) {
-                                                    const currentCode = verificationCode.split('');
-                                                    currentCode[index] = '';
-                                                    setVerificationCode(currentCode.join(''));
-                                                    if (index > 0) {
-                                                        setTimeout(() => {
-                                                            codeInputRefs.current[index - 1]?.focus();
-                                                        }, 10);
-                                                    }
                                                 }
                                                 // Дозволяємо перехід стрілками
                                                 if (e.key === 'ArrowLeft' && index > 0) {
