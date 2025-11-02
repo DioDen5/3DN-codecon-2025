@@ -26,11 +26,23 @@ const TeacherCard = ({
             className="bg-white text-black rounded-xl overflow-hidden shadow-md w-full max-w-xs cursor-pointer hover:-translate-y-3 hover:shadow-xl transition-all duration-500 ease-in-out border-0"
             onClick={handleCardClick}
         >
-            <img 
-                src={image} 
-                alt={name} 
-                className="w-full h-64 object-cover object-[center_20%] pointer-events-none" 
-            />
+            {image && image !== '/api/placeholder/300/400' && image.trim() !== '' ? (
+                <img 
+                    src={image} 
+                    alt={name} 
+                    className="w-full h-64 object-cover object-[center_20%] pointer-events-none" 
+                    onError={(e) => {
+                        // При помилці завантаження показуємо placeholder з ініціалами
+                        e.target.style.display = 'none';
+                        const placeholder = e.target.nextElementSibling;
+                        if (placeholder) placeholder.style.display = 'flex';
+                    }}
+                />
+            ) : (
+                <div className="w-full h-64 bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-4xl font-bold pointer-events-none">
+                    {name?.charAt(0)?.toUpperCase() || 'T'}
+                </div>
+            )}
             <div className="p-3">
                 <h3 className="text-sm font-medium leading-tight mb-1">
                     {highlightText ? highlightText(name, searchQuery) : name}

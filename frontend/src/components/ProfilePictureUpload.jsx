@@ -55,7 +55,11 @@ const ProfilePictureUpload = ({
         }
     };
 
-    const displayImage = preview || currentAvatar;
+    // Фільтруємо placeholder URL
+    const isValidImage = currentAvatar && 
+        currentAvatar !== '/api/placeholder/300/400' && 
+        currentAvatar.trim() !== '';
+    const displayImage = preview || (isValidImage ? currentAvatar : null);
     const showInitials = !displayImage;
 
     return (
@@ -79,6 +83,7 @@ const ProfilePictureUpload = ({
                         className="w-full h-full rounded-full object-cover shadow-lg"
                         onError={(e) => {
                             console.error('Error loading profile image:', displayImage);
+                            // При помилці завантаження показуємо ініціали замість зображення
                             e.target.style.display = 'none';
                         }}
                     />

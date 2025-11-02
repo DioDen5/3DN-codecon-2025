@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, User, Activity, Settings, Mail, Calendar, Award, MessageCircle, MessageSquare, ThumbsUp, Star, GraduationCap, BookOpen, Shield, Lock, Key, Power, ToggleRight, Play, Smartphone, ShieldCheck, Eye, EyeOff, Edit3, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import { useAuthState } from '../api/useAuthState';
 import { getNameChangeStatus } from '../api/name-change';
-import { getMyTeacherProfile } from '../api/teachers';
+import { getMyTeacherProfile, getTeacher } from '../api/teachers';
 import StarRating from '../components/StarRating';
 import NameChangeModal from '../components/NameChangeModal';
 import ProfilePictureUpload from '../components/ProfilePictureUpload';
@@ -47,53 +47,30 @@ const TeacherProfilePageNew = () => {
     const [hasClaimRequest, setHasClaimRequest] = useState(false);
     const [showClaimModal, setShowClaimModal] = useState(false);
 
+    // Завантаження профілю викладача за ID (якщо переглядається чужий профіль)
     useEffect(() => {
-        setTimeout(() => {
-            setTeacher({
-                _id: user?.id || id,
-                name: user?.displayName || 'Доктор Олександр Петренко',
-                university: 'Київський національний університет',
-                department: 'Кафедра комп\'ютерних наук',
-                position: 'Професор',
-                academicDegree: 'Доктор технічних наук',
-                bio: 'Спеціаліст з штучного інтелекту та машинного навчання. Автор понад 50 наукових публікацій та 3 монографій. Досвідчений викладач з глибокими знаннями в галузі AI/ML.',
-                image: '/api/placeholder/300/400',
-                email: user?.email || 'o.petrenko@university.edu.ua',
-                phone: '+380 44 123 45 67',
-                rating: 8.5,
-                totalReviews: 47,
-                isOwner: user?.role === 'teacher'
-            });
-            
-            setStats({
-                reviews: 47,
-                averageRating: 8.5,
-                totalLikes: 156,
-                totalDislikes: 23
-            });
-            
-            setReviews([
-                {
-                    id: 1,
-                    author: 'Анонімний студент',
-                    rating: 9,
-                    comment: 'Чудовий викладач! Дуже доступно пояснює складні теми.',
-                    date: '2024-01-15',
-                    isAnonymous: true
-                },
-                {
-                    id: 2,
-                    author: 'Марія Іваненко',
-                    rating: 8,
-                    comment: 'Дуже цікаві лекції, але іноді занадто швидко.',
-                    date: '2024-01-10',
-                    isAnonymous: false
+        if (id && id !== user?.id) {
+            // Завантаження профілю іншого викладача
+            const loadTeacherProfile = async () => {
+                try {
+                    const data = await getTeacher(id);
+                    setTeacher(data);
+                    setStats({
+                        reviews: data.totalReviews || 0,
+                        averageRating: data.rating || 0,
+                        totalLikes: data.likes || 0,
+                        totalDislikes: data.dislikes || 0
+                    });
+                    setLoading(false);
+                } catch (error) {
+                    console.error('Error loading teacher profile:', error);
+                    setLoading(false);
                 }
-            ]);
-            
-            setLoading(false);
-            setReviewsLoading(false);
-        }, 1000);
+            };
+            loadTeacherProfile();
+        }
+        // Якщо це свій профіль викладача, teacher буде встановлено через loadMyTeacherProfile
+        // Не встановлюємо loading = false тут, щоб дочекатися завантаження
     }, [id, user]);
 
     // Завантаження статусу запиту на зміну імені та Teacher профілю
@@ -160,20 +137,37 @@ const TeacherProfilePageNew = () => {
 
     // Завантаження свого Teacher профілю
     const loadMyTeacherProfile = async () => {
-        if (!user || user.role !== 'teacher') return;
+        if (!user || user.role !== 'teacher') {
+            // Якщо не викладач, встановлюємо loading = false
+            if (!id || id === user?.id) {
+                setLoading(false);
+            }
+            return;
+        }
         
         try {
             const data = await getMyTeacherProfile();
+            console.log('Loaded teacher profile data:', data);
             if (data.teacher) {
                 setMyTeacherProfile(data.teacher);
                 setHasClaimRequest(data.hasClaimRequest || false);
                 // Якщо є прив'язаний профіль, завантажуємо його дані
-                if (data.teacher) {
-                    setTeacher(data.teacher);
+                setTeacher(data.teacher);
+                // Встановлюємо фото профілю з Teacher профілю, якщо воно є та не є placeholder
+                if (data.teacher.image && 
+                    data.teacher.image !== '/api/placeholder/300/400' && 
+                    data.teacher.image.trim() !== '') {
+                    console.log('Setting profile picture from teacher.image');
+                    setProfilePicture(data.teacher.image);
                 }
+                setLoading(false);
             } else {
                 setMyTeacherProfile(null);
                 setHasClaimRequest(data.hasClaimRequest || false);
+                // Якщо немає профілю викладача і це свій профіль, встановлюємо loading = false
+                if (!id || id === user?.id) {
+                    setLoading(false);
+                }
             }
         } catch (error) {
             console.error('Error loading my teacher profile:', error);
@@ -182,6 +176,10 @@ const TeacherProfilePageNew = () => {
             }
             setMyTeacherProfile(null);
             setHasClaimRequest(false);
+            // При помилці також встановлюємо loading = false
+            if (!id || id === user?.id) {
+                setLoading(false);
+            }
         }
     };
 
@@ -297,7 +295,7 @@ const TeacherProfilePageNew = () => {
                 <div className="relative">
                     <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
                         <ProfilePictureUpload
-                            currentAvatar={profilePicture}
+                            currentAvatar={profilePicture || teacher?.image}
                             userName={getCurrentDisplayName()}
                             onImageChange={handleProfilePictureChange}
                             size="large"

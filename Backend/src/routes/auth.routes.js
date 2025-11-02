@@ -456,6 +456,11 @@ router.post('/register/teacher', async (req, res) => {
             status: 'pending'
         });
 
+        // Конвертуємо user._id в ObjectId для коректного зберігання
+        const userIdObjectId = user._id instanceof mongoose.Types.ObjectId 
+            ? user._id 
+            : new mongoose.Types.ObjectId(user._id);
+
         const teacher = await Teacher.create({
             name,
             university,
@@ -467,7 +472,19 @@ router.post('/register/teacher', async (req, res) => {
             image: image,
             bio: bio || null,
             status: 'pending',
-            userId: null
+            userId: userIdObjectId // Зв'язуємо Teacher профіль з User одразу після реєстрації
+        });
+        
+        console.log('Teacher created:', {
+            _id: teacher._id,
+            name: teacher.name,
+            email: teacher.email,
+            userId: teacher.userId,
+            userIdType: typeof teacher.userId,
+            userIdString: teacher.userId?.toString(),
+            userEmail: normalizedEmail,
+            user_id: user._id,
+            user_idType: typeof user._id
         });
 
         const access = signJwt({ id: user._id, role: user.role, status: user.status }, 'access');

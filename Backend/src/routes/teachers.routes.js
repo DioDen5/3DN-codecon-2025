@@ -96,25 +96,66 @@ router.get('/my-profile', authRequired, async (req, res) => {
     try {
         const userId = req.user.id;
         
+        console.log('Getting my profile for user:', { userId, role: req.user.role });
+        
         if (req.user.role !== 'teacher') {
             return res.status(403).json({ error: 'Only teachers can access this endpoint' });
         }
         
+        // Завантажуємо User з бази, щоб отримати email
+        const userIdObjectId = userId instanceof mongoose.Types.ObjectId 
+            ? userId 
+            : new mongoose.Types.ObjectId(userId);
+            
+        const user = await User.findById(userIdObjectId);
+        if (!user) {
+            console.log('User not found for userId:', userIdObjectId);
+            return res.json({ teacher: null, hasClaimRequest: false });
+        }
+        
+        const userEmail = user.email;
+        console.log('User email:', userEmail);
+        
         // Безпечно конвертуємо userId в ObjectId
         let teacher = null;
         try {
-            const userIdObjectId = userId instanceof mongoose.Types.ObjectId 
-                ? userId 
-                : new mongoose.Types.ObjectId(userId);
+            console.log('Searching for teacher with userId:', userIdObjectId);
+            
+            // Спочатку шукаємо за userId
             teacher = await Teacher.findOne({ userId: userIdObjectId });
+            
+            console.log('Teacher found by userId:', !!teacher);
+            
+            // Якщо не знайдено за userId, шукаємо за email
+            if (!teacher && userEmail) {
+                console.log('Searching for teacher with email:', userEmail.toLowerCase().trim());
+                teacher = await Teacher.findOne({ email: userEmail.toLowerCase().trim() });
+                console.log('Teacher found by email:', !!teacher);
+            }
+            
+            // Якщо все ще не знайдено, перевіряємо всі Teacher з таким email для діагностики
+            if (!teacher && userEmail) {
+                const allTeachersWithEmail = await Teacher.find({ email: userEmail.toLowerCase().trim() });
+                console.log('All teachers with this email:', allTeachersWithEmail.length);
+                if (allTeachersWithEmail.length > 0) {
+                    console.log('First teacher with this email:', {
+                        _id: allTeachersWithEmail[0]._id,
+                        userId: allTeachersWithEmail[0].userId,
+                        email: allTeachersWithEmail[0].email
+                    });
+                }
+            }
         } catch (findError) {
             console.error('Error finding teacher:', findError);
             return res.json({ teacher: null, hasClaimRequest: false });
         }
         
         if (!teacher) {
+            console.log('Teacher not found for user:', { userId, userEmail });
             return res.json({ teacher: null, hasClaimRequest: false });
         }
+        
+        console.log('Teacher found:', { _id: teacher._id, name: teacher.name, userId: teacher.userId });
         
         // Перевіряємо чи є активна заявка (безпечно)
         let hasClaimRequest = false;
