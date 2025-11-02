@@ -163,30 +163,64 @@ const AutocompleteInput = ({
             {isOpen && filteredOptions.length > 0 && (
                 <div 
                     ref={dropdownRef}
-                    className={`autocomplete-dropdown-wrapper absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg ${
+                    className={`autocomplete-dropdown-wrapper absolute z-50 w-full mt-2 bg-gray-800 rounded-lg shadow-2xl border border-gray-700 overflow-hidden ${
                         filteredOptions.length > 3 ? 'always-show-scrollbar' : 'overflow-y-auto max-h-64'
                     }`}
                     style={filteredOptions.length > 3 ? { height: '16rem', overflowY: 'scroll' } : { maxHeight: '16rem' }}
                 >
-                    {filteredOptions.map((option) => (
+                    {filteredOptions.map((option, index) => (
                         <button
                             key={option.id}
                             type="button"
                             onClick={() => handleSelect(option)}
-                            className="w-full px-4 py-2 text-left hover:bg-blue-50 transition-colors border-b border-gray-100 last:border-b-0"
+                            className={`autocomplete-option w-full px-4 py-3 text-left transition-all duration-300 border-b-2 border-gray-600/50 last:border-b-0 group ${
+                                option.popular 
+                                    ? 'bg-gray-700 hover:bg-gray-600 hover:shadow-[0_0_10px_rgba(59,130,246,0.2)]' 
+                                    : 'bg-gray-800 hover:bg-gray-700 hover:shadow-[0_0_5px_rgba(75,85,99,0.2)]'
+                            }`}
+                            style={{
+                                animationDelay: `${index * 20}ms`
+                            }}
                         >
-                            <div className="font-medium text-gray-800">{option.name}</div>
-                            {option.shortName && (
-                                <div className="text-xs text-gray-500 mt-0.5">{option.shortName}</div>
-                            )}
+                            <div className="flex items-start gap-3">
+                                <div className={`flex-shrink-0 w-2 h-2 rounded-full mt-2 transition-all duration-300 ${
+                                    option.popular 
+                                        ? 'bg-blue-500 shadow-[0_0_6px_rgba(59,130,246,0.5)] group-hover:shadow-[0_0_10px_rgba(59,130,246,0.7)] group-hover:scale-150' 
+                                        : 'bg-gray-500 group-hover:bg-gray-400 group-hover:scale-125'
+                                }`}></div>
+                                <div className="flex-1 min-w-0">
+                                    <div className={`font-semibold text-sm leading-tight transition-colors duration-300 ${
+                                        option.popular 
+                                            ? 'text-blue-300 group-hover:text-blue-200' 
+                                            : 'text-white group-hover:text-gray-100'
+                                    }`}>
+                                        {option.name}
+                                    </div>
+                                    {option.shortName && (
+                                        <div className={`text-xs mt-1.5 font-medium transition-colors duration-300 ${
+                                            option.popular 
+                                                ? 'text-blue-400/80 group-hover:text-blue-300' 
+                                                : 'text-gray-400 group-hover:text-gray-300'
+                                        }`}>
+                                            {option.shortName}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                         </button>
                     ))}
                 </div>
             )}
 
             {isOpen && searchTerm.trim() && filteredOptions.length === 0 && (
-                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-4 text-center text-gray-500">
-                    Нічого не знайдено
+                <div className="absolute z-50 w-full mt-2 bg-gray-800 border border-gray-700 rounded-lg shadow-2xl p-8 text-center">
+                    <div className="flex flex-col items-center gap-3">
+                        <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p className="text-white font-semibold text-sm">Нічого не знайдено</p>
+                        <p className="text-xs text-gray-400 mt-1">Спробуйте інший запит</p>
+                    </div>
                 </div>
             )}
         </div>
