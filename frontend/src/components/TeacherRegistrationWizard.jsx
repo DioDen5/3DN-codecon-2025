@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, User, GraduationCap, BookOpen, Lock, Image, FileText, CheckCircle, Lightbulb } from 'lucide-react';
+import { ChevronLeft, ChevronRight, User, GraduationCap, BookOpen, Lock, Image, FileText, CheckCircle, Lightbulb, Eye, EyeOff } from 'lucide-react';
 import { registerTeacher } from '../api/auth';
 import { useAuth } from '../state/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -36,6 +36,8 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
     const [focusedFields, setFocusedFields] = useState({});
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     
     const totalSteps = 6;
     
@@ -124,15 +126,46 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
     };
 
     const handleSubjectChange = (index, value) => {
-        // Перевіряємо на дублікати
         const trimmedValue = value.trim();
-        const duplicateIndex = formData.subjects.findIndex((s, i) => 
-            i !== index && s.trim().toLowerCase() === trimmedValue.toLowerCase() && trimmedValue !== ''
-        );
         
-        if (duplicateIndex !== -1) {
-            showError(`Предмет "${trimmedValue}" вже додано`);
-            return;
+        // Перевіряємо мінімальну довжину
+        if (trimmedValue && trimmedValue.length < 2) {
+            setErrors(prev => ({
+                ...prev,
+                [`subject-${index}`]: 'Назва предмета має містити мінімум 2 символи'
+            }));
+        }
+        
+        // Перевіряємо на дублікати (тільки якщо значення не порожнє)
+        if (trimmedValue) {
+            const duplicateIndex = formData.subjects.findIndex((s, i) => 
+                i !== index && s.trim().toLowerCase() === trimmedValue.toLowerCase()
+            );
+            
+            if (duplicateIndex !== -1) {
+                setErrors(prev => ({
+                    ...prev,
+                    [`subject-${index}`]: 'Цей предмет вже додано',
+                    [`subject-${duplicateIndex}`]: 'Цей предмет вже додано'
+                }));
+                showError(`Предмет "${trimmedValue}" вже додано`);
+            } else {
+                // Очищуємо помилку дублікату, якщо вона була
+                setErrors(prev => {
+                    const newErrors = { ...prev };
+                    if (newErrors[`subject-${index}`] === 'Цей предмет вже додано') {
+                        delete newErrors[`subject-${index}`];
+                    }
+                    return newErrors;
+                });
+            }
+        } else {
+            // Якщо поле порожнє, очищуємо помилки
+            setErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors[`subject-${index}`];
+                return newErrors;
+            });
         }
         
         const newSubjects = [...formData.subjects];
@@ -141,18 +174,14 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
             ...prev,
             subjects: newSubjects
         }));
-        
-        // Очищуємо помилки для цього предмета
-        if (errors[`subject-${index}`]) {
-            setErrors(prev => {
-                const newErrors = { ...prev };
-                delete newErrors[`subject-${index}`];
-                return newErrors;
-            });
-        }
     };
 
     const addSubject = () => {
+        const MAX_SUBJECTS = 10;
+        if (formData.subjects.length >= MAX_SUBJECTS) {
+            showError(`Можна додати максимум ${MAX_SUBJECTS} предметів`);
+            return;
+        }
         setFormData(prev => ({
             ...prev,
             subjects: [...prev.subjects, '']
@@ -165,6 +194,27 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                 ...prev,
                 subjects: prev.subjects.filter((_, i) => i !== index)
             }));
+            
+            // Очищуємо помилки для видаленого предмета та зсуваємо індекси
+            setErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors[`subject-${index}`];
+                // Зсуваємо помилки для наступних індексів
+                const updatedErrors = {};
+                Object.keys(newErrors).forEach(key => {
+                    if (key.startsWith('subject-')) {
+                        const subjectIndex = parseInt(key.split('-')[1]);
+                        if (subjectIndex < index) {
+                            updatedErrors[key] = newErrors[key];
+                        } else if (subjectIndex > index) {
+                            updatedErrors[`subject-${subjectIndex - 1}`] = newErrors[key];
+                        }
+                    } else {
+                        updatedErrors[key] = newErrors[key];
+                    }
+                });
+                return updatedErrors;
+            });
         }
     };
 
@@ -187,6 +237,17 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                 newErrors.subjects = 'Додайте хоча б один предмет';
             }
             
+            // Перевірка кожного предмета на мінімальну довжину
+            formData.subjects.forEach((subject, index) => {
+                const trimmed = subject.trim();
+                if (trimmed && trimmed.length < 2) {
+                    newErrors[`subject-${index}`] = 'Назва предмета має містити мінімум 2 символи';
+                } else if (!trimmed && index < formData.subjects.length - 1) {
+                    // Порожнє поле (крім останнього)
+                    newErrors[`subject-${index}`] = 'Введіть назву предмета або видаліть поле';
+                }
+            });
+            
             // Перевірка на дублікати
             const subjectsLower = validSubjects.map(s => s.trim().toLowerCase());
             const uniqueSubjects = new Set(subjectsLower);
@@ -207,6 +268,12 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
             if (!formData.confirmPassword) newErrors.confirmPassword = 'Підтвердження пароля обов\'язкове';
             else if (formData.password !== formData.confirmPassword) {
                 newErrors.confirmPassword = 'Паролі не співпадають';
+            }
+        } else if (step === 6) {
+            if (!formData.bio.trim()) {
+                newErrors.bio = 'Біографія обов\'язкова';
+            } else if (formData.bio.trim().length < 10) {
+                newErrors.bio = 'Біографія має містити мінімум 10 символів';
             }
         }
         
@@ -242,7 +309,7 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                 department: formData.department || undefined, // Опціональне поле
                 subjects: validSubjects,
                 image: formData.image || undefined,
-                bio: formData.bio || undefined
+                bio: formData.bio
             };
             
                     const { token, user, teacher } = await registerTeacher(registrationData);
@@ -495,65 +562,94 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                                     <span>Оберіть факультет, щоб побачити список предметів для цього факультету</span>
                                 </p>
                             )}
-                            {formData.subjects.map((subject, index) => {
-                                // Перевіряємо на дублікати
-                                const isDuplicate = formData.subjects.filter((s, i) => 
-                                    i !== index && s.trim().toLowerCase() === subject.trim().toLowerCase() && subject.trim() !== ''
-                                ).length > 0;
-                                
-                                return (
-                                    <div key={index} className="mb-3">
-                                        <div className="flex gap-2 items-start">
-                                            <div className="flex-1">
-                                                <AutocompleteInput
-                                                    value={subject}
-                                                    onChange={(value) => handleSubjectChange(index, value)}
-                                                    onFocus={() => handleFocus(`subject-${index}`)}
-                                                    onBlur={() => handleBlur(`subject-${index}`)}
-                                                    options={subjectOptions}
-                                                    placeholder={selectedFaculty ? `Предмет ${index + 1}` : "Спочатку оберіть факультет"}
-                                                    error={!!errors[`subject-${index}`] || isDuplicate}
-                                                    showPopular={true}
-                                                    maxResults={8}
-                                                    allowCustomInput={true}
-                                                    disabled={!selectedFaculty}
-                                                />
-                                                {errors[`subject-${index}`] && (
-                                                    <p className="text-red-400 text-sm mt-1">{errors[`subject-${index}`]}</p>
-                                                )}
-                                                {isDuplicate && (
-                                                    <p className="text-red-400 text-sm mt-1">Цей предмет вже додано</p>
+                            <div className="space-y-3">
+                                {formData.subjects.map((subject, index) => {
+                                    const hasError = !!errors[`subject-${index}`];
+                                    
+                                    return (
+                                        <div key={index} className="relative">
+                                            <div className="flex gap-2 items-start">
+                                                <div className="flex-1">
+                                                    <AutocompleteInput
+                                                        value={subject}
+                                                        onChange={(value) => handleSubjectChange(index, value)}
+                                                        onFocus={() => handleFocus(`subject-${index}`)}
+                                                        onBlur={() => handleBlur(`subject-${index}`)}
+                                                        options={subjectOptions}
+                                                        placeholder={selectedFaculty ? `Предмет ${index + 1}` : "Спочатку оберіть факультет"}
+                                                        error={hasError}
+                                                        showPopular={true}
+                                                        maxResults={8}
+                                                        allowCustomInput={true}
+                                                        disabled={!selectedFaculty}
+                                                    />
+                                                    {hasError && (
+                                                        <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
+                                                            <span className="w-1 h-1 rounded-full bg-red-400"></span>
+                                                            {errors[`subject-${index}`]}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                                {formData.subjects.length > 1 && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => removeSubject(index)}
+                                                        className="px-3 py-2 bg-red-500/80 hover:bg-red-600 rounded-md text-white transition-all duration-200 flex-shrink-0 mt-0 hover:scale-105 active:scale-95 shadow-md hover:shadow-lg"
+                                                        title="Видалити предмет"
+                                                    >
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                                                        </svg>
+                                                    </button>
                                                 )}
                                             </div>
-                                            {formData.subjects.length > 1 && (
-                                                <button
-                                                    type="button"
-                                                    onClick={() => removeSubject(index)}
-                                                    className="px-3 py-2 bg-red-500 hover:bg-red-600 rounded-md text-white transition flex-shrink-0 mt-0"
-                                                    title="Видалити предмет"
-                                                >
-                                                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                                                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                                                    </svg>
-                                                </button>
-                                            )}
                                         </div>
-                                    </div>
-                                );
-                            })}
-                            <button
-                                type="button"
-                                onClick={addSubject}
-                                className="w-full py-2 bg-blue-500 hover:bg-blue-600 rounded-md text-white transition font-medium"
-                            >
-                                + Додати предмет
-                            </button>
-                            {errors.subjects && <p className="text-red-400 text-sm mt-1">{errors.subjects}</p>}
-                            {selectedFaculty && subjectOptions.length > 0 && (
-                                <p className="text-xs text-gray-400 mt-2">
-                                    ✓ Показано предмети для <strong>{selectedFaculty}</strong>. Можна також ввести свої.
+                                    );
+                                })}
+                            </div>
+                            
+                            <div className="flex items-center gap-2 mt-3">
+                                <button
+                                    type="button"
+                                    onClick={addSubject}
+                                    disabled={formData.subjects.length >= 10}
+                                    className={`flex-1 py-2 rounded-md text-white transition font-medium ${
+                                        formData.subjects.length >= 10
+                                            ? 'bg-gray-500 cursor-not-allowed opacity-50'
+                                            : 'bg-blue-500 hover:bg-blue-600 hover:shadow-lg active:scale-95'
+                                    }`}
+                                >
+                                    + Додати предмет
+                                </button>
+                                <div className="px-3 py-2 bg-gray-700/50 rounded-md text-xs text-gray-300">
+                                    {formData.subjects.filter(s => s.trim()).length} / 10
+                                </div>
+                            </div>
+                            
+                            {errors.subjects && (
+                                <div className="mt-2 p-2 bg-red-500/10 border border-red-500/30 rounded-md">
+                                    <p className="text-red-400 text-sm flex items-center gap-2">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-red-400"></span>
+                                        {errors.subjects}
+                                    </p>
+                                </div>
+                            )}
+                            
+                            {formData.subjects.length >= 10 && (
+                                <p className="text-xs text-yellow-400 mt-1 flex items-center gap-1">
+                                    <Lightbulb className="w-3 h-3" />
+                                    <span>Досягнуто максимальної кількості предметів (10)</span>
                                 </p>
+                            )}
+                            
+                            {selectedFaculty && subjectOptions.length > 0 && (
+                                <div className="mt-3 p-2 bg-blue-500/10 border border-blue-500/30 rounded-md">
+                                    <p className="text-xs text-blue-300 flex items-center gap-2">
+                                        <CheckCircle className="w-3 h-3 flex-shrink-0" />
+                                        <span>Показано предмети для <strong>{selectedFaculty}</strong>. Можна також ввести свої.</span>
+                                    </p>
+                                </div>
                             )}
                         </div>
                     </div>
@@ -565,29 +661,47 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                     <div className="space-y-4 animate-[fadeIn_0.3s_ease-out]">
                         <div>
                             <label className="block text-sm mb-2">Пароль:</label>
-                            <input
-                                type="password"
-                                value={formData.password}
-                                onChange={(e) => handleChange('password', e.target.value)}
-                                onFocus={() => handleFocus('password')}
-                                onBlur={() => handleBlur('password')}
-                                className={getInputClassName('password', errors.password)}
-                                placeholder="Мінімум 8 символів"
-                            />
+                            <div className="relative">
+                                <input
+                                    type={showPassword ? 'text' : 'password'}
+                                    value={formData.password}
+                                    onChange={(e) => handleChange('password', e.target.value)}
+                                    onFocus={() => handleFocus('password')}
+                                    onBlur={() => handleBlur('password')}
+                                    className={getInputClassName('password', errors.password)}
+                                    placeholder="Мінімум 8 символів"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors"
+                                >
+                                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                </button>
+                            </div>
                             {errors.password && <p className="text-red-400 text-sm mt-1">{errors.password}</p>}
                         </div>
                         
                         <div>
                             <label className="block text-sm mb-2">Підтвердження пароля:</label>
-                            <input
-                                type="password"
-                                value={formData.confirmPassword}
-                                onChange={(e) => handleChange('confirmPassword', e.target.value)}
-                                onFocus={() => handleFocus('confirmPassword')}
-                                onBlur={() => handleBlur('confirmPassword')}
-                                className={getInputClassName('confirmPassword', errors.confirmPassword)}
-                                placeholder="Підтвердіть пароль"
-                            />
+                            <div className="relative">
+                                <input
+                                    type={showConfirmPassword ? 'text' : 'password'}
+                                    value={formData.confirmPassword}
+                                    onChange={(e) => handleChange('confirmPassword', e.target.value)}
+                                    onFocus={() => handleFocus('confirmPassword')}
+                                    onBlur={() => handleBlur('confirmPassword')}
+                                    className={getInputClassName('confirmPassword', errors.confirmPassword)}
+                                    placeholder="Підтвердіть пароль"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors"
+                                >
+                                    {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                </button>
+                            </div>
                             {errors.confirmPassword && <p className="text-red-400 text-sm mt-1">{errors.confirmPassword}</p>}
                         </div>
                     </div>
@@ -669,7 +783,7 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                 return (
                     <div className="space-y-4 animate-[fadeIn_0.3s_ease-out]">
                         <div>
-                            <label className="block text-sm mb-2">Біографія (опціонально)</label>
+                            <label className="block text-sm mb-2">Біографія:</label>
                             <textarea
                                 value={formData.bio}
                                 onChange={(e) => handleChange('bio', e.target.value)}
@@ -677,9 +791,10 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                                 onBlur={() => handleBlur('bio')}
                                 rows="6"
                                 maxLength="500"
-                                className={getInputClassName('bio', false, 'w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 resize-none focus:outline-none transition-all duration-300')}
+                                className={getInputClassName('bio', errors.bio, 'w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 resize-none focus:outline-none transition-all duration-300')}
                                 placeholder="Коротка інформація про себе..."
                             />
+                            {errors.bio && <p className="text-red-400 text-sm mt-1">{errors.bio}</p>}
                             <p className="text-xs text-gray-400 mt-2">
                                 {formData.bio.length}/500 символів
                             </p>

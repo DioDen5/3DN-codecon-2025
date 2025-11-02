@@ -372,7 +372,7 @@ const teacherRegisterSchema = z.object({
     department: z.string().min(2).optional(), // Тепер опціональне
     subjects: z.array(z.string().min(1)).min(1),
     image: z.string().optional(), // Може бути URL або base64 рядок
-    bio: z.string().max(500).optional()
+    bio: z.string().min(10).max(500) // Обов'язкове поле, мінімум 10 символів
 });
 
 router.post('/register/teacher', async (req, res) => {
