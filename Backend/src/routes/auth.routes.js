@@ -368,7 +368,8 @@ const teacherRegisterSchema = z.object({
     lastName: z.string().min(2),
     middleName: z.string().optional(),
     university: z.string().min(2),
-    department: z.string().min(2),
+    faculty: z.string().min(2), // Обов'язкове поле
+    department: z.string().min(2).optional(), // Тепер опціональне
     subjects: z.array(z.string().min(1)).min(1),
     image: z.string().optional(), // Може бути URL або base64 рядок
     bio: z.string().max(500).optional()
@@ -382,7 +383,7 @@ router.post('/register/teacher', async (req, res) => {
             return res.status(400).json({ error: errorMessage });
         }
 
-        const { email, password, displayName, firstName, lastName, middleName, university, department, subjects, image, bio } = parse.data;
+        const { email, password, displayName, firstName, lastName, middleName, university, faculty, department, subjects, image, bio } = parse.data;
 
         const normalizedEmail = email.toLowerCase().trim();
 
@@ -438,7 +439,8 @@ router.post('/register/teacher', async (req, res) => {
         const teacher = await Teacher.create({
             name,
             university,
-            department,
+            faculty,
+            department: department || null, // Опціональне поле
             subjects: subjects || [],
             subject: subjects && subjects.length > 0 ? subjects[0] : '',
             email: normalizedEmail,

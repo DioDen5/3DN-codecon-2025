@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useNotification } from '../contexts/NotificationContext';
 import AutocompleteInput from './AutocompleteInput';
 import universitiesData from '../data/universities.json';
-import departmentsData from '../data/departments.json';
+import facultiesData from '../data/faculties.json';
 
 const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
     const navigate = useNavigate();
@@ -21,6 +21,7 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
         phone: '',
         displayName: '',
         university: '',
+        faculty: '',
         department: '',
         subjects: [''],
         password: '',
@@ -70,14 +71,23 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
         }
     }, [formData.firstName, formData.lastName, formData.middleName]);
 
-    // Очищуємо кафедру при зміні університету
+    // Очищуємо факультет і кафедру при зміні університету
     const [prevUniversity, setPrevUniversity] = useState('');
     useEffect(() => {
         if (formData.university !== prevUniversity && prevUniversity !== '') {
-            setFormData(prev => ({ ...prev, department: '' }));
+            setFormData(prev => ({ ...prev, faculty: '', department: '' }));
         }
         setPrevUniversity(formData.university);
     }, [formData.university, prevUniversity]);
+
+    // Очищуємо кафедру при зміні факультету
+    const [prevFaculty, setPrevFaculty] = useState('');
+    useEffect(() => {
+        if (formData.faculty !== prevFaculty && prevFaculty !== '') {
+            setFormData(prev => ({ ...prev, department: '' }));
+        }
+        setPrevFaculty(formData.faculty);
+    }, [formData.faculty, prevFaculty]);
 
     const steps = [
         { number: 1, title: 'Особисті дані', icon: User },
@@ -147,7 +157,8 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
             // phone не обов'язкове - пропускається якщо не вказано
         } else if (step === 2) {
             if (!formData.university.trim()) newErrors.university = 'Університет обов\'язковий';
-            if (!formData.department.trim()) newErrors.department = 'Кафедра обов\'язкова';
+            if (!formData.faculty.trim()) newErrors.faculty = 'Факультет обов\'язковий';
+            // department опціональне - не перевіряємо
         } else if (step === 3) {
             const validSubjects = formData.subjects.filter(s => s.trim());
             if (validSubjects.length === 0) {
@@ -177,7 +188,7 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
     };
 
     const handleSubmit = async () => {
-        if (!validateStep(4)) return;
+        if (!validateStep(totalSteps)) return;
         
         setLoading(true);
         try {
@@ -190,7 +201,8 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                 lastName: formData.lastName,
                 middleName: formData.middleName || undefined,
                 university: formData.university,
-                department: formData.department,
+                faculty: formData.faculty,
+                department: formData.department || undefined, // Опціональне поле
                 subjects: validSubjects,
                 image: formData.image || undefined,
                 bio: formData.bio || undefined
@@ -278,44 +290,41 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                 );
                 
             case 2:
-                // Знаходимо кафедри для вибраного університету
+                // Крок 2: Університет + Факультет (обов'язкове) + Кафедра (опціональне)
                 const selectedUniversity = formData.university.trim();
                 const universityData = universitiesData.find(u => 
                     u.name === selectedUniversity || u.shortName === selectedUniversity
                 );
                 
-                let departmentOptions = [];
+                // Знаходимо факультети для вибраного університету
+                let facultyOptions = [];
                 if (universityData) {
-                    // Знаходимо кафедри для цього університету
-                    const universityDepartments = departmentsData.find(d => 
-                        d.universityName === universityData.name || d.universityName === universityData.shortName
+                    const universityFaculties = facultiesData.find(f => 
+                        f.universityName === universityData.name || f.universityName === universityData.shortName
                     );
                     
-                    if (universityDepartments && universityDepartments.departments) {
-                        // Конвертуємо масив рядків у формат для AutocompleteInput
-                        // Перші 3 кафедри позначаємо як популярні (найчастіші)
-                        departmentOptions = universityDepartments.departments.map((dept, index) => ({
+                    if (universityFaculties && universityFaculties.faculties) {
+                        facultyOptions = universityFaculties.faculties.map((faculty, index) => ({
+                            name: faculty.name,
+                            shortName: faculty.name,
+                            popular: index < 3, // Перші 3 факультети - найчастіші
+                            departments: faculty.departments || []
+                        }));
+                    }
+                }
+                
+                // Знаходимо кафедри для вибраного факультету
+                const selectedFaculty = formData.faculty.trim();
+                let departmentOptions = [];
+                if (selectedFaculty && universityData) {
+                    const facultyData = facultyOptions.find(f => f.name === selectedFaculty);
+                    if (facultyData && facultyData.departments && facultyData.departments.length > 0) {
+                        departmentOptions = facultyData.departments.map((dept, index) => ({
                             name: dept,
                             shortName: dept,
                             popular: index < 3 // Перші 3 кафедри - найчастіші
                         }));
                     }
-                }
-                
-                // Якщо університет не вибрано або кафедри не знайдено, показуємо всі популярні кафедри
-                if (departmentOptions.length === 0) {
-                    // Збираємо популярні кафедри з усіх університетів
-                    const allDepartments = new Set();
-                    departmentsData.forEach(university => {
-                        university.departments.forEach(dept => {
-                            allDepartments.add(dept);
-                        });
-                    });
-                    departmentOptions = Array.from(allDepartments).slice(0, 10).map(dept => ({
-                        name: dept,
-                        shortName: dept,
-                        popular: false
-                    }));
                 }
                 
                 return (
@@ -337,35 +346,59 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                         </div>
                         
                         <div>
-                            <label className="block text-sm mb-2">Кафедра:</label>
+                            <label className="block text-sm mb-2">Факультет:</label>
+                            <AutocompleteInput
+                                value={formData.faculty}
+                                onChange={(value) => handleChange('faculty', value)}
+                                onFocus={() => handleFocus('faculty')}
+                                onBlur={() => handleBlur('faculty')}
+                                options={facultyOptions}
+                                placeholder={selectedUniversity ? "Оберіть або введіть факультет" : "Спочатку оберіть університет"}
+                                error={!!errors.faculty}
+                                showPopular={true}
+                                maxResults={8}
+                                allowCustomInput={true}
+                                disabled={!selectedUniversity}
+                            />
+                            {errors.faculty && <p className="text-red-400 text-sm mt-1">{errors.faculty}</p>}
+                            {!selectedUniversity && (
+                                <p className="text-xs text-gray-400 mt-2 flex items-center gap-2">
+                                    <Lightbulb className="w-4 h-4 text-yellow-400 flex-shrink-0" />
+                                    <span>Спочатку оберіть університет, щоб побачити список факультетів</span>
+                                </p>
+                            )}
+                        </div>
+                        
+                        <div>
+                            <label className="block text-sm mb-2">Кафедра: <span className="text-gray-400 text-xs">(не обов'язково)</span></label>
                             <AutocompleteInput
                                 value={formData.department}
                                 onChange={(value) => handleChange('department', value)}
                                 onFocus={() => handleFocus('department')}
                                 onBlur={() => handleBlur('department')}
                                 options={departmentOptions}
-                                placeholder="Оберіть або введіть кафедру"
+                                placeholder={selectedFaculty ? "Оберіть або введіть кафедру" : "Спочатку оберіть факультет"}
                                 error={!!errors.department}
                                 showPopular={true}
                                 maxResults={8}
                                 allowCustomInput={true}
-                                disabled={!selectedUniversity}
+                                disabled={!selectedFaculty}
                             />
                             {errors.department && <p className="text-red-400 text-sm mt-1">{errors.department}</p>}
-                            {!selectedUniversity && (
+                            {!selectedFaculty && (
                                 <p className="text-xs text-gray-400 mt-2 flex items-center gap-2">
                                     <Lightbulb className="w-4 h-4 text-yellow-400 flex-shrink-0" />
-                                    <span>Спочатку оберіть університет, щоб побачити список кафедр</span>
+                                    <span>Спочатку оберіть факультет, щоб побачити список кафедр</span>
                                 </p>
                             )}
-                            {selectedUniversity && departmentOptions.length > 0 && (
+                            {selectedFaculty && departmentOptions.length > 0 && (
                                 <p className="text-xs text-gray-400 mt-2">
-                                    ✓ Показано кафедри для <strong>{selectedUniversity}</strong>. Можна також ввести свою.
+                                    ✓ Показано кафедри для <strong>{selectedFaculty}</strong>. Можна також ввести свою або пропустити.
                                 </p>
                             )}
-                            {selectedUniversity && departmentOptions.length === 0 && (
+                            {selectedFaculty && departmentOptions.length === 0 && (
                                 <p className="text-xs text-yellow-400 mt-2">
-                                    ⚠ Кафедри для цього університету не знайдено. Можна ввести назву вручну.
+                                    ⚠ Кафедри для цього факультету не знайдено. Можна ввести назву вручну або пропустити.
                                 </p>
                             )}
                         </div>

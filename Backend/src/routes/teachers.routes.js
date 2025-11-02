@@ -11,30 +11,35 @@ const router = express.Router();
 router.get('/', async (req, res) => {
         console.log('Teachers route hit:', req.url);
         try {
-            const { q, page = 1, limit = 8, sort = 'rating', university, department, subject } = req.query;
+            const { q, page = 1, limit = 8, sort = 'rating', university, faculty, department, subject } = req.query;
             const skip = (page - 1) * limit;
 
             let filter = {};
 
             if (q) {
                 const searchRegex = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
-                filter = {
-                    $or: [
-                        { name: { $regex: searchRegex } },
-                        { university: { $regex: searchRegex } },
-                        { department: { $regex: searchRegex } },
-                        { subject: { $regex: searchRegex } }
-                    ]
-                };
+                        filter = {
+                            $or: [
+                                { name: { $regex: searchRegex } },
+                                { university: { $regex: searchRegex } },
+                                { faculty: { $regex: searchRegex } },
+                                { department: { $regex: searchRegex } },
+                                { subject: { $regex: searchRegex } }
+                            ]
+                        };
             }
 
-            if (university) {
-                filter.university = university;
-            }
+                    if (university) {
+                        filter.university = university;
+                    }
 
-            if (department) {
-                filter.department = department;
-            }
+                    if (faculty) {
+                        filter.faculty = faculty;
+                    }
+
+                    if (department) {
+                        filter.department = department;
+                    }
 
             if (subject) {
                 filter.subject = subject;
@@ -153,20 +158,21 @@ router.get('/my-profile', authRequired, async (req, res) => {
         } catch (toObjectError) {
             console.error('Error converting teacher to object:', toObjectError);
             // Якщо всі методи не працюють, використовуємо явне вказання полів
-            teacherWithRating = {
-                _id: teacher._id.toString(),
-                name: teacher.name || '',
-                email: teacher.email || '',
-                university: teacher.university || '',
-                department: teacher.department || '',
-                subject: teacher.subject || '',
-                subjects: teacher.subjects || [],
-                image: teacher.image || '',
-                bio: teacher.bio || '',
-                status: teacher.status || 'pending',
-                userId: teacher.userId ? teacher.userId.toString() : null,
-                rating: rating,
-                likes: teacher.likes || 0,
+                teacherWithRating = {
+                    _id: teacher._id.toString(),
+                    name: teacher.name || '',
+                    email: teacher.email || '',
+                    university: teacher.university || '',
+                    faculty: teacher.faculty || '',
+                    department: teacher.department || '',
+                    subject: teacher.subject || '',
+                    subjects: teacher.subjects || [],
+                    image: teacher.image || '',
+                    bio: teacher.bio || '',
+                    status: teacher.status || 'pending',
+                    userId: teacher.userId ? teacher.userId.toString() : null,
+                    rating: rating,
+                    likes: teacher.likes || 0,
                 dislikes: teacher.dislikes || 0,
                 comments: teacher.comments || 0,
                 totalVotes: teacher.totalVotes || 0,
@@ -208,12 +214,13 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', authRequired, async (req, res) => {
     try {
-        const { name, university, department, subject, image, email } = req.body;
+        const { name, university, faculty, department, subject, image, email } = req.body;
         
         const teacher = new Teacher({
             name,
             university,
-            department,
+            faculty,
+            department: department || null,
             subject,
             image,
             email: email ? email.toLowerCase().trim() : null
@@ -478,6 +485,7 @@ router.put('/my-profile', authRequired, async (req, res) => {
             middleName, 
             displayName,
             university, 
+            faculty,
             department, 
             subjects, 
             image, 
@@ -508,11 +516,19 @@ router.put('/my-profile', authRequired, async (req, res) => {
             }
         }
 
+        if (faculty !== undefined) {
+            if (teacher.status === 'verified') {
+                pendingChanges.faculty = faculty;
+            } else {
+                updates.faculty = faculty;
+            }
+        }
+
         if (department !== undefined) {
             if (teacher.status === 'verified') {
                 pendingChanges.department = department;
             } else {
-                updates.department = department;
+                updates.department = department || null; // Опціональне поле
             }
         }
 

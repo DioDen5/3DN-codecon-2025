@@ -11,9 +11,14 @@ const teacherSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
-    department: {
+    faculty: {
         type: String,
         required: true,
+        trim: true
+    },
+    department: {
+        type: String,
+        required: false, // Тепер опціональне
         trim: true
     },
     subject: {

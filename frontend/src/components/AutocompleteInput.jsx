@@ -36,20 +36,17 @@ const AutocompleteInput = ({
             const popular = options.filter(opt => opt.popular).slice(0, showPopular ? popularCount : 0);
             setFilteredOptions(popular);
         } else {
-            // Фільтруємо та сортуємо за релевантністю
+            // Фільтруємо та сортуємо за релевантністю (популярні не показуються, якщо не співпадають)
             const term = searchTerm.toLowerCase();
             const filtered = options
                 .filter(opt => {
                     const name = opt.name.toLowerCase();
                     const shortName = opt.shortName?.toLowerCase() || '';
+                    // Фільтруємо тільки ті, що співпадають з пошуком
                     return name.includes(term) || shortName.includes(term);
                 })
                 .sort((a, b) => {
-                    // Популярні першими
-                    if (a.popular && !b.popular) return -1;
-                    if (!a.popular && b.popular) return 1;
-                    
-                    // Потім за початком збігу
+                    // Сортуємо за початком збігу (не за популярністю, якщо є пошук)
                     const aName = a.name.toLowerCase();
                     const bName = b.name.toLowerCase();
                     const aStarts = aName.startsWith(term);
@@ -197,38 +194,22 @@ const AutocompleteInput = ({
                 >
                     {filteredOptions.map((option, index) => (
                         <button
-                            key={option.id}
+                            key={option.id || index}
                             type="button"
                             onClick={() => handleSelect(option)}
-                            className={`autocomplete-option w-full px-4 py-3 text-left transition-all duration-300 border-b-2 border-gray-600/50 last:border-b-0 group ${
-                                option.popular 
-                                    ? 'bg-gray-700 hover:bg-gray-600 hover:shadow-[0_0_10px_rgba(59,130,246,0.2)]' 
-                                    : 'bg-gray-800 hover:bg-gray-700 hover:shadow-[0_0_5px_rgba(75,85,99,0.2)]'
-                            }`}
+                            className="autocomplete-option w-full px-4 py-3 text-left transition-all duration-300 border-b-2 border-gray-600/50 last:border-b-0 group bg-gray-800 hover:bg-gray-700 hover:shadow-[0_0_10px_rgba(59,130,246,0.2)]"
                             style={{
                                 animationDelay: `${index * 20}ms`
                             }}
                         >
                             <div className="flex items-start gap-3">
-                                <div className={`flex-shrink-0 w-2 h-2 rounded-full mt-2 transition-all duration-300 ${
-                                    option.popular 
-                                        ? 'bg-blue-500 shadow-[0_0_6px_rgba(59,130,246,0.5)] group-hover:shadow-[0_0_10px_rgba(59,130,246,0.7)] group-hover:scale-150' 
-                                        : 'bg-gray-500 group-hover:bg-gray-400 group-hover:scale-125'
-                                }`}></div>
+                                <div className="flex-shrink-0 w-2 h-2 rounded-full mt-2 transition-all duration-300 bg-gray-500 group-hover:bg-blue-500 group-hover:shadow-[0_0_6px_rgba(59,130,246,0.5)] group-hover:scale-150"></div>
                                 <div className="flex-1 min-w-0">
-                                    <div className={`font-semibold text-sm leading-tight transition-colors duration-300 ${
-                                        option.popular 
-                                            ? 'text-blue-300 group-hover:text-blue-200' 
-                                            : 'text-white group-hover:text-gray-100'
-                                    }`}>
+                                    <div className="font-semibold text-sm leading-tight transition-colors duration-300 text-white group-hover:text-blue-200">
                                         {option.name}
                                     </div>
-                                    {option.shortName && (
-                                        <div className={`text-xs mt-1.5 font-medium transition-colors duration-300 ${
-                                            option.popular 
-                                                ? 'text-blue-400/80 group-hover:text-blue-300' 
-                                                : 'text-gray-400 group-hover:text-gray-300'
-                                        }`}>
+                                    {option.shortName && option.shortName !== option.name && (
+                                        <div className="text-xs mt-1.5 font-medium transition-colors duration-300 text-gray-400 group-hover:text-blue-300">
                                             {option.shortName}
                                         </div>
                                     )}
