@@ -29,8 +29,34 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
     });
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
+    const [focusedFields, setFocusedFields] = useState({});
     
     const totalSteps = 6;
+    
+    const handleFocus = (field) => {
+        setFocusedFields(prev => ({ ...prev, [field]: true }));
+    };
+    
+    const handleBlur = (field) => {
+        setFocusedFields(prev => ({ ...prev, [field]: false }));
+    };
+    
+    const getInputClassName = (field, hasError = false, baseClasses = 'w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 focus:outline-none transition-all duration-300') => {
+        const hasValue = formData[field] && formData[field].trim().length > 0;
+        const isFocused = focusedFields[field];
+        const shouldShowBlueBorder = hasValue || isFocused;
+        
+        if (hasError) {
+            return `${baseClasses} border border-red-400 shadow-[0_0_10px_rgba(248,113,113,0.5)]`;
+        }
+        
+        if (shouldShowBlueBorder) {
+            return `${baseClasses} border border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)] focus:border-blue-400 focus:shadow-[0_0_12px_rgba(59,130,246,0.6)]`;
+        }
+        
+        // Сіре обведення за замовчуванням
+        return `${baseClasses} border border-gray-500`;
+    };
 
     useEffect(() => {
         if (formData.firstName && formData.lastName && !formData.displayName) {
@@ -51,9 +77,19 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
     ];
 
     const handleChange = (field, value) => {
+        let formattedValue = value;
+        
+        // Для полів імен автоматично форматуємо: перша літера велика, решта малі
+        if (field === 'firstName' || field === 'lastName' || field === 'middleName') {
+            if (value.length > 0) {
+                // Перша літера велика, решта малі
+                formattedValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+            }
+        }
+        
         setFormData(prev => ({
             ...prev,
-            [field]: value
+            [field]: formattedValue
         }));
         if (errors[field]) {
             setErrors(prev => ({
@@ -94,7 +130,9 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
         if (step === 1) {
             if (!formData.firstName.trim()) newErrors.firstName = 'Ім\'я обов\'язкове';
             if (!formData.lastName.trim()) newErrors.lastName = 'Прізвище обов\'язкове';
+            if (!formData.middleName.trim()) newErrors.middleName = 'По батькові обов\'язкове';
             // displayName генерується автоматично на основі firstName, lastName, middleName
+            // phone не обов'язкове - пропускається якщо не вказано
         } else if (step === 2) {
             if (!formData.university.trim()) newErrors.university = 'Університет обов\'язковий';
             if (!formData.department.trim()) newErrors.department = 'Кафедра обов\'язкова';
@@ -176,11 +214,9 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                                 type="text"
                                 value={formData.firstName}
                                 onChange={(e) => handleChange('firstName', e.target.value)}
-                                className={`w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 focus:outline-none transition-all duration-300 ${
-                                    errors.firstName 
-                                        ? 'border border-red-400 shadow-[0_0_10px_rgba(248,113,113,0.5)]' 
-                                        : 'border border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)] focus:border-blue-400 focus:shadow-[0_0_12px_rgba(59,130,246,0.6)]'
-                                }`}
+                                onFocus={() => handleFocus('firstName')}
+                                onBlur={() => handleBlur('firstName')}
+                                className={getInputClassName('firstName', errors.firstName)}
                                 placeholder="Олександр"
                             />
                             {errors.firstName && <p className="text-red-400 text-sm mt-1">{errors.firstName}</p>}
@@ -192,11 +228,9 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                                 type="text"
                                 value={formData.lastName}
                                 onChange={(e) => handleChange('lastName', e.target.value)}
-                                className={`w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 focus:outline-none transition-all duration-300 ${
-                                    errors.lastName 
-                                        ? 'border border-red-400 shadow-[0_0_10px_rgba(248,113,113,0.5)]' 
-                                        : 'border border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)] focus:border-blue-400 focus:shadow-[0_0_12px_rgba(59,130,246,0.6)]'
-                                }`}
+                                onFocus={() => handleFocus('lastName')}
+                                onBlur={() => handleBlur('lastName')}
+                                className={getInputClassName('lastName', errors.lastName)}
                                 placeholder="Петренко"
                             />
                             {errors.lastName && <p className="text-red-400 text-sm mt-1">{errors.lastName}</p>}
@@ -208,18 +242,23 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                                 type="text"
                                 value={formData.middleName}
                                 onChange={(e) => handleChange('middleName', e.target.value)}
-                                className="w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 focus:outline-none transition-all duration-300 border border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)] focus:border-blue-400 focus:shadow-[0_0_12px_rgba(59,130,246,0.6)]"
+                                onFocus={() => handleFocus('middleName')}
+                                onBlur={() => handleBlur('middleName')}
+                                className={getInputClassName('middleName', errors.middleName)}
                                 placeholder="Володимирович"
                             />
+                            {errors.middleName && <p className="text-red-400 text-sm mt-1">{errors.middleName}</p>}
                         </div>
                         
                         <div>
-                            <label className="block text-sm mb-2">Номер телефону:</label>
+                            <label className="block text-sm mb-2">Номер телефону: <span className="text-gray-400 text-xs">(не обов'язково)</span></label>
                             <input
                                 type="tel"
                                 value={formData.phone}
                                 onChange={(e) => handleChange('phone', e.target.value)}
-                                className="w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 focus:outline-none transition-all duration-300 border border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)] focus:border-blue-400 focus:shadow-[0_0_12px_rgba(59,130,246,0.6)]"
+                                onFocus={() => handleFocus('phone')}
+                                onBlur={() => handleBlur('phone')}
+                                className={getInputClassName('phone')}
                                 placeholder="+380 12 345 67 89"
                             />
                         </div>
@@ -235,11 +274,9 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                                 type="text"
                                 value={formData.university}
                                 onChange={(e) => handleChange('university', e.target.value)}
-                                className={`w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 focus:outline-none transition-all duration-300 ${
-                                    errors.university 
-                                        ? 'border border-red-400 shadow-[0_0_10px_rgba(248,113,113,0.5)]' 
-                                        : 'border border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)] focus:border-blue-400 focus:shadow-[0_0_12px_rgba(59,130,246,0.6)]'
-                                }`}
+                                onFocus={() => handleFocus('university')}
+                                onBlur={() => handleBlur('university')}
+                                className={getInputClassName('university', errors.university)}
                                 placeholder="Львівський національний університет"
                             />
                             {errors.university && <p className="text-red-400 text-sm mt-1">{errors.university}</p>}
@@ -251,11 +288,9 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                                 type="text"
                                 value={formData.department}
                                 onChange={(e) => handleChange('department', e.target.value)}
-                                className={`w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 focus:outline-none transition-all duration-300 ${
-                                    errors.department 
-                                        ? 'border border-red-400 shadow-[0_0_10px_rgba(248,113,113,0.5)]' 
-                                        : 'border border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)] focus:border-blue-400 focus:shadow-[0_0_12px_rgba(59,130,246,0.6)]'
-                                }`}
+                                onFocus={() => handleFocus('department')}
+                                onBlur={() => handleBlur('department')}
+                                className={getInputClassName('department', errors.department)}
                                 placeholder="Кафедра комп'ютерних наук"
                             />
                             {errors.department && <p className="text-red-400 text-sm mt-1">{errors.department}</p>}
@@ -274,7 +309,12 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                                         type="text"
                                         value={subject}
                                         onChange={(e) => handleSubjectChange(index, e.target.value)}
-                                        className="flex-1 px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 focus:outline-none transition-all duration-300 border border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)] focus:border-blue-400 focus:shadow-[0_0_12px_rgba(59,130,246,0.6)]"
+                                        onFocus={() => handleFocus(`subject-${index}`)}
+                                        onBlur={() => handleBlur(`subject-${index}`)}
+                                        className={subject.trim() || focusedFields[`subject-${index}`] 
+                                            ? 'flex-1 px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 focus:outline-none transition-all duration-300 border border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)] focus:border-blue-400 focus:shadow-[0_0_12px_rgba(59,130,246,0.6)]'
+                                            : 'flex-1 px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 focus:outline-none transition-all duration-300 border border-gray-500'
+                                        }
                                         placeholder={`Предмет ${index + 1}`}
                                     />
                                     {formData.subjects.length > 1 && (
@@ -309,11 +349,9 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                                 type="password"
                                 value={formData.password}
                                 onChange={(e) => handleChange('password', e.target.value)}
-                                className={`w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 focus:outline-none transition-all duration-300 ${
-                                    errors.password 
-                                        ? 'border border-red-400 shadow-[0_0_10px_rgba(248,113,113,0.5)]' 
-                                        : 'border border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)] focus:border-blue-400 focus:shadow-[0_0_12px_rgba(59,130,246,0.6)]'
-                                }`}
+                                onFocus={() => handleFocus('password')}
+                                onBlur={() => handleBlur('password')}
+                                className={getInputClassName('password', errors.password)}
                                 placeholder="Мінімум 8 символів"
                             />
                             {errors.password && <p className="text-red-400 text-sm mt-1">{errors.password}</p>}
@@ -325,11 +363,9 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                                 type="password"
                                 value={formData.confirmPassword}
                                 onChange={(e) => handleChange('confirmPassword', e.target.value)}
-                                className={`w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 focus:outline-none transition-all duration-300 ${
-                                    errors.confirmPassword 
-                                        ? 'border border-red-400 shadow-[0_0_10px_rgba(248,113,113,0.5)]' 
-                                        : 'border border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)] focus:border-blue-400 focus:shadow-[0_0_12px_rgba(59,130,246,0.6)]'
-                                }`}
+                                onFocus={() => handleFocus('confirmPassword')}
+                                onBlur={() => handleBlur('confirmPassword')}
+                                className={getInputClassName('confirmPassword', errors.confirmPassword)}
                                 placeholder="Підтвердіть пароль"
                             />
                             {errors.confirmPassword && <p className="text-red-400 text-sm mt-1">{errors.confirmPassword}</p>}
@@ -416,9 +452,11 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                             <textarea
                                 value={formData.bio}
                                 onChange={(e) => handleChange('bio', e.target.value)}
+                                onFocus={() => handleFocus('bio')}
+                                onBlur={() => handleBlur('bio')}
                                 rows="6"
                                 maxLength="500"
-                                className="w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 resize-none focus:outline-none transition-all duration-300 border border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)] focus:border-blue-400 focus:shadow-[0_0_12px_rgba(59,130,246,0.6)]"
+                                className={getInputClassName('bio', false, 'w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 resize-none focus:outline-none transition-all duration-300')}
                                 placeholder="Коротка інформація про себе..."
                             />
                             <p className="text-xs text-gray-400 mt-2">
