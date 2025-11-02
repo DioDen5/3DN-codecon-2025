@@ -82,8 +82,111 @@ router.get('/', async (req, res) => {
         } catch (error) {
             console.error('Teachers fetch error:', error);
             res.status(500).json({ error: 'Failed to fetch teachers' });
+    }
+});
+
+// ВАЖЛИВО: специфічні роути мають бути ПЕРЕД параметризованими (/:id)
+// Отримати свій Teacher профіль (якщо є) - ПЕРЕД /:id
+router.get('/my-profile', authRequired, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        
+        if (req.user.role !== 'teacher') {
+            return res.status(403).json({ error: 'Only teachers can access this endpoint' });
         }
-    });
+        
+        // Безпечно конвертуємо userId в ObjectId
+        let teacher = null;
+        try {
+            const userIdObjectId = userId instanceof mongoose.Types.ObjectId 
+                ? userId 
+                : new mongoose.Types.ObjectId(userId);
+            teacher = await Teacher.findOne({ userId: userIdObjectId });
+        } catch (findError) {
+            console.error('Error finding teacher:', findError);
+            return res.json({ teacher: null, hasClaimRequest: false });
+        }
+        
+        if (!teacher) {
+            return res.json({ teacher: null, hasClaimRequest: false });
+        }
+        
+        // Перевіряємо чи є активна заявка (безпечно)
+        let hasClaimRequest = false;
+        try {
+            hasClaimRequest = await TeacherClaimRequest.exists({
+                userId: new mongoose.Types.ObjectId(userId),
+                status: 'pending'
+            }) || false;
+        } catch (claimRequestError) {
+            console.error('Error checking claim request:', claimRequestError);
+            hasClaimRequest = false;
+        }
+        
+        // Безпечне обчислення рейтингу
+        let rating = 0;
+        try {
+            rating = teacher.calculateRating ? teacher.calculateRating() : (teacher.rating || 0);
+        } catch (ratingError) {
+            console.error('Error calculating rating:', ratingError);
+            rating = teacher.rating || 0;
+        }
+        
+        // Безпечно конвертуємо teacher в об'єкт
+        let teacherWithRating;
+        try {
+            // Спробуємо різні способи конвертації
+            let teacherObject;
+            if (teacher.toObject && typeof teacher.toObject === 'function') {
+                teacherObject = teacher.toObject({ virtuals: true });
+            } else if (teacher.toJSON && typeof teacher.toJSON === 'function') {
+                teacherObject = teacher.toJSON();
+            } else {
+                // Якщо методи не працюють, використовуємо JSON parse/stringify
+                teacherObject = JSON.parse(JSON.stringify(teacher));
+            }
+            
+            teacherWithRating = {
+                ...teacherObject,
+                rating: rating
+            };
+        } catch (toObjectError) {
+            console.error('Error converting teacher to object:', toObjectError);
+            // Якщо всі методи не працюють, використовуємо явне вказання полів
+            teacherWithRating = {
+                _id: teacher._id.toString(),
+                name: teacher.name || '',
+                email: teacher.email || '',
+                university: teacher.university || '',
+                department: teacher.department || '',
+                subject: teacher.subject || '',
+                subjects: teacher.subjects || [],
+                image: teacher.image || '',
+                bio: teacher.bio || '',
+                status: teacher.status || 'pending',
+                userId: teacher.userId ? teacher.userId.toString() : null,
+                rating: rating,
+                likes: teacher.likes || 0,
+                dislikes: teacher.dislikes || 0,
+                comments: teacher.comments || 0,
+                totalVotes: teacher.totalVotes || 0,
+                createdAt: teacher.createdAt,
+                updatedAt: teacher.updatedAt
+            };
+        }
+        
+        res.json({ teacher: teacherWithRating, hasClaimRequest: !!hasClaimRequest });
+    } catch (error) {
+        console.error('Get my profile error:', error);
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+        res.status(500).json({ 
+            error: 'Failed to fetch profile', 
+            details: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
+    }
+});
 
 router.get('/:id', async (req, res) => {
     try {
@@ -229,49 +332,6 @@ router.get('/:id/reactions', authRequired, async (req, res) => {
         res.json(counts);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch reactions' });
-    }
-});
-
-// Отримати свій Teacher профіль (якщо є)
-router.get('/my-profile', authRequired, async (req, res) => {
-    try {
-        const userId = req.user.id;
-        
-        if (req.user.role !== 'teacher') {
-            return res.status(403).json({ error: 'Only teachers can access this endpoint' });
-        }
-        
-        const teacher = await Teacher.findOne({ userId: new mongoose.Types.ObjectId(userId) });
-        
-        if (!teacher) {
-            return res.json({ teacher: null, hasClaimRequest: false });
-        }
-        
-        // Перевіряємо чи є активна заявка
-        const hasClaimRequest = await TeacherClaimRequest.exists({
-            userId: new mongoose.Types.ObjectId(userId),
-            status: 'pending'
-        });
-        
-        // Безпечне обчислення рейтингу
-        let rating = 0;
-        try {
-            rating = teacher.calculateRating ? teacher.calculateRating() : (teacher.rating || 0);
-        } catch (ratingError) {
-            console.error('Error calculating rating:', ratingError);
-            rating = teacher.rating || 0;
-        }
-        
-        const teacherWithRating = {
-            ...teacher.toObject(),
-            rating: rating
-        };
-        
-        res.json({ teacher: teacherWithRating, hasClaimRequest: !!hasClaimRequest });
-    } catch (error) {
-        console.error('Get my profile error:', error);
-        console.error('Error stack:', error.stack);
-        res.status(500).json({ error: 'Failed to fetch profile', details: error.message });
     }
 });
 

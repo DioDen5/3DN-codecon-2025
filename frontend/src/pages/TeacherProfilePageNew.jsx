@@ -177,6 +177,9 @@ const TeacherProfilePageNew = () => {
             }
         } catch (error) {
             console.error('Error loading my teacher profile:', error);
+            if (error.response?.data) {
+                console.error('Server error details:', error.response.data);
+            }
             setMyTeacherProfile(null);
             setHasClaimRequest(false);
         }
