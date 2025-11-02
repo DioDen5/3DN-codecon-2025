@@ -371,16 +371,38 @@ const teacherRegisterSchema = z.object({
     faculty: z.string().min(2), // Обов'язкове поле
     department: z.string().min(2).optional(), // Тепер опціональне
     subjects: z.array(z.string().min(1)).min(1),
-    image: z.string().optional(), // Може бути URL або base64 рядок
+    image: z.string().min(1), // Обов'язкове поле, може бути URL або base64 рядок
     bio: z.string().min(10).max(500) // Обов'язкове поле, мінімум 10 символів
 });
 
 router.post('/register/teacher', async (req, res) => {
     try {
+        console.log('Received registration data:', {
+            email: req.body.email,
+            hasPassword: !!req.body.password,
+            displayName: req.body.displayName,
+            firstName: req.body.firstName,
+            lastName: req.body.lastName,
+            middleName: req.body.middleName,
+            university: req.body.university,
+            faculty: req.body.faculty,
+            department: req.body.department,
+            subjectsCount: req.body.subjects?.length,
+            hasImage: !!req.body.image,
+            imageLength: req.body.image?.length,
+            bio: req.body.bio?.substring(0, 50) + '...'
+        });
+        
         const parse = teacherRegisterSchema.safeParse(req.body);
         if (!parse.success) {
+            console.error('Validation error details:', JSON.stringify(parse.error.errors, null, 2));
             const errorMessage = parse.error?.errors?.[0]?.message || 'Invalid input';
-            return res.status(400).json({ error: errorMessage });
+            const errorPath = parse.error?.errors?.[0]?.path?.join('.') || 'unknown';
+            return res.status(400).json({ 
+                error: errorMessage,
+                field: errorPath,
+                errors: parse.error.errors
+            });
         }
 
         const { email, password, displayName, firstName, lastName, middleName, university, faculty, department, subjects, image, bio } = parse.data;
@@ -434,8 +456,6 @@ router.post('/register/teacher', async (req, res) => {
             status: 'pending'
         });
 
-        const teacherImage = image || '/api/placeholder/300/400';
-
         const teacher = await Teacher.create({
             name,
             university,
@@ -444,7 +464,7 @@ router.post('/register/teacher', async (req, res) => {
             subjects: subjects || [],
             subject: subjects && subjects.length > 0 ? subjects[0] : '',
             email: normalizedEmail,
-            image: teacherImage,
+            image: image,
             bio: bio || null,
             status: 'pending',
             userId: null

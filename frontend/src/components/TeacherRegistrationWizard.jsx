@@ -177,11 +177,6 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
     };
 
     const addSubject = () => {
-        const MAX_SUBJECTS = 10;
-        if (formData.subjects.length >= MAX_SUBJECTS) {
-            showError(`Можна додати максимум ${MAX_SUBJECTS} предметів`);
-            return;
-        }
         setFormData(prev => ({
             ...prev,
             subjects: [...prev.subjects, '']
@@ -269,6 +264,10 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
             else if (formData.password !== formData.confirmPassword) {
                 newErrors.confirmPassword = 'Паролі не співпадають';
             }
+        } else if (step === 5) {
+            if (!formData.imagePreview || !formData.image) {
+                newErrors.image = 'Фото профілю обов\'язкове';
+            }
         } else if (step === 6) {
             if (!formData.bio.trim()) {
                 newErrors.bio = 'Біографія обов\'язкова';
@@ -297,6 +296,15 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
         setLoading(true);
         try {
             const validSubjects = formData.subjects.filter(s => s.trim());
+            
+            // Перевірка обов'язкових полів перед відправкою
+            if (!formData.image || !formData.image.trim()) {
+                showError('Фото профілю обов\'язкове');
+                setErrors({ image: 'Фото профілю обов\'язкове' });
+                setLoading(false);
+                return;
+            }
+            
             const registrationData = {
                 email,
                 password: formData.password,
@@ -308,9 +316,11 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                 faculty: formData.faculty,
                 department: formData.department || undefined, // Опціональне поле
                 subjects: validSubjects,
-                image: formData.image || undefined,
+                image: formData.image, // Обов'язкове поле
                 bio: formData.bio
             };
+            
+            console.log('Registration data:', { ...registrationData, image: registrationData.image ? 'base64 image (length: ' + registrationData.image.length + ')' : 'missing' });
             
                     const { token, user, teacher } = await registerTeacher(registrationData);
                     loginSuccess({ token, user });
@@ -329,12 +339,35 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                     }, 100);
         } catch (error) {
             console.error('Registration error:', error);
-            const errorMessage = error.response?.data?.error || error.message || 'Помилка реєстрації. Спробуйте ще раз.';
+            let errorMessage = 'Помилка реєстрації. Спробуйте ще раз.';
+            
+            if (error.response?.data) {
+                console.error('Error response data:', error.response.data);
+                
+                // Якщо є деталі помилки валідації
+                if (Array.isArray(error.response.data.errors) && error.response.data.errors.length > 0) {
+                    // Якщо Zod повертає масив помилок
+                    const firstError = error.response.data.errors[0];
+                    errorMessage = `${firstError.path?.join('.') || 'Поле'}: ${firstError.message || 'помилка валідації'}`;
+                    console.error('Validation errors:', error.response.data.errors);
+                } else if (error.response.data.error) {
+                    errorMessage = error.response.data.error;
+                    if (error.response.data.field) {
+                        errorMessage = `${error.response.data.field}: ${errorMessage}`;
+                    }
+                } else if (error.response.data.message) {
+                    errorMessage = error.response.data.message;
+                }
+            } else if (error.message) {
+                errorMessage = error.message;
+            }
+            
             console.error('Error details:', {
                 status: error.response?.status,
                 data: error.response?.data,
                 message: errorMessage
             });
+            
             showError(errorMessage);
             setLoading(false);
         }
@@ -568,64 +601,37 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                                     
                                     return (
                                         <div key={index} className="relative">
-                                            <div className="flex gap-2 items-start">
-                                                <div className="flex-1">
-                                                    <AutocompleteInput
-                                                        value={subject}
-                                                        onChange={(value) => handleSubjectChange(index, value)}
-                                                        onFocus={() => handleFocus(`subject-${index}`)}
-                                                        onBlur={() => handleBlur(`subject-${index}`)}
-                                                        options={subjectOptions}
-                                                        placeholder={selectedFaculty ? `Предмет ${index + 1}` : "Спочатку оберіть факультет"}
-                                                        error={hasError}
-                                                        showPopular={true}
-                                                        maxResults={8}
-                                                        allowCustomInput={true}
-                                                        disabled={!selectedFaculty}
-                                                    />
-                                                    {hasError && (
-                                                        <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
-                                                            <span className="w-1 h-1 rounded-full bg-red-400"></span>
-                                                            {errors[`subject-${index}`]}
-                                                        </p>
-                                                    )}
-                                                </div>
-                                                {formData.subjects.length > 1 && (
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => removeSubject(index)}
-                                                        className="px-3 py-2 bg-red-500/80 hover:bg-red-600 rounded-md text-white transition-all duration-200 flex-shrink-0 mt-0 hover:scale-105 active:scale-95 shadow-md hover:shadow-lg"
-                                                        title="Видалити предмет"
-                                                    >
-                                                        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                                                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                                                        </svg>
-                                                    </button>
-                                                )}
-                                            </div>
+                                            <AutocompleteInput
+                                                value={subject}
+                                                onChange={(value) => handleSubjectChange(index, value)}
+                                                onFocus={() => handleFocus(`subject-${index}`)}
+                                                onBlur={() => handleBlur(`subject-${index}`)}
+                                                options={subjectOptions}
+                                                placeholder={selectedFaculty ? `Предмет ${index + 1}` : "Спочатку оберіть факультет"}
+                                                error={hasError}
+                                                showPopular={true}
+                                                maxResults={8}
+                                                allowCustomInput={true}
+                                                disabled={!selectedFaculty}
+                                            />
+                                            {hasError && (
+                                                <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
+                                                    <span className="w-1 h-1 rounded-full bg-red-400"></span>
+                                                    {errors[`subject-${index}`]}
+                                                </p>
+                                            )}
                                         </div>
                                     );
                                 })}
                             </div>
                             
-                            <div className="flex items-center gap-2 mt-3">
-                                <button
-                                    type="button"
-                                    onClick={addSubject}
-                                    disabled={formData.subjects.length >= 10}
-                                    className={`flex-1 py-2 rounded-md text-white transition font-medium ${
-                                        formData.subjects.length >= 10
-                                            ? 'bg-gray-500 cursor-not-allowed opacity-50'
-                                            : 'bg-blue-500 hover:bg-blue-600 hover:shadow-lg active:scale-95'
-                                    }`}
-                                >
-                                    + Додати предмет
-                                </button>
-                                <div className="px-3 py-2 bg-gray-700/50 rounded-md text-xs text-gray-300">
-                                    {formData.subjects.filter(s => s.trim()).length} / 10
-                                </div>
-                            </div>
+                            <button
+                                type="button"
+                                onClick={addSubject}
+                                className="w-full py-2 rounded-md text-white transition font-medium bg-blue-500 hover:bg-blue-600 hover:shadow-lg active:scale-95 mt-3"
+                            >
+                                + Додати предмет
+                            </button>
                             
                             {errors.subjects && (
                                 <div className="mt-2 p-2 bg-red-500/10 border border-red-500/30 rounded-md">
@@ -634,13 +640,6 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                                         {errors.subjects}
                                     </p>
                                 </div>
-                            )}
-                            
-                            {formData.subjects.length >= 10 && (
-                                <p className="text-xs text-yellow-400 mt-1 flex items-center gap-1">
-                                    <Lightbulb className="w-3 h-3" />
-                                    <span>Досягнуто максимальної кількості предметів (10)</span>
-                                </p>
                             )}
                             
                             {selectedFaculty && subjectOptions.length > 0 && (
@@ -769,11 +768,19 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                                         className="hidden"
                                     />
                                 </label>
-                                <p className="text-xs text-gray-400 text-center">
-                                    {formData.imagePreview 
-                                        ? 'Фото вибрано. Якщо не вибрано, буде використано фото за замовчуванням'
-                                        : 'Якщо не вибрано, буде використано фото за замовчуванням'}
-                                </p>
+                                {errors.image && (
+                                    <p className="text-red-400 text-sm mt-1 text-center">{errors.image}</p>
+                                )}
+                                {formData.imagePreview && (
+                                    <p className="text-xs text-green-400 text-center">
+                                        ✓ Фото вибрано
+                                    </p>
+                                )}
+                                {!formData.imagePreview && (
+                                    <p className="text-xs text-gray-400 text-center">
+                                        Фото профілю обов'язкове
+                                    </p>
+                                )}
                             </div>
                         </div>
                     </div>

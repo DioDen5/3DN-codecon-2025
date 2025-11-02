@@ -14,7 +14,8 @@ const AutocompleteInput = ({
     showPopular = true,
     maxResults = 8,
     allowCustomInput = true, // Дозволити вільний ввід, якщо опції не знайдено
-    disabled = false // Заблокувати інпут
+    disabled = false, // Заблокувати інпут
+    showClear = true // Показувати кнопку очищення
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
@@ -169,7 +170,7 @@ const AutocompleteInput = ({
                     title={searchTerm || placeholder}
                 />
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
-                    {searchTerm && (
+                    {searchTerm && showClear && (
                         <button
                             type="button"
                             onClick={handleClear}
