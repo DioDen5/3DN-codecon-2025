@@ -320,8 +320,7 @@ const SignupForm = ({ switchToLogin, onClose }) => {
                     
                     <form onSubmit={handleLoginWithCode} className="space-y-4">
                         <div>
-                            <label className="block text-sm mb-2">Код верифікації</label>
-                            <div className="flex gap-2 justify-center items-center">
+                            <div className="flex gap-3 justify-center items-center">
                                 {[0, 1, 2, 3, 4, 5].map((index) => {
                                     const digit = verificationCode[index] || '';
                                     const hasValue = digit !== '';
@@ -408,9 +407,9 @@ const SignupForm = ({ switchToLogin, onClose }) => {
                                 })}
                             </div>
                             {errors.code && (
-                                <p className="text-red-400 text-sm mt-1">{errors.code}</p>
+                                <p className="text-red-400 text-sm mt-3">{errors.code}</p>
                             )}
-                            <div className="flex justify-center mt-2">
+                            <div className="flex justify-center mt-4">
                                 <button
                                     type="button"
                                     onClick={() => handleSendCode(formData.email)}
@@ -421,7 +420,7 @@ const SignupForm = ({ switchToLogin, onClose }) => {
                             </div>
                         </div>
                         
-                        <div className="flex gap-3">
+                        <div className="flex gap-3 mt-6">
                             <button
                                 type="button"
                                 onClick={() => {

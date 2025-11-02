@@ -37,23 +37,36 @@ function AppContent() {
     useEffect(() => {
         const onAuthChanged = (e) => {
             if (e.detail?.isAuth) setModalType(null);
+            
+            // Перевіряємо чи потрібно показати модальне вікно для встановлення пароля після авторизації
+            const requiresPasswordSetup = sessionStorage.getItem('teacherRequiresPasswordSetup') === 'true';
+            if (requiresPasswordSetup && !showPasswordModal) {
+                setTimeout(() => {
+                    setShowPasswordModal(true);
+                    sessionStorage.removeItem('teacherRequiresPasswordSetup');
+                }, 200);
+            }
         };
         window.addEventListener("auth-changed", onAuthChanged);
         return () => window.removeEventListener("auth-changed", onAuthChanged);
-    }, []);
+    }, [showPasswordModal]);
 
     // Перевіряємо чи потрібно показати модальне вікно для встановлення пароля
-    // Перевіряємо при кожній зміні маршруту
+    // Перевіряємо при кожній зміні маршруту та одразу після монтування
     useEffect(() => {
-        const requiresPasswordSetup = sessionStorage.getItem('teacherRequiresPasswordSetup') === 'true';
-        if (requiresPasswordSetup) {
-            // Невелика затримка, щоб модальне вікно з'явилось після завершення навігації
-            setTimeout(() => {
-                setShowPasswordModal(true);
-                sessionStorage.removeItem('teacherRequiresPasswordSetup'); // Видаляємо флаг
-            }, 100);
-        }
-    }, [location.pathname]);
+        const checkPasswordSetup = () => {
+            const requiresPasswordSetup = sessionStorage.getItem('teacherRequiresPasswordSetup') === 'true';
+            if (requiresPasswordSetup && !showPasswordModal) {
+                // Невелика затримка, щоб модальне вікно з'явилось після завершення навігації
+                setTimeout(() => {
+                    setShowPasswordModal(true);
+                    sessionStorage.removeItem('teacherRequiresPasswordSetup'); // Видаляємо флаг
+                }, 100);
+            }
+        };
+        
+        checkPasswordSetup();
+    }, [location.pathname, showPasswordModal]);
 
     return (
         <>

@@ -108,8 +108,7 @@ const LoginForm = ({ switchToReset, onSuccess }) => {
                 
                 <form onSubmit={handleLoginWithCode} className="space-y-4">
                     <div>
-                        <label className="block text-sm mb-2">Код верифікації</label>
-                        <div className="flex gap-2 justify-center items-center">
+                        <div className="flex gap-3 justify-center items-center">
                             {[0, 1, 2, 3, 4, 5].map((index) => {
                                 const digit = verificationCode[index] || '';
                                 const hasValue = digit !== '';
@@ -191,7 +190,7 @@ const LoginForm = ({ switchToReset, onSuccess }) => {
                                 );
                             })}
                         </div>
-                        <div className="flex justify-center mt-2">
+                        <div className="flex justify-center mt-4">
                             <button
                                 type="button"
                                 onClick={handleSendCode}
@@ -202,9 +201,9 @@ const LoginForm = ({ switchToReset, onSuccess }) => {
                         </div>
                     </div>
                     
-                    {error && <p className="text-red-400 text-sm">{error}</p>}
+                    {error && <p className="text-red-400 text-sm mt-3">{error}</p>}
                     
-                    <div className="flex gap-3">
+                    <div className="flex gap-3 mt-6">
                         <button
                             type="button"
                             onClick={() => {

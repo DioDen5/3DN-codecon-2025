@@ -74,6 +74,50 @@ async function createTestTeachers() {
                 image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
                 status: 'verified',
                 userId: null
+            },
+            {
+                email: 'test.teacher7@lnu.edu.ua',
+                name: 'Дмитро Мельник',
+                university: 'ЛНУ ім. І. Франка',
+                department: 'Кафедра біології',
+                subject: 'Генетика',
+                subjects: ['Генетика', 'Молекулярна біологія'],
+                image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
+                status: 'verified',
+                userId: null
+            },
+            {
+                email: 'test.teacher8@lnu.edu.ua',
+                name: 'Олена Захаренко',
+                university: 'ЛНУ ім. І. Франка',
+                department: 'Кафедра психології',
+                subject: 'Соціальна психологія',
+                subjects: ['Соціальна психологія', 'Клінічна психологія'],
+                image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
+                status: 'verified',
+                userId: null
+            },
+            {
+                email: 'test.teacher9@lnu.edu.ua',
+                name: 'Андрій Ткаченко',
+                university: 'ЛНУ ім. І. Франка',
+                department: 'Кафедра економіки',
+                subject: 'Мікроекономіка',
+                subjects: ['Мікроекономіка', 'Макроекономіка'],
+                image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
+                status: 'verified',
+                userId: null
+            },
+            {
+                email: 'test.teacher10@lnu.edu.ua',
+                name: 'Сергій Бондаренко',
+                university: 'ЛНУ ім. І. Франка',
+                department: 'Кафедра політології',
+                subject: 'Теорія політики',
+                subjects: ['Теорія політики', 'Міжнародні відносини'],
+                image: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
+                status: 'verified',
+                userId: null
             }
         ];
         
