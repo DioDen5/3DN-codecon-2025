@@ -108,3 +108,10 @@
     background: linear-gradient(180deg, rgba(96, 165, 250, 0.5), rgba(59, 130, 246, 0.6)) !important;
 }
 
+/* Стилі для обрізання тексту в інпуті з ellipsis */
+.autocomplete-input {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+

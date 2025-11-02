@@ -138,7 +138,7 @@ const AutocompleteInput = ({
         }
     }, [isOpen]);
 
-    const baseInputClasses = className || 'w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 focus:outline-none transition-all duration-300';
+    const baseInputClasses = className || 'w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 focus:outline-none transition-all duration-300 pr-14 overflow-hidden text-ellipsis whitespace-nowrap';
     const inputClasses = error
         ? `${baseInputClasses} border border-red-400 shadow-[0_0_10px_rgba(248,113,113,0.5)]`
         : disabled
@@ -169,15 +169,16 @@ const AutocompleteInput = ({
                     className={inputClasses}
                     placeholder={placeholder}
                     readOnly={disabled}
+                    title={searchTerm || placeholder}
                 />
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
                     {searchTerm && (
                         <button
                             type="button"
                             onClick={handleClear}
-                            className="text-gray-400 hover:text-gray-600 transition-colors"
+                            className="group"
                         >
-                            <X className="w-4 h-4" />
+                            <X className="w-4 h-4 text-gray-400 group-hover:text-gray-600 group-hover:rotate-90 transition-transform duration-300" />
                         </button>
                     )}
                     <ChevronDown 
