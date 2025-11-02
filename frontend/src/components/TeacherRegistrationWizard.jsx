@@ -390,15 +390,15 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                     </div>
                 </div>
                 
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center mb-4">
                     {steps.map((step, index) => {
                         const Icon = step.icon;
                         const isActive = currentStep === step.number;
                         const isCompleted = currentStep > step.number;
                         
                         return (
-                            <div key={step.number} className="flex items-center flex-1">
-                                <div className="flex flex-col items-center flex-1">
+                            <React.Fragment key={step.number}>
+                                <div className="flex flex-col items-center flex-shrink-0" style={{ width: '54px' }}>
                                     <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
                                         isActive 
                                             ? 'bg-blue-600 scale-110 shadow-lg shadow-blue-500/50' 
@@ -412,14 +412,14 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                                             <Icon className="w-5 h-5 text-white" />
                                         )}
                                     </div>
-                                    <p className={`text-xs mt-2 text-center ${isActive ? 'font-semibold' : ''}`}>
+                                    <p className={`text-xs mt-2 text-center whitespace-nowrap ${isActive ? 'font-semibold' : ''}`}>
                                         {step.title}
                                     </p>
                                 </div>
                                 {index < steps.length - 1 && (
-                                    <div className={`flex-1 h-1 mx-2 transition-all duration-300 ${isCompleted ? 'bg-green-500' : 'bg-gray-600'}`} />
+                                    <div className={`h-1 flex-1 mx-2 min-w-[20px] transition-all duration-300 ${isCompleted ? 'bg-green-500' : 'bg-gray-600'}`} />
                                 )}
-                            </div>
+                            </React.Fragment>
                         );
                     })}
                 </div>
