@@ -1,7 +1,7 @@
 /* Custom scrollbar for autocomplete dropdown */
 .autocomplete-dropdown-wrapper {
     scrollbar-width: thin;
-    scrollbar-color: #4B5563 #374151;
+    scrollbar-color: rgba(147, 197, 253, 0.3) #374151;
     -ms-overflow-style: scrollbar;
 }
 
@@ -22,7 +22,7 @@
 }
 
 .autocomplete-dropdown-wrapper::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #4B5563, #6B7280) !important;
+    background: linear-gradient(180deg, rgba(147, 197, 253, 0.3), rgba(96, 165, 250, 0.4)) !important;
     border-radius: 4px;
     display: block !important;
     visibility: visible !important;
@@ -30,7 +30,7 @@
 }
 
 .autocomplete-dropdown-wrapper::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, #6B7280, #9CA3AF) !important;
+    background: linear-gradient(180deg, rgba(96, 165, 250, 0.5), rgba(59, 130, 246, 0.6)) !important;
 }
 
 /* Анімація появи опцій */
@@ -86,7 +86,7 @@
 }
 
 .autocomplete-dropdown-wrapper.always-show-scrollbar {
-    scrollbar-color: #4B5563 #374151 !important;
+    scrollbar-color: rgba(147, 197, 253, 0.3) #374151 !important;
 }
 
 .autocomplete-dropdown-wrapper.always-show-scrollbar::-webkit-scrollbar-track {
@@ -97,7 +97,7 @@
 }
 
 .autocomplete-dropdown-wrapper.always-show-scrollbar::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #4B5563, #6B7280) !important;
+    background: linear-gradient(180deg, rgba(147, 197, 253, 0.3), rgba(96, 165, 250, 0.4)) !important;
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
@@ -105,6 +105,6 @@
 }
 
 .autocomplete-dropdown-wrapper.always-show-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, #6B7280, #9CA3AF) !important;
+    background: linear-gradient(180deg, rgba(96, 165, 250, 0.5), rgba(59, 130, 246, 0.6)) !important;
 }
 
