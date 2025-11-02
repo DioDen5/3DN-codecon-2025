@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, Activity, Settings, Mail, Calendar, Award, MessageCircle, MessageSquare, ThumbsUp, Star, GraduationCap, BookOpen, Shield, Lock, Key, Power, ToggleRight, Play, Smartphone, ShieldCheck, Eye, EyeOff, Edit3, Clock, CheckCircle, AlertCircle, FileQuestion, Sparkles, Wind, Inbox, MessageSquarePlus, Zap } from 'lucide-react';
+import { ArrowLeft, User, Activity, Settings, Mail, Calendar, Award, MessageCircle, MessageSquare, ThumbsUp, Star, GraduationCap, BookOpen, Building2, Shield, Lock, Key, Power, ToggleRight, Play, Smartphone, ShieldCheck, Eye, EyeOff, Edit3, Clock, CheckCircle, AlertCircle, FileQuestion, Sparkles, Wind, Inbox, MessageSquarePlus, Zap } from 'lucide-react';
 import { useAuthState } from '../api/useAuthState';
 import { getNameChangeStatus } from '../api/name-change';
 import { getMyTeacherProfile, getTeacher } from '../api/teachers';
@@ -295,28 +295,42 @@ const TeacherProfilePageNew = () => {
                 
                 <div className="relative">
                     <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
-                        <ProfilePictureUpload
-                            currentAvatar={profilePicture || teacher?.image}
-                            userName={getCurrentDisplayName()}
-                            onImageChange={handleProfilePictureChange}
-                            size="large"
-                            className="w-16 h-16 sm:w-20 sm:h-20 md:w-23 md:h-23"
-                        />
+                        <div className="flex flex-col items-center">
+                            <ProfilePictureUpload
+                                currentAvatar={profilePicture || teacher?.image}
+                                userName={getCurrentDisplayName()}
+                                onImageChange={handleProfilePictureChange}
+                                size="large"
+                                className="w-16 h-16 sm:w-20 sm:h-20 md:w-23 md:h-23"
+                            />
+                            {teacher?.position && (
+                                <div className="flex items-center gap-1 text-blue-600 font-semibold -mt-1.5 -ml-3">
+                                    <Award size={16} />
+                                    <span className="text-xs sm:text-sm">{teacher.position}</span>
+                                </div>
+                            )}
+                        </div>
                         <div className="flex-1 text-center sm:text-left">
                             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{teacher?.name}</h1>
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-3">
-                                <div className="flex items-center gap-2 text-gray-600">
-                                    <GraduationCap size={18} />
-                                    <span className="text-sm sm:text-base">{teacher?.university}</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-gray-600">
-                                    <BookOpen size={18} />
-                                    <span className="text-sm sm:text-base">{teacher?.department}</span>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-2 text-blue-600 font-semibold">
-                                <Award size={18} />
-                                <span className="text-sm sm:text-base">{teacher?.position || 'Посада не вказана'}</span>
+                            <div className="flex flex-col gap-2">
+                                {teacher?.university && (
+                                    <div className="flex items-center gap-2 text-gray-600">
+                                        <GraduationCap size={18} />
+                                        <span className="text-sm sm:text-base">{teacher.university}</span>
+                                    </div>
+                                )}
+                                {teacher?.faculty && (
+                                    <div className="flex items-center gap-2 text-gray-600">
+                                        <Building2 size={18} />
+                                        <span className="text-sm sm:text-base">{teacher.faculty}</span>
+                                    </div>
+                                )}
+                                {teacher?.department && (
+                                    <div className="flex items-center gap-2 text-gray-600">
+                                        <BookOpen size={18} />
+                                        <span className="text-sm sm:text-base">{teacher.department}</span>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
