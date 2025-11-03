@@ -5,7 +5,7 @@ import specializationsData from '../data/specializations.json';
  * @param {Array<string>} subjects - Масив предметів викладача
  * @returns {Object|null} - Об'єкт спеціалізації або null, якщо не знайдено
  */
-export function getSpecializationBySubjects(subjects) {
+export function getSpecializationBySubjects(subjects, faculty = '', department = '') {
     if (!subjects || !Array.isArray(subjects) || subjects.length === 0) {
         return null;
     }
@@ -67,6 +67,23 @@ export function getSpecializationBySubjects(subjects) {
         }
     }
 
+    // Додаткові евристики за факультетом/кафедрою, якщо ключові слова з предметів не спрацювали
+    const text = `${(faculty || '').toLowerCase()} ${(department || '').toLowerCase()}`;
+    if (text) {
+        const findByCode = (code) => specializationsData.find(s => s.code === code) || null;
+        if (/філолог/i.test(text) || /лінгв/i.test(text) || /мов/i.test(text)) return findByCode('Philology');
+        if (/фізик/i.test(text)) return findByCode('Physics');
+        if (/математ/i.test(text) || /прикладн.*матем/i.test(text)) return findByCode('Math');
+        if (/істор/i.test(text)) return findByCode('History');
+        if (/хім/i.test(text)) return findByCode('Chemistry');
+        if (/інформат/i.test(text) || /комп.?ютер/i.test(text) || /програм/i.test(text)) {
+            // якщо в предметах є AI/ML ключі — повертаємо AI/ML, інакше Web Dev
+            const subjStr = (subjects || []).join(' ').toLowerCase();
+            const hasAIML = /машин|штучн|нейрон/i.test(subjStr);
+            return findByCode(hasAIML ? 'AI/ML' : 'Web Dev');
+        }
+    }
+
     // Якщо нічого не знайдено, повертаємо null
     return null;
 }
@@ -89,6 +106,6 @@ export function getTeacherSpecialization(teacher) {
 
     // Якщо немає, визначаємо автоматично на основі subjects
     const subjects = teacher.subjects || (teacher.subject ? [teacher.subject] : []);
-    return getSpecializationBySubjects(subjects);
+    return getSpecializationBySubjects(subjects, teacher.faculty, teacher.department);
 }
 
