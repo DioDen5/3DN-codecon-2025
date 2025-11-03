@@ -13,6 +13,7 @@ async function createTestTeachers() {
                 email: 'test.teacher1@lnu.edu.ua',
                 name: 'Іван Петренко',
                 university: 'ЛНУ ім. І. Франка',
+                faculty: 'Факультет математики та інформатики',
                 department: 'Кафедра математики',
                 subject: 'Математика',
                 subjects: ['Математика', 'Алгебра'],
@@ -118,6 +119,34 @@ async function createTestTeachers() {
                 image: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
                 status: 'verified',
                 userId: null
+            },
+            {
+                email: 'test.teacher11@lnu.edu.ua',
+                name: 'Оксана Іваненко',
+                university: 'ЛНУ ім. І. Франка',
+                faculty: 'Факультет філології',
+                department: 'Кафедра філології',
+                subject: 'Українська література',
+                subjects: ['Українська література', 'Українська мова'],
+                image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
+                bio: 'Досвідчений викладач української літератури з багаторічним стажем. Спеціалізуюсь на класичній та сучасній українській літературі.',
+                position: 'Доцент',
+                status: 'verified',
+                userId: null
+            },
+            {
+                email: 'test.teacher12@lnu.edu.ua',
+                name: 'Володимир Сидоренко',
+                university: 'ЛНУ ім. І. Франка',
+                faculty: 'Факультет прикладної математики та інформатики',
+                department: 'Кафедра комп\'ютерних наук',
+                subject: 'Програмна інженерія',
+                subjects: ['Програмна інженерія', 'Веб-програмування', 'Бази даних'],
+                image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
+                bio: 'Професійний розробник та викладач програмної інженерії. Маю великий досвід у розробці веб-додатків та роботі з сучасними технологіями.',
+                position: 'Професор',
+                status: 'verified',
+                userId: null
             }
         ];
         
@@ -140,10 +169,13 @@ async function createTestTeachers() {
                 name: teacherData.name,
                 email: teacherData.email,
                 university: teacherData.university,
-                department: teacherData.department,
+                faculty: teacherData.faculty || teacherData.department || 'Не вказано',
+                department: teacherData.department || null,
                 subject: teacherData.subject,
                 subjects: teacherData.subjects,
                 image: teacherData.image,
+                bio: teacherData.bio || 'Викладач в університеті. Маю досвід у навчанні студентів.',
+                position: teacherData.position || 'Викладач',
                 status: teacherData.status,
                 userId: null, // НЕ прив'язаний до User - це ключове для тестування!
                 rating: 0,

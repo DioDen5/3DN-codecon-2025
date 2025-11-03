@@ -260,9 +260,16 @@ router.get('/:id', async (req, res) => {
             return res.status(404).json({ error: 'Teacher not found' });
         }
         
+        const rating = teacher.calculateRating ? teacher.calculateRating() : (teacher.rating || 0);
+        
         const teacherWithRating = {
             ...teacher.toObject(),
-            rating: teacher.calculateRating()
+            rating: rating,
+            // Переконуємося, що всі поля статистики включені
+            comments: teacher.comments || 0,
+            likes: teacher.likes || 0,
+            dislikes: teacher.dislikes || 0,
+            totalVotes: teacher.totalVotes || 0
         };
         
         res.json(teacherWithRating);

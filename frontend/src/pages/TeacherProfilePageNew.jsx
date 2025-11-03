@@ -57,7 +57,7 @@ const TeacherProfilePageNew = () => {
                     const data = await getTeacher(id);
                     setTeacher(data);
                     setStats({
-                        reviews: data.totalReviews || 0,
+                        reviews: data.comments || 0,
                         averageRating: data.rating || 0,
                         totalLikes: data.likes || 0,
                         totalDislikes: data.dislikes || 0
@@ -154,6 +154,15 @@ const TeacherProfilePageNew = () => {
                 setHasClaimRequest(data.hasClaimRequest || false);
                 // Якщо є прив'язаний профіль, завантажуємо його дані
                 setTeacher(data.teacher);
+                // Логуємо position для діагностики
+                console.log('Teacher position from API:', data.teacher.position);
+                // Встановлюємо статистику з даних учителя
+                setStats({
+                    reviews: data.teacher.comments || 0,
+                    averageRating: data.teacher.rating || 0,
+                    totalLikes: data.teacher.likes || 0,
+                    totalDislikes: data.teacher.dislikes || 0
+                });
                 // Встановлюємо фото профілю з Teacher профілю, якщо воно є та не є placeholder
                 if (data.teacher.image && 
                     data.teacher.image !== '/api/placeholder/300/400' && 

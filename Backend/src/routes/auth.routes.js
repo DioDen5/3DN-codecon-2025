@@ -710,12 +710,17 @@ router.post('/login-with-code', async (req, res) => {
 
         if (!user) {
             const passwordHash = await bcrypt.hash(Math.random().toString(36), 10);
+            // Розбиваємо ім'я на частини для firstName і lastName
+            const nameParts = teacher.name.trim().split(/\s+/);
+            const firstName = nameParts[0] || teacher.name || 'Викладач';
+            const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : teacher.name || 'Викладач';
+            
             user = await User.create({
                 email: normalizedEmail,
                 passwordHash,
-                displayName: teacher.name.split(' ')[0],
-                firstName: teacher.name.split(' ')[0],
-                lastName: teacher.name.split(' ').slice(-1)[0],
+                displayName: firstName,
+                firstName: firstName,
+                lastName: lastName,
                 role: 'teacher',
                 status: 'verified'
             });
@@ -728,7 +733,26 @@ router.post('/login-with-code', async (req, res) => {
         if (!teacher.userId) {
             teacher.userId = user._id;
             teacher.status = 'verified';
-            await teacher.save();
+            // Перевіряємо, чи є обов'язкові поля (якщо їх не було в старих профілях)
+            if (!teacher.faculty) {
+                teacher.faculty = teacher.department || teacher.university || 'Не вказано';
+            }
+            // НЕ встановлюємо bio та position автоматично, якщо вони вже є
+            // Встановлюємо базові значення тільки якщо поля порожні, щоб уникнути помилок валідації
+            if (!teacher.bio || teacher.bio.trim() === '') {
+                teacher.bio = `Викладач ${teacher.subject || teacher.subjects?.[0] || 'предмета'} в ${teacher.university}. Маю досвід у навчанні студентів.`;
+            }
+            // НЕ перезаписуємо position, якщо воно вже встановлено адміном
+            // Встановлюємо тільки якщо поле справді порожнє
+            if (!teacher.position || teacher.position.trim() === '') {
+                teacher.position = 'Викладач'; // Базове значення, якщо не встановлено адміном
+            }
+            try {
+                await teacher.save();
+            } catch (saveError) {
+                console.error('Error saving teacher after login:', saveError);
+                // Якщо помилка через обов'язкові поля, все одно продовжуємо
+            }
         }
 
         user.status = 'verified';
@@ -761,7 +785,17 @@ router.post('/login-with-code', async (req, res) => {
         });
     } catch (error) {
         console.error('Login with code error:', error);
-        res.status(500).json({ error: 'Failed to login with code' });
+        console.error('Error stack:', error.stack);
+        console.error('Error details:', {
+            message: error.message,
+            name: error.name,
+            email: req.body?.email,
+            code: req.body?.code
+        });
+        res.status(500).json({ 
+            error: 'Failed to login with code',
+            details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
     }
 });
 
