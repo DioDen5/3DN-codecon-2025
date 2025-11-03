@@ -353,6 +353,17 @@ const TeacherProfilePageNew = () => {
 
     const renderProfileTab = () => (
         <div className="space-y-6 md:space-y-8">
+            {user?.role === 'teacher' && myTeacherProfile && myTeacherProfile.status === 'pending' && (
+                <div className="bg-gradient-to-r from-yellow-100 via-orange-100 to-amber-100 text-gray-900 rounded-2xl p-4 border border-yellow-200 shadow-sm flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-yellow-400/30 flex items-center justify-center flex-shrink-0">
+                        <Clock className="w-4 h-4 text-yellow-700" />
+                    </div>
+                    <div>
+                        <p className="font-semibold">Ваш профіль на перевірці</p>
+                        <p className="text-sm text-gray-700">Після модерації адміністратором статус зміниться на «Верифіковано», і профіль буде опубліковано.</p>
+                    </div>
+                </div>
+            )}
             {/* Заголовок профілю */}
             <div className="bg-white text-black rounded-2xl p-6 shadow-xl border border-gray-200 relative overflow-hidden group profile-card">
                 {/* Декоративні елементи */}
