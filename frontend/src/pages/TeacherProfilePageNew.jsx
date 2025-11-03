@@ -4,6 +4,7 @@ import { ArrowLeft, User, Activity, Settings, Mail, Calendar, Award, MessageCirc
 import { useAuthState } from '../api/useAuthState';
 import { getNameChangeStatus } from '../api/name-change';
 import { getMyTeacherProfile, getTeacher } from '../api/teachers';
+import { getTeacherComments } from '../api/teacher-comments';
 import StarRating from '../components/StarRating';
 import NameChangeModal from '../components/NameChangeModal';
 import ProfilePictureUpload from '../components/ProfilePictureUpload';
@@ -48,6 +49,53 @@ const TeacherProfilePageNew = () => {
     const [hasClaimRequest, setHasClaimRequest] = useState(false);
     const [showClaimModal, setShowClaimModal] = useState(false);
 
+    // Завантаження відгуків для викладача
+    const loadReviews = async (teacherId) => {
+        if (!teacherId) {
+            setReviews([]);
+            setReviewsLoading(false);
+            return;
+        }
+        
+        setReviewsLoading(true);
+        try {
+            const commentsData = await getTeacherComments(teacherId);
+            const comments = commentsData.comments || [];
+            
+            // Форматуємо відгуки для відображення
+            const formattedReviews = comments.map((comment) => {
+                // Конвертуємо rating від 1-5 до 1-10 для відображення
+                const rating = comment.rating || 0;
+                const ratingOutOf10 = rating > 0 ? (rating / 5) * 10 : 0;
+                
+                // Отримуємо ім'я автора
+                let authorName = 'Анонімний користувач';
+                if (comment.authorId) {
+                    if (typeof comment.authorId === 'object') {
+                        authorName = comment.authorId.displayName || comment.authorId.name || authorName;
+                    } else {
+                        authorName = comment.authorName || authorName;
+                    }
+                }
+                
+                return {
+                    id: comment._id || comment.id,
+                    author: authorName,
+                    comment: comment.body || comment.text || '',
+                    rating: ratingOutOf10, // Конвертований rating від 1-5 до 1-10
+                    date: comment.createdAt || comment.date || new Date().toISOString()
+                };
+            });
+            
+            setReviews(formattedReviews);
+        } catch (error) {
+            console.error('Error loading reviews:', error);
+            setReviews([]);
+        } finally {
+            setReviewsLoading(false);
+        }
+    };
+
     // Завантаження профілю викладача за ID (якщо переглядається чужий профіль)
     useEffect(() => {
         if (id && id !== user?.id) {
@@ -82,6 +130,15 @@ const TeacherProfilePageNew = () => {
             loadMyTeacherProfile();
         }
     }, [user]);
+
+    // Завантаження відгуків, коли профіль викладача завантажений
+    useEffect(() => {
+        if (teacher && teacher._id) {
+            // Використовуємо id з URL якщо це чужий профіль, інакше teacher._id
+            const teacherId = (id && id !== user?.id) ? id : teacher._id;
+            loadReviews(teacherId);
+        }
+    }, [teacher?._id, id, user?.id]);
 
     const handleTabChange = (tabId) => {
         setActiveTab(tabId);
