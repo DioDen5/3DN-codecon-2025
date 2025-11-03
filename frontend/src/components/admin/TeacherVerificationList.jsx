@@ -15,7 +15,12 @@ const Item = ({ t, onApprove, onReject }) => {
                             </div>
                             <div>
                                 <div className="font-medium text-gray-900">Запит на верифікацію профілю</div>
-                                <div className="text-sm text-gray-600">{t.name} • {t.userId?.email || '—'}</div>
+                                <div className="text-sm text-gray-600">
+                                    {t.name} • {t.userId?.email || '—'}
+                                    {t.createdAt && (
+                                        <span className="text-gray-500"> • {new Date(t.createdAt).toLocaleString('uk-UA', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                                    )}
+                                </div>
                             </div>
                         </div>
                         <div className="flex flex-wrap gap-2 mb-3">
