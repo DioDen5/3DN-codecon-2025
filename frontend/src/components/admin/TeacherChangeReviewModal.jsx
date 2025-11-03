@@ -53,8 +53,8 @@ const TeacherChangeReviewModal = ({ item, onClose, onApprove, onReject }) => {
     return createPortal(
         <div className={`fixed inset-0 z-50 flex items-center justify-center ${isClosing ? 'modal-closing' : 'report-backdrop-animate'}`}>
             <div className={`absolute inset-0 bg-black/50 backdrop-blur-sm ${isClosing ? '' : 'report-backdrop-animate'}`} onClick={handleClose} />
-            <div className={`relative w-[95vw] max-w-3xl bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden ${isClosing ? 'modal-closing' : 'report-modal-animate'} ring-1 ring-white/10 shadow-[0_0_108px_22px_rgba(37,99,235,0.25)]`}>
-                <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50">
+            <div className={`relative w-[94vw] max-w-2xl bg-white rounded-2xl shadow-2xl border border-gray-200 ${isClosing ? 'modal-closing' : 'report-modal-animate'} ring-1 ring-white/10 shadow-[0_0_108px_22px_rgba(37,99,235,0.25)] max-h-[88vh] overflow-y-auto`}>
+                <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50 sticky top-0 z-10">
                     <div className="flex items-center gap-3 min-w-0">
                         <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow">
                             <User size={18} />
@@ -80,7 +80,7 @@ const TeacherChangeReviewModal = ({ item, onClose, onApprove, onReject }) => {
                     </div>
                 </div>
 
-                <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Row label="Посада" value={c.position ?? orig.position} icon={Award} changed={isChanged('position')} />
                     <Row label="Телефон" value={(c.phone ?? orig.phone) || 'не вказано'} icon={Smartphone} changed={isChanged('phone')} />
                     <Row label="Університет" value={c.university ?? orig.university} icon={GraduationCap} changed={isChanged('university')} />
@@ -107,7 +107,7 @@ const TeacherChangeReviewModal = ({ item, onClose, onApprove, onReject }) => {
                     </div>
                 </div>
 
-                <div className="px-5 py-4 border-t border-gray-200 bg-white flex items-center justify-between gap-3">
+                <div className="px-4 py-3 border-t border-gray-200 bg-white flex items-center justify-between gap-3 sticky bottom-0 z-10">
                     <div className="flex gap-3">
                         <button onClick={() => onReject(item._id)} className="flex items-center gap-2 px-4 py-2 bg-red-100 border border-red-300 rounded-lg text-red-700 font-medium hover:bg-red-200 hover:scale-105 hover:shadow-md transition-all duration-300 cursor-pointer">
                             Відхилити

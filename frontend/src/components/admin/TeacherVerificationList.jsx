@@ -1,36 +1,55 @@
 import React, { useState } from 'react';
-import { CheckCircle, XCircle, GraduationCap, Mail } from 'lucide-react';
+import { GraduationCap, Mail, Eye } from 'lucide-react';
+import TeacherVerificationModal from './TeacherVerificationModal';
 
 const Item = ({ t, onApprove, onReject }) => {
-    const [reason, setReason] = useState('');
+    const [open, setOpen] = useState(false);
     return (
-        <div className="rounded-xl p-4 border transition-all duration-500 ease-out relative bg-gray-50 border-gray-200 hover:moderation-glow" style={{ animation: 'slideInFromLeft 0.6s ease-out both' }}>
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div className="space-y-1">
-                    <div className="flex items-center gap-2 text-gray-900 font-semibold">
-                        <GraduationCap size={16} /> {t.name}
+        <>
+            <div className="rounded-xl p-4 border transition-all duration-500 ease-out relative bg-gray-50 border-gray-200 hover:moderation-glow" style={{ animation: 'slideInFromLeft 0.6s ease-out both' }}>
+                <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                                <GraduationCap className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <div className="font-medium text-gray-900">Запит на верифікацію профілю</div>
+                                <div className="text-sm text-gray-600">{t.name} • {t.userId?.email || '—'}</div>
+                            </div>
+                        </div>
+                        <div className="flex flex-wrap gap-2 mb-3">
+                            {t.university && (
+                                <span className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-gray-100 border border-gray-200 text-gray-800">
+                                    <span className="text-[10px] uppercase tracking-wide text-gray-500">Університет:</span>
+                                    <span className="font-medium">{t.university}</span>
+                                </span>
+                            )}
+                            {t.faculty && (
+                                <span className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-gray-100 border border-gray-200 text-gray-800">
+                                    <span className="text-[10px] uppercase tracking-wide text-gray-500">Факультет:</span>
+                                    <span className="font-medium">{t.faculty}</span>
+                                </span>
+                            )}
+                        </div>
+                        <div className="flex gap-2">
+                            <button onClick={() => setOpen(true)} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm hover:bg-blue-200 hover:shadow-lg hover:shadow-blue-300/50 active:scale-95 active:shadow-inner transition-all duration-300 cursor-pointer flex items-center gap-1">
+                                <Eye className="w-4 h-4" /> Переглянути
+                            </button>
+                        </div>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Mail size={14} /> {t.userId?.email || '—'}
-                    </div>
-                    <div className="text-xs text-gray-500">Університет: {t.university || '—'} | Факультет: {t.faculty || '—'}</div>
-                </div>
-                <div className="flex items-center gap-2">
-                    <button onClick={() => onApprove(t._id)} className="px-3 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors cursor-pointer flex items-center gap-2">
-                        <CheckCircle size={16} /> Схвалити
-                    </button>
-                    <input
-                        value={reason}
-                        onChange={(e)=>setReason(e.target.value)}
-                        placeholder="Причина відхилення"
-                        className="px-2 py-2 border border-gray-300 rounded-lg text-sm"
-                    />
-                    <button onClick={() => onReject(t._id, reason)} className="px-3 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors cursor-pointer flex items-center gap-2">
-                        <XCircle size={16} /> Відхилити
-                    </button>
                 </div>
             </div>
-        </div>
+            {open && (
+                <TeacherVerificationModal
+                    item={t}
+                    isOpen={open}
+                    onClose={() => setOpen(false)}
+                    onApprove={(id) => { setOpen(false); onApprove?.(id); }}
+                    onReject={(id, reason) => { setOpen(false); onReject?.(id, reason); }}
+                />
+            )}
+        </>
     );
 };
 
