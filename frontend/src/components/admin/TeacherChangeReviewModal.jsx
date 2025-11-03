@@ -1,5 +1,6 @@
-import React from 'react';
-import { X, CheckCircle, XCircle, GraduationCap, Building2, BookOpen, User, Smartphone, Image, FileText, Award } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { X, CheckCircle, XCircle, GraduationCap, Building2, BookOpen, User, Smartphone, Image, FileText, Award, Mail } from 'lucide-react';
 
 const Row = ({ label, value, icon: Icon, changed = false }) => {
     const valueClass = changed ? 'text-yellow-700' : 'text-gray-900';
@@ -23,8 +24,23 @@ const Row = ({ label, value, icon: Icon, changed = false }) => {
 };
 
 const TeacherChangeReviewModal = ({ item, onClose, onApprove, onReject }) => {
+    const [isClosing, setIsClosing] = useState(false);
+    useEffect(() => {
+        // Блокуємо прокрутку під час відкритої модалки
+        document.body.style.overflow = 'hidden';
+        return () => { document.body.style.overflow = 'unset'; };
+    }, []);
+
+    const handleClose = () => {
+        setIsClosing(true);
+        setTimeout(() => {
+            setIsClosing(false);
+            onClose?.();
+        }, 300);
+    };
     const c = item?.pendingChanges || {};
     const orig = item || {};
+    const email = item?.email || item?.userId?.email || '';
 
     const isChanged = (key, formatter) => {
         if (!(key in c)) return false;
@@ -34,23 +50,34 @@ const TeacherChangeReviewModal = ({ item, onClose, onApprove, onReject }) => {
     };
 
     const subjectsToString = (arr) => Array.isArray(arr) ? arr.filter(Boolean).join(', ') : (arr || '');
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-            <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-            <div className="relative w-[95vw] max-w-3xl bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden animate-[fadeIn_0.2s_ease-out]">
+    return createPortal(
+        <div className={`fixed inset-0 z-50 flex items-center justify-center ${isClosing ? 'modal-closing' : 'report-backdrop-animate'}`}>
+            <div className={`absolute inset-0 bg-black/50 backdrop-blur-sm ${isClosing ? '' : 'report-backdrop-animate'}`} onClick={handleClose} />
+            <div className={`relative w-[95vw] max-w-3xl bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden ${isClosing ? 'modal-closing' : 'report-modal-animate'} ring-1 ring-white/10 shadow-[0_0_108px_22px_rgba(37,99,235,0.25)]`}>
                 <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
                         <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow">
                             <User size={18} />
                         </div>
-                        <div>
+                        <div className="min-w-0">
                             <div className="text-sm text-gray-500">Запит на зміну профілю</div>
-                            <div className="text-base font-bold text-gray-900">{item?.name || 'Викладач'}</div>
+                            <div className="text-base font-bold text-gray-900 whitespace-normal break-words flex items-center gap-2">
+                                <span>{item?.name || 'Викладач'}</span>
+                                {email && (
+                                    <span className="text-sm font-medium text-blue-700 break-all flex items-center gap-1">
+                                        <span className="text-gray-400">—</span>
+                                        <Mail size={14} />
+                                        {email}
+                                    </span>
+                                )}
+                            </div>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-2 rounded-full bg-blue-50 border border-blue-200 text-blue-700 hover:bg-blue-100 active:bg-blue-200 transition-colors group" aria-label="Закрити">
-                        <X className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
-                    </button>
+                    <div className="flex items-center gap-3">
+                        <button onClick={handleClose} className="p-2 rounded-full bg-blue-50 border border-blue-200 text-blue-700 hover:bg-blue-100 active:bg-blue-200 transition-colors group" aria-label="Закрити">
+                            <X className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
+                        </button>
+                    </div>
                 </div>
 
                 <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -74,22 +101,32 @@ const TeacherChangeReviewModal = ({ item, onClose, onApprove, onReject }) => {
                         <div className="text-xs text-gray-500 mb-2 flex items-center gap-2">
                             <FileText size={16} /> Біографія {isChanged('bio') && <span className="inline-flex items-center px-2 py-[2px] rounded-full text-[10px] font-semibold border bg-yellow-50 border-yellow-200 text-yellow-700">змінено</span>}
                         </div>
-                        <div className={`p-3 rounded-xl border ${isChanged('bio') ? 'border-yellow-300 bg-yellow-50 text-yellow-800' : 'border-gray-200 bg-gray-50 text-gray-800'} text-sm leading-relaxed whitespace-pre-wrap`}>
+                        <div className={`p-3 rounded-xl border ${isChanged('bio') ? 'border-yellow-300 bg-yellow-50 text-yellow-800' : 'border-gray-200 bg-gray-50 text-gray-800'} text-sm leading-relaxed whitespace-pre-wrap max-h-56 overflow-auto`}>
                             {(c.bio ?? orig.bio) || '—'}
                         </div>
                     </div>
                 </div>
 
-                <div className="px-5 py-4 border-t border-gray-200 bg-white flex items-center justify-end gap-3">
-                    <button onClick={onClose} className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Скасувати</button>
-                    <button onClick={() => onReject(item._id)} className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors flex items-center gap-2"><XCircle size={16} /> Відхилити</button>
-                    <button onClick={() => onApprove(item._id)} className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors flex items-center gap-2"><CheckCircle size={16} /> Схвалити</button>
+                <div className="px-5 py-4 border-t border-gray-200 bg-white flex items-center justify-between gap-3">
+                    <div className="flex gap-3">
+                        <button onClick={() => onReject(item._id)} className="flex items-center gap-2 px-4 py-2 bg-red-100 border border-red-300 rounded-lg text-red-700 font-medium hover:bg-red-200 hover:scale-105 hover:shadow-md transition-all duration-300 cursor-pointer">
+                            Відхилити
+                        </button>
+                        <button onClick={() => onApprove(item._id)} className="flex items-center gap-2 px-4 py-2 bg-green-100 border border-green-300 rounded-lg text-green-700 font-medium hover:bg-green-200 hover:scale-105 hover:shadow-md transition-all duration-300 cursor-pointer">
+                            Схвалити
+                        </button>
+                    </div>
+                    <button onClick={handleClose} className="px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-200 hover:scale-105 hover:shadow-md transition-all duration-300 cursor-pointer">
+                        Скасувати
+                    </button>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 
 export default TeacherChangeReviewModal;
+
 
 
