@@ -69,6 +69,7 @@ const TeacherProfilePageNew = () => {
     });
     const [editErrors, setEditErrors] = useState({});
     const [submittingChanges, setSubmittingChanges] = useState(false);
+    const [phoneFocused, setPhoneFocused] = useState(false);
 
     // Ключ у сховищі для запам'ятовування закритого банера (прив'язаний до конкретного профілю та статусу)
     const bannerStorageKey = myTeacherProfile?._id
@@ -946,9 +947,11 @@ const TeacherProfilePageNew = () => {
 
             {/* Редагування профілю викладача (у Налаштуваннях) */}
             <div className="bg-white text-black rounded-2xl p-6 shadow-xl border border-gray-200 relative overflow-hidden group">
+                {/* Декоративні елементи (ідентично блоку налаштування профілю) */}
+                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-100/50 to-indigo-100/30 rounded-full -translate-y-16 translate-x-16 animate-pulse decorative-element-1"></div>
                 <div className="relative">
                     <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-3">
-                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg">
+                        <div className="w-8 h-8 bg-gradient-to-br from-blue-400 via-blue-600 to-blue-800 rounded-lg flex items-center justify-center shadow-lg transition-transform duration-300 security-icon-glow security-icon-pulse security-icon-rotate security-icon-shimmer relative overflow-hidden">
                             <Edit3 className="w-4 h-4 text-white" />
                         </div>
                         Редагування профілю
@@ -977,7 +980,18 @@ const TeacherProfilePageNew = () => {
                                     </div>
                                     <div>
                                         <label className="block text-sm font-medium mb-1">Телефон</label>
-                                        <input value={editForm.phone} onChange={e=>handleEditChange('phone', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-500/40" placeholder="+380..." />
+                                        <input
+                                            value={editForm.phone}
+                                            onChange={e=>handleEditChange('phone', e.target.value)}
+                                            onFocus={()=>setPhoneFocused(true)}
+                                            onBlur={()=>setPhoneFocused(false)}
+                                            className={`w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 border transition-all duration-300 focus:outline-none ${
+                                                (phoneFocused || (editForm.phone && editForm.phone.trim().length > 0))
+                                                    ? 'border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)] focus:border-blue-400 focus:shadow-[0_0_12px_rgba(59,130,246,0.6)]'
+                                                    : 'border-gray-300'
+                                            }`}
+                                            placeholder="+380..."
+                                        />
                                         {teacher && (
                                             <div className="text-xs text-gray-500 mt-1">
                                                 Зараз: {teacher.phone ? teacher.phone : 'не вказано'}
@@ -1055,17 +1069,42 @@ const TeacherProfilePageNew = () => {
                                     <div className="text-xs text-gray-500 mt-2">Зараз: {teacher.subjects.join(', ')}</div>
                                 )}
                             </div>
-                            <div className="p-4 rounded-xl border border-gray-200">
+                            <div className="p-4 rounded-xl border border-gray-200 relative overflow-hidden">
+                                {/* декоративне коло у правому верхньому куті */}
+                                <div className="pointer-events-none absolute -top-8 -right-8 w-40 h-40 rounded-full bg-gradient-to-br from-blue-100/40 to-indigo-100/30" />
                                 <h4 className="font-semibold text-gray-900 mb-3">Фото та Біографія</h4>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm font-medium mb-1">Фото профілю</label>
-                                        <input type="file" accept="image/*" onChange={(e)=>{ const f=e.target.files?.[0]; if(!f) return; const r=new FileReader(); r.onloadend=()=>handleEditChange('image', r.result); r.readAsDataURL(f); }} className="block w-full text-sm" />
-                                        {editForm.image && <p className="text-xs text-gray-500 mt-1">Зображення обрано</p>}
+                                        <label className="block text-sm font-medium mb-2">Фото профілю</label>
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold shadow">
+                                                {(editForm.image || teacher?.image) ? (
+                                                    <img src={editForm.image || teacher?.image} alt="preview" className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <span className="text-xl">{(teacher?.name||'U').charAt(0)}</span>
+                                                )}
+                                            </div>
+                                            <div>
+                                                <label className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 cursor-pointer transition-colors">
+                                                    <input type="file" accept="image/*" onChange={(e)=>{ const f=e.target.files?.[0]; if(!f) return; const r=new FileReader(); r.onloadend=()=>handleEditChange('image', r.result); r.readAsDataURL(f); }} className="hidden" />
+                                                    Обрати фото
+                                                </label>
+                                                {(editForm.image || teacher?.image) && (
+                                                    <p className="text-xs text-gray-500 mt-1">Зараз відображається попередній перегляд фото</p>
+                                                )}
+                                            </div>
+                                        </div>
                                     </div>
                                     <div>
                                         <label className="block text-sm font-medium mb-1">Біографія</label>
-                                        <textarea value={editForm.bio} onChange={e=>handleEditChange('bio', e.target.value)} rows={6} maxLength={500} className={`w-full px-3 py-2 rounded-lg border ${editErrors.bio?'border-red-400':'border-gray-300'} focus:border-blue-400 focus:ring-2 focus:ring-blue-500/40`} placeholder="Коротка інформація про себе..." />
+                                        <textarea
+                                            value={editForm.bio}
+                                            onChange={e=>handleEditChange('bio', e.target.value)}
+                                            rows={6}
+                                            maxLength={500}
+                                            className={`w-full px-3 py-2 rounded-lg border ${editErrors.bio?'border-red-400':'border-gray-300'} focus:border-blue-400 focus:ring-2 focus:ring-blue-500/40`}
+                                            placeholder={editForm.bio?.trim() ? '' : 'Коротка інформація про себе...'}
+                                        />
                                         <div className="text-xs text-gray-500 mt-1">{editForm.bio.length}/500</div>
                                     </div>
                                 </div>
