@@ -13,7 +13,10 @@ import {
     resolveReport,
     rejectReport,
     approveTeacherClaimRequest,
-    rejectTeacherClaimRequest
+    rejectTeacherClaimRequest,
+    getTeacherPendingChanges,
+    approveTeacherPendingChanges,
+    rejectTeacherPendingChanges
 } from '../../api/admin-stats';
 import { useTeacherData } from '../../contexts/TeacherDataContext';
 
@@ -27,6 +30,7 @@ export const useAdminData = () => {
     const [reportsData, setReportsData] = useState([]);
     const [nameChangeRequests, setNameChangeRequests] = useState([]);
     const [teacherClaimRequests, setTeacherClaimRequests] = useState([]);
+    const [teacherVerificationRequests, setTeacherVerificationRequests] = useState([]);
     const [activityData, setActivityData] = useState([]);
     
     const [moderationData, setModerationData] = useState(null);
@@ -75,6 +79,30 @@ export const useAdminData = () => {
         totalItems: 0
     });
 
+    const [teacherPendingChanges, setTeacherPendingChanges] = useState([]);
+
+    const loadTeacherPendingChanges = useCallback(async () => {
+        try {
+            const { getTeacherPendingChanges } = await import('../../api/admin-stats');
+            const data = await getTeacherPendingChanges();
+            setTeacherPendingChanges(data || []);
+        } catch (e) {
+            console.error('Error loading teacher pending changes:', e);
+            setTeacherPendingChanges([]);
+        }
+    }, []);
+
+    const loadTeacherClaimRequests = useCallback(async () => {
+        try {
+            const { getAdminTeacherClaimRequests } = await import('../../api/admin-stats');
+            const data = await getAdminTeacherClaimRequests();
+            setTeacherClaimRequests(data || []);
+        } catch (e) {
+            console.error('Error loading teacher claim requests:', e);
+            setTeacherClaimRequests([]);
+        }
+    }, []);
+
     // Зберігаємо поточні сторінки для кожного типу контенту
     const [currentAnnouncementsPage, setCurrentAnnouncementsPage] = useState(1);
     const [currentCommentsPage, setCurrentCommentsPage] = useState(1);
@@ -86,13 +114,15 @@ export const useAdminData = () => {
             setLoading(true);
             setError(null);
 
-            const [stats, users, reports, nameChanges, teacherClaims, activityResponse] = await Promise.all([
+            const [stats, users, reports, nameChanges, teacherClaims, activityResponse, pendingChanges, verification] = await Promise.all([
                 getAdminStats(),
                 getAdminUsers(),
                 getAdminReports(),
                 getAdminNameChangeRequests(),
                 getAdminTeacherClaimRequests(),
-                getAdminActivity(1)
+                getAdminActivity(1),
+                getTeacherPendingChanges(),
+                (await import('../../api/admin-stats')).getTeacherVerificationRequests()
             ]);
 
             setStatsData(stats);
@@ -100,6 +130,8 @@ export const useAdminData = () => {
             setReportsData(reports);
             setNameChangeRequests(nameChanges);
             setTeacherClaimRequests(teacherClaims);
+            setTeacherPendingChanges(pendingChanges || []);
+            setTeacherVerificationRequests(verification || []);
             
             console.log('Reports loaded:', reports.length);
             setActivityData(activityResponse.content || []);
@@ -114,7 +146,8 @@ export const useAdminData = () => {
             const moderationData = {
                 announcements: stats.activeAnnouncements,
                 comments: stats.totalComments,
-                reviews: stats.totalReviews
+                reviews: stats.totalReviews,
+                teacherChanges: (pendingChanges || []).length
             };
             setModerationData(moderationData);
 
@@ -548,6 +581,29 @@ export const useAdminData = () => {
         }
     };
 
+    // Teacher pending changes handlers
+    const approveTeacherPendingChanges = async (teacherId) => {
+        try {
+            const { approveTeacherPendingChanges: apiApprove, getTeacherPendingChanges: apiList } = await import('../../api/admin-stats');
+            await apiApprove(teacherId);
+            const updated = await apiList();
+            setTeacherPendingChanges(updated || []);
+        } catch (e) {
+            console.error('Error approving teacher pending changes:', e);
+        }
+    };
+
+    const rejectTeacherPendingChanges = async (teacherId) => {
+        try {
+            const { rejectTeacherPendingChanges: apiReject, getTeacherPendingChanges: apiList } = await import('../../api/admin-stats');
+            await apiReject(teacherId);
+            const updated = await apiList();
+            setTeacherPendingChanges(updated || []);
+        } catch (e) {
+            console.error('Error rejecting teacher pending changes:', e);
+        }
+    };
+
     return {
         loading,
         error,
@@ -566,6 +622,10 @@ export const useAdminData = () => {
         announcementsPagination,
         commentsPagination,
         reviewsPagination,
+        teacherPendingChanges,
+        teacherVerificationRequests,
+        loadTeacherPendingChanges,
+        loadTeacherClaimRequests,
         loadAdminData,
         loadAnnouncements,
         loadComments,
@@ -592,6 +652,8 @@ export const useAdminData = () => {
         teacherClaimRequests,
         approveTeacherClaimRequest: handleApproveTeacherClaimRequest,
         rejectTeacherClaimRequest: handleRejectTeacherClaimRequest,
+        approveTeacherPendingChanges,
+        rejectTeacherPendingChanges,
         refreshCurrentContent: async (contentType) => {
             try {
                 console.log('refreshCurrentContent called with:', contentType);

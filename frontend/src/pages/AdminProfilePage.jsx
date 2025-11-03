@@ -79,6 +79,12 @@ const AdminProfilePageRefactored = () => {
         approveNameRequest,
         rejectNameRequest,
         teacherClaimRequests,
+        teacherPendingChanges,
+        teacherVerificationRequests,
+        loadTeacherPendingChanges,
+        loadTeacherClaimRequests,
+        approveTeacherPendingChanges,
+        rejectTeacherPendingChanges,
         approveTeacherClaimRequest,
         rejectTeacherClaimRequest
     } = useAdminData();
@@ -146,6 +152,8 @@ const AdminProfilePageRefactored = () => {
                 loadComments(1);
             } else if (moderationFilter === 'reviews') {
                 loadReviews(1);
+            } else if (moderationFilter === 'teacher-changes') {
+                loadTeacherPendingChanges();
             }
             // 'all' вже завантажується в loadAdminData()
         }
@@ -367,9 +375,23 @@ const AdminProfilePageRefactored = () => {
                             nameChangeRequests={nameChangeRequests}
                             onApproveNameRequest={(id) => approveNameRequest(id)}
                             onRejectNameRequest={(id) => rejectNameRequest(id)}
-                            teacherClaimRequests={teacherClaimRequests}
-                            onApproveTeacherClaimRequest={(id, notes) => approveTeacherClaimRequest(id, notes)}
-                            onRejectTeacherClaimRequest={(id, notes) => rejectTeacherClaimRequest(id, notes)}
+                            teacherClaimRequests={undefined}
+                            onApproveTeacherClaimRequest={undefined}
+                            onRejectTeacherClaimRequest={undefined}
+                            teacherPendingChanges={teacherPendingChanges}
+                            onApproveTeacherPendingChanges={(teacherId) => approveTeacherPendingChanges(teacherId)}
+                            onRejectTeacherPendingChanges={(teacherId) => rejectTeacherPendingChanges(teacherId)}
+                            teacherVerificationRequests={teacherVerificationRequests}
+                            onApproveTeacherVerification={async (teacherId) => {
+                                const { approveTeacherVerification } = await import('../api/admin-stats');
+                                await approveTeacherVerification(teacherId);
+                                await loadAdminData();
+                            }}
+                            onRejectTeacherVerification={async (teacherId, reason) => {
+                                const { rejectTeacherVerification } = await import('../api/admin-stats');
+                                await rejectTeacherVerification(teacherId, reason || 'Виправте дані профілю');
+                                await loadAdminData();
+                            }}
                         />
                     )}
 

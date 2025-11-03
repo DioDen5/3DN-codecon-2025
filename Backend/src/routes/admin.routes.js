@@ -975,8 +975,7 @@ router.post('/teacher-verification-requests/:id/reject', ...adminAuth, async (re
 router.get('/teacher-pending-changes', ...adminAuth, async (req, res) => {
     try {
         const teachers = await Teacher.find({ 
-            pendingChanges: { $ne: null, $exists: true },
-            status: 'verified'
+            pendingChanges: { $ne: null, $exists: true }
         })
         .populate('userId', 'email displayName')
         .sort({ lastEditedAt: -1 });

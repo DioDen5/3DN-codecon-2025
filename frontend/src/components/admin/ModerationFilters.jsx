@@ -16,7 +16,8 @@ const ModerationFilters = ({
         { id: 'comments', label: 'Коментарі', icon: MessageCircle },
         { id: 'reviews', label: 'Відгуки', icon: Star },
         { id: 'name-requests', label: 'Зміна імені', icon: UserRound },
-        { id: 'teacher-claims', label: 'Заявки викладачів', icon: GraduationCap }
+        { id: 'teacher-verification', label: 'Верифікація викладачів', icon: GraduationCap },
+        { id: 'teacher-changes', label: 'Зміни профілів викладачів', icon: GraduationCap }
     ];
 
     return (
@@ -44,8 +45,10 @@ const ModerationFilters = ({
                                             ? 'bg-purple-500 text-white shadow-lg transform scale-105'
                                             : filter.id === 'name-requests'
                                             ? 'bg-blue-400 text-white shadow-lg transform scale-105'
-                                            : filter.id === 'teacher-claims'
-                                            ? 'bg-indigo-500 text-white shadow-lg transform scale-105'
+                                            : filter.id === 'teacher-changes'
+                                            ? 'bg-indigo-600 text-white shadow-lg transform scale-105'
+                                            : filter.id === 'teacher-verification'
+                                            ? 'bg-blue-600 text-white shadow-lg transform scale-105'
                                             : 'bg-blue-500 text-white shadow-lg transform scale-105'
                                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-105'
                                 }`}
@@ -57,7 +60,7 @@ const ModerationFilters = ({
                     })}
                 </div>
 
-                <div className="flex-1">
+                <div className="flex-1 lg:flex-none lg:w-[370px]">
                     <SearchInput 
                         placeholder="Пошук по тексту..."
                         value={moderationSearch}

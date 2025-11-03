@@ -8,6 +8,8 @@ import AllContentList from './AllContentList';
 import ModerationPagination from './ModerationPagination';
 import NameRequestsList from './NameRequestsList';
 import TeacherClaimRequestsList from './TeacherClaimRequestsList';
+import TeacherPendingChangesList from './TeacherPendingChangesList';
+import TeacherVerificationList from './TeacherVerificationList';
 
 const AdminModeration = ({
     moderationFilter,
@@ -51,7 +53,13 @@ const AdminModeration = ({
     onRejectNameRequest,
     teacherClaimRequests,
     onApproveTeacherClaimRequest,
-    onRejectTeacherClaimRequest
+    onRejectTeacherClaimRequest,
+    teacherPendingChanges,
+    onApproveTeacherPendingChanges,
+    onRejectTeacherPendingChanges,
+    teacherVerificationRequests,
+    onApproveTeacherVerification,
+    onRejectTeacherVerification
 }) => {
     return (
         <div className="space-y-6">
@@ -155,11 +163,18 @@ const AdminModeration = ({
                     <NameRequestsList nameRequests={nameChangeRequests} onApprove={onApproveNameRequest} onReject={onRejectNameRequest} />
                 )}
 
-                {moderationFilter === 'teacher-claims' && (
-                    <TeacherClaimRequestsList 
-                        teacherClaimRequests={teacherClaimRequests} 
-                        onApprove={onApproveTeacherClaimRequest} 
-                        onReject={onRejectTeacherClaimRequest} 
+                {moderationFilter === 'teacher-verification' && (
+                    <TeacherVerificationList
+                        items={teacherVerificationRequests}
+                        onApprove={onApproveTeacherVerification}
+                        onReject={onRejectTeacherVerification}
+                    />
+                )}
+                {moderationFilter === 'teacher-changes' && (
+                    <TeacherPendingChangesList 
+                        items={teacherPendingChanges}
+                        onApprove={onApproveTeacherPendingChanges}
+                        onReject={onRejectTeacherPendingChanges}
                     />
                 )}
             </div>

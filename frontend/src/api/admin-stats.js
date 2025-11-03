@@ -212,3 +212,65 @@ export const rejectTeacherClaimRequest = async (requestId, adminNotes = '') => {
         throw error;
     }
 };
+
+// Teacher pending profile changes
+export const getTeacherPendingChanges = async () => {
+    try {
+        const response = await http.get('/admin/teacher-pending-changes');
+        return response.data;
+    } catch (error) {
+        console.error('Error getting teacher pending changes:', error);
+        throw error;
+    }
+};
+
+export const approveTeacherPendingChanges = async (teacherId) => {
+    try {
+        const response = await http.post(`/admin/teacher-pending-changes/${teacherId}/approve`);
+        return response.data;
+    } catch (error) {
+        console.error('Error approving teacher pending changes:', error);
+        throw error;
+    }
+};
+
+export const rejectTeacherPendingChanges = async (teacherId) => {
+    try {
+        const response = await http.post(`/admin/teacher-pending-changes/${teacherId}/reject`);
+        return response.data;
+    } catch (error) {
+        console.error('Error rejecting teacher pending changes:', error);
+        throw error;
+    }
+};
+
+// Teacher verification requests
+export const getTeacherVerificationRequests = async () => {
+    try {
+        const response = await http.get('/admin/teacher-verification-requests');
+        return response.data;
+    } catch (error) {
+        console.error('Error getting teacher verification requests:', error);
+        throw error;
+    }
+};
+
+export const approveTeacherVerification = async (teacherId) => {
+    try {
+        const response = await http.post(`/admin/teacher-verification-requests/${teacherId}/approve`);
+        return response.data;
+    } catch (error) {
+        console.error('Error approving teacher verification:', error);
+        throw error;
+    }
+};
+
+export const rejectTeacherVerification = async (teacherId, rejectionReason) => {
+    try {
+        const response = await http.post(`/admin/teacher-verification-requests/${teacherId}/reject`, { rejectionReason });
+        return response.data;
+    } catch (error) {
+        console.error('Error rejecting teacher verification:', error);
+        throw error;
+    }
+};

@@ -9,6 +9,7 @@ import { useAuthState } from '../api/useAuthState';
 import { getNameChangeStatus } from '../api/name-change';
 import { getMyTeacherProfile, getTeacher, submitTeacherChangeRequest } from '../api/teachers';
 import { getTeacherComments } from '../api/teacher-comments';
+import { useNotification } from '../contexts/NotificationContext';
 import StarRating from '../components/StarRating';
 import NameChangeModal from '../components/NameChangeModal';
 import ProfilePictureUpload from '../components/ProfilePictureUpload';
@@ -19,6 +20,7 @@ const TeacherProfilePageNew = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { user } = useAuthState();
+    const { showSuccess, showError } = useNotification();
     
     const [activeTab, setActiveTab] = useState(() => {
         return localStorage.getItem('teacherProfileActiveTab') || 'profile';
@@ -69,6 +71,7 @@ const TeacherProfilePageNew = () => {
     });
     const [editErrors, setEditErrors] = useState({});
     const [submittingChanges, setSubmittingChanges] = useState(false);
+    const [changeSubmittedBanner, setChangeSubmittedBanner] = useState(false);
     const [phoneFocused, setPhoneFocused] = useState(false);
 
     // Ключ у сховищі для запам'ятовування закритого банера (прив'язаний до конкретного профілю та статусу)
@@ -192,6 +195,10 @@ const TeacherProfilePageNew = () => {
         try {
             await submitTeacherChangeRequest(diff);
             showSuccess?.('Зміни надіслано на розгляд');
+            if (myTeacherProfile?._id) {
+                try { localStorage.setItem(`teacherChangeSubmitted:${myTeacherProfile._id}`, '1'); } catch {}
+            }
+            setChangeSubmittedBanner(true);
             setEditMode(false);
         } catch (e) {
             console.error(e);
@@ -200,6 +207,15 @@ const TeacherProfilePageNew = () => {
             setSubmittingChanges(false);
         }
     };
+
+    // Читаємо прапорець показу успішного банера для поточного вчителя
+    useEffect(() => {
+        if (myTeacherProfile?._id) {
+            try {
+                setChangeSubmittedBanner(localStorage.getItem(`teacherChangeSubmitted:${myTeacherProfile._id}`) === '1');
+            } catch {}
+        }
+    }, [myTeacherProfile?._id]);
 
     // Автокомпліт дані (університет/факультет/кафедра)
     const universityOptions = Array.from(new Set((facultiesData || []).map(u => u.universityName)))
@@ -835,6 +851,12 @@ const TeacherProfilePageNew = () => {
         <div className="space-y-6">
             {/* Налаштування профілю */}
             <div className="bg-white text-black rounded-2xl p-6 shadow-xl border border-gray-200 relative overflow-hidden group profile-settings-card">
+                {changeSubmittedBanner && (
+                    <div className="mb-4 p-3 rounded-xl border-2 border-green-200 bg-gradient-to-br from-green-50 to-emerald-50 text-green-800 flex items-center justify-between">
+                        <span className="font-semibold">Зміни успішно надіслані на модерацію</span>
+                        <button onClick={() => { setChangeSubmittedBanner(false); if (myTeacherProfile?._id) { try { localStorage.removeItem(`teacherChangeSubmitted:${myTeacherProfile._id}`); } catch {} } }} className="px-2 py-1 text-green-700 hover:bg-green-100 rounded-lg cursor-pointer">Закрити</button>
+                    </div>
+                )}
                 {/* Декоративні елементи */}
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-100/50 to-indigo-100/30 rounded-full -translate-y-16 translate-x-16 animate-pulse decorative-element-1"></div>
                 <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-indigo-100/40 to-blue-100/30 rounded-full translate-y-12 -translate-x-12 animate-bounce decorative-element-2" style={{animationDuration: '3s'}}></div>

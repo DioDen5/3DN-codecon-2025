@@ -5,6 +5,7 @@ import { TeacherClaimRequest } from '../models/TeacherClaimRequest.js';
 import { Reaction } from '../models/Reaction.js';
 import { User } from '../models/User.js';
 import { authRequired } from '../middleware/auth.js';
+import { requireVerified } from '../middleware/requireVerified.js';
 
 const router = express.Router();
 
@@ -250,6 +251,54 @@ router.get('/my-profile', authRequired, async (req, res) => {
             details: error.message,
             stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
         });
+    }
+});
+
+// Надіслати запит на зміну власного профілю (йде на модерацію)
+router.post('/me/change-request', authRequired, requireVerified, async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        if (req.user.role !== 'teacher') {
+            return res.status(403).json({ error: 'Only teachers can submit change requests' });
+        }
+
+        const teacher = await Teacher.findOne({ userId: new mongoose.Types.ObjectId(userId) });
+        if (!teacher) {
+            return res.status(404).json({ error: 'Профіль викладача не знайдено' });
+        }
+
+        // Дозволяємо змінювати тільки whitelisted поля
+        const allowedFields = new Set([
+            'position',
+            'phone',
+            'university',
+            'faculty',
+            'department',
+            'subjects',
+            'image',
+            'bio'
+        ]);
+
+        const changes = {};
+        Object.keys(req.body || {}).forEach((key) => {
+            if (allowedFields.has(key)) {
+                changes[key] = req.body[key];
+            }
+        });
+
+        if (Object.keys(changes).length === 0) {
+            return res.status(400).json({ error: 'Немає валідних змін для збереження' });
+        }
+
+        teacher.pendingChanges = changes;
+        teacher.lastEditedAt = new Date();
+        await teacher.save();
+
+        return res.json({ message: 'Запит на зміну профілю успішно надіслано на модерацію' });
+    } catch (error) {
+        console.error('Error submitting teacher change request:', error);
+        return res.status(500).json({ error: 'Не вдалося надіслати запит на зміну профілю' });
     }
 });
 
