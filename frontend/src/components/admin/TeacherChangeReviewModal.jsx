@@ -48,14 +48,14 @@ const TeacherChangeReviewModal = ({ item, onClose, onApprove, onReject }) => {
                             <div className="text-base font-bold text-gray-900">{item?.name || 'Викладач'}</div>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-2 rounded-lg hover:bg-gray-100 transition-colors group" aria-label="Закрити">
-                        <X className="w-5 h-5 text-gray-600 group-hover:rotate-90 transition-transform duration-300" />
+                    <button onClick={onClose} className="p-2 rounded-full bg-blue-50 border border-blue-200 text-blue-700 hover:bg-blue-100 active:bg-blue-200 transition-colors group" aria-label="Закрити">
+                        <X className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
                     </button>
                 </div>
 
                 <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Row label="Посада" value={c.position ?? orig.position} icon={Award} changed={isChanged('position')} />
-                    <Row label="Телефон" value={c.phone ?? orig.phone} icon={Smartphone} changed={isChanged('phone')} />
+                    <Row label="Телефон" value={(c.phone ?? orig.phone) || 'не вказано'} icon={Smartphone} changed={isChanged('phone')} />
                     <Row label="Університет" value={c.university ?? orig.university} icon={GraduationCap} changed={isChanged('university')} />
                     <Row label="Факультет" value={c.faculty ?? orig.faculty} icon={Building2} changed={isChanged('faculty')} />
                     <Row label="Кафедра" value={c.department ?? orig.department} icon={BookOpen} changed={isChanged('department')} />
