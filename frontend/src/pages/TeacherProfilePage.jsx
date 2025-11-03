@@ -322,7 +322,7 @@ const TeacherProfilePage = () => {
                         </div>
                     </div>
                 </div>
-                        {!hasSubmittedReview && (
+                        {!hasSubmittedReview && !isOwnProfile && (
                             <ReviewInput 
                                 onSubmit={handleReviewSubmit} 
                                 userRating={userRating}
@@ -338,6 +338,12 @@ const TeacherProfilePage = () => {
                 const newReplies = updateFunction(replies);
                 
                 if (isAuthenticated && user) {
+                    // Якщо це власний профіль викладача, завжди залишаємо hasSubmittedReview = true
+                    if (isOwnProfile) {
+                        setHasSubmittedReview(true);
+                        return;
+                    }
+                    
                     const userId = user._id || user.id;
                     const userHasReview = newReplies.some(comment => 
                         comment.authorId && comment.authorId._id === userId
