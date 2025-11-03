@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, Activity, Settings, Mail, Calendar, Award, MessageCircle, MessageSquare, ThumbsUp, Star, GraduationCap, BookOpen, Building2, Shield, Lock, Key, Power, ToggleRight, Play, Smartphone, ShieldCheck, Eye, EyeOff, Edit3, Clock, CheckCircle, AlertCircle, FileQuestion, Sparkles, Wind, Inbox, MessageSquarePlus, Zap } from 'lucide-react';
+import { ArrowLeft, User, Activity, Settings, Mail, Calendar, Award, MessageCircle, MessageSquare, ThumbsUp, Star, GraduationCap, BookOpen, Building2, Shield, Lock, Key, Power, ToggleRight, Play, Smartphone, ShieldCheck, Eye, EyeOff, Edit3, Clock, CheckCircle, AlertCircle, FileQuestion, Sparkles, Wind, Inbox, MessageSquarePlus, Zap, X } from 'lucide-react';
 import { useAuthState } from '../api/useAuthState';
 import { getNameChangeStatus } from '../api/name-change';
 import { getMyTeacherProfile, getTeacher } from '../api/teachers';
@@ -48,6 +48,22 @@ const TeacherProfilePageNew = () => {
     const [myTeacherProfile, setMyTeacherProfile] = useState(null);
     const [hasClaimRequest, setHasClaimRequest] = useState(false);
     const [showClaimModal, setShowClaimModal] = useState(false);
+    const [dismissedStatusBanner, setDismissedStatusBanner] = useState(false);
+
+    // Ключ у сховищі для запам'ятовування закритого банера (прив'язаний до конкретного профілю та статусу)
+    const bannerStorageKey = myTeacherProfile?._id
+        ? `teacherStatusBannerDismissed:${myTeacherProfile._id}:${myTeacherProfile.status || 'unknown'}`
+        : null;
+
+    // Читаємо стан закриття банера з localStorage при зміні профілю/статусу
+    useEffect(() => {
+        if (bannerStorageKey) {
+            const stored = localStorage.getItem(bannerStorageKey);
+            setDismissedStatusBanner(stored === '1');
+        } else {
+            setDismissedStatusBanner(false);
+        }
+    }, [bannerStorageKey]);
 
     // Завантаження відгуків для викладача
     const loadReviews = async (teacherId) => {
@@ -353,19 +369,60 @@ const TeacherProfilePageNew = () => {
 
     const renderProfileTab = () => (
         <div className="space-y-6 md:space-y-8">
-            {user?.role === 'teacher' && myTeacherProfile && myTeacherProfile.status === 'pending' && (
-                <div className="bg-gradient-to-r from-yellow-100 via-orange-100 to-amber-100 text-gray-900 rounded-2xl p-4 border border-yellow-200 shadow-sm flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-full bg-yellow-400/30 flex items-center justify-center flex-shrink-0">
-                        <Clock className="w-4 h-4 text-yellow-700" />
+            {user?.role === 'teacher' && myTeacherProfile && !dismissedStatusBanner && (myTeacherProfile.status === 'pending' || myTeacherProfile.status === 'rejected') && (
+                <div className={`relative rounded-2xl p-4 border shadow-sm flex items-start gap-3 ${myTeacherProfile.status === 'rejected' ? 'bg-red-50 border-red-200 text-red-900' : 'bg-yellow-50 border-yellow-200 text-gray-900'}`}>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${myTeacherProfile.status === 'rejected' ? 'bg-red-200/40' : 'bg-yellow-400/30'}`}>
+                        {myTeacherProfile.status === 'rejected' ? (
+                            <AlertCircle className="w-4 h-4 text-red-700" />
+                        ) : (
+                            <Clock className="w-4 h-4 text-yellow-700" />
+                        )}
                     </div>
-                    <div>
-                        <p className="font-semibold">Ваш профіль на перевірці</p>
-                        <p className="text-sm text-gray-700">Після модерації адміністратором статус зміниться на «Верифіковано», і профіль буде опубліковано.</p>
+                    <div className="pr-8">
+                        <p className="font-semibold">{myTeacherProfile.status === 'rejected' ? 'Профіль відхилено' : 'Ваш профіль на перевірці'}</p>
+                        <p className="text-sm ${myTeacherProfile.status === 'rejected' ? 'text-red-800' : 'text-gray-700'}">
+                            {myTeacherProfile.status === 'rejected' 
+                                ? (myTeacherProfile.rejectionReason ? `Причина: ${myTeacherProfile.rejectionReason}` : 'Ваш профіль було відхилено модератором.')
+                                : 'Після модерації адміністратором статус зміниться на «Верифіковано», і профіль буде опубліковано.'}
+                        </p>
                     </div>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setDismissedStatusBanner(true);
+                            if (bannerStorageKey) localStorage.setItem(bannerStorageKey, '1');
+                        }}
+                        className={`group absolute top-2 right-2 p-1.5 rounded-full border transition-all duration-300 ease-out ${myTeacherProfile.status === 'rejected' ? 'border-red-300 hover:bg-red-100' : 'border-yellow-300 hover:bg-yellow-100'}`}
+                        aria-label="Закрити"
+                        title="Закрити повідомлення"
+                    >
+                        <X className={`${myTeacherProfile.status === 'rejected' ? 'text-red-700' : 'text-yellow-700'} w-4 h-4 transition-transform duration-300 group-hover:rotate-90`} />
+                    </button>
                 </div>
             )}
             {/* Заголовок профілю */}
             <div className="bg-white text-black rounded-2xl p-6 shadow-xl border border-gray-200 relative overflow-hidden group profile-card">
+                {/* Значок статусу у правому верхньому куті */}
+                {teacher?.status && (
+                    (() => {
+                        const st = (teacher.status || '').toLowerCase();
+                        const isVerified = st === 'verified';
+                        const isPending = st === 'pending';
+                        const isRejected = st === 'rejected';
+                        const cls = isVerified
+                            ? 'bg-green-100 text-green-800 border-green-200'
+                            : isPending
+                                ? 'bg-yellow-100 text-yellow-800 border-yellow-200'
+                                : 'bg-red-100 text-red-800 border-red-200';
+                        const label = isVerified ? 'Верифіковано' : isPending ? 'На перевірці' : 'Відхилено';
+                        return (
+                            <span className={`absolute top-4 right-4 z-10 inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border shadow-sm ${cls}`}>
+                                <span className="w-1.5 h-1.5 rounded-full bg-current opacity-80 animate-pulse"></span>
+                                {label}
+                            </span>
+                        );
+                    })()
+                )}
                 {/* Декоративні елементи */}
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-100/50 to-indigo-100/30 rounded-full -translate-y-16 translate-x-16 animate-pulse decorative-element-1"></div>
                 <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-indigo-100/40 to-blue-100/30 rounded-full translate-y-12 -translate-x-12 animate-bounce decorative-element-2" style={{animationDuration: '3s'}}></div>
@@ -388,7 +445,9 @@ const TeacherProfilePageNew = () => {
                             )}
                         </div>
                         <div className="flex-1 text-center sm:text-left">
-                            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{teacher?.name}</h1>
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3">
+                                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 sm:mb-0">{teacher?.name}</h1>
+                            </div>
                             <div className="flex flex-col gap-2">
                                 {teacher?.university && (
                                     <div className="flex items-center gap-2 text-gray-600">
