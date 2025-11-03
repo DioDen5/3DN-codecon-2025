@@ -1,45 +1,44 @@
-import React from 'react';
-import { CheckCircle, XCircle, User, GraduationCap, Building2, BookOpen, FileText } from 'lucide-react';
+import React, { useState } from 'react';
+import { User, GraduationCap, Building2, BookOpen } from 'lucide-react';
+import TeacherChangeReviewModal from './TeacherChangeReviewModal';
 
 const Row = ({ item, onApprove, onReject }) => {
+    const [open, setOpen] = useState(false);
     const changes = item?.pendingChanges || {};
-    const field = (label, value) => (
-        <div className="flex items-center gap-2 text-sm"><span className="text-gray-500">{label}:</span><span className="font-medium">{value || '—'}</span></div>
-    );
     return (
-        <div className="rounded-xl p-4 border transition-all duration-500 ease-out relative bg-gray-50 border-gray-200 hover:moderation-glow" style={{ animation: 'slideInFromLeft 0.6s ease-out both' }}>
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-gray-900 font-semibold">
-                        <User size={16} /> {item?.name}
+        <>
+            <div className="rounded-xl p-4 border transition-all duration-500 ease-out relative bg-white border-gray-200 hover:shadow-md" style={{ animation: 'slideInFromLeft 0.6s ease-out both' }}>
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-gray-900 font-semibold">
+                            <User size={16} /> {item?.name}
+                        </div>
+                        <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
+                            {changes.university && (
+                                <span className="inline-flex items-center gap-1"><GraduationCap size={14} />{changes.university}</span>
+                            )}
+                            {changes.faculty && (
+                                <span className="inline-flex items-center gap-1"><Building2 size={14} />{changes.faculty}</span>
+                            )}
+                            {changes.department && (
+                                <span className="inline-flex items-center gap-1"><BookOpen size={14} />{changes.department}</span>
+                            )}
+                        </div>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                        {changes.position && field('Посада', changes.position)}
-                        {changes.university && (
-                            <div className="flex items-center gap-2 text-sm"><GraduationCap size={16} /><span className="font-medium">{changes.university}</span></div>
-                        )}
-                        {changes.faculty && (
-                            <div className="flex items-center gap-2 text-sm"><Building2 size={16} /><span className="font-medium">{changes.faculty}</span></div>
-                        )}
-                        {changes.department && (
-                            <div className="flex items-center gap-2 text-sm"><BookOpen size={16} /><span className="font-medium">{changes.department}</span></div>
-                        )}
-                        {Array.isArray(changes.subjects) && changes.subjects.length > 0 && field('Предмети', changes.subjects.join(', '))}
-                        {changes.bio && (
-                            <div className="flex items-center gap-2 text-sm"><FileText size={16} /><span className="font-medium line-clamp-2" title={changes.bio}>{changes.bio}</span></div>
-                        )}
+                    <div className="flex items-center gap-2">
+                        <button onClick={() => setOpen(true)} className="px-3 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer">Детальніше</button>
                     </div>
-                </div>
-                <div className="flex items-center gap-2">
-                    <button onClick={() => onApprove(item._id)} className="px-3 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors cursor-pointer flex items-center gap-2">
-                        <CheckCircle size={16} /> Схвалити
-                    </button>
-                    <button onClick={() => onReject(item._id)} className="px-3 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors cursor-pointer flex items-center gap-2">
-                        <XCircle size={16} /> Відхилити
-                    </button>
                 </div>
             </div>
-        </div>
+            {open && (
+                <TeacherChangeReviewModal
+                    item={item}
+                    onClose={() => setOpen(false)}
+                    onApprove={(id) => { setOpen(false); onApprove(id); }}
+                    onReject={(id) => { setOpen(false); onReject(id); }}
+                />
+            )}
+        </>
     );
 };
 
