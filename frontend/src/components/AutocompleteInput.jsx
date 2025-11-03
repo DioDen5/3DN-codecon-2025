@@ -15,13 +15,17 @@ const AutocompleteInput = ({
     maxResults = 8,
     allowCustomInput = true, // Дозволити вільний ввід, якщо опції не знайдено
     disabled = false, // Заблокувати інпут
-    showClear = true // Показувати кнопку очищення
+    showClear = true, // Показувати кнопку очищення
+    truncateWordsCount, // необов'язково: показувати лише перші N слів коли інпут не у фокусі
+    truncateTwoWordsAndChars, // якщо true: показати 2 повні слова + кілька букв наступного
+    truncateNextChars = 3 // скільки букв показувати для наступного слова
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [filteredOptions, setFilteredOptions] = useState([]);
     const inputRef = useRef(null);
     const dropdownRef = useRef(null);
+    const [isFocused, setIsFocused] = useState(false);
 
     // Відсортувати опції: спочатку популярні, потім за релевантністю
     useEffect(() => {
@@ -105,6 +109,7 @@ const AutocompleteInput = ({
     const handleFocus = () => {
         if (disabled) return;
         setIsOpen(true);
+        setIsFocused(true);
         onFocus?.();
     };
 
@@ -113,6 +118,7 @@ const AutocompleteInput = ({
         setTimeout(() => {
             if (!dropdownRef.current?.contains(document.activeElement)) {
                 setIsOpen(false);
+                setIsFocused(false);
                 onBlur?.();
             }
         }, 200);
@@ -136,7 +142,7 @@ const AutocompleteInput = ({
         }
     }, [isOpen]);
 
-    const baseInputClasses = className || 'w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 focus:outline-none transition-all duration-300 pr-14 overflow-hidden text-ellipsis whitespace-nowrap';
+    const baseInputClasses = className || 'w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 text-gray-800 focus:outline-none transition-all duration-300 pr-24 overflow-hidden text-ellipsis whitespace-nowrap';
     const inputClasses = error
         ? `${baseInputClasses} border border-red-400 shadow-[0_0_10px_rgba(248,113,113,0.5)]`
         : disabled
@@ -158,7 +164,22 @@ const AutocompleteInput = ({
                 <input
                     ref={inputRef}
                     type="text"
-                    value={searchTerm}
+                    value={(() => {
+                        if (isFocused || isOpen) return searchTerm;
+                        const parts = (searchTerm || '').split(/\s+/).filter(Boolean);
+                        if (truncateTwoWordsAndChars) {
+                            if (parts.length <= 2) return searchTerm;
+                            const head = parts.slice(0, 2).join(' ');
+                            const tail = parts[2]?.slice(0, Math.max(0, truncateNextChars)) || '';
+                            return `${head} ${tail}…`;
+                        }
+                        if (truncateWordsCount) {
+                            return parts.length > truncateWordsCount 
+                                ? parts.slice(0, truncateWordsCount).join(' ') + '…' 
+                                : searchTerm;
+                        }
+                        return searchTerm;
+                    })()}
                     onChange={handleInputChange}
                     onFocus={disabled ? undefined : handleFocus}
                     onBlur={handleBlur}
