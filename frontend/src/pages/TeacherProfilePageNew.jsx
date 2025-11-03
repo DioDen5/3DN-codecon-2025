@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, User, Activity, Settings, Mail, Calendar, Award, MessageCircle, MessageSquare, ThumbsUp, Star, GraduationCap, BookOpen, Building2, Shield, Lock, Key, Power, ToggleRight, Play, Smartphone, ShieldCheck, Eye, EyeOff, Edit3, Clock, CheckCircle, AlertCircle, FileQuestion, Sparkles, Wind, Inbox, MessageSquarePlus, Zap, X } from 'lucide-react';
+import AutocompleteInput from '../components/AutocompleteInput';
+import facultiesData from '../data/faculties.json';
+import subjectsData from '../data/subjects.json';
+import academicPositionsData from '../data/academicPositions.json';
 import { useAuthState } from '../api/useAuthState';
 import { getNameChangeStatus } from '../api/name-change';
-import { getMyTeacherProfile, getTeacher } from '../api/teachers';
+import { getMyTeacherProfile, getTeacher, submitTeacherChangeRequest } from '../api/teachers';
 import { getTeacherComments } from '../api/teacher-comments';
 import StarRating from '../components/StarRating';
 import NameChangeModal from '../components/NameChangeModal';
@@ -49,6 +53,22 @@ const TeacherProfilePageNew = () => {
     const [hasClaimRequest, setHasClaimRequest] = useState(false);
     const [showClaimModal, setShowClaimModal] = useState(false);
     const [dismissedStatusBanner, setDismissedStatusBanner] = useState(false);
+    const [editMode, setEditMode] = useState(false);
+    const [editForm, setEditForm] = useState({
+        firstName: '',
+        lastName: '',
+        middleName: '',
+        position: '',
+        phone: '',
+        university: '',
+        faculty: '',
+        department: '',
+        subjects: [],
+        bio: '',
+        image: ''
+    });
+    const [editErrors, setEditErrors] = useState({});
+    const [submittingChanges, setSubmittingChanges] = useState(false);
 
     // Ключ у сховищі для запам'ятовування закритого банера (прив'язаний до конкретного профілю та статусу)
     const bannerStorageKey = myTeacherProfile?._id
@@ -64,6 +84,151 @@ const TeacherProfilePageNew = () => {
             setDismissedStatusBanner(false);
         }
     }, [bannerStorageKey]);
+
+    // Ініціалізація форми редагування при завантаженні профілю
+    useEffect(() => {
+        if (teacher) {
+            const nameParts = (teacher.name || '').split(/\s+/);
+            const [fn = '', mn = '', ln = ''] = [nameParts[0] || '', nameParts.length === 3 ? nameParts[1] : '', nameParts.length > 1 ? nameParts[nameParts.length - 1] : ''];
+            const draftKey = teacher?._id ? `teacherEditDraft:${teacher._id}` : null;
+            let draft = null;
+            if (draftKey) {
+                try { draft = JSON.parse(localStorage.getItem(draftKey) || 'null'); } catch {}
+            }
+            const base = {
+                firstName: fn,
+                lastName: ln,
+                middleName: mn,
+                position: teacher.position || '',
+                phone: teacher.phone || '',
+                university: teacher.university || '',
+                faculty: teacher.faculty || '',
+                department: teacher.department || '',
+                subjects: Array.isArray(teacher.subjects) ? teacher.subjects : (teacher.subject ? [teacher.subject] : []),
+                bio: teacher.bio || '',
+                image: teacher.image || ''
+            };
+            // Обережно мерджимо чернетку: беремо тільки значення, які не порожні та відрізняються від базових
+            let merged = base;
+            if (draft && typeof draft === 'object') {
+                merged = { ...base };
+                for (const [k, v] of Object.entries(draft)) {
+                    if (k === 'subjects') {
+                        if (Array.isArray(v) && v.length > 0 && JSON.stringify(v) !== JSON.stringify(base.subjects)) {
+                            merged.subjects = v;
+                        }
+                    } else if (typeof v === 'string') {
+                        if (v.trim() && v !== base[k]) merged[k] = v;
+                    }
+                }
+            }
+            setEditForm(merged);
+            setEditErrors({});
+        }
+    }, [teacher]);
+
+    // Збереження чернетки локально
+    useEffect(() => {
+        const draftKey = teacher?._id ? `teacherEditDraft:${teacher._id}` : null;
+        if (!draftKey) return;
+        try { localStorage.setItem(draftKey, JSON.stringify(editForm)); } catch {}
+    }, [editForm, teacher?._id]);
+
+    const handleEditChange = (field, value) => {
+        setEditForm(prev => ({ ...prev, [field]: value }));
+    };
+
+    const validateEdit = () => {
+        const errs = {};
+        const original = teacher || {};
+        const origSubjects = Array.isArray(original.subjects) ? original.subjects : (original.subject ? [original.subject] : []);
+
+        // Перевіряємо тільки те, що змінено
+        if ((editForm.university || '') !== (original.university || '')) {
+            if (!editForm.university.trim()) errs.university = 'Університет обов\'язковий';
+        }
+        if ((editForm.faculty || '') !== (original.faculty || '')) {
+            if (!editForm.faculty.trim()) errs.faculty = 'Факультет обов\'язковий';
+        }
+        if ((editForm.department || '') !== (original.department || '')) {
+            // кафедра не обов'язкова — без валідації, лише формат
+        }
+        if (JSON.stringify(editForm.subjects) !== JSON.stringify(origSubjects)) {
+            if (!Array.isArray(editForm.subjects) || editForm.subjects.filter(s => s.trim()).length === 0) {
+                errs.subjects = 'Додайте щонайменше один предмет';
+            }
+        }
+        if ((editForm.bio || '') !== (original.bio || '')) {
+            if (!editForm.bio || editForm.bio.trim().length < 10) errs.bio = 'Біо має містити від 10 символів';
+        }
+        setEditErrors(errs);
+        return Object.keys(errs).length === 0;
+    };
+
+    const computeDiff = () => {
+        const diff = {};
+        const original = teacher || {};
+        if ((editForm.position || '') !== (original.position || '')) diff.position = editForm.position || null;
+        if ((editForm.phone || '') !== (original.phone || '')) diff.phone = editForm.phone || null;
+        if ((editForm.university || '') !== (original.university || '')) diff.university = editForm.university;
+        if ((editForm.faculty || '') !== (original.faculty || '')) diff.faculty = editForm.faculty;
+        if ((editForm.department || '') !== (original.department || '')) diff.department = editForm.department || null;
+        const origSubjects = Array.isArray(original.subjects) ? original.subjects : (original.subject ? [original.subject] : []);
+        if (JSON.stringify(origSubjects) !== JSON.stringify(editForm.subjects)) diff.subjects = editForm.subjects;
+        if ((editForm.bio || '') !== (original.bio || '')) diff.bio = editForm.bio;
+        if ((editForm.image || '') !== (original.image || '')) diff.image = editForm.image; // зображення як base64/URL
+        return diff;
+    };
+
+    const handleSubmitChanges = async () => {
+        if (!validateEdit()) return;
+        const diff = computeDiff();
+        if (Object.keys(diff).length === 0) {
+            showSuccess?.('Немає змін для надсилання');
+            return;
+        }
+        setSubmittingChanges(true);
+        try {
+            await submitTeacherChangeRequest(diff);
+            showSuccess?.('Зміни надіслано на розгляд');
+            setEditMode(false);
+        } catch (e) {
+            console.error(e);
+            showError?.(e?.response?.data?.error || 'Не вдалося надіслати зміни');
+        } finally {
+            setSubmittingChanges(false);
+        }
+    };
+
+    // Автокомпліт дані (університет/факультет/кафедра)
+    const universityOptions = Array.from(new Set((facultiesData || []).map(u => u.universityName)))
+        .map(name => ({ name }));
+    const facultyOptions = (() => {
+        const u = (facultiesData || []).find(x => x.universityName === editForm.university);
+        return u ? u.faculties.map(f => ({ name: f.name })) : [];
+    })();
+    const departmentOptions = (() => {
+        const u = (facultiesData || []).find(x => x.universityName === editForm.university);
+        const f = u?.faculties?.find(ff => ff.name === editForm.faculty);
+        return f ? (f.departments || []).map(d => ({ name: d })) : [];
+    })();
+
+    const facultySubjects = (() => {
+        const s = (subjectsData || []).find(x => x.facultyName === editForm.faculty);
+        return s ? s.subjects.map(name => ({ name })) : [];
+    })();
+
+    const positionOptions = (academicPositionsData || []).map(p => ({ name: p.name }));
+
+    const handleSubjectChange = (index, value) => {
+        setEditForm(prev => {
+            const list = [...prev.subjects];
+            list[index] = value;
+            return { ...prev, subjects: list };
+        });
+    };
+    const addSubject = () => setEditForm(prev => ({ ...prev, subjects: [...(prev.subjects||[]), ''] }));
+    const removeSubject = (idx) => setEditForm(prev => ({ ...prev, subjects: prev.subjects.filter((_,i)=>i!==idx) }));
 
     // Завантаження відгуків для викладача
     const loadReviews = async (teacherId) => {
@@ -473,6 +638,8 @@ const TeacherProfilePageNew = () => {
                 </div>
             </div>
 
+            
+            
             {/* Статистика */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                 <div className="bg-white text-black rounded-xl p-3 md:p-4 shadow-sm text-center group cursor-pointer hover:scale-105 transition-transform duration-300">
@@ -709,45 +876,24 @@ const TeacherProfilePageNew = () => {
                         </div>
                     </div>
                     
-                    {/* Статус Teacher профілю */}
-                    {user?.role === 'teacher' && (
+                    {/* Запит/прив'язка Teacher-профілю (залишаємо тільки випадок, коли не прив'язано) */}
+                    {user?.role === 'teacher' && !myTeacherProfile && (
                         <div className="mt-6 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-200 animate-[slideInFromLeft_0.6s_ease-out_both]">
-                            {!myTeacherProfile ? (
-                                <div>
-                                    <div className="flex items-center gap-3 mb-3">
-                                        <AlertCircle className="w-5 h-5 text-yellow-600" />
-                                        <h4 className="font-semibold text-gray-900">
-                                            Профіль викладача не прив'язано
-                                        </h4>
-                                    </div>
-                                    <p className="text-sm text-gray-700 mb-4">
-                                        Щоб мати доступ до редагування свого профілю викладача, вам потрібно подати заявку на отримання профілю.
-                                    </p>
-                                    <button
-                                        onClick={handleOpenClaimModal}
-                                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium cursor-pointer"
-                                    >
-                                        Подати заявку на профіль
-                                    </button>
-                                </div>
-                            ) : (
-                                <div>
-                                    <div className="flex items-center gap-3 mb-3">
-                                        <CheckCircle className="w-5 h-5 text-green-600" />
-                                        <h4 className="font-semibold text-gray-900">
-                                            Профіль викладача прив'язано
-                                        </h4>
-                                    </div>
-                                    <div className="text-sm text-gray-700 space-y-1">
-                                        <p><strong>Ім'я:</strong> {myTeacherProfile.name}</p>
-                                        <p><strong>Університет:</strong> {myTeacherProfile.university}</p>
-                                        <p><strong>Кафедра:</strong> {myTeacherProfile.department}</p>
-                                        {myTeacherProfile.subject && (
-                                            <p><strong>Предмет:</strong> {myTeacherProfile.subject}</p>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
+                            <div className="flex items-center gap-3 mb-3">
+                                <AlertCircle className="w-5 h-5 text-yellow-600" />
+                                <h4 className="font-semibold text-gray-900">
+                                    Профіль викладача не прив'язано
+                                </h4>
+                            </div>
+                            <p className="text-sm text-gray-700 mb-4">
+                                Щоб мати доступ до редагування свого профілю викладача, подайте заявку на отримання профілю.
+                            </p>
+                            <button
+                                onClick={handleOpenClaimModal}
+                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium cursor-pointer"
+                            >
+                                Подати заявку на профіль
+                            </button>
                             {hasClaimRequest && (
                                 <div className="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
                                     <div className="flex items-center gap-2">
@@ -793,6 +939,143 @@ const TeacherProfilePageNew = () => {
                                     Переглянути деталі
                                 </button>
                             )}
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Редагування профілю викладача (у Налаштуваннях) */}
+            <div className="bg-white text-black rounded-2xl p-6 shadow-xl border border-gray-200 relative overflow-hidden group">
+                <div className="relative">
+                    <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-3">
+                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg">
+                            <Edit3 className="w-4 h-4 text-white" />
+                        </div>
+                        Редагування профілю
+                    </h3>
+                    {!editMode ? (
+                        <div className="flex items-center justify-between">
+                            <p className="text-sm text-gray-600">Оновіть свої академічні дані, предмети, фото та біографію. Зміни підуть на модерацію.</p>
+                            <button onClick={() => setEditMode(true)} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 hover:scale-105 cursor-pointer">Редагувати профіль</button>
+                        </div>
+                    ) : (
+                        <div className="space-y-6">
+                            <div className="p-4 rounded-xl border border-gray-200">
+                                <h4 className="font-semibold text-gray-900 mb-3">Особисті дані</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">Посада</label>
+                                        <AutocompleteInput
+                                            value={editForm.position}
+                                            onChange={(v)=>handleEditChange('position', v)}
+                                            options={positionOptions}
+                                            placeholder="Оберіть або введіть посаду"
+                                        />
+                                        {teacher?.position && teacher.position !== editForm.position && (
+                                            <div className="text-xs text-gray-500 mt-1">Зараз: {teacher.position}</div>
+                                        )}
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">Телефон</label>
+                                        <input value={editForm.phone} onChange={e=>handleEditChange('phone', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-500/40" placeholder="+380..." />
+                                        {teacher && (
+                                            <div className="text-xs text-gray-500 mt-1">
+                                                Зараз: {teacher.phone ? teacher.phone : 'не вказано'}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="p-4 rounded-xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white">
+                                <h4 className="font-semibold text-gray-900 mb-3">Академія</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">Університет</label>
+                                        <AutocompleteInput
+                                            value={editForm.university}
+                                            onChange={(v)=>{ handleEditChange('university', v); handleEditChange('faculty',''); handleEditChange('department',''); }}
+                                            options={universityOptions}
+                                            placeholder="Оберіть або введіть університет"
+                                            error={!!editErrors.university}
+                                        />
+                                        {teacher?.university && teacher.university !== editForm.university && (
+                                            <div className="text-xs text-gray-500 mt-1">Зараз: {teacher.university}</div>
+                                        )}
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">Факультет</label>
+                                        <AutocompleteInput
+                                            value={editForm.faculty}
+                                            onChange={(v)=>{ handleEditChange('faculty', v); handleEditChange('department',''); }}
+                                            options={facultyOptions}
+                                            placeholder={editForm.university ? 'Оберіть факультет' : 'Спочатку оберіть університет'}
+                                            disabled={!editForm.university}
+                                            error={!!editErrors.faculty}
+                                        />
+                                        {teacher?.faculty && teacher.faculty !== editForm.faculty && (
+                                            <div className="text-xs text-gray-500 mt-1">Зараз: {teacher.faculty}</div>
+                                        )}
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">Кафедра</label>
+                                        <AutocompleteInput
+                                            value={editForm.department}
+                                            onChange={(v)=>handleEditChange('department', v)}
+                                            options={departmentOptions}
+                                            placeholder={editForm.faculty ? 'Оберіть кафедру' : 'Спочатку оберіть факультет'}
+                                            disabled={!editForm.faculty}
+                                        />
+                                        {teacher?.department && teacher.department !== editForm.department && (
+                                            <div className="text-xs text-gray-500 mt-1">Зараз: {teacher.department}</div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="p-4 rounded-xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white">
+                                <h4 className="font-semibold text-gray-900 mb-3">Предмети</h4>
+                                <div className="space-y-2">
+                                    {(editForm.subjects || []).map((s, idx) => (
+                                        <div key={idx} className="flex items-center gap-2">
+                                            <div className="flex-1">
+                                                <AutocompleteInput
+                                                    value={s}
+                                                    onChange={(v)=>handleSubjectChange(idx, v)}
+                                                    options={facultySubjects}
+                                                    placeholder={editForm.faculty ? 'Оберіть предмет' : 'Спочатку оберіть факультет'}
+                                                    disabled={!editForm.faculty}
+                                                />
+                                            </div>
+                                            <button onClick={()=>removeSubject(idx)} className="px-2 py-2 text-sm rounded-lg border border-gray-300 hover:bg-gray-50 cursor-pointer">Видалити</button>
+                                        </div>
+                                    ))}
+                                    <button onClick={addSubject} className="mt-2 px-3 py-2 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors cursor-pointer">Додати предмет</button>
+                                </div>
+                                {editErrors.subjects && <p className="text-sm text-red-500 mt-2">{editErrors.subjects}</p>}
+                                {teacher?.subjects && JSON.stringify(teacher.subjects) !== JSON.stringify(editForm.subjects) && (
+                                    <div className="text-xs text-gray-500 mt-2">Зараз: {teacher.subjects.join(', ')}</div>
+                                )}
+                            </div>
+                            <div className="p-4 rounded-xl border border-gray-200">
+                                <h4 className="font-semibold text-gray-900 mb-3">Фото та Біографія</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">Фото профілю</label>
+                                        <input type="file" accept="image/*" onChange={(e)=>{ const f=e.target.files?.[0]; if(!f) return; const r=new FileReader(); r.onloadend=()=>handleEditChange('image', r.result); r.readAsDataURL(f); }} className="block w-full text-sm" />
+                                        {editForm.image && <p className="text-xs text-gray-500 mt-1">Зображення обрано</p>}
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">Біографія</label>
+                                        <textarea value={editForm.bio} onChange={e=>handleEditChange('bio', e.target.value)} rows={6} maxLength={500} className={`w-full px-3 py-2 rounded-lg border ${editErrors.bio?'border-red-400':'border-gray-300'} focus:border-blue-400 focus:ring-2 focus:ring-blue-500/40`} placeholder="Коротка інформація про себе..." />
+                                        <div className="text-xs text-gray-500 mt-1">{editForm.bio.length}/500</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="sticky bottom-2 z-10">
+                                <div className="bg-white/80 backdrop-blur-md border border-gray-200 rounded-xl p-3 flex items-center justify-end gap-3 shadow-lg">
+                                    <button onClick={()=>setEditMode(false)} className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer">Скасувати</button>
+                                    <button disabled={submittingChanges} onClick={handleSubmitChanges} className={`px-4 py-2 rounded-lg text-white cursor-pointer transition-colors ${submittingChanges? 'bg-blue-400':'bg-blue-600 hover:bg-blue-700'}`}>Надіслати на розгляд</button>
+                                </div>
+                            </div>
                         </div>
                     )}
                 </div>

@@ -44,3 +44,9 @@ export const setTeacherPassword = async (password) => {
     const response = await http.post('/teachers/set-password', { password });
     return response.data;
 };
+
+// Надіслати запит на зміну профілю викладача (модерація змін)
+export const submitTeacherChangeRequest = async (changes) => {
+    const response = await http.post('/teachers/me/change-request', { changes });
+    return response.data;
+};

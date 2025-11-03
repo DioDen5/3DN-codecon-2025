@@ -13,7 +13,7 @@ import ForumPage from "./pages/ForumPage";
 import ForumPostPage from "./pages/ForumPostPage.jsx";
 import CreateDiscussionPage from "./pages/CreateDiscussionPage.jsx";
 import TeachersPage from "./pages/TeachersPage.jsx";
-import TeacherProfilePage from "./pages/TeacherProfilePage";
+import TeacherProfilePageNew from "./pages/TeacherProfilePageNew.jsx";
 import UserProfilePage from "./pages/UserProfilePage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 
@@ -120,7 +120,7 @@ function AppContent() {
                     />
 
                     <Route path="/teachers" element={<TeachersPage />} />
-                    <Route path="/teachers/:id" element={<TeacherProfilePage />} />
+                    <Route path="/teachers/:id" element={<TeacherProfilePageNew />} />
                     
                     <Route
                         path="/profile"

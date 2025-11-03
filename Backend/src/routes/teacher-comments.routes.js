@@ -103,8 +103,7 @@ router.post('/:teacherId', authRequired, async (req, res) => {
         await comment.save();
         await comment.populate('authorId', 'displayName email');
         
-        // Оновлюємо лічильники викладача
-        const teacher = await Teacher.findById(teacherId);
+        // Оновлюємо лічильники викладача (використовуємо вже завантажений вище teacher)
         
         // Логуємо створення відгуку
         if (teacher) {
