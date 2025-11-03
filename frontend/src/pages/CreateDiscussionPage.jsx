@@ -7,15 +7,16 @@ const CreateDiscussionPage = () => {
     const navigate = useNavigate();
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
-    const [image, setImage] = useState(null);
+    // Рекомендовані обмеження: короткий заголовок і змістовний опис
+    const TITLE_MAX = 50; // короткі, читабельні заголовки
+    const CONTENT_MAX = 2000;
+    // Видалено завантаження фото за вимогою
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
-    const handleImageChange = (e) => {
-        setImage(e.target.files[0]);
-    };
+    // Фото більше не підтримується
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -24,7 +25,22 @@ const CreateDiscussionPage = () => {
         setSuccess('');
 
         try {
-            const result = await articleCreate(title, content, image);
+            // Базова валідація з урахуванням лімітів
+            if (!title.trim()) {
+                setIsSubmitting(false);
+                setError('Будь ласка, вкажіть заголовок.');
+                return;
+            }
+            if (!content.trim()) {
+                setIsSubmitting(false);
+                setError('Будь ласка, додайте опис.');
+                return;
+            }
+
+            const safeTitle = title.slice(0, TITLE_MAX);
+            const safeContent = content.slice(0, CONTENT_MAX);
+
+            const result = await articleCreate(safeTitle, safeContent, null);
             
             triggerForumRefresh();
             
@@ -50,7 +66,7 @@ const CreateDiscussionPage = () => {
     };
 
     const handleCancel = () => {
-        if (title.trim() || content.trim() || image) {
+        if (title.trim() || content.trim()) {
             setShowCancelConfirm(true);
         } else {
             navigate('/forum');
@@ -80,26 +96,21 @@ const CreateDiscussionPage = () => {
                         placeholder="Заголовок"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
-                        className="w-full p-3 rounded-xl bg-gray-300/60 placeholder:text-gray-600 text-black"
+                        maxLength={TITLE_MAX}
+                        className="w-full p-3 rounded-xl bg-gray-300/60 placeholder:text-gray-600 text-black border border-gray-300 focus:outline-none focus:border-blue-400 focus:shadow-[0_0_10px_rgba(59,130,246,0.5)] transition"
                     />
+                    <div className="text-right text-xs text-gray-500 -mt-2">{title.length}/{TITLE_MAX}</div>
                     <textarea
-                        placeholder="Тіло"
-                        rows="4"
+                        placeholder="Опис"
+                        rows="6"
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
-                        className="w-full p-3 rounded-xl bg-gray-300/60 placeholder:text-gray-600 text-black"
+                        maxLength={CONTENT_MAX}
+                        className="w-full p-3 rounded-xl bg-gray-300/60 placeholder:text-gray-600 text-black resize-none overflow-y-auto max-h-80 border border-gray-300 focus:outline-none focus:border-blue-400 focus:shadow-[0_0_10px_rgba(59,130,246,0.5)] transition"
                     ></textarea>
+                    <div className="text-right text-xs text-gray-500 -mt-2">{content.length}/{CONTENT_MAX}</div>
 
-                    <div className="flex justify-between items-center">
-                        <label className="text-blue-600 cursor-pointer">
-                            + Завантажити фото
-                            <input
-                                type="file"
-                                className="text-gray-400"
-                                accept="image/*"
-                                onChange={handleImageChange}
-                            />
-                        </label>
+                    <div className="flex justify-end items-center">
                         <button
                             type="submit"
                             disabled={isSubmitting}
