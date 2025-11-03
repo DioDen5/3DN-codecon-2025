@@ -17,7 +17,7 @@ const ModerationFilters = ({
         { id: 'reviews', label: 'Відгуки', icon: Star },
         { id: 'name-requests', label: 'Зміна імені', icon: UserRound },
         { id: 'teacher-verification', label: 'Верифікація викладачів', icon: GraduationCap },
-        { id: 'teacher-changes', label: 'Зміни профілів викладачів', icon: GraduationCap }
+        { id: 'teacher-changes', label: 'Редагування профілів', icon: GraduationCap }
     ];
 
     return (

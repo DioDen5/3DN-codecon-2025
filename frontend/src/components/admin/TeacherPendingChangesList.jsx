@@ -7,26 +7,31 @@ const Row = ({ item, onApprove, onReject }) => {
     const changes = item?.pendingChanges || {};
     return (
         <>
-            <div className="rounded-xl p-4 border transition-all duration-500 ease-out relative bg-white border-gray-200 hover:shadow-md" style={{ animation: 'slideInFromLeft 0.6s ease-out both' }}>
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                    <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-gray-900 font-semibold">
-                            <User size={16} /> {item?.name}
+            <div className="rounded-xl p-4 border transition-all duration-500 ease-out relative bg-gray-50 border-gray-200 hover:moderation-glow" style={{ animation: 'slideInFromLeft 0.6s ease-out both' }}>
+                <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                                <User className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <div className="font-medium text-gray-900">Запит на редагування профілю</div>
+                                <div className="text-sm text-gray-600">Викладач: {item?.name} • {item?.lastEditedAt ? new Date(item.lastEditedAt).toLocaleDateString('uk-UA') : ''}</div>
+                            </div>
                         </div>
-                        <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
-                            {changes.university && (
-                                <span className="inline-flex items-center gap-1"><GraduationCap size={14} />{changes.university}</span>
-                            )}
-                            {changes.faculty && (
-                                <span className="inline-flex items-center gap-1"><Building2 size={14} />{changes.faculty}</span>
-                            )}
-                            {changes.department && (
-                                <span className="inline-flex items-center gap-1"><BookOpen size={14} />{changes.department}</span>
-                            )}
+                        <p className="text-gray-700 mb-3">
+                            <span className="font-medium">Ключові зміни:</span>
+                            {changes.position && <span> посада</span>}
+                            {changes.university && <span>, університет</span>}
+                            {changes.faculty && <span>, факультет</span>}
+                            {changes.department && <span>, кафедра</span>}
+                            {Array.isArray(changes.subjects) && changes.subjects.length > 0 && <span>, предмети</span>}
+                            {changes.bio && <span>, біографія</span>}
+                            {changes.image && <span>, фото</span>}
+                        </p>
+                        <div className="flex gap-2">
+                            <button onClick={() => setOpen(true)} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm hover:bg-blue-200 hover:shadow-lg hover:shadow-blue-300/50 active:scale-95 active:shadow-inner transition-all duration-300 cursor-pointer">Переглянути</button>
                         </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <button onClick={() => setOpen(true)} className="px-3 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer">Детальніше</button>
                     </div>
                 </div>
             </div>
