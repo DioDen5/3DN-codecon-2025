@@ -288,6 +288,8 @@ const SignupForm = ({ switchToLogin, onClose }) => {
                     onBack={() => {
                         setShowTeacherWizard(false);
                         setSelectedRole(null);
+                        // Повертаємось до модалки вибору ролі, а не у форму студента
+                        setShowRoleModal(true);
                     }}
                     onSuccess={() => {
                         setShowTeacherWizard(false);

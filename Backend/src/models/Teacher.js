@@ -42,6 +42,11 @@ const teacherSchema = new mongoose.Schema({
         lowercase: true,
         index: true
     },
+    phone: {
+        type: String,
+        required: false,
+        trim: true
+    },
     // ID користувача, якому належить профіль
     userId: {
         type: mongoose.Schema.Types.ObjectId,

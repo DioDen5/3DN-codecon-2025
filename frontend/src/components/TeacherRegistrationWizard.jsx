@@ -317,6 +317,7 @@ const TeacherRegistrationWizard = ({ email, onBack, onSuccess }) => {
                         firstName: formData.firstName,
                         lastName: formData.lastName,
                         middleName: formData.middleName || undefined,
+                        phone: formData.phone || undefined,
                         university: formData.university,
                         faculty: formData.faculty,
                         department: formData.department || undefined, // Опціональне поле

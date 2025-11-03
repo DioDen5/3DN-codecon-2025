@@ -367,6 +367,7 @@ const teacherRegisterSchema = z.object({
     firstName: z.string().min(2),
     lastName: z.string().min(2),
     middleName: z.string().optional(),
+    phone: z.string().min(10).max(20).optional(),
     university: z.string().min(2),
     faculty: z.string().min(2), // Обов'язкове поле
     department: z.string().min(2).optional(), // Тепер опціональне
@@ -385,6 +386,7 @@ router.post('/register/teacher', async (req, res) => {
             firstName: req.body.firstName,
             lastName: req.body.lastName,
             middleName: req.body.middleName,
+            phone: req.body.phone,
             university: req.body.university,
             faculty: req.body.faculty,
             department: req.body.department,
@@ -404,6 +406,7 @@ router.post('/register/teacher', async (req, res) => {
                 hasPassword: !!req.body.password,
                 hasFirstName: !!req.body.firstName,
                 hasLastName: !!req.body.lastName,
+                hasPhone: !!req.body.phone,
                 hasUniversity: !!req.body.university,
                 hasFaculty: !!req.body.faculty,
                 hasSubjects: !!req.body.subjects,
@@ -421,7 +424,7 @@ router.post('/register/teacher', async (req, res) => {
             });
         }
 
-        const { email, password, displayName, firstName, lastName, middleName, university, faculty, department, subjects, image, bio, position } = parse.data;
+        const { email, password, displayName, firstName, lastName, middleName, phone, university, faculty, department, subjects, image, bio, position } = parse.data;
 
         const normalizedEmail = email.toLowerCase().trim();
 
@@ -485,6 +488,7 @@ router.post('/register/teacher', async (req, res) => {
             subjects: subjects || [],
             subject: subjects && subjects.length > 0 ? subjects[0] : '',
             email: normalizedEmail,
+            phone: phone || null,
             image: image,
             bio: bio || null,
             position: position || null, // Академічна посада
