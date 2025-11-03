@@ -947,7 +947,7 @@ const TeacherProfilePageNew = () => {
 
             {/* Редагування профілю викладача (у Налаштуваннях) */}
             <div className="bg-white text-black rounded-2xl p-6 shadow-xl border border-gray-200 relative overflow-hidden group">
-                {/* Декоративні елементи (ідентично блоку налаштування профілю) */}
+                {/* Декоративна кулька у правому верхньому куті (як у блоці налаштувань профілю) */}
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-100/50 to-indigo-100/30 rounded-full -translate-y-16 translate-x-16 animate-pulse decorative-element-1"></div>
                 <div className="relative">
                     <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-3">
