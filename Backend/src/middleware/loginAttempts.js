@@ -71,9 +71,27 @@ export const logLoginAttempt = async (req, res, next) => {
                 failureReason: success ? null : 'invalid_credentials'
             });
         }
-        next();
+        if (next) next();
     } catch (error) {
         console.error('Error logging login attempt:', error);
-        next();
+        if (next) next();
+    }
+};
+
+export const logLoginAttemptSync = async (req, success, failureReason = null) => {
+    try {
+        if (req.loginAttempt) {
+            const { email, ipAddress, userAgent } = req.loginAttempt;
+            
+            await LoginAttempt.create({
+                email,
+                ipAddress,
+                userAgent,
+                success,
+                failureReason: success ? null : (failureReason || 'invalid_credentials')
+            });
+        }
+    } catch (error) {
+        console.error('Error logging login attempt:', error);
     }
 };

@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../state/AuthContext";
 import { useNotification } from "../contexts/NotificationContext";
 import { getRedirectAfterLogin } from "../utils/getRedirectAfterLogin";
+import { Eye, EyeOff } from "lucide-react";
 
 const LoginForm = ({ switchToReset, onSuccess }) => {
     const [email, setEmail] = useState("");
@@ -13,6 +14,7 @@ const LoginForm = ({ switchToReset, onSuccess }) => {
     const [showCodeForm, setShowCodeForm] = useState(false);
     const [verificationCode, setVerificationCode] = useState('');
     const [codeSent, setCodeSent] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const codeInputRefs = useRef([]);
     const navigate = useNavigate();
     const { loginSuccess } = useAuth();
@@ -246,15 +248,24 @@ const LoginForm = ({ switchToReset, onSuccess }) => {
 
             <div>
                 <label className="block text-sm text-white-700">Password</label>
-                <input
-                    type="password"
-                    name="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    autoComplete="current-password"
-                    className="w-full px-4 py-2 rounded-md bg-[#D9D9D9]/20 placeholder-white/50 focus:outline-none text-gray-800"
-                    placeholder="Your Password"
-                />
+                <div className="relative">
+                    <input
+                        type={showPassword ? 'text' : 'password'}
+                        name="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        autoComplete="current-password"
+                        className="w-full px-4 py-2 pr-12 rounded-md bg-[#D9D9D9]/20 placeholder-white/50 focus:outline-none text-gray-800"
+                        placeholder="Your Password"
+                    />
+                    <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors"
+                    >
+                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                </div>
             </div>
 
             <div className="flex items-center justify-between text-sm">

@@ -56,6 +56,11 @@ app.use('/api/name-change', nameChangeRoutes)
 app.use('/api/admin', adminRoutes)
 app.use('/api/admin/settings', securitySettingsRoutes)
 
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+    res.json({ status: 'ok', timestamp: new Date().toISOString() })
+})
+
 // Додаємо логування всіх запитів
 app.use((req, res, next) => {
     console.log(`${req.method} ${req.path} - ${new Date().toISOString()}`);

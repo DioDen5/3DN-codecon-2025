@@ -11,7 +11,7 @@ import { signJwt, verifyJwt } from '../middleware/auth.js';
 import { sendPasswordResetEmail, sendVerificationCodeEmail } from '../utils/emailService.js';
 import { logUserRegistration, logUserVerification } from '../utils/activityLogger.js';
 import { checkSessionTimeout, checkIdleTimeout } from '../middleware/sessionTimeout.js';
-import { checkLoginAttempts, logLoginAttempt } from '../middleware/loginAttempts.js';
+import { checkLoginAttempts, logLoginAttempt, logLoginAttemptSync } from '../middleware/loginAttempts.js';
 
 const router = express.Router();
 
@@ -92,84 +92,90 @@ router.post('/register', async (req, res) => {
 });
 
 router.post('/login', checkLoginAttempts, async (req, res) => {
-    const { email, password, rememberMe } = req.body ?? {};
+    try {
+        const { email, password, rememberMe } = req.body ?? {};
 
-    const normalizedEmail = email?.toLowerCase().trim();
+        const normalizedEmail = email?.toLowerCase().trim();
 
-    const user = await User.findOne({ email: normalizedEmail });
-    if (!user) {
-        const teacher = await Teacher.findOne({ email: normalizedEmail });
-        if (teacher && !teacher.userId) {
-            await logLoginAttempt(req, res, () => {});
-            return res.status(401).json({ 
-                error: 'Teacher profile exists',
-                requiresCodeVerification: true,
-                message: 'Профіль викладача з такою поштою існує. Підтвердіть вхід за кодом'
-            });
-        }
-        
-        await logLoginAttempt(req, res, () => {});
-        return res.status(401).json({ error: 'Invalid credentials' });
-    }
-
-    let passwordToCheck = user.passwordHash;
-    if (user.role === 'teacher' && user.teacherPassword) {
-        const teacherPasswordOk = await bcrypt.compare(password, user.teacherPassword);
-        if (teacherPasswordOk) {
-            passwordToCheck = user.teacherPassword;
-        }
-    }
-
-    const ok = await bcrypt.compare(password, passwordToCheck);
-    if (!ok) {
-        await logLoginAttempt(req, res, () => {});
-        return res.status(401).json({ error: 'Invalid credentials' });
-    }
-
-    if (user.role === 'teacher') {
-        const teacher = await Teacher.findOne({ email: normalizedEmail });
-        if (teacher && !teacher.userId) {
-            teacher.userId = user._id;
-            if (teacher.status === 'pending' && user.status === 'verified') {
-                teacher.status = 'verified';
+        const user = await User.findOne({ email: normalizedEmail });
+        if (!user) {
+            const teacher = await Teacher.findOne({ email: normalizedEmail });
+            if (teacher && !teacher.userId) {
+                await logLoginAttemptSync(req, false, 'teacher_profile_exists');
+                return res.status(401).json({ 
+                    error: 'Teacher profile exists',
+                    requiresCodeVerification: true,
+                    message: 'Профіль викладача з такою поштою існує. Підтвердіть вхід за кодом'
+                });
             }
-            await teacher.save();
+            
+            await logLoginAttemptSync(req, false, 'user_not_found');
+            return res.status(401).json({ error: 'Invalid credentials' });
         }
-    }
 
-    user.rememberMe = rememberMe || false;
-    user.lastLoginEmail = rememberMe ? normalizedEmail : null;
-    await user.save();
-
-    let teacherProfile = null;
-    if (user.role === 'teacher') {
-        const existingTeacher = await Teacher.findOne({ userId: user._id });
-        if (existingTeacher) {
-            teacherProfile = {
-                id: existingTeacher._id,
-                name: existingTeacher.name,
-                university: existingTeacher.university,
-                department: existingTeacher.department,
-                subjects: existingTeacher.subjects || [existingTeacher.subject].filter(Boolean),
-                status: existingTeacher.status
-            };
+        let passwordToCheck = user.passwordHash;
+        if (user.role === 'teacher' && user.teacherPassword) {
+            const teacherPasswordOk = await bcrypt.compare(password, user.teacherPassword);
+            if (teacherPasswordOk) {
+                passwordToCheck = user.teacherPassword;
+            }
         }
+
+        const ok = await bcrypt.compare(password, passwordToCheck);
+        if (!ok) {
+            await logLoginAttemptSync(req, false, 'invalid_password');
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        if (user.role === 'teacher') {
+            const teacher = await Teacher.findOne({ email: normalizedEmail });
+            if (teacher && !teacher.userId) {
+                teacher.userId = user._id;
+                if (teacher.status === 'pending' && user.status === 'verified') {
+                    teacher.status = 'verified';
+                }
+                await teacher.save();
+            }
+        }
+
+        user.rememberMe = rememberMe || false;
+        user.lastLoginEmail = rememberMe ? normalizedEmail : null;
+        await user.save();
+
+        let teacherProfile = null;
+        if (user.role === 'teacher') {
+            const existingTeacher = await Teacher.findOne({ userId: user._id });
+            if (existingTeacher) {
+                teacherProfile = {
+                    id: existingTeacher._id,
+                    name: existingTeacher.name,
+                    university: existingTeacher.university,
+                    department: existingTeacher.department,
+                    subjects: existingTeacher.subjects || [existingTeacher.subject].filter(Boolean),
+                    status: existingTeacher.status
+                };
+            }
+        }
+
+        const access = signJwt({ id: user._id, role: user.role, status: user.status }, 'access');
+        const refresh = signJwt({ id: user._id }, 'refresh');
+
+        setRefreshCookie(res, refresh);
+
+        await logLoginAttemptSync(req, true);
+        
+        return res.json({
+            token: access,
+            user: { id: user._id, displayName: user.displayName, role: user.role, status: user.status },
+            rememberMe: user.rememberMe,
+            lastLoginEmail: user.lastLoginEmail,
+            teacherProfile
+        });
+    } catch (error) {
+        console.error('Login error:', error);
+        await logLoginAttemptSync(req, false, 'server_error');
+        return res.status(500).json({ error: 'Internal server error' });
     }
-
-    const access = signJwt({ id: user._id, role: user.role, status: user.status }, 'access');
-    const refresh = signJwt({ id: user._id }, 'refresh');
-
-    setRefreshCookie(res, refresh);
-
-    await logLoginAttempt(req, res, () => {});
-    
-    return res.json({
-        token: access,
-        user: { id: user._id, displayName: user.displayName, role: user.role, status: user.status },
-        rememberMe: user.rememberMe,
-        lastLoginEmail: user.lastLoginEmail,
-        teacherProfile
-    });
 });
 
 
@@ -766,7 +772,7 @@ router.post('/login-with-code', async (req, res) => {
 
         setRefreshCookie(res, refresh);
 
-        await logLoginAttempt(req, res, () => {});
+        await logLoginAttemptSync(req, true);
 
         return res.json({
             token: access,

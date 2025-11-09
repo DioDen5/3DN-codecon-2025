@@ -156,7 +156,7 @@ start_backend() {
     fi
     
     # Запустити backend в фоновому режимі
-    npm start > ../backend.log 2>&1 &
+    npm run dev > ../backend.log 2>&1 &
     BACKEND_PID=$!
     
     cd ..
@@ -166,6 +166,7 @@ start_backend() {
         print_success "Backend started successfully (PID: $BACKEND_PID)"
     else
         print_error "Backend failed to start"
+        print_status "Check backend.log for errors: tail -f backend.log"
         exit 1
     fi
 }
