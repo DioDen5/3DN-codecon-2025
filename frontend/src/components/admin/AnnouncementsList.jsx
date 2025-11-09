@@ -47,11 +47,7 @@ const AnnouncementsList = ({
     return (
         <div className="space-y-3">
             {announcementsContent.map((announcement, index) => (
-                <div key={announcement._id} className={`rounded-xl p-4 border transition-all duration-500 ease-out relative ${
-                    announcement.isApproved 
-                        ? 'bg-gradient-to-r from-green-50 to-green-100 border-green-300 shadow-green-200 shadow-lg' 
-                        : 'bg-gray-50 border-gray-200 hover:moderation-glow'
-                }`} style={{ animation: 'slideInFromLeft 0.6s ease-out both' }}>
+                <div key={announcement._id} className="rounded-xl p-4 border transition-all duration-500 ease-out relative bg-gray-50 border-gray-200 hover:moderation-glow" style={{ animation: 'slideInFromLeft 0.6s ease-out both' }}>
                     <div className="flex items-start justify-between">
                         <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
@@ -65,14 +61,6 @@ const AnnouncementsList = ({
                                     </div>
                                 </div>
                             </div>
-                            {announcement.isApproved && (
-                                <div className="absolute top-3 right-3 bg-gradient-to-r from-green-500 to-green-600 text-white px-3 py-1 rounded-lg text-xs font-semibold shadow-lg flex items-center gap-1">
-                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                    </svg>
-                                    Перевірено
-                                </div>
-                            )}
                             <p className="text-gray-700 mb-3">{announcement.body?.substring(0, 100)}...</p>
                             <div className="flex gap-2">
                                 <button 

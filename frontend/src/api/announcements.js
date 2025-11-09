@@ -19,14 +19,14 @@ export async function getById(id) {
     }
 }
 
-export async function createDraft({ title, body, tags = [] }) {
-    const payload = { title, body, status: 'draft', tags };
+export async function createDraft({ title, body }) {
+    const payload = { title, body, status: 'draft' };
     const { data } = await http.post('/announcements', payload);
     return data;
 }
 
-export async function createPublished({ title, body, tags = [] }) {
-    const payload = { title, body, status: 'published', visibility: 'students', tags };
+export async function createPublished({ title, body }) {
+    const payload = { title, body, status: 'published', visibility: 'students' };
     const { data } = await http.post('/announcements', payload);
     return data;
 }

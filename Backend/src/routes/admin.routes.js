@@ -624,11 +624,7 @@ router.post('/approve/:type/:id', authRequired, requireAdmin, async (req, res) =
         let result;
         switch (type) {
             case 'announcement':
-                result = await Announcement.findByIdAndUpdate(id, {
-                    isApproved: true,
-                    approvedBy: req.user.id,
-                    approvedAt: new Date()
-                }, { new: true });
+                result = await Announcement.findByIdAndUpdate(id, {}, { new: true });
                 break;
             case 'comment':
                 result = await Comment.findByIdAndUpdate(id, {
@@ -675,11 +671,7 @@ router.delete('/approve/:type/:id', authRequired, requireAdmin, async (req, res)
         let result;
         switch (type) {
             case 'announcement':
-                result = await Announcement.findByIdAndUpdate(id, {
-                    isApproved: false,
-                    approvedBy: null,
-                    approvedAt: null
-                }, { new: true });
+                result = await Announcement.findByIdAndUpdate(id, {}, { new: true });
                 break;
             case 'comment':
                 result = await Comment.findByIdAndUpdate(id, {
