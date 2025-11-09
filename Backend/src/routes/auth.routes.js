@@ -210,7 +210,6 @@ router.post('/logout', (_req, res) => {
     return res.json({ ok: true });
 });
 
-// Новий endpoint для отримання збережених даних логіну
 router.get('/remembered-login', async (req, res) => {
     try {
         // Шукаємо користувача, який має активне rememberMe

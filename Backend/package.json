@@ -4,7 +4,8 @@
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
     "seed": "node src/seed.js",
-    "cleanup-db": "node cleanup-unused-collections.js"
+    "cleanup-db": "node cleanup-unused-collections.js",
+    "create-unlinked-teachers": "node create-unlinked-teachers.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

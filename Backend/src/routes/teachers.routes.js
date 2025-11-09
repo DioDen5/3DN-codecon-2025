@@ -91,8 +91,6 @@ router.get('/', async (req, res) => {
     }
 });
 
-// ВАЖЛИВО: специфічні роути мають бути ПЕРЕД параметризованими (/:id)
-// Отримати свій Teacher профіль (якщо є) - ПЕРЕД /:id
 router.get('/my-profile', authRequired, async (req, res) => {
     try {
         const userId = req.user.id;
@@ -254,7 +252,6 @@ router.get('/my-profile', authRequired, async (req, res) => {
     }
 });
 
-// Надіслати запит на зміну власного профілю (йде на модерацію)
 router.post('/me/change-request', authRequired, requireVerified, async (req, res) => {
     try {
         const userId = req.user.id;
@@ -457,7 +454,6 @@ router.get('/:id/reactions', authRequired, async (req, res) => {
     }
 });
 
-// Створити заявку на отримання Teacher профілю
 router.post('/claim', authRequired, async (req, res) => {
     try {
         const userId = req.user.id;
@@ -523,7 +519,6 @@ router.post('/claim', authRequired, async (req, res) => {
     }
 });
 
-// Отримати список заявок користувача
 router.get('/claim/my-requests', authRequired, async (req, res) => {
     try {
         const userId = req.user.id;
@@ -545,7 +540,6 @@ router.get('/claim/my-requests', authRequired, async (req, res) => {
     }
 });
 
-// Встановити пароль для викладача
 router.post('/set-password', authRequired, async (req, res) => {
     try {
         const userId = req.user.id;
@@ -580,7 +574,6 @@ router.post('/set-password', authRequired, async (req, res) => {
     }
 });
 
-// Оновити профіль викладача
 router.put('/my-profile', authRequired, async (req, res) => {
     try {
         const userId = req.user.id;
@@ -704,7 +697,6 @@ router.put('/my-profile', authRequired, async (req, res) => {
     }
 });
 
-// Отримати зміни що очікують модерації
 router.get('/my-profile/pending-changes', authRequired, async (req, res) => {
     try {
         const userId = req.user.id;

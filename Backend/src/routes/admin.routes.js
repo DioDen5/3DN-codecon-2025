@@ -75,7 +75,6 @@ router.get('/stats', ...adminAuth, async (req, res) => {
     }
 });
 
-// Отримання списку користувачів
 router.get('/users', ...adminAuth, async (req, res) => {
     try {
         const users = await User.find({}, {
@@ -110,7 +109,6 @@ router.get('/users', ...adminAuth, async (req, res) => {
     }
 });
 
-// Отримання скарг
 router.get('/reports', ...adminAuth, async (req, res) => {
     try {
         const reports = await Report.find({ status: 'open' })
@@ -124,7 +122,6 @@ router.get('/reports', ...adminAuth, async (req, res) => {
     }
 });
 
-// Розгляд скарги (resolve)
 router.patch('/reports/:reportId/resolve', authRequired, requireAdmin, async (req, res) => {
     try {
         const { reportId } = req.params;
@@ -147,7 +144,6 @@ router.patch('/reports/:reportId/resolve', authRequired, requireAdmin, async (re
     }
 });
 
-// Відхилення скарги (reject)
 router.patch('/reports/:reportId/reject', authRequired, requireAdmin, async (req, res) => {
     try {
         const { reportId } = req.params;
@@ -170,25 +166,20 @@ router.patch('/reports/:reportId/reject', authRequired, requireAdmin, async (req
     }
 });
 
-// Отримання даних для модерації
 router.get('/moderation', authRequired, requireAdmin, async (req, res) => {
     try {
         const { Announcement } = await import('../models/Announcement.js');
         const { Comment } = await import('../models/Comment.js');
         const { TeacherComment } = await import('../models/TeacherComment.js');
 
-        // Підрахунок оголошень
         const totalAnnouncements = await Announcement.countDocuments();
         const publishedAnnouncements = await Announcement.countDocuments({ status: 'published' });
         const draftAnnouncements = await Announcement.countDocuments({ status: 'draft' });
 
-        // Підрахунок коментарів
         const totalComments = await Comment.countDocuments();
 
-        // Підрахунок відгуків про викладачів
         const totalReviews = await TeacherComment.countDocuments();
 
-        // Останні елементи для модерації
         const recentAnnouncements = await Announcement.find()
             .populate('authorId', 'displayName email')
             .sort({ createdAt: -1 })
@@ -231,7 +222,6 @@ router.get('/moderation', authRequired, requireAdmin, async (req, res) => {
     }
 });
 
-// Отримання запитів на зміну імені
 router.get('/name-change-requests', authRequired, requireAdmin, async (req, res) => {
     try {
         const requests = await NameChangeRequest.find({ status: 'pending' })
@@ -245,7 +235,6 @@ router.get('/name-change-requests', authRequired, requireAdmin, async (req, res)
     }
 });
 
-// Схвалити запит на зміну імені та оновити дані користувача
 router.post('/name-change-requests/:id/approve', authRequired, requireAdmin, async (req, res) => {
     try {
         const { id } = req.params;
@@ -282,7 +271,6 @@ router.post('/name-change-requests/:id/approve', authRequired, requireAdmin, asy
     }
 });
 
-// Відхилити запит на зміну імені
 router.post('/name-change-requests/:id/reject', authRequired, requireAdmin, async (req, res) => {
     try {
         const { id } = req.params;
@@ -310,7 +298,6 @@ router.post('/name-change-requests/:id/reject', authRequired, requireAdmin, asyn
     }
 });
 
-// Отримання останньої активності
 router.get('/activity', authRequired, requireAdmin, async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
@@ -326,12 +313,10 @@ router.get('/activity', authRequired, requireAdmin, async (req, res) => {
         const totalItems = await ActivityLog.countDocuments();
         const totalPages = Math.ceil(totalItems / limit);
 
-        // Форматуємо дані для frontend
         const formattedActivities = activities.map(activity => {
             const user = activity.userId;
             const userName = user?.displayName || user?.email?.split('@')[0] || 'Невідомий';
             
-            // Визначаємо статус на основі типу дії
             let status = 'info';
             if (activity.action.includes('approved') || activity.action.includes('verified')) {
                 status = 'success';
@@ -368,7 +353,6 @@ router.get('/activity', authRequired, requireAdmin, async (req, res) => {
     }
 });
 
-// Отримання всього контенту для модерації
 router.get('/moderation/all', authRequired, requireAdmin, async (req, res) => {
     try {
         console.log('Getting all moderation content...');
@@ -377,17 +361,14 @@ router.get('/moderation/all', authRequired, requireAdmin, async (req, res) => {
         const limit = parseInt(req.query.limit) || 5;
         const skip = (page - 1) * limit;
         
-        // Отримуємо всі оголошення
         const announcements = await Announcement.find()
             .populate('authorId', 'displayName email')
             .sort({ createdAt: -1 });
 
-        // Отримуємо всі коментарі
         const comments = await Comment.find()
             .populate('authorId', 'displayName email')
             .sort({ createdAt: -1 });
 
-        // Отримуємо всі відгуки про викладачів
         let reviews = [];
         try {
             const { TeacherComment } = await import('../models/TeacherComment.js');
@@ -399,14 +380,12 @@ router.get('/moderation/all', authRequired, requireAdmin, async (req, res) => {
             reviews = [];
         }
 
-        // Об'єднуємо весь контент в один масив з типом
         const allContent = [
             ...announcements.map(item => ({ ...item.toObject(), contentType: 'announcement' })),
             ...comments.map(item => ({ ...item.toObject(), contentType: 'comment' })),
             ...reviews.map(item => ({ ...item.toObject(), contentType: 'review' }))
         ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-        // Застосовуємо пагінацію
         const totalItems = allContent.length;
         const totalPages = Math.ceil(totalItems / limit);
         const paginatedContent = allContent.slice(skip, skip + limit);
@@ -421,7 +400,6 @@ router.get('/moderation/all', authRequired, requireAdmin, async (req, res) => {
             totalPages
         });
 
-        // Логування для відгуків
         if (reviews.length > 0) {
             console.log('Sample review data:', {
                 authorId: reviews[0].authorId,
@@ -454,7 +432,6 @@ router.get('/moderation/all', authRequired, requireAdmin, async (req, res) => {
     }
 });
 
-// Отримання оголошень для модерації
 router.get('/moderation/announcements', authRequired, requireAdmin, async (req, res) => {
     try {
         console.log('Getting moderation announcements...');
@@ -489,7 +466,6 @@ router.get('/moderation/announcements', authRequired, requireAdmin, async (req, 
     }
 });
 
-// Отримання коментарів для модерації
 router.get('/moderation/comments', authRequired, requireAdmin, async (req, res) => {
     try {
         console.log('Getting moderation comments...');
@@ -524,7 +500,6 @@ router.get('/moderation/comments', authRequired, requireAdmin, async (req, res) 
     }
 });
 
-// Отримання відгуків для модерації
 router.get('/moderation/reviews', authRequired, requireAdmin, async (req, res) => {
     try {
         console.log('Getting moderation reviews...');
@@ -577,14 +552,12 @@ router.delete('/content/:type/:id', authRequired, requireAdmin, async (req, res)
                 break;
             case 'review':
                 result = await TeacherComment.findByIdAndDelete(id);
-                // Оновлюємо статистику викладача після видалення відгуку
                 if (result && result.teacherId) {
                     const { Teacher } = await import('../models/Teacher.js');
                     const teacher = await Teacher.findById(result.teacherId);
                     if (teacher) {
                         teacher.comments = Math.max(0, teacher.comments - 1);
                         
-                        // Перераховуємо рейтинг викладача
                         const remainingReviews = await TeacherComment.find({ 
                             teacherId: result.teacherId 
                         });
@@ -613,7 +586,6 @@ router.delete('/content/:type/:id', authRequired, requireAdmin, async (req, res)
         
         console.log('Content deleted successfully');
         
-        // Оновлюємо статус скарги на "вирішена" після успішного видалення контенту
         try {
             console.log('Looking for report with targetId:', id, 'targetType:', type);
             const report = await Report.findOne({ targetId: id, targetType: type });
@@ -643,7 +615,6 @@ router.delete('/content/:type/:id', authRequired, requireAdmin, async (req, res)
     }
 });
 
-// POST /admin/approve/:type/:id - схвалити контент
 router.post('/approve/:type/:id', authRequired, requireAdmin, async (req, res) => {
     console.log('POST /approve route hit:', req.params);
     const { type, id } = req.params;
@@ -695,7 +666,6 @@ router.post('/approve/:type/:id', authRequired, requireAdmin, async (req, res) =
     }
 });
 
-// DELETE /admin/approve/:type/:id - скасувати схвалення контенту
 router.delete('/approve/:type/:id', authRequired, requireAdmin, async (req, res) => {
     console.log('DELETE /approve route hit:', req.params);
     const { type, id } = req.params;
@@ -747,7 +717,6 @@ router.delete('/approve/:type/:id', authRequired, requireAdmin, async (req, res)
     }
 });
 
-// Отримання заявок викладачів на отримання профілю
 router.get('/teacher-claim-requests', ...adminAuth, async (req, res) => {
     try {
         console.log('Getting teacher claim requests...');
@@ -764,7 +733,6 @@ router.get('/teacher-claim-requests', ...adminAuth, async (req, res) => {
     }
 });
 
-// Затвердити заявку викладача на отримання профілю
 router.post('/teacher-claim-requests/:id/approve', ...adminAuth, async (req, res) => {
     try {
         const { id } = req.params;
@@ -783,19 +751,16 @@ router.post('/teacher-claim-requests/:id/approve', ...adminAuth, async (req, res
             return res.status(400).json({ error: 'Заявку вже оброблено' });
         }
 
-        // Перевіряємо чи Teacher не вже прив'язаний
         const teacher = await Teacher.findById(request.teacherId);
         if (teacher.userId) {
             return res.status(400).json({ error: 'Профіль викладача вже прив\'язаний до іншого користувача' });
         }
 
-        // Перевіряємо чи користувач вже має профіль
         const existingTeacher = await Teacher.findOne({ userId: request.userId._id });
         if (existingTeacher) {
             return res.status(400).json({ error: 'Користувач вже має прив\'язаний профіль викладача' });
         }
 
-        // Прив'язуємо Teacher до користувача
         teacher.userId = request.userId._id;
         if (!teacher.email) {
             teacher.email = request.userEmail;
@@ -836,7 +801,6 @@ router.post('/teacher-claim-requests/:id/approve', ...adminAuth, async (req, res
     }
 });
 
-// Відхилити заявку викладача на отримання профілю
 router.post('/teacher-claim-requests/:id/reject', ...adminAuth, async (req, res) => {
     try {
         const { id } = req.params;
@@ -872,7 +836,6 @@ router.post('/teacher-claim-requests/:id/reject', ...adminAuth, async (req, res)
     }
 });
 
-// Отримати заявки на верифікацію Teacher профілів (нові реєстрації)
 router.get('/teacher-verification-requests', ...adminAuth, async (req, res) => {
     try {
         const teachers = await Teacher.find({ 
@@ -889,7 +852,6 @@ router.get('/teacher-verification-requests', ...adminAuth, async (req, res) => {
     }
 });
 
-// Затвердити Teacher профіль
 router.post('/teacher-verification-requests/:id/approve', ...adminAuth, async (req, res) => {
     try {
         const { id } = req.params;
@@ -929,7 +891,6 @@ router.post('/teacher-verification-requests/:id/approve', ...adminAuth, async (r
     }
 });
 
-// Відхилити Teacher профіль
 router.post('/teacher-verification-requests/:id/reject', ...adminAuth, async (req, res) => {
     try {
         const { id } = req.params;
@@ -971,7 +932,6 @@ router.post('/teacher-verification-requests/:id/reject', ...adminAuth, async (re
     }
 });
 
-// Отримати зміни профілів що очікують модерації
 router.get('/teacher-pending-changes', ...adminAuth, async (req, res) => {
     try {
         const teachers = await Teacher.find({ 
@@ -987,7 +947,6 @@ router.get('/teacher-pending-changes', ...adminAuth, async (req, res) => {
     }
 });
 
-// Затвердити зміни профілю
 router.post('/teacher-pending-changes/:id/approve', ...adminAuth, async (req, res) => {
     try {
         const { id } = req.params;
@@ -1017,7 +976,6 @@ router.post('/teacher-pending-changes/:id/approve', ...adminAuth, async (req, re
     }
 });
 
-// Відхилити зміни профілю
 router.post('/teacher-pending-changes/:id/reject', ...adminAuth, async (req, res) => {
     try {
         const { id } = req.params;
