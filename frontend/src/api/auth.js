@@ -69,6 +69,11 @@ export async function forgotPassword(email) {
     return data;
 }
 
+export async function verifyResetToken(token) {
+    const { data } = await http.get(`/auth/reset-password/verify?token=${token}`);
+    return data;
+}
+
 export async function resetPassword(token, password) {
     const { data } = await http.post('/auth/reset-password', { token, password });
     return data;

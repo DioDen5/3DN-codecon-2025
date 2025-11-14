@@ -16,17 +16,31 @@ import TeachersPage from "./pages/TeachersPage.jsx";
 import TeacherProfilePage from "./pages/TeacherProfilePage";
 import UserProfilePage from "./pages/UserProfilePage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
+import ResetPasswordVerifyPage from "./pages/ResetPasswordVerifyPage";
 
 import RequireAuth from "./utils/RequireAuth";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { NotificationProvider } from "./contexts/NotificationContext";
 import { TeacherDataProvider } from "./contexts/TeacherDataContext";
+import { useAuthState } from "./api/useAuthState";
+import { getMe } from "./api/auth";
 
 function AppContent() {
     const location = useLocation();
     const [modalType, setModalType] = useState(null);
     const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const { user } = useAuthState();
     const closeModal = () => setModalType(null);
+
+    useEffect(() => {
+        const currentUser = getMe();
+        if (currentUser) {
+            const flag = sessionStorage.getItem('teacherRequiresPasswordSetup');
+            if (flag === 'true') {
+                sessionStorage.removeItem('teacherRequiresPasswordSetup');
+            }
+        }
+    }, []);
 
     useEffect(() => {
         const openLogin = () => setModalType("login");
@@ -38,12 +52,13 @@ function AppContent() {
         const onAuthChanged = (e) => {
             if (e.detail?.isAuth) setModalType(null);
             
-            // Перевіряємо чи потрібно показати модальне вікно для встановлення пароля після авторизації
-            // Використовуємо setTimeout, щоб дати час на встановлення флагу в sessionStorage
             setTimeout(() => {
                 const requiresPasswordSetup = sessionStorage.getItem('teacherRequiresPasswordSetup') === 'true';
-                if (requiresPasswordSetup && !showPasswordModal) {
+                const currentUser = getMe();
+                if (requiresPasswordSetup && !showPasswordModal && currentUser && currentUser.role === 'teacher') {
                     setShowPasswordModal(true);
+                    sessionStorage.removeItem('teacherRequiresPasswordSetup');
+                } else if (requiresPasswordSetup) {
                     sessionStorage.removeItem('teacherRequiresPasswordSetup');
                 }
             }, 100);
@@ -52,22 +67,23 @@ function AppContent() {
         return () => window.removeEventListener("auth-changed", onAuthChanged);
     }, [showPasswordModal]);
 
-    // Перевіряємо чи потрібно показати модальне вікно для встановлення пароля
-    // Перевіряємо при кожній зміні маршруту та одразу після монтування
     useEffect(() => {
         const checkPasswordSetup = () => {
             const requiresPasswordSetup = sessionStorage.getItem('teacherRequiresPasswordSetup') === 'true';
-            if (requiresPasswordSetup && !showPasswordModal) {
-                // Невелика затримка, щоб модальне вікно з'явилось після завершення навігації
+            const currentUser = getMe();
+            
+            if (requiresPasswordSetup && !showPasswordModal && currentUser && currentUser.role === 'teacher') {
                 setTimeout(() => {
                     setShowPasswordModal(true);
-                    sessionStorage.removeItem('teacherRequiresPasswordSetup'); // Видаляємо флаг
+                    sessionStorage.removeItem('teacherRequiresPasswordSetup');
                 }, 200);
+            } else if (requiresPasswordSetup) {
+                sessionStorage.removeItem('teacherRequiresPasswordSetup');
             }
         };
         
         checkPasswordSetup();
-    }, [location.pathname, showPasswordModal]);
+    }, [location.pathname, showPasswordModal, user]);
 
     return (
         <>
@@ -131,6 +147,7 @@ function AppContent() {
                         }
                     />
                     
+                    <Route path="/reset-password/verify" element={<ResetPasswordVerifyPage />} />
                     <Route path="/reset-password" element={<ResetPasswordPage />} />
                 </Routes>
             </ErrorBoundary>

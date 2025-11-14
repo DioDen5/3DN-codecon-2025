@@ -96,8 +96,10 @@ router.post('/login', checkLoginAttempts, async (req, res) => {
         const { email, password, rememberMe } = req.body ?? {};
 
         const normalizedEmail = email?.toLowerCase().trim();
-
-        const user = await User.findOne({ email: normalizedEmail });
+        
+        const user = await User.findOne({ 
+            email: { $regex: `^${normalizedEmail.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, $options: 'i' } 
+        });
         if (!user) {
             const teacher = await Teacher.findOne({ email: normalizedEmail });
             if (teacher && !teacher.userId) {
@@ -109,20 +111,24 @@ router.post('/login', checkLoginAttempts, async (req, res) => {
                 });
             }
             
-            await logLoginAttemptSync(req, false, 'user_not_found');
+            await logLoginAttemptSync(req, false, 'other');
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
-        let passwordToCheck = user.passwordHash;
-        if (user.role === 'teacher' && user.teacherPassword) {
+        let passwordValid = false;
+        
+        const mainPasswordOk = await bcrypt.compare(password, user.passwordHash);
+        
+        if (mainPasswordOk) {
+            passwordValid = true;
+        } else if (user.role === 'teacher' && user.teacherPassword) {
             const teacherPasswordOk = await bcrypt.compare(password, user.teacherPassword);
             if (teacherPasswordOk) {
-                passwordToCheck = user.teacherPassword;
+                passwordValid = true;
             }
         }
 
-        const ok = await bcrypt.compare(password, passwordToCheck);
-        if (!ok) {
+        if (!passwordValid) {
             await logLoginAttemptSync(req, false, 'invalid_password');
             return res.status(401).json({ error: 'Invalid credentials' });
         }
@@ -272,7 +278,7 @@ router.post('/forgot-password', async (req, res) => {
             expiresAt
         });
 
-        const resetUrl = `${process.env.FRONTEND_ORIGIN || 'http://localhost:5176'}/reset-password?token=${token}`;
+        const resetUrl = `${process.env.FRONTEND_ORIGIN || 'http://localhost:5176'}/reset-password/verify?token=${token}`;
 
         await sendPasswordResetEmail(email, resetUrl, user.displayName);
 
@@ -808,6 +814,41 @@ router.post('/login-with-code', async (req, res) => {
     }
 });
 
+// Валідація токену для підтвердження
+router.get('/reset-password/verify', async (req, res) => {
+    try {
+        const { token } = req.query;
+
+        if (!token) {
+            return res.status(400).json({ error: 'Токен не надано' });
+        }
+
+        const resetToken = await PasswordResetToken.findOne({ 
+            token, 
+            used: false,
+            expiresAt: { $gt: new Date() }
+        });
+
+        if (!resetToken) {
+            return res.status(400).json({ error: 'Недійсний або прострочений токен' });
+        }
+
+        const user = await User.findById(resetToken.userId);
+        if (!user) {
+            return res.status(400).json({ error: 'Користувач не знайдений' });
+        }
+
+        return res.json({ 
+            valid: true,
+            email: user.email,
+            displayName: user.displayName
+        });
+    } catch (error) {
+        console.error('Verify token error:', error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 router.post('/reset-password', async (req, res) => {
     try {
         const parse = resetPasswordSchema.safeParse(req.body);
@@ -836,8 +877,11 @@ router.post('/reset-password', async (req, res) => {
         const passwordHash = await bcrypt.hash(password, 10);
 
         user.passwordHash = passwordHash;
+        if (user.role === 'teacher') {
+            user.teacherPassword = passwordHash;
+        }
+        
         await user.save();
-
         await resetToken.markAsUsed();
 
         return res.json({ message: 'Пароль успішно оновлено' });

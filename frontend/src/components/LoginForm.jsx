@@ -70,31 +70,58 @@ const LoginForm = ({ switchToReset, onSuccess }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        e.stopPropagation();
+        
+        // Блокуємо будь-які подальші події
+        if (e.cancelable) {
+            e.cancelBubble = true;
+        }
+        
         setError(null);
+        
+        if (!email || !password) {
+            setError('Будь ласка, заповніть всі поля');
+            return false;
+        }
+        
         try {
             const { token, user, requiresCodeVerification, teacherProfile } = await login(email, password, rememberMe);
             
             if (requiresCodeVerification) {
                 setShowCodeForm(true);
                 await handleSendCode();
-                return;
+                return false;
             }
+            
+            sessionStorage.removeItem('teacherRequiresPasswordSetup');
             
             loginSuccess({ token, user });
             sessionStorage.setItem('justLoggedIn', 'true');
             
-            // Визначаємо правильний редирект для викладачів
             const redirectPath = await getRedirectAfterLogin(user, teacherProfile);
             
-            onSuccess?.();
-            navigate(redirectPath);
+            setTimeout(() => {
+                onSuccess?.();
+                navigate(redirectPath);
+            }, 3000);
+            
+            return false;
         } catch (error) {
-            if (error.response?.data?.requiresCodeVerification) {
+            if (error.response?.status === 429) {
+                const lockoutMessage = error.response?.data?.message || 
+                    `Занадто багато невдалих спроб входу. Спробуйте знову через ${Math.ceil((error.response?.data?.retryAfter || 1200) / 60)} хвилин.`;
+                setError(lockoutMessage);
+                showError(lockoutMessage);
+            } else if (error.response?.data?.requiresCodeVerification) {
                 setShowCodeForm(true);
                 await handleSendCode();
             } else {
-                setError(error.response?.data?.error || "Невірна пошта або пароль");
+                const errorMessage = error.response?.data?.error || error.response?.data?.message || "Невірна пошта або пароль";
+                setError(errorMessage);
+                showError(errorMessage);
             }
+            
+            return false;
         }
     };
 
@@ -232,7 +259,16 @@ const LoginForm = ({ switchToReset, onSuccess }) => {
     }
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-6 p-10 w-full text-white">
+        <form 
+            onSubmit={handleSubmit} 
+            className="space-y-6 p-10 w-full text-white"
+            onKeyDown={(e) => {
+                // Блокуємо Enter на формі, якщо не в полі вводу
+                if (e.key === 'Enter' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+                    e.preventDefault();
+                }
+            }}
+        >
             <div>
                 <label className="block text-sm text-white-700">Email</label>
                 <input
@@ -287,7 +323,10 @@ const LoginForm = ({ switchToReset, onSuccess }) => {
 
             {error && <p className="text-red-400">{error}</p>}
 
-            <button type="submit" className="w-full bg-blue-700 p-2 rounded-lg mt-8 text-white hover:bg-blue-800 transition cursor-pointer">
+            <button 
+                type="submit" 
+                className="w-full bg-blue-700 p-2 rounded-lg mt-8 text-white hover:bg-blue-800 transition cursor-pointer"
+            >
                 Авторизуватися
             </button>
         </form>
