@@ -143,7 +143,7 @@ const getVerificationCodeTemplate = (code, type = 'login') => {
             <head>
                 <meta charset="utf-8" />
                 <style>
-                    body { margin: 0; font-family: 'Inter', Arial, sans-serif; background: #020617; color: #e2e8f0; }
+                    body { margin: 0; padding: 40px 0; font-family: 'Inter', Arial, sans-serif; background: #020617; color: #e2e8f0; }
                     .wrapper { max-width: 460px; margin: 24px auto; background: radial-gradient(circle at top, rgba(37,99,235,0.3), rgba(15,23,42,0.95)); border-radius: 24px; padding: 36px 40px 44px; box-shadow: 0 18px 48px rgba(15, 23, 42, 0.5); border: 1px solid rgba(148,163,184,0.25); text-align: center; }
                     h1 { margin: 0; font-size: 26px; letter-spacing: 0.08em; text-transform: uppercase; color: #f8fafc; }
                     p { margin: 16px 0; font-size: 15px; color: #cbd5f5; }
@@ -151,6 +151,7 @@ const getVerificationCodeTemplate = (code, type = 'login') => {
                     .timer { margin-top: 12px; font-size: 13px; color: #94a3b8; letter-spacing: 0.06em; }
                     .footer { margin-top: 32px; font-size: 12px; color: #64748b; letter-spacing: 0.04em; }
                     @media (max-width: 520px) {
+                        body { padding: 24px 0; }
                         .wrapper { margin: 16px; padding: 32px 24px; }
                         .code { width: 100%; letter-spacing: 0.4em; }
                     }
@@ -210,11 +211,5 @@ export const sendVerificationCodeEmail = async (email, code, type = 'login') => 
 };
 
 export const sendVerificationCodeEmailDev = async (email, code, type) => {
-    console.log('\n=== VERIFICATION CODE EMAIL (DEV MODE) ===');
-    console.log('To:', email);
-    console.log('Type:', type);
-    console.log('Code:', code);
-    console.log('==========================================\n');
-    
     return { success: true, messageId: 'dev-mode' };
 };

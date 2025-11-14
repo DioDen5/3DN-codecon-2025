@@ -603,18 +603,10 @@ router.post('/send-verification-code', async (req, res) => {
 
             await sendVerificationCodeEmail(normalizedEmail, code, type);
 
-            // В dev режимі повертаємо код у відповіді (тільки для розробки)
-            const isDev = process.env.NODE_ENV !== 'production';
-            const response = {
+            return res.json({
                 message: 'Код надіслано на пошту',
                 expiresAt
-            };
-            
-            if (isDev) {
-                response.code = code; // Додаємо код тільки в dev режимі
-            }
-
-            return res.json(response);
+            });
     } catch (error) {
         console.error('Send verification code error:', error);
         res.status(500).json({ error: 'Failed to send verification code' });

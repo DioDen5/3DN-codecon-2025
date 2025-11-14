@@ -93,12 +93,6 @@ export async function registerTeacher(formData) {
 
 export async function sendVerificationCode(email, type = 'login') {
     const { data } = await http.post('/auth/send-verification-code', { email, type });
-    
-    // В dev режимі показуємо код в консолі для зручності тестування
-    if (data?.code) {
-        console.log('Verification code:', data.code);
-    }
-    
     return data;
 }
 

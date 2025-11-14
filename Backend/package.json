@@ -1,12 +1,13 @@
 {
   "type": "module",
-  "scripts": {
-    "dev": "nodemon src/server.js",
-    "start": "node src/server.js",
-    "seed": "node src/seed.js",
-    "cleanup-db": "node cleanup-unused-collections.js",
-    "create-unlinked-teachers": "node create-unlinked-teachers.js"
-  },
+    "scripts": {
+        "dev": "nodemon src/server.js",
+        "start": "node src/server.js",
+        "seed": "node src/seed.js",
+        "cleanup-db": "node cleanup-unused-collections.js",
+        "create-unlinked-teachers": "node create-unlinked-teachers.js",
+        "convert-student-to-teacher": "node convert-student-to-teacher.js"
+    },
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
