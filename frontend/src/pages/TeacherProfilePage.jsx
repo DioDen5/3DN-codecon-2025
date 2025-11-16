@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, ThumbsUp, ThumbsDown, Star, GraduationCap, BookOpen } from 'lucide-react'
+import { ArrowLeft, ThumbsUp, ThumbsDown, Star, GraduationCap, BookOpen, Building2, Users } from 'lucide-react'
 import { getTeacher, voteTeacher, getTeacherReactions } from '../api/teachers'
 import { getTeacherComments, createTeacherComment, getTeacherCommentCounts } from '../api/teacher-comments'
 import { useAuthState } from '../api/useAuthState'
@@ -189,14 +189,60 @@ const TeacherProfilePage = () => {
                         
                         <div className="md:w-2/3 p-8">
                             <div className="mb-6">
-                                <h1 className="text-3xl font-bold mb-2">{teacher.name}</h1>
-                                <div className="flex items-center gap-2 text-gray-600 mb-2">
-                                    <GraduationCap size={20} />
-                                    <span>{teacher.university}</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-gray-600">
-                                    <BookOpen size={20} />
-                                    <span>{teacher.subject}</span>
+                                <h1 className="text-3xl font-bold mb-3">
+                                    {teacher.position && teacher.name.startsWith(teacher.position)
+                                        ? teacher.name.replace(new RegExp(`^${teacher.position}\\s+`), '')
+                                        : teacher.name}
+                                </h1>
+                                
+                                {teacher.position && (
+                                    <div className="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold mb-4">
+                                        {teacher.position}
+                                    </div>
+                                )}
+                                
+                                <div className="space-y-3 mt-4">
+                                    {teacher.university && (
+                                        <div className="flex items-start gap-3 text-gray-700">
+                                            <GraduationCap size={20} className="mt-0.5 text-blue-600 flex-shrink-0" />
+                                            <div>
+                                                <span className="font-medium">{teacher.university}</span>
+                                            </div>
+                                        </div>
+                                    )}
+                                    
+                                    {teacher.faculty && (
+                                        <div className="flex items-start gap-3 text-gray-700">
+                                            <Building2 size={20} className="mt-0.5 text-purple-600 flex-shrink-0" />
+                                            <div>
+                                                <span className="font-medium">{teacher.faculty}</span>
+                                            </div>
+                                        </div>
+                                    )}
+                                    
+                                    {teacher.department && (
+                                        <div className="flex items-start gap-3 text-gray-700">
+                                            <Users size={20} className="mt-0.5 text-green-600 flex-shrink-0" />
+                                            <div>
+                                                <span className="font-medium">Кафедра: </span>
+                                                <span className="text-gray-600">{teacher.department.replace(/^Кафедра\s*/i, '')}</span>
+                                            </div>
+                                        </div>
+                                    )}
+                                    
+                                    {(teacher.subjects && teacher.subjects.length > 0) || teacher.subject ? (
+                                        <div className="flex items-start gap-3 text-gray-700">
+                                            <BookOpen size={20} className="mt-0.5 text-orange-600 flex-shrink-0" />
+                                            <div className="flex-1">
+                                                <span className="font-medium">Предмети: </span>
+                                                <span className="text-gray-600">
+                                                    {teacher.subjects && teacher.subjects.length > 0 
+                                                        ? teacher.subjects.join(', ') 
+                                                        : teacher.subject}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    ) : null}
                                 </div>
                             </div>
 
