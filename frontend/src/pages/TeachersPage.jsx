@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import SearchInput from '../components/SearchInput'
 import TeacherCard from '../components/TeacherCard'
@@ -24,6 +24,7 @@ const TeachersPage = () => {
         subject: searchParams.get('subject') || ''
     })
     const [isFilterOpen, setIsFilterOpen] = useState(false)
+    const filterRef = useRef(null)
     const { refreshTrigger } = useTeacherData()
 
     const ITEMS_PER_PAGE = 8
@@ -185,6 +186,7 @@ const TeachersPage = () => {
                         <div className="flex gap-3">
                             <SortDropdown className="" menuPosition="right-12" slideFrom="left" />
                             <FilterDropdown 
+                                ref={filterRef}
                                 filters={filters}
                                 onFiltersChange={handleFiltersChange}
                                 onToggle={handleFilterToggle}
@@ -202,16 +204,47 @@ const TeachersPage = () => {
 
                     {!loading && !error && (
                         <div className={`transition-all duration-500 ease-out ${isFilterOpen ? 'mt-96' : 'mt-0'}`}>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
-                                {teachers.map((teacher) => (
-                                    <TeacherCard
-                                        key={teacher._id}
-                                        {...teacher}
-                                        searchQuery={searchQuery}
-                                        highlightText={highlightText}
-                                    />
-                                ))}
-                            </div>
+                            {teachers.length === 0 ? (
+                                <div className="bg-gradient-to-b from-black to-gray-900 rounded-3xl border border-gray-700 p-10 shadow-2xl text-center text-white animate-[slideInFromLeft_0.6s_ease-out_both]">
+                                    <div className="mx-auto mb-6 w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-[0_0_40px_rgba(37,99,235,0.35)]">
+                                        <svg className="w-10 h-10 text-white" viewBox="0 0 16 16" fill="currentColor">
+                                            <rect x="2" y="3" width="12" height="1.5" rx="0.75" />
+                                            <circle cx="4" cy="3.75" r="1" fill="none" stroke="currentColor" strokeWidth="1.5" />
+                                            <rect x="2" y="7" width="12" height="1.5" rx="0.75" />
+                                            <circle cx="8" cy="7.75" r="1" fill="none" stroke="currentColor" strokeWidth="1.5" />
+                                            <rect x="2" y="11" width="12" height="1.5" rx="0.75" />
+                                            <circle cx="12" cy="11.75" r="1" fill="none" stroke="currentColor" strokeWidth="1.5" />
+                                        </svg>
+                                    </div>
+                                    <h3 className="text-2xl font-extrabold mb-2">Викладачів не знайдено</h3>
+                                    <p className="text-gray-300 max-w-2xl mx-auto mb-6">За обраними фільтрами викладачів не виявлено. Спробуйте змінити університет, факультет або предмет.</p>
+                                    <div className="flex items-center justify-center gap-3">
+                                        <button
+                                            onClick={() => setFilters({ university: '', department: '', subject: '' })}
+                                            className="px-5 py-3 rounded-xl bg-gray-800 border border-gray-600 text-gray-200 hover:bg-gray-700 hover:border-gray-500 transition-all cursor-pointer"
+                                        >
+                                            Очистити фільтри
+                                        </button>
+                                        <button
+                                            onClick={() => filterRef.current?.open()}
+                                            className="px-5 py-3 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition-all cursor-pointer"
+                                        >
+                                            Змінити фільтри
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+                                    {teachers.map((teacher) => (
+                                        <TeacherCard
+                                            key={teacher._id}
+                                            {...teacher}
+                                            searchQuery={searchQuery}
+                                            highlightText={highlightText}
+                                        />
+                                    ))}
+                                </div>
+                            )}
 
                         {totalPages > 1 && (
                             <div className="flex justify-center mt-10">

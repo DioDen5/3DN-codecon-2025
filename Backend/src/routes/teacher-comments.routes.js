@@ -66,6 +66,21 @@ router.post('/:teacherId', authRequired, async (req, res) => {
             return res.status(400).json({ error: 'Rating is required and must be between 1 and 5' });
         }
 
+        // Перевіряємо, чи користувач не намагається залишити відгук самому собі
+        const teacher = await Teacher.findById(teacherId);
+        if (teacher && teacher.userId) {
+            const teacherUserId = teacher.userId instanceof mongoose.Types.ObjectId 
+                ? teacher.userId.toString() 
+                : teacher.userId.toString();
+            const currentUserId = userId instanceof mongoose.Types.ObjectId 
+                ? userId.toString() 
+                : userId.toString();
+            
+            if (teacherUserId === currentUserId) {
+                return res.status(403).json({ error: 'Ви не можете залишити відгук самому собі' });
+            }
+        }
+
         // Перевіряємо, чи користувач вже залишив відгук для цього викладача
         const existingComment = await TeacherComment.findOne({
             teacherId,
@@ -88,8 +103,7 @@ router.post('/:teacherId', authRequired, async (req, res) => {
         await comment.save();
         await comment.populate('authorId', 'displayName email');
         
-        // Оновлюємо лічильники викладача
-        const teacher = await Teacher.findById(teacherId);
+        // Оновлюємо лічильники викладача (використовуємо вже завантажений вище teacher)
         
         // Логуємо створення відгуку
         if (teacher) {

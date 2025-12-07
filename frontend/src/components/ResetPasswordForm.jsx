@@ -67,7 +67,7 @@ const ResetPasswordForm = ({ switchToLogin }) => {
                     className={`w-full p-2 rounded-lg mt-2 text-white transition ${
                         loading 
                             ? 'bg-gray-500 cursor-not-allowed' 
-                            : 'bg-blue-700 hover:bg-blue-800'
+                            : 'bg-blue-700 hover:bg-blue-800 cursor-pointer'
                     }`}
                 >
                     {loading ? 'Відправляємо...' : 'Надіслати'}
@@ -76,7 +76,7 @@ const ResetPasswordForm = ({ switchToLogin }) => {
                 <button
                     type="button"
                     onClick={switchToLogin}
-                    className="text-sm text-indigo-300 hover:underline"
+                    className="text-sm text-indigo-300 hover:underline cursor-pointer"
                 >
                     Повернутись до входу
                 </button>

@@ -181,3 +181,96 @@ export const rejectNameChangeRequest = async (requestId) => {
     const response = await http.post(`/admin/name-change-requests/${requestId}/reject`);
     return response.data;
 };
+
+// Teacher Claim Requests
+export const getAdminTeacherClaimRequests = async () => {
+    try {
+        const response = await http.get('/admin/teacher-claim-requests');
+        return response.data;
+    } catch (error) {
+        console.error('Error getting admin teacher claim requests:', error);
+        throw error;
+    }
+};
+
+export const approveTeacherClaimRequest = async (requestId, adminNotes = '') => {
+    try {
+        const response = await http.post(`/admin/teacher-claim-requests/${requestId}/approve`, { adminNotes });
+        return response.data;
+    } catch (error) {
+        console.error('Error approving teacher claim request:', error);
+        throw error;
+    }
+};
+
+export const rejectTeacherClaimRequest = async (requestId, adminNotes = '') => {
+    try {
+        const response = await http.post(`/admin/teacher-claim-requests/${requestId}/reject`, { adminNotes });
+        return response.data;
+    } catch (error) {
+        console.error('Error rejecting teacher claim request:', error);
+        throw error;
+    }
+};
+
+// Teacher pending profile changes
+export const getTeacherPendingChanges = async () => {
+    try {
+        const response = await http.get('/admin/teacher-pending-changes');
+        return response.data;
+    } catch (error) {
+        console.error('Error getting teacher pending changes:', error);
+        throw error;
+    }
+};
+
+export const approveTeacherPendingChanges = async (teacherId) => {
+    try {
+        const response = await http.post(`/admin/teacher-pending-changes/${teacherId}/approve`);
+        return response.data;
+    } catch (error) {
+        console.error('Error approving teacher pending changes:', error);
+        throw error;
+    }
+};
+
+export const rejectTeacherPendingChanges = async (teacherId) => {
+    try {
+        const response = await http.post(`/admin/teacher-pending-changes/${teacherId}/reject`);
+        return response.data;
+    } catch (error) {
+        console.error('Error rejecting teacher pending changes:', error);
+        throw error;
+    }
+};
+
+// Teacher verification requests
+export const getTeacherVerificationRequests = async () => {
+    try {
+        const response = await http.get('/admin/teacher-verification-requests');
+        return response.data;
+    } catch (error) {
+        console.error('Error getting teacher verification requests:', error);
+        throw error;
+    }
+};
+
+export const approveTeacherVerification = async (teacherId) => {
+    try {
+        const response = await http.post(`/admin/teacher-verification-requests/${teacherId}/approve`);
+        return response.data;
+    } catch (error) {
+        console.error('Error approving teacher verification:', error);
+        throw error;
+    }
+};
+
+export const rejectTeacherVerification = async (teacherId, rejectionReason) => {
+    try {
+        const response = await http.post(`/admin/teacher-verification-requests/${teacherId}/reject`, { rejectionReason });
+        return response.data;
+    } catch (error) {
+        console.error('Error rejecting teacher verification:', error);
+        throw error;
+    }
+};

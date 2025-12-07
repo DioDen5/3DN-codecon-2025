@@ -7,6 +7,9 @@ import ReviewsList from './ReviewsList';
 import AllContentList from './AllContentList';
 import ModerationPagination from './ModerationPagination';
 import NameRequestsList from './NameRequestsList';
+import TeacherClaimRequestsList from './TeacherClaimRequestsList';
+import TeacherPendingChangesList from './TeacherPendingChangesList';
+import TeacherVerificationList from './TeacherVerificationList';
 
 const AdminModeration = ({
     moderationFilter,
@@ -47,7 +50,16 @@ const AdminModeration = ({
     handleReviewsPageClick,
     nameChangeRequests,
     onApproveNameRequest,
-    onRejectNameRequest
+    onRejectNameRequest,
+    teacherClaimRequests,
+    onApproveTeacherClaimRequest,
+    onRejectTeacherClaimRequest,
+    teacherPendingChanges,
+    onApproveTeacherPendingChanges,
+    onRejectTeacherPendingChanges,
+    teacherVerificationRequests,
+    onApproveTeacherVerification,
+    onRejectTeacherVerification
 }) => {
     return (
         <div className="space-y-6">
@@ -149,6 +161,21 @@ const AdminModeration = ({
 
                 {moderationFilter === 'name-requests' && (
                     <NameRequestsList nameRequests={nameChangeRequests} onApprove={onApproveNameRequest} onReject={onRejectNameRequest} />
+                )}
+
+                {moderationFilter === 'teacher-verification' && (
+                    <TeacherVerificationList
+                        items={teacherVerificationRequests}
+                        onApprove={onApproveTeacherVerification}
+                        onReject={onRejectTeacherVerification}
+                    />
+                )}
+                {moderationFilter === 'teacher-changes' && (
+                    <TeacherPendingChangesList 
+                        items={teacherPendingChanges}
+                        onApprove={onApproveTeacherPendingChanges}
+                        onReject={onRejectTeacherPendingChanges}
+                    />
                 )}
             </div>
         </div>

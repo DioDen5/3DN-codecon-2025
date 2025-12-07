@@ -90,19 +90,51 @@ start_mongodb() {
     fi
     
     print_status "Starting MongoDB..."
-    
-    # Створити директорію для логів
-    mkdir -p /opt/homebrew/var/log/mongodb
-    
-    # Запустити MongoDB в фоновому режимі
-    mongod --dbpath /opt/homebrew/var/mongodb --logpath /opt/homebrew/var/log/mongodb/mongo.log --fork
-    
-    if [ $? -eq 0 ]; then
-        print_success "MongoDB started successfully"
-    else
-        print_error "Failed to start MongoDB"
-        exit 1
+
+    # Локальні директорії даних та логів у межах проєкту (уникаємо прав доступу)
+    PROJECT_ROOT="$(pwd)"
+    MONGO_DATA_DIR="$PROJECT_ROOT/.data/mongodb"
+    MONGO_LOG_DIR="$PROJECT_ROOT/.data/logs"
+    MONGO_LOG_FILE="$MONGO_LOG_DIR/mongo.log"
+
+    # Якщо порт 27017 вже зайнятий (ймовірно, інший mongod працює) — використовуємо його і не стартуємо новий
+    if lsof -i tcp:27017 -sTCP:LISTEN >/dev/null 2>&1; then
+        print_warning "MongoDB port 27017 is already in use. Assuming MongoDB is running; skipping start."
+        return 0
     fi
+
+    # Створити директорії, якщо відсутні
+    mkdir -p "$MONGO_DATA_DIR"
+    mkdir -p "$MONGO_LOG_DIR"
+
+    # Опції запуску MongoDB
+    MONGO_OPTS=(--dbpath "$MONGO_DATA_DIR" --logpath "$MONGO_LOG_FILE" --bind_ip 127.0.0.1 --logappend)
+
+    # Спроба запуску з --fork
+    mongod "${MONGO_OPTS[@]}" --fork
+
+    if [ $? -ne 0 ]; then
+        print_warning "MongoDB failed to start with --fork. Showing last 50 log lines:"
+        if [ -f "$MONGO_LOG_FILE" ]; then
+            tail -n 50 "$MONGO_LOG_FILE" || true
+        else
+            print_warning "Mongo log file not found at $MONGO_LOG_FILE"
+        fi
+
+        print_status "Attempting to remove stale lock and repair..."
+        rm -f "$MONGO_DATA_DIR/mongod.lock" 2>/dev/null || true
+        rm -f /tmp/mongodb-*.sock 2>/dev/null || true
+        mongod --dbpath "$MONGO_DATA_DIR" --repair >> "$MONGO_LOG_FILE" 2>&1 || true
+
+        print_status "Retrying MongoDB start..."
+        mongod "${MONGO_OPTS[@]}" --fork
+        if [ $? -ne 0 ]; then
+            print_error "Failed to start MongoDB after repair. See log: $MONGO_LOG_FILE"
+            exit 1
+        fi
+    fi
+
+    print_success "MongoDB started successfully"
 }
 
 # Запуск Backend
@@ -124,7 +156,7 @@ start_backend() {
     fi
     
     # Запустити backend в фоновому режимі
-    npm start > ../backend.log 2>&1 &
+    npm run dev > ../backend.log 2>&1 &
     BACKEND_PID=$!
     
     cd ..
@@ -134,6 +166,7 @@ start_backend() {
         print_success "Backend started successfully (PID: $BACKEND_PID)"
     else
         print_error "Backend failed to start"
+        print_status "Check backend.log for errors: tail -f backend.log"
         exit 1
     fi
 }

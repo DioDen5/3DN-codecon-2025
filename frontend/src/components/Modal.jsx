@@ -1,7 +1,19 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { motion } from 'framer-motion'
 
 const Modal = ({ isOpen, onClose, children }) => {
+    // Блокуємо скрол сторінки коли модальне вікно відкрите
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden'
+            return () => {
+                document.body.style.overflow = ''
+            }
+        } else {
+            document.body.style.overflow = ''
+        }
+    }, [isOpen])
+
     if (!isOpen) return null
 
     return (
@@ -25,7 +37,7 @@ const Modal = ({ isOpen, onClose, children }) => {
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
-                            className="w-6 h-6 text-black group-hover:text-gray-600"
+                            className="w-6 h-6 text-black group-hover:text-gray-600 group-hover:rotate-90 transition-transform duration-300"
                             viewBox="0 0 24 24"
                             strokeWidth="1.5"
                             stroke="currentColor"

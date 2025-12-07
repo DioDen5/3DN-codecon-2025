@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 
 import Header from "./components/Header";
 import Modal from "./components/Modal";
 import LoginForm from "./components/LoginForm";
 import SignupForm from "./components/SignupForm";
 import ResetPasswordForm from "./components/ResetPasswordForm";
+import SetTeacherPasswordModal from "./components/SetTeacherPasswordModal";
 
 import HomePage from "./pages/HomePage";
 import ForumPage from "./pages/ForumPage";
@@ -15,15 +16,31 @@ import TeachersPage from "./pages/TeachersPage.jsx";
 import TeacherProfilePage from "./pages/TeacherProfilePage";
 import UserProfilePage from "./pages/UserProfilePage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
+import ResetPasswordVerifyPage from "./pages/ResetPasswordVerifyPage";
 
 import RequireAuth from "./utils/RequireAuth";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { NotificationProvider } from "./contexts/NotificationContext";
 import { TeacherDataProvider } from "./contexts/TeacherDataContext";
+import { useAuthState } from "./api/useAuthState";
+import { getMe } from "./api/auth";
 
-function App() {
+function AppContent() {
+    const location = useLocation();
     const [modalType, setModalType] = useState(null);
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const { user } = useAuthState();
     const closeModal = () => setModalType(null);
+
+    useEffect(() => {
+        const currentUser = getMe();
+        if (currentUser) {
+            const flag = sessionStorage.getItem('teacherRequiresPasswordSetup');
+            if (flag === 'true') {
+                sessionStorage.removeItem('teacherRequiresPasswordSetup');
+            }
+        }
+    }, []);
 
     useEffect(() => {
         const openLogin = () => setModalType("login");
@@ -34,16 +51,43 @@ function App() {
     useEffect(() => {
         const onAuthChanged = (e) => {
             if (e.detail?.isAuth) setModalType(null);
+            
+            setTimeout(() => {
+                const requiresPasswordSetup = sessionStorage.getItem('teacherRequiresPasswordSetup') === 'true';
+                const currentUser = getMe();
+                if (requiresPasswordSetup && !showPasswordModal && currentUser && currentUser.role === 'teacher') {
+                    setShowPasswordModal(true);
+                    sessionStorage.removeItem('teacherRequiresPasswordSetup');
+                } else if (requiresPasswordSetup) {
+                    sessionStorage.removeItem('teacherRequiresPasswordSetup');
+                }
+            }, 100);
         };
         window.addEventListener("auth-changed", onAuthChanged);
         return () => window.removeEventListener("auth-changed", onAuthChanged);
-    }, []);
+    }, [showPasswordModal]);
+
+    useEffect(() => {
+        const checkPasswordSetup = () => {
+            const requiresPasswordSetup = sessionStorage.getItem('teacherRequiresPasswordSetup') === 'true';
+            const currentUser = getMe();
+            
+            if (requiresPasswordSetup && !showPasswordModal && currentUser && currentUser.role === 'teacher') {
+                setTimeout(() => {
+                    setShowPasswordModal(true);
+                    sessionStorage.removeItem('teacherRequiresPasswordSetup');
+                }, 200);
+            } else if (requiresPasswordSetup) {
+                sessionStorage.removeItem('teacherRequiresPasswordSetup');
+            }
+        };
+        
+        checkPasswordSetup();
+    }, [location.pathname, showPasswordModal, user]);
 
     return (
-        <NotificationProvider>
-            <Router>
-                <TeacherDataProvider>
-                <Header
+        <>
+            <Header
                     onLoginOpen={() => setModalType("login")}
                     onSignupOpen={() => setModalType("signup")}
                 />
@@ -103,11 +147,12 @@ function App() {
                         }
                     />
                     
+                    <Route path="/reset-password/verify" element={<ResetPasswordVerifyPage />} />
                     <Route path="/reset-password" element={<ResetPasswordPage />} />
                 </Routes>
             </ErrorBoundary>
 
-            <Modal isOpen={modalType !== null} onClose={closeModal}>
+            <Modal isOpen={modalType !== null && modalType !== "signup"} onClose={closeModal}>
                 {modalType === "login" && (
                     <LoginForm
                         switchToReset={() => setModalType("reset")}
@@ -115,14 +160,38 @@ function App() {
                     />
                 )}
 
-                {modalType === "signup" && (
-                    <SignupForm switchToLogin={() => setModalType("login")} />
-                )}
-
                 {modalType === "reset" && (
                     <ResetPasswordForm switchToLogin={() => setModalType("login")} />
                 )}
             </Modal>
+            {modalType === "signup" && (
+                <SignupForm 
+                    switchToLogin={() => setModalType("login")}
+                    onClose={() => setModalType(null)}
+                />
+            )}
+
+            <SetTeacherPasswordModal
+                isOpen={showPasswordModal}
+                onClose={() => {
+                    // Не дозволяємо закривати модальне вікно - це обов'язковий крок
+                    // Модальне вікно закривається тільки після успішного встановлення пароля через onSuccess
+                }}
+                onSuccess={() => {
+                    // Пароль успішно встановлено - тепер можна закрити
+                    setShowPasswordModal(false);
+                }}
+            />
+        </>
+    );
+}
+
+function App() {
+    return (
+        <NotificationProvider>
+            <Router>
+                <TeacherDataProvider>
+                    <AppContent />
                 </TeacherDataProvider>
             </Router>
         </NotificationProvider>

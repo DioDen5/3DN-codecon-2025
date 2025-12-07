@@ -37,6 +37,15 @@ const SuccessNotification = ({ message, isVisible, onClose, type = 'success' }) 
                 icon: 'Flag'
             };
         }
+        if (type === 'error') {
+            return {
+                bg: 'bg-gradient-to-r from-red-500 via-red-600 to-red-700',
+                border: 'border-red-400/20',
+                overlay: 'from-red-400/20 to-red-500/20',
+                text: 'text-red-100',
+                icon: 'X'
+            };
+        }
         return {
             bg: 'bg-gradient-to-r from-green-500 via-green-600 to-green-700',
             border: 'border-green-400/20',
@@ -70,13 +79,15 @@ const SuccessNotification = ({ message, isVisible, onClose, type = 'success' }) 
                     <div className="p-3 bg-white/20 rounded-full animate-bounce">
                         {type === 'report' ? (
                             <Flag className="w-6 h-6 text-white animate-pulse" />
+                        ) : type === 'error' ? (
+                            <X className="w-6 h-6 text-white animate-pulse" />
                         ) : (
                             <CheckCircle className="w-6 h-6 text-white animate-pulse" />
                         )}
                     </div>
                     <div className="flex-1">
                         <p className="font-bold text-base">
-                            {type === 'report' ? 'Скаргу надіслано!' : 'Успішно!'}
+                            {type === 'report' ? 'Скаргу надіслано!' : type === 'error' ? 'Помилка!' : 'Успішно!'}
                         </p>
                         <p className={`text-sm ${colors.text} font-medium`}>{message}</p>
                     </div>

@@ -43,6 +43,13 @@ http.interceptors.response.use(
             throw err;
         }
         
+        // Не робимо refresh для register/check-email endpoint (не потребує авторизації)
+        // Перевіряємо URL перед іншими перевірками
+        if (config.url?.includes('/register/check-email') || config.url?.includes('/auth/register/check-email')) {
+            throw err;
+        }
+        
+        // Не робимо refresh для auth endpoints, для помилок інших статусів, або якщо вже робили retry
         if (isAuthPath || response.status !== 401 || config._retry || config._skipAuthHandler) {
             throw err;
         }

@@ -1,58 +1,59 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { X, Check, GraduationCap, Building2, BookMarked, Sparkles } from 'lucide-react';
+import AutocompleteInput from './AutocompleteInput';
+import facultiesData from '../data/faculties.json';
+import subjectsData from '../data/subjects.json';
 
-const FilterDropdown = ({ 
+const FilterDropdown = forwardRef(({ 
     filters = {}, 
     onFiltersChange, 
     onToggle,
     className = '',
     position = 'right-0'
-}) => {
+}, ref) => {
     const [isOpen, setIsOpen] = useState(false);
     const [isAnimating, setIsAnimating] = useState(false);
     const [localFilters, setLocalFilters] = useState(filters);
     const [filtersApplied, setFiltersApplied] = useState(false);
     const dropdownRef = useRef(null);
 
-        const filterOptions = {
-            university: [
-                { value: '', label: 'Всі університети' },
-                { value: 'Львівська політехніка', label: 'Львівська політехніка' },
-                { value: 'ЛНУ ім. І. Франка', label: 'ЛНУ ім. І. Франка' },
-                { value: 'УКУ', label: 'УКУ' },
-                { value: 'Львівська комерційна академія', label: 'Львівська комерційна академія' }
-            ],
-            department: [
-                { value: '', label: 'Всі кафедри' },
-                { value: 'Інформаційних систем', label: 'Інформаційних систем' },
-                { value: 'Комп\'ютерних наук', label: 'Комп\'ютерних наук' },
-                { value: 'Математики', label: 'Математики' },
-                { value: 'Фізики', label: 'Фізики' },
-                { value: 'Правознавства', label: 'Правознавства' },
-                { value: 'Психології', label: 'Психології' },
-                { value: 'Соціології', label: 'Соціології' },
-                { value: 'Іноземних мов', label: 'Іноземних мов' },
-                { value: 'Філософії', label: 'Філософії' },
-                { value: 'Політології', label: 'Політології' },
-                { value: 'Теології', label: 'Теології' },
-                { value: 'Економіки', label: 'Економіки' }
-            ],
-            subject: [
-                { value: '', label: 'Всі предмети' },
-                { value: 'Програмування', label: 'Програмування' },
-                { value: 'Математика', label: 'Математика' },
-                { value: 'Фізика', label: 'Фізика' },
-                { value: 'Право', label: 'Право' },
-                { value: 'Психологія', label: 'Психологія' },
-                { value: 'Соціологія', label: 'Соціологія' },
-                { value: 'Англійська мова', label: 'Англійська мова' },
-                { value: 'Філософія', label: 'Філософія' },
-                { value: 'Політологія', label: 'Політологія' },
-                { value: 'Алгоритми', label: 'Алгоритми' },
-                { value: 'Теологія', label: 'Теологія' },
-                { value: 'Економіка', label: 'Економіка' }
-            ]
-        };
+    // Autocomplete options (каскадні)
+    const universityOptions = (() => {
+        const base = Array.from(new Set((facultiesData || []).map(u => u.universityName)))
+            .map(name => ({ name }));
+        // Позначаємо кілька випадкових як popular, щоб показувати при фокусі
+        const count = Math.min(5, base.length);
+        const used = new Set();
+        while (used.size < count) {
+            const idx = Math.floor(Math.random() * base.length);
+            used.add(idx);
+        }
+        return base.map((opt, idx) => used.has(idx) ? { ...opt, popular: true } : opt);
+    })();
+    const facultyOptions = (() => {
+        if (!localFilters.university) return [];
+        const uni = (facultiesData || []).find(u => u.universityName === localFilters.university);
+        const base = (uni?.faculties || []).map(f => ({ name: f.name }));
+        const count = Math.min(3, base.length);
+        const used = new Set();
+        while (used.size < count) {
+            const idx = Math.floor(Math.random() * base.length);
+            used.add(idx);
+        }
+        return base.map((opt, idx) => used.has(idx) ? { ...opt, popular: true } : opt);
+    })();
+    const subjectOptions = (() => {
+        if (!localFilters.department) return [];
+        const fac = (subjectsData || []).find(f => f.facultyName === localFilters.department);
+        const base = (fac?.subjects || []).map(s => ({ name: s }));
+        const count = Math.min(5, base.length);
+        const used = new Set();
+        while (used.size < count) {
+            const idx = Math.floor(Math.random() * base.length);
+            used.add(idx);
+        }
+        return base.map((opt, idx) => used.has(idx) ? { ...opt, popular: true } : opt);
+    })();
 
     useEffect(() => {
         setLocalFilters(filters);
@@ -77,6 +78,14 @@ const FilterDropdown = ({
 
     const handleFilterChange = (filterType, value) => {
         const newFilters = { ...localFilters, [filterType]: value };
+        // Каскадне очищення: якщо змінюємо університет — чистимо факультет і предмет; якщо факультет — чистимо предмет
+        if (filterType === 'university') {
+            newFilters.department = '';
+            newFilters.subject = '';
+        }
+        if (filterType === 'department') {
+            newFilters.subject = '';
+        }
         setLocalFilters(newFilters);
     };
 
@@ -118,6 +127,12 @@ const FilterDropdown = ({
 
     const [hovered, setHovered] = useState(false);
     const showGlow = isOpen || hovered;
+
+    // Expose open() to parent
+    useImperativeHandle(ref, () => ({
+        open: handleOpen,
+        close: handleClose
+    }));
 
     return (
         <div className={`relative ${className}`} ref={dropdownRef}>
@@ -187,66 +202,61 @@ const FilterDropdown = ({
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                                    {Object.entries(filterOptions).map(([filterType, options], index) => (
-                                        <div 
-                                            key={filterType}
-                                            className="animate-in slide-in-from-left-2 fade-in-0"
-                                            style={{ animationDelay: `${index * 150}ms` }}
-                                        >
-                                            <label className="flex items-center gap-3 text-lg font-semibold text-gray-200 mb-4 capitalize">
-                                                {filterType === 'university' && (
-                                                    <>
-                                                        <GraduationCap className="w-6 h-6 text-blue-400" />
-                                                        Університет
-                                                    </>
-                                                )}
-                                                {filterType === 'department' && (
-                                                    <>
-                                                        <Building2 className="w-6 h-6 text-green-400" />
-                                                        Кафедра
-                                                    </>
-                                                )}
-                                                {filterType === 'subject' && (
-                                                    <>
-                                                        <BookMarked className="w-6 h-6 text-purple-400" />
-                                                        Предмет
-                                                    </>
-                                                )}
-                                            </label>
-                                            <select
-                                                value={localFilters[filterType] || ''}
-                                                onChange={(e) => handleFilterChange(filterType, e.target.value)}
-                                                className={`w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl focus:ring-1 transition-all duration-300 text-white hover:bg-gray-600 hover:border-gray-500 text-lg focus:outline-none pr-8 cursor-pointer ${
-                                                    filterType === 'university' 
-                                                        ? 'focus:ring-blue-400 focus:border-blue-400 focus:shadow-[0_0_10px_rgba(59,130,246,0.5)]'
-                                                        : filterType === 'department'
-                                                        ? 'focus:ring-green-400 focus:border-green-400 focus:shadow-[0_0_10px_rgba(34,197,94,0.5)]'
-                                                        : 'focus:ring-purple-400 focus:border-purple-400 focus:shadow-[0_0_10px_rgba(168,85,247,0.5)]'
-                                                }`}
-                                                style={{ 
-                                                    outline: 'none',
-                                                    appearance: 'none',
-                                                    backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-                                                    backgroundPosition: 'right 0.5rem center',
-                                                    backgroundRepeat: 'no-repeat',
-                                                    backgroundSize: '1.5em 1.5em',
-                                                    transition: 'background-image 0.3s ease-in-out'
-                                                }}
-                                                onFocus={(e) => {
-                                                    e.target.style.backgroundImage = `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M14 12l-4-4-4 4'/%3e%3c/svg%3e")`;
-                                                }}
-                                                onBlur={(e) => {
-                                                    e.target.style.backgroundImage = `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`;
-                                                }}
-                                            >
-                                                {options.map((option) => (
-                                                    <option key={option.value} value={option.value} className="bg-gray-800 text-white">
-                                                        {option.label}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                    ))}
+                                    <div className="animate-in slide-in-from-left-2 fade-in-0" style={{ animationDelay: '0ms' }}>
+                                        <label className="flex items-center gap-3 text-lg font-semibold text-gray-200 mb-4">
+                                            <GraduationCap className="w-6 h-6 text-blue-400" /> Університет
+                                        </label>
+                                        <AutocompleteInput
+                                            value={localFilters.university || ''}
+                                            onChange={(v) => handleFilterChange('university', v)}
+                                            options={universityOptions}
+                                            placeholder="Оберіть або введіть університет"
+                                            showPopular={true}
+                                            maxResults={8}
+                                            allowCustomInput={true}
+                                            className="w-full px-4 py-3 rounded-xl bg-gray-700 text-gray-200 border border-gray-600 focus:outline-none transition-all duration-300 focus:border-blue-400 focus:shadow-[0_0_10px_rgba(59,130,246,0.5)]"
+                                            truncateTwoWordsAndChars
+                                            truncateNextChars={7}
+                                        />
+                                    </div>
+
+                                    <div className="animate-in slide-in-from-left-2 fade-in-0" style={{ animationDelay: '150ms' }}>
+                                        <label className="flex items-center gap-3 text-lg font-semibold text-gray-200 mb-4">
+                                            <Building2 className="w-6 h-6 text-green-400" /> Факультет
+                                        </label>
+                                        <AutocompleteInput
+                                            value={localFilters.department || ''}
+                                            onChange={(v) => handleFilterChange('department', v)}
+                                            options={facultyOptions}
+                                            placeholder={localFilters.university ? 'Оберіть або введіть факультет' : 'Спочатку оберіть університет'}
+                                            disabled={!localFilters.university}
+                                            showPopular={true}
+                                            maxResults={8}
+                                            allowCustomInput={true}
+                                            className="w-full px-4 py-3 rounded-xl bg-gray-700 text-gray-200 border border-gray-600 focus:outline-none transition-all duration-300 focus:border-green-400 focus:shadow-[0_0_10px_rgba(34,197,94,0.5)]"
+                                            truncateTwoWordsAndChars
+                                            truncateNextChars={7}
+                                        />
+                                    </div>
+
+                                    <div className="animate-in slide-in-from-left-2 fade-in-0" style={{ animationDelay: '300ms' }}>
+                                        <label className="flex items-center gap-3 text-lg font-semibold text-gray-200 mb-4">
+                                            <BookMarked className="w-6 h-6 text-purple-400" /> Предмет
+                                        </label>
+                                        <AutocompleteInput
+                                            value={localFilters.subject || ''}
+                                            onChange={(v) => handleFilterChange('subject', v)}
+                                            options={subjectOptions}
+                                            placeholder={localFilters.department ? 'Оберіть предмет' : 'Спочатку оберіть факультет'}
+                                            disabled={!localFilters.department}
+                                            showPopular={true}
+                                            maxResults={10}
+                                            allowCustomInput={true}
+                                            className="w-full px-4 py-3 rounded-xl bg-gray-700 text-gray-200 border border-gray-600 focus:outline-none transition-all duration-300 focus:border-purple-400 focus:shadow-[0_0_10px_rgba(168,85,247,0.5)]"
+                                            truncateTwoWordsAndChars
+                                            truncateNextChars={7}
+                                        />
+                                    </div>
                                 </div>
 
                                 <div className="flex gap-4 mt-8 pt-6 border-t border-gray-700 animate-in slide-in-from-bottom-2 fade-in-0">
@@ -270,6 +280,6 @@ const FilterDropdown = ({
             )}
         </div>
     );
-};
+});
 
 export default FilterDropdown;

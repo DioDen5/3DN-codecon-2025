@@ -26,6 +26,14 @@ export const NotificationProvider = ({ children }) => {
         });
     };
 
+    const showError = (message) => {
+        setNotification({
+            isVisible: true,
+            message,
+            type: 'error'
+        });
+    };
+
     const hideNotification = () => {
         setNotification({
             isVisible: false,
@@ -35,7 +43,7 @@ export const NotificationProvider = ({ children }) => {
     };
 
     return (
-        <NotificationContext.Provider value={{ showSuccess, hideNotification }}>
+        <NotificationContext.Provider value={{ showSuccess, showError, hideNotification }}>
             {children}
             <SuccessNotification
                 isVisible={notification.isVisible}

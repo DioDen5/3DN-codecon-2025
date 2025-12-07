@@ -1,0 +1,117 @@
+/* Custom scrollbar for autocomplete dropdown */
+.autocomplete-dropdown-wrapper {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(147, 197, 253, 0.3) #374151;
+    -ms-overflow-style: scrollbar;
+}
+
+.autocomplete-dropdown-wrapper::-webkit-scrollbar {
+    width: 8px;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    -webkit-appearance: auto !important;
+}
+
+.autocomplete-dropdown-wrapper::-webkit-scrollbar-track {
+    background: #374151 !important;
+    border-radius: 4px;
+    margin: 4px 0;
+    display: block !important;
+    visibility: visible !important;
+}
+
+.autocomplete-dropdown-wrapper::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(147, 197, 253, 0.3), rgba(96, 165, 250, 0.4)) !important;
+    border-radius: 4px;
+    display: block !important;
+    visibility: visible !important;
+    min-height: 30px;
+}
+
+.autocomplete-dropdown-wrapper::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, rgba(96, 165, 250, 0.5), rgba(59, 130, 246, 0.6)) !important;
+}
+
+/* Анімація появи опцій */
+.autocomplete-option {
+    animation: fadeInSlide 0.3s ease-out backwards;
+    position: relative;
+}
+
+.autocomplete-option::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, #3B82F6, #2563EB);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    border-radius: 0 4px 4px 0;
+}
+
+.autocomplete-option:hover::before {
+    opacity: 1;
+}
+
+@keyframes fadeInSlide {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Завжди показувати скролбар для списків з більше ніж 3 елементами */
+.autocomplete-dropdown-wrapper.always-show-scrollbar {
+    overflow-y: scroll !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: #9CA3AF #F3F4F6 !important;
+    -ms-overflow-style: scrollbar !important;
+    /* Примусово показуємо скролбар через фіксовану висоту */
+    height: 16rem !important;
+}
+
+.autocomplete-dropdown-wrapper.always-show-scrollbar::-webkit-scrollbar {
+    width: 8px !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    -webkit-appearance: auto !important;
+}
+
+.autocomplete-dropdown-wrapper.always-show-scrollbar {
+    scrollbar-color: rgba(147, 197, 253, 0.3) #374151 !important;
+}
+
+.autocomplete-dropdown-wrapper.always-show-scrollbar::-webkit-scrollbar-track {
+    background: #374151 !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.autocomplete-dropdown-wrapper.always-show-scrollbar::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(147, 197, 253, 0.3), rgba(96, 165, 250, 0.4)) !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    min-height: 30px !important;
+}
+
+.autocomplete-dropdown-wrapper.always-show-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, rgba(96, 165, 250, 0.5), rgba(59, 130, 246, 0.6)) !important;
+}
+
+/* Стилі для обрізання тексту в інпуті з ellipsis */
+.autocomplete-input {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+

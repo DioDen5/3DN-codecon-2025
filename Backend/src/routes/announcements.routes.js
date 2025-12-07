@@ -121,14 +121,13 @@ router.get('/:id', authRequired, requireVerified, async (req, res) => {
 });
 
 router.post('/', authRequired, requireVerified, async (req, res) => {
-    const { title, body, tags, status = 'draft', visibility = 'students' } = req.body ?? {};
+    const { title, body, status = 'draft', visibility = 'students' } = req.body ?? {};
     
     console.log('Creating announcement:', { title, status, visibility });
     
     const doc = await Announcement.create({
         title,
         body,
-        tags,
         authorId: req.user.id,
         status,
         visibility,
@@ -151,7 +150,6 @@ router.post('/:id/submit', authRequired, requireVerified, async (req, res) => {
     if (!doc) return res.status(404).json({ error: 'Not found' });
 
     doc.status = 'pending';
-    doc.moderation = { lastAction: 'submit', by: req.user.id, at: new Date() };
     await doc.save();
 
     res.json(doc);

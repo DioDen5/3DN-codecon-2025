@@ -95,6 +95,6 @@ export async function voteComment(commentId, action) {
 }
 
 export async function articleCreate(title, content, imageFile) {
-    const doc = await Ann.createPublished({ title, body: content, tags: [] });
+    const doc = await Ann.createPublished({ title, body: content });
     return { id: doc._id };
 }
