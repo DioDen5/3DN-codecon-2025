@@ -1,20 +1,20 @@
 {
   "type": "module",
-    "scripts": {
-        "dev": "nodemon src/server.js",
-        "start": "node src/server.js",
-        "seed": "node src/seed.js",
-        "cleanup-db": "node cleanup-unused-collections.js",
-        "create-unlinked-teachers": "node create-unlinked-teachers.js",
-        "convert-student-to-teacher": "node convert-student-to-teacher.js",
-        "show-account": "node show-account-data.js",
-        "cleanup-all": "node cleanup-all-data.js",
-        "seed-demo": "node seed-demo-data.js",
-        "remove-teacher-likes": "node remove-teacher-likes-dislikes.js",
-        "create-test-teacher": "node create-test-teacher.js",
-        "fix-ukrainian-emails": "node fix-ukrainian-emails.js",
-        "update-test-teacher-email": "node update-test-teacher-user-email.js"
-    },
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "seed": "node src/seed.js",
+    "cleanup-db": "node cleanup-unused-collections.js",
+    "create-unlinked-teachers": "node create-unlinked-teachers.js",
+    "convert-student-to-teacher": "node convert-student-to-teacher.js",
+    "show-account": "node show-account-data.js",
+    "cleanup-all": "node cleanup-all-data.js",
+    "seed-demo": "node seed-demo-data.js",
+    "remove-teacher-likes": "node remove-teacher-likes-dislikes.js",
+    "create-test-teacher": "node create-test-teacher.js",
+    "fix-ukrainian-emails": "node fix-ukrainian-emails.js",
+    "update-test-teacher-email": "node update-test-teacher-user-email.js"
+  },
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
