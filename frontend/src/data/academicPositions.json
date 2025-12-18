@@ -1,0 +1,51 @@
+[
+    {
+        "name": "Асистент",
+        "shortName": "Асистент",
+        "popular": true,
+        "order": 1
+    },
+    {
+        "name": "Старший викладач",
+        "shortName": "Ст. викладач",
+        "popular": true,
+        "order": 2
+    },
+    {
+        "name": "Доцент",
+        "shortName": "Доцент",
+        "popular": true,
+        "order": 3
+    },
+    {
+        "name": "Професор",
+        "shortName": "Професор",
+        "popular": true,
+        "order": 4
+    },
+    {
+        "name": "Завідувач кафедри",
+        "shortName": "Зав. кафедри",
+        "popular": false,
+        "order": 5
+    },
+    {
+        "name": "Декан",
+        "shortName": "Декан",
+        "popular": false,
+        "order": 6
+    },
+    {
+        "name": "Проректор",
+        "shortName": "Проректор",
+        "popular": false,
+        "order": 7
+    },
+    {
+        "name": "Ректор",
+        "shortName": "Ректор",
+        "popular": false,
+        "order": 8
+    }
+]
+

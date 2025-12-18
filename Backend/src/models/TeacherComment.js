@@ -1,0 +1,48 @@
+import mongoose from 'mongoose';
+
+const { Schema, Types } = mongoose;
+
+const teacherCommentSchema = new Schema(
+    {
+        teacherId: {
+            type: Types.ObjectId,
+            ref: 'teachers',
+            required: true,
+            index: true,
+        },
+        authorId: {
+            type: Types.ObjectId,
+            ref: 'users',
+            required: true,
+            index: true,
+        },
+        body: {
+            type: String,
+            required: false,
+            trim: true,
+            default: '',
+        },
+    rating: {
+        type: Number,
+        enum: [1, 2, 3, 4, 5],
+        required: true,
+    },
+        status: {
+            type: String,
+            enum: ['visible', 'hidden', 'deleted'],
+            default: 'visible',
+        },
+        isApproved: { type: Boolean, default: false, index: true },
+        approvedBy: { type: Types.ObjectId, ref: 'users', default: null },
+        approvedAt: { type: Date, default: null },
+    },
+    {
+        versionKey: false,
+        timestamps: true,
+    }
+);
+
+teacherCommentSchema.index({ teacherId: 1, createdAt: -1 });
+teacherCommentSchema.index({ authorId: 1 });
+
+export const TeacherComment = mongoose.model('teachercomments', teacherCommentSchema);
